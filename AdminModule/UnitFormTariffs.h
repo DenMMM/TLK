@@ -39,8 +39,7 @@ __published:	// IDE-managed Components
     TLabel *Label1;
     TCheckBox *CheckBoxPage4;
     TCheckBox *CheckBoxPage5;
-    TCheckBox *CheckBoxPage6;
-    TCheckBox *CheckBoxPage7;
+    TCheckBox *CheckBoxRoute;
     TBevel *Bevel1;
     TBitBtn *BitBtnSave;
     TListView *ListViewComputers;

@@ -168,15 +168,10 @@ void __fastcall TFormMain::TreeViewGamesDblClick(TObject *Sender)
     int pos;
     command=(char*)TreeNode->Data;
     //
-    STARTUPINFO startup_info;
-    startup_info.cb=sizeof(STARTUPINFO);
-    startup_info.lpReserved=NULL;
-    startup_info.lpDesktop=NULL;
-    startup_info.lpTitle=NULL;
-    startup_info.dwFlags=0;
-    startup_info.cbReserved2=NULL;
-    startup_info.lpReserved2=NULL;
-    PROCESS_INFORMATION process_information;
+    STARTUPINFO si;
+    memset(&si,0,sizeof(STARTUPINFO));
+    si.cb=sizeof(STARTUPINFO);
+    PROCESS_INFORMATION pi;
     // Запускаем игру
     if ( (pos=command.AnsiPos("\""))==NULL ) return;
     path=command.SubString(pos+1,command.Length()-pos);
@@ -185,7 +180,16 @@ void __fastcall TFormMain::TreeViewGamesDblClick(TObject *Sender)
     path=ExtractFilePath(path);
     ::CreateProcess(NULL,command.c_str(),NULL,NULL,false,
         CREATE_DEFAULT_ERROR_MODE|NORMAL_PRIORITY_CLASS,NULL,
-        path.c_str(),&startup_info,&process_information);
+        path.c_str(),&si,&pi);
+
+/*    STARTUPINFO si;
+    PROCESS_INFORMATION pi;
+
+    memset(&si,0,sizeof(STARTUPINFO));
+    si.cb=sizeof(STARTUPINFO);
+    ::CreateProcess(NULL,(char*)TreeNode->Data,NULL,NULL,FALSE,
+        CREATE_DEFAULT_ERROR_MODE|NORMAL_PRIORITY_CLASS,
+        NULL,(char*)TreeNode->Data,&si,&pi);*/
 }
 //---------------------------------------------------------------------------
 void __fastcall TFormMain::SpeedButtonRebootClick(TObject *Sender)

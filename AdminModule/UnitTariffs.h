@@ -13,13 +13,13 @@
 #define mwdSu ((unsigned int)64)
 #define mwdAll ((unsigned int)127)
 //---------------------------------------------------------------------------
+#define mgpNone ((unsigned int)0)
 #define mgp1 ((unsigned int)1)
 #define mgp2 ((unsigned int)2)
 #define mgp3 ((unsigned int)4)
 #define mgp4 ((unsigned int)8)
 #define mgp5 ((unsigned int)16)
-#define mgp6 ((unsigned int)32)
-#define mgp7 ((unsigned int)64)
+#define mgpRoute ((unsigned int)32)
 //---------------------------------------------------------------------------
 class MTariffTime;
 class MTariffTimes;

@@ -3,18 +3,17 @@
 <PROJECT>
   <MACROS>
     <VERSION value="BCB.05.03"/>
-    <PROJECT value="TLk.exe"/>
-    <OBJFILES value="TLk.obj UnitGames.obj UnitOptionsLoadSave.obj UnitBaseClassMList.obj 
-      UnitCommon.obj UnitState.obj UnitThreadNetSync.obj UnitFormMain.obj"/>
-    <RESFILES value="TLk.res"/>
+    <PROJECT value="TLKRte.exe"/>
+    <OBJFILES value="UnitMain.obj UnitService.obj"/>
+    <RESFILES value=""/>
     <IDLFILES value=""/>
     <IDLGENFILES value=""/>
     <DEFFILE value=""/>
-    <RESDEPEN value="$(RESFILES) UnitFormMain.dfm"/>
-    <LIBFILES value=""/>
-    <LIBRARIES value="bcbie50.lib Vcl50.lib"/>
-    <SPARELIBS value="Vcl50.lib bcbie50.lib"/>
-    <PACKAGES value="Vcl50.bpi Vclx50.bpi"/>
+    <RESDEPEN value="$(RESFILES)"/>
+    <LIBFILES value="IPHLPAPI.LIB"/>
+    <LIBRARIES value="Vcl50.lib"/>
+    <SPARELIBS value="Vcl50.lib"/>
+    <PACKAGES value=""/>
     <PATHCPP value=".;"/>
     <PATHPAS value=".;"/>
     <PATHRC value=".;"/>
@@ -23,33 +22,33 @@
     <RELEASELIBPATH value="$(BCB)\lib\release"/>
     <LINKER value="tlink32"/>
     <USERDEFINES value=""/>
-    <SYSDEFINES value="NO_STRICT"/>
-    <MAINSOURCE value="TLk.cpp"/>
+    <SYSDEFINES value="NO_STRICT;_NO_VCL"/>
+    <MAINSOURCE value="TLKRte.bpf"/>
     <INCLUDEPATH value="$(BCB)\include;$(BCB)\include\vcl"/>
     <LIBPATH value="$(BCB)\lib\obj;$(BCB)\lib"/>
     <WARNINGS value="-w-par"/>
   </MACROS>
   <OPTIONS>
     <IDLCFLAGS value="-I$(BCB)\include -I$(BCB)\include\vcl -src_suffix cpp -boa"/>
-    <CFLAG1 value="-O2 -H=$(BCB)\lib\vcl50.csm -Hc -Vx -Ve -X- -a8 -b- -k- -vi -c -tW -tWM"/>
+    <CFLAG1 value="-O2 -H=$(BCB)\lib\vcl50.csm -Hc -Vx -Ve -X- -a4 -b- -k- -vi -tW -tWM -c"/>
     <PFLAGS value="-$Y- -$L- -$D- -v -JPHNE -M"/>
     <RFLAGS value=""/>
     <AFLAGS value="/mx /w2 /zn"/>
     <LFLAGS value="-D&quot;&quot; -aa -Tpe -x -Gn"/>
   </OPTIONS>
   <LINKER>
-    <ALLOBJ value="c0w32.obj sysinit.obj $(OBJFILES)"/>
+    <ALLOBJ value="c0w32.obj $(OBJFILES)"/>
     <ALLRES value="$(RESFILES)"/>
-    <ALLLIB value="$(LIBFILES) $(LIBRARIES) import32.lib cp32mt.lib"/>
+    <ALLLIB value="$(LIBFILES) $(LIBRARIES) import32.lib cw32mt.lib"/>
   </LINKER>
   <IDEOPTIONS>
 [Version Info]
-IncludeVerInfo=1
+IncludeVerInfo=0
 AutoIncBuild=1
 MajorVer=1
 MinorVer=0
 Release=0
-Build=73
+Build=10
 Debug=0
 PreRelease=0
 Special=0
@@ -60,16 +59,18 @@ CodePage=1251
 
 [Version Info Keys]
 CompanyName=MMM Groups
-FileDescription=
-FileVersion=1.0.0.73
+FileDescription=TLK Route Support
+FileVersion=1.0.0.10
 InternalName=
 LegalCopyright=
 LegalTrademarks=
-OriginalFilename=TLK.exe
-ProductName=
-ProductVersion=3.0.0.0
+OriginalFilename=TLKRte.exe
+ProductName=Time Locker
+ProductVersion=1.0.0.0
+Comments=
 
 [Excluded Packages]
+$(BCB)\Bin\dclstd50.bpl=Borland Standard Components
 $(BCB)\Bin\dcl31w50.bpl=Delphi 1.0 Compatibility Components
 $(BCB)\Bin\bcbsmp50.bpl=Borland C++ Sample Components
 C:\WINDOWS\System32\ibsmp50.bpl=Borland C++ InterBase Alerter Component
@@ -85,12 +86,14 @@ $(BCB)\Bin\DCLIB50.bpl=InterBase Data Access Components
 $(BCB)\Bin\dclsmpedit50.bpl=Borland Editor Script Enhancements
 
 [HistoryLists\hlIncludePath]
-Count=1
+Count=2
 Item0=$(BCB)\include;$(BCB)\include\vcl
+Item1=D:\Program Files\Borland\CBuilder5\Projects\;$(BCB)\include;$(BCB)\include\vcl
 
 [HistoryLists\hlLibraryPath]
-Count=1
+Count=2
 Item0=$(BCB)\lib\obj;$(BCB)\lib
+Item1=D:\Program Files\Borland\CBuilder5\Projects\;$(BCB)\lib\obj;$(BCB)\lib
 
 [HistoryLists\hlDebugSourcePath]
 Count=1
@@ -104,7 +107,7 @@ Item0=_DEBUG
 DebugSourceDirs=$(BCB)\source\vcl
 
 [Parameters]
-RunParams=
+RunParams=/debug
 HostApplication=
 RemoteHost=
 RemotePath=

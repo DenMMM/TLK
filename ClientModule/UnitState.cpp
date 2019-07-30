@@ -14,7 +14,7 @@ MState::MState()
     StartWorkTime=0.; SizeWorkTime=0;
     StartFineTime=0.; SizeFineTime=0;
     StopTimerTime=0.;
-    GamesPages=0;
+    GamesPages=mgpNone;
     StateVer=-1;
     CS_Main=CS_Games=NULL;
     NotPingTime=0;
@@ -34,6 +34,7 @@ bool MState::ControlWorkTime()
     StartWorkTime=0.; SizeWorkTime=0;
     StartFineTime=0.; SizeFineTime=0;
     State=mcsFree|(State&mcsAuto);
+    GamesPages=mgpNone;
     return true;
 }
 //---------------------------------------------------------------------------

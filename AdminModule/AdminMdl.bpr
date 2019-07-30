@@ -23,12 +23,10 @@
       UnitFormComputersConfig.dfm UnitFormFine.dfm UnitFormUsers.dfm 
       UnitFormAccessRights.dfm UnitFormChangePassword.dfm UnitFormLogIn.dfm"/>
     <LIBFILES value=""/>
-    <LIBRARIES value="bcbsmp50.lib VCLX50.lib NMFast50.lib Vcl50.lib"/>
-    <SPARELIBS value="Vcl50.lib NMFast50.lib VCLX50.lib bcbsmp50.lib"/>
-    <PACKAGES value="Vcl50.bpi Vclx50.bpi bcbsmp50.bpi Vcldb50.bpi vclado50.bpi ibsmp50.bpi 
-      VCLBDE50.bpi vcldbx50.bpi Qrpt50.bpi TeeUI50.bpi TeeDB50.bpi Tee50.bpi 
-      Dss50.bpi TeeQR50.bpi VCLIB50.bpi Vclmid50.bpi vclie50.bpi Inetdb50.bpi 
-      Inet50.bpi NMFast50.bpi webmid50.bpi bcbie50.bpi dclocx50.bpi"/>
+    <LIBRARIES value="bcbsmp50.lib VCLX50.lib Vcl50.lib"/>
+    <SPARELIBS value="Vcl50.lib VCLX50.lib bcbsmp50.lib"/>
+    <PACKAGES value="Vcl50.bpi Vclx50.bpi bcbsmp50.bpi Vclmid50.bpi vclie50.bpi Inetdb50.bpi 
+      Inet50.bpi webmid50.bpi bcbie50.bpi dclocx50.bpi"/>
     <PATHCPP value=".;"/>
     <PATHPAS value=".;"/>
     <PATHRC value=".;"/>
@@ -63,7 +61,7 @@ AutoIncBuild=1
 MajorVer=1
 MinorVer=0
 Release=0
-Build=97
+Build=99
 Debug=0
 PreRelease=0
 Special=0
@@ -75,7 +73,7 @@ CodePage=1251
 [Version Info Keys]
 CompanyName=MMM Groups
 FileDescription=
-FileVersion=1.0.0.97
+FileVersion=1.0.0.99
 InternalName=
 LegalCopyright=
 LegalTrademarks=
@@ -83,6 +81,19 @@ OriginalFilename=AdminMdl.exe
 ProductName=
 ProductVersion=3.0.0.0
 Comments=
+
+[Excluded Packages]
+C:\WINDOWS\System32\ibsmp50.bpl=Borland C++ InterBase Alerter Component
+$(BCB)\Bin\dclado50.bpl=Borland ADO DB Components
+$(BCB)\Bin\dcldb50.bpl=Borland Database Components
+$(BCB)\Bin\dclbde50.bpl=Borland BDE DB Components
+$(BCB)\Bin\dclqrt50.bpl=QuickReport Components
+$(BCB)\Bin\dcltee50.bpl=TeeChart 5.0 Components
+$(BCB)\Bin\dcldss50.bpl=Borland Decision Cube Components
+$(BCB)\Bin\applet50.bpl=Borland Control Panel Applet Package
+$(BCB)\Bin\dcltqr50.bpl=TeeChart 5.0 for QuickReport Components Design Package
+$(BCB)\Bin\DCLIB50.bpl=InterBase Data Access Components
+$(BCB)\Bin\dclsmpedit50.bpl=Borland Editor Script Enhancements
 
 [HistoryLists\hlIncludePath]
 Count=3
@@ -123,10 +134,5 @@ LinkCGLIB=0
 AddServerUnit=1
 AddClientUnit=1
 PrecompiledHeaders=1
-
-[Language]
-ActiveLang=
-ProjectLang=
-RootDir=
   </IDEOPTIONS>
 </PROJECT>

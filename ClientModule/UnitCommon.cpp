@@ -56,4 +56,35 @@ error:
     return false;
 }
 //---------------------------------------------------------------------------
+void RegExecList(HKEY hkey, LPCTSTR subkey)
+{
+    HKEY key;
+    DWORD index, type, name_size, data_size;
+    char name[256], value[256];
+    STARTUPINFO si;
+    PROCESS_INFORMATION pi;
+
+    if ( ::RegOpenKeyEx(hkey,subkey,0,
+        KEY_ENUMERATE_SUB_KEYS|KEY_QUERY_VALUE,&key)!=ERROR_SUCCESS ) return;
+
+    index=0;
+    while(true)
+    {
+        name_size=data_size=256;
+        if ( ::RegEnumValue(key,index,name,&name_size,NULL,
+            &type,value,&data_size)!=ERROR_SUCCESS ) break;
+        if ( (data_size>1)&&(type==REG_SZ) )
+        {
+            memset(&si,0,sizeof(STARTUPINFO));
+            si.cb=sizeof(STARTUPINFO);
+            ::CreateProcess(NULL,value,NULL,NULL,FALSE,
+                CREATE_DEFAULT_ERROR_MODE|NORMAL_PRIORITY_CLASS,
+                NULL,NULL,&si,&pi);
+        }
+        if ( (++index)>=100 ) break;
+    }
+
+    ::RegCloseKey(key);
+}
+//---------------------------------------------------------------------------
 

@@ -1,6 +1,6 @@
 object FormTariffs: TFormTariffs
-  Left = 337
-  Top = 182
+  Left = 281
+  Top = 196
   BorderIcons = [biSystemMenu]
   BorderStyle = bsSingle
   Caption = 'Тарифы'
@@ -28,19 +28,19 @@ object FormTariffs: TFormTariffs
     Left = 12
     Top = 177
     Width = 229
-    Height = 41
+    Height = 48
     Shape = bsFrame
   end
   object Bevel1: TBevel
     Left = 12
-    Top = 221
+    Top = 228
     Width = 229
-    Height = 41
+    Height = 34
     Shape = bsFrame
   end
   object LabelPages: TLabel
-    Left = 30
-    Top = 229
+    Left = 22
+    Top = 239
     Width = 46
     Height = 13
     Alignment = taRightJustify
@@ -119,30 +119,30 @@ object FormTariffs: TFormTariffs
     OnExit = EditNameExit
   end
   object CheckBoxPage1: TCheckBox
-    Left = 84
-    Top = 225
+    Left = 74
+    Top = 237
     Width = 33
     Height = 17
     Caption = '1'
-    TabOrder = 3
+    TabOrder = 5
     OnClick = CheckBoxPage1Click
   end
   object CheckBoxPage2: TCheckBox
-    Left = 120
-    Top = 225
+    Left = 106
+    Top = 237
     Width = 33
     Height = 17
     Caption = '2'
-    TabOrder = 4
+    TabOrder = 6
     OnClick = CheckBoxPage1Click
   end
   object CheckBoxPage3: TCheckBox
-    Left = 156
-    Top = 225
+    Left = 138
+    Top = 237
     Width = 33
     Height = 17
     Caption = '3'
-    TabOrder = 5
+    TabOrder = 7
     OnClick = CheckBoxPage1Click
   end
   object BitBtnClose: TBitBtn
@@ -165,39 +165,30 @@ object FormTariffs: TFormTariffs
     Spacing = 0
   end
   object CheckBoxPage4: TCheckBox
-    Left = 84
-    Top = 241
+    Left = 170
+    Top = 237
     Width = 33
     Height = 17
     Caption = '4'
-    TabOrder = 6
-    OnClick = CheckBoxPage1Click
-  end
-  object CheckBoxPage5: TCheckBox
-    Left = 120
-    Top = 241
-    Width = 33
-    Height = 17
-    Caption = '5'
-    TabOrder = 7
-    OnClick = CheckBoxPage1Click
-  end
-  object CheckBoxPage6: TCheckBox
-    Left = 156
-    Top = 241
-    Width = 33
-    Height = 17
-    Caption = '6'
     TabOrder = 8
     OnClick = CheckBoxPage1Click
   end
-  object CheckBoxPage7: TCheckBox
-    Left = 192
-    Top = 241
+  object CheckBoxPage5: TCheckBox
+    Left = 202
+    Top = 237
     Width = 33
     Height = 17
-    Caption = '7'
+    Caption = '5'
     TabOrder = 9
+    OnClick = CheckBoxPage1Click
+  end
+  object CheckBoxRoute: TCheckBox
+    Left = 20
+    Top = 201
+    Width = 177
+    Height = 17
+    Caption = 'Internet'
+    TabOrder = 4
     OnClick = CheckBoxPage1Click
   end
   object BitBtnSetSelComp: TBitBtn
@@ -306,7 +297,7 @@ object FormTariffs: TFormTariffs
     Width = 177
     Height = 17
     Caption = 'Перезагрузка после запуска'
-    TabOrder = 23
+    TabOrder = 3
     OnClick = CheckBoxRebootClick
   end
   object OpenPictureDialog: TOpenPictureDialog

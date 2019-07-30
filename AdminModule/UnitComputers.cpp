@@ -101,12 +101,13 @@ void MComputer::CmdFine(int FineSize_)
     {
         // Уменьшение времени работы по штрафу без ожидания
         SizeWorkTime+=FineSize_;
-        if ( SizeWorkTime<0 ) SizeWorkTime=0;
+        if ( SizeWorkTime<0 ) goto full;
         DataChanges|=mdcWorkTime|mdcNetState;
     } else
     {
+full:
         // Полное снятие времени работы
-        TariffID=0;
+        TariffID=0; GamesPages=mgpNone;
         StartWorkTime=0.; SizeWorkTime=0;
         StartFineTime=0.; SizeFineTime=0;
         State=mcsFree|(State&mcsAuto);
@@ -247,7 +248,7 @@ void MComputer::CmdNotUse(bool Apply_)
     Lock();
     if ( Apply_ )
     {
-        TariffID=0;
+        TariffID=0; GamesPages=mgpNone;
         StartWorkTime=0.; SizeWorkTime=0;
         StartFineTime=0.; SizeFineTime=0;
         StopTimerTime=0.;
@@ -292,7 +293,7 @@ bool MComputer::ControlWorkTime()
     double SystemTime=(double)(Date()+Time());
     if ( (!(State&mcsWork))||(State&(mcsPause|mcsAuto))||
         (SystemTime<(StartWorkTime+SizeWorkTime/(24.*60))) ) return false;
-    TariffID=0;
+    TariffID=0; GamesPages=mgpNone;
     StartWorkTime=0.; SizeWorkTime=0;
     StartFineTime=0.; SizeFineTime=0;
     State=mcsFree|(State&mcsAuto);
@@ -374,7 +375,7 @@ MComputer::MComputer()
     StartFineTime=0.; SizeFineTime=0;
     StopTimerTime=0.;
     FaceType=0;
-    GamesPages=0;
+    GamesPages=mgpNone;
     TariffID=0;
     StateVer=0;
     NetSync=NotSync=mnsState;

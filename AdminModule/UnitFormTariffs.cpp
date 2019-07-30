@@ -86,8 +86,7 @@ void __fastcall TFormTariffs::ListViewNamesChange(TObject *Sender,
         CheckBoxPage3->Checked=Pages&mgp3;
         CheckBoxPage4->Checked=Pages&mgp4;
         CheckBoxPage5->Checked=Pages&mgp5;
-        CheckBoxPage6->Checked=Pages&mgp6;
-        CheckBoxPage7->Checked=Pages&mgp7;
+        CheckBoxRoute->Checked=Pages&mgpRoute;
     }
     //
     CheckBoxReboot->Checked=TMPTariff->Reboot;
@@ -156,8 +155,7 @@ void __fastcall TFormTariffs::CheckBoxPage1Click(TObject *Sender)
     else if ( Sender==CheckBoxPage3 ) Page=mgp3;
     else if ( Sender==CheckBoxPage4 ) Page=mgp4;
     else if ( Sender==CheckBoxPage5 ) Page=mgp5;
-    else if ( Sender==CheckBoxPage6 ) Page=mgp6;
-    else if ( Sender==CheckBoxPage7 ) Page=mgp7;
+    else if ( Sender==CheckBoxRoute ) Page=mgpRoute;
     else return;
 
     if ( ((TCheckBox*)Sender)->Checked ) TMPTariff->GamesPages|=Page;
