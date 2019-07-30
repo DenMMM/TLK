@@ -74,11 +74,11 @@ void TFormGames::AddGamesToTree(MGames *Games_, TTreeNode *TreeNode_, TImageList
     for ( MGame *Game=(MGame*)Games_->gFirst(); Game;
         Game=(MGame*)Game->gNext() )
     {
-        NewTreeNode=TreeViewGames->Items->AddChild(TreeNode_,Game->Name);
+        NewTreeNode=TreeViewGames->Items->AddChild(TreeNode_,Game->Name.c_str());
 
         // Извлечем иконку
         strcpy(icon_file,
-            strlen(Game->Icon)? Game->Icon: Game->Command);
+            strlen(Game->Icon.c_str())? Game->Icon.c_str(): Game->Command.c_str());
         pos1=strchr(icon_file,'\"');
         if ( pos1==NULL ) icon=::ExtractIcon(NULL,icon_file,0);
         else if ( (pos2=strchr(pos1+1,'\"'))==NULL ) icon=NULL;
@@ -102,7 +102,7 @@ void TFormGames::AddGamesToTree(MGames *Games_, TTreeNode *TreeNode_, TImageList
         }
 
         // Командная строка для запуска
-        NewTreeNode->Data=Game->Command;
+        NewTreeNode->Data=(void*)Game->Command.c_str();     /// очень опасно !!!
         // Подуровни дерева
         AddGamesToTree(Game->SubGames,NewTreeNode,ImageList_);
     }

@@ -14,6 +14,7 @@ class MSyncStates;
 class MSync;
 //---------------------------------------------------------------------------
 #include <winsock2.h>
+#include "UnitWinAPI.h"
 #include "UnitSLList.h"
 #include "UnitComputers.h"
 #include "UnitStates.h"
@@ -243,8 +244,8 @@ private:
     MStates *States;            // Cостояния компьютеров для синхронизации
     MSyncStates SyncStates;     // Объекты процесса синхронизации
 
-    unsigned PCount;                    // Общий счетчик отправленных пакетов (индикация)
-    mutable CRITICAL_SECTION CS_PCount; // и объект синхронизации доступа потоков к нему
+    unsigned PCount;                            // Общий счетчик отправленных пакетов (индикация)
+    mutable MWAPI::CRITICAL_SECTION CS_PCount;  // и объект синхронизации доступа потоков к нему
 
     union MPacket
     {

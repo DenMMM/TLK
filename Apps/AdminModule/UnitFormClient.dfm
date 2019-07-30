@@ -290,7 +290,7 @@ object FormClient: TFormClient
         Width = 125
         Height = 21
         Style = csDropDownList
-        ItemHeight = 13
+        ItemHeight = 0
         TabOrder = 1
         OnClick = ComboBoxToEndTimeClick
       end
@@ -300,7 +300,7 @@ object FormClient: TFormClient
         Width = 125
         Height = 21
         Style = csDropDownList
-        ItemHeight = 13
+        ItemHeight = 0
         TabOrder = 2
       end
       object ComboBoxRebootWait: TComboBox
@@ -309,7 +309,7 @@ object FormClient: TFormClient
         Width = 125
         Height = 21
         Style = csDropDownList
-        ItemHeight = 13
+        ItemHeight = 0
         TabOrder = 4
         OnClick = ComboBoxRebootWaitClick
       end
@@ -319,7 +319,7 @@ object FormClient: TFormClient
         Width = 125
         Height = 21
         Style = csDropDownList
-        ItemHeight = 13
+        ItemHeight = 0
         TabOrder = 5
       end
       object CheckBoxTransp: TCheckBox
@@ -336,7 +336,7 @@ object FormClient: TFormClient
         Width = 125
         Height = 21
         Style = csDropDownList
-        ItemHeight = 13
+        ItemHeight = 0
         TabOrder = 3
         OnClick = ComboBoxMsgEndTimeClick
       end

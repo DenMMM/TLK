@@ -16,16 +16,12 @@ MLockDsk::MLockDsk()
     SysTime=0;
     CompNum=0;
     WorkTime=0;
-    *MsgFile=0;
-    ::InitializeCriticalSection(&CS_Param);
 }
 //---------------------------------------------------------------------------
 MLockDsk::~MLockDsk()
 {
     // Завершим работу потока без разблокировки экрана
     Hide(false);
-    //
-    ::DeleteCriticalSection(&CS_Param);
 }
 //---------------------------------------------------------------------------
 DWORD WINAPI MLockDsk::ThreadF(LPVOID Data_)
@@ -281,7 +277,8 @@ void MLockDsk::UpdBkg(HWND hBkg_, HWND hText_)
 //---------------------------------------------------------------------------
 void MLockDsk::UpdTransp() const
 {
-    Lock();
+    MWAPI::CRITICAL_SECTION::Lock lckObj(CS_Param);
+
     // Выставим режим прозрачности окна и параметры цвета
     if ( Transp )
     {
@@ -292,14 +289,14 @@ void MLockDsk::UpdTransp() const
     // Обновим содержимое
     ::InvalidateRect(hwMain,NULL,TRUE);
     ::UpdateWindow(hwMain);
-    UnLock();
 }
 //---------------------------------------------------------------------------
 bool MLockDsk::LoadImg()
 {
-    Lock();
-    hMsgImg=::LoadImage(NULL,MsgFile,IMAGE_BITMAP,0,0,LR_LOADFROMFILE);
-    UnLock();
+    CS_Param.Enter();
+    hMsgImg=::LoadImage(NULL,MsgFile.c_str(),IMAGE_BITMAP,0,0,LR_LOADFROMFILE);
+    CS_Param.Leafe();
+
     if ( hMsgImg==NULL ) return false;
     ::SendMessage(hwMsgImg,STM_SETIMAGE,(WPARAM)IMAGE_BITMAP,(LPARAM)hMsgImg);
     return true;
@@ -307,41 +304,38 @@ bool MLockDsk::LoadImg()
 //---------------------------------------------------------------------------
 void MLockDsk::UpdCompNum() const
 {
+    MWAPI::CRITICAL_SECTION::Lock lckObj(CS_Param);
     char line[]="99";
 
-    Lock();
     // Номер компьютера
     sprintf(line,"%2i",CompNum);
     ::SetWindowText(hwCompNumSh,line);
     ::SetWindowText(hwCompNum,line);
-    UnLock();
 }
 //---------------------------------------------------------------------------
 void MLockDsk::UpdSysTime() const
 {
+    MWAPI::CRITICAL_SECTION::Lock lckObj(CS_Param);
     char line[]="--:--";
     SYSTEMTIME st;
 
-    Lock();
     // Текущее время
     if ( Int64ToSystemTime(&SysTime,&st) )
     {
         sprintf(line,"%.2i:%.2i",st.wHour,st.wMinute);
         ::SetWindowText(hwSysTime,line);
     }
-    UnLock();
 }
 //---------------------------------------------------------------------------
 void MLockDsk::UpdWorkTime() const
 {
+    MWAPI::CRITICAL_SECTION::Lock lckObj(CS_Param);
     char line[]="--:--";
 
-    Lock();
     // Сколько осталось работать
     if ( WorkTime==0 ) sprintf(line,"--:--");
     else sprintf(line,"%.2i:%.2i",WorkTime/60,WorkTime%60);
     ::SetWindowText(hwWorkTime,line);
-    UnLock();
 }
 //---------------------------------------------------------------------------
 bool MLockDsk::ThreadMsg(UINT Msg_) const
@@ -359,19 +353,22 @@ bool MLockDsk::ThreadMsg(UINT Msg_) const
 bool MLockDsk::SetTransp(bool Transp_)
 {
     return true;            /// с прозрачностью баг - отключена
-/*    Lock();
+/*
+    CS_Param.Enter();
     Transp=Transp_;
-    UnLock();
-    return ThreadMsg(MSG_UpdTransp);*/
+    CS_Param.Leafe();
+
+    return ThreadMsg(MSG_UpdTransp);
+*/
 }
 //---------------------------------------------------------------------------
 bool MLockDsk::Show(const char *File_)
 {
     // Скопируем параметры в буфер потока
-    Lock();
-    if ( strlen(File_)>MAX_PATH ) *MsgFile=0;
-    else strcpy(MsgFile,File_);
-    UnLock();
+    CS_Param.Enter();
+    if ( strlen(File_)>MAX_PATH ) MsgFile.clear();
+    else MsgFile=File_;     /// проверить bad_alloc или выделить память заранее
+    CS_Param.Leafe();
 
     // Отправим сообщение работающему потоку
     if ( hThread!=NULL ) return ThreadMsg(MSG_UpdMsg);
@@ -385,25 +382,28 @@ bool MLockDsk::Show(const char *File_)
 //---------------------------------------------------------------------------
 bool MLockDsk::UpdateCompNum(int Num_)
 {
-    Lock();
+    CS_Param.Enter();
     CompNum=Num_;
-    UnLock();
+    CS_Param.Leafe();
+
     return ThreadMsg(MSG_UpdCompNum);
 }
 //---------------------------------------------------------------------------
 bool MLockDsk::UpdateSysTime(__int64 Time_)
 {
-    Lock();
+    CS_Param.Enter();
     SysTime=Time_;
-    UnLock();
+    CS_Param.Leafe();
+
     return ThreadMsg(MSG_UpdSysTime);
 }
 //---------------------------------------------------------------------------
 bool MLockDsk::UpdateWorkTime(int Time_)
 {
-    Lock();
+    CS_Param.Enter();
     WorkTime=Time_;
-    UnLock();
+    CS_Param.Leafe();
+
     return ThreadMsg(MSG_UpdWorkTime);
 }
 //---------------------------------------------------------------------------

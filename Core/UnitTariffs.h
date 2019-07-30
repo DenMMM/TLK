@@ -2,7 +2,6 @@
 #ifndef UnitTariffsH
 #define UnitTariffsH
 //---------------------------------------------------------------------------
-struct MTariffData;
 class MRunTime;
 class MRunTimes;
 class MTariffTime;
@@ -11,6 +10,8 @@ class MTariff;
 class MTariffs;
 class MTariffInfo;          /// только для TFormRun
 class MTariffsInfo;         /// больше нигде не используются
+//---------------------------------------------------------------------------
+#include <string>
 //---------------------------------------------------------------------------
 #include "UnitComputers.h"
 #include "UnitIDList.h"
@@ -40,12 +41,6 @@ class MTariffsInfo;         /// больше нигде не используются
 #define mttPacket       3       // Пакет с A до B часов (ночь, например)
 //---------------------------------------------------------------------------
 //#define Cost_Precision  0.50
-//---------------------------------------------------------------------------
-struct MTariffData
-{
-    unsigned ID;                        // ID-номер тарифа
-    char Name[MAX_TariffNameLen+1];     // Название тарифа
-};
 //---------------------------------------------------------------------------
 class MRunTime:public MListItem
 {
@@ -115,9 +110,8 @@ class MTariffInfo:public MListItem
 {
 public:
     unsigned ID;
-    char Name[MAX_TariffNameLen+1];
+    std::string Name;
 
-    char *SetName(const char *Name_);
     void Copy(const MListItem *SrcItem_);
 
     MTariffInfo();
@@ -154,12 +148,11 @@ private:
     char Comps[MAX_Comps];              // Их номера
 
 public:
-    char Name[MAX_TariffNameLen+1];     // Название тарифа
+    std::string Name;                   // Название тарифа
     unsigned Programs;                  // Группы программ для запуска
     bool Reboot;                        // Пререзагружать компьютер после запуска
     MTariffTimes Times;                 // Типы тарифа по времени
 
-    char *SetName(const char *Name_);
     bool SetComps(char *Comps_, int Count_);
     // Проверяет есть ли для заданного времени пакеты по тарифу
     bool CheckForTime(__int64 &Time_) const;
@@ -173,8 +166,26 @@ public:
     void Copy(const MListItem *SrcItem_);
 
     // Поддержка логов
-    void GetTariffData(MTariffData *Data_) const;
-    void SetTariffData(MTariffData *Data_);
+    struct LogData
+    {
+        unsigned ID;            // ID-номер тарифа
+        std::string Name;       // Название тарифа
+
+        LogData &operator=(const MTariff &Tariff_)
+        {
+            ID=Tariff_.ItemID;
+            Name=Tariff_.Name;
+            return *this;
+        }
+    };
+    friend LogData;             // Нужен доступ к ItemID
+
+    MTariff &operator=(const LogData &Data_)
+    {
+        ItemID=Data_.ID;
+        Name=Data_.Name;
+        return *this;
+    }
 
     MTariff();
     ~MTariff();

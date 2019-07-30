@@ -55,7 +55,7 @@ private:	// User declarations
     void SetEdit(bool Edit_);
     void SetListViewTimesLine(TListItem *Item_);
 public:		// User declarations
-    bool Execute(MTariffTimes *Times_, char *Name_, int Left_, int Top_);
+    bool Execute(MTariffTimes *Times_, const char *Name_, int Left_, int Top_);
     __fastcall TFormTariffTimes(TComponent* Owner);
 };
 //---------------------------------------------------------------------------

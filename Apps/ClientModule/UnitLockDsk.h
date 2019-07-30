@@ -2,8 +2,10 @@
 #ifndef UnitLockDskH
 #define UnitLockDskH
 //---------------------------------------------------------------------------
+#include <string>
 #include <winsock2.h>
 //#include <windows.h>
+#include "UnitWinAPI.h"
 #include "UnitStates.h"
 //---------------------------------------------------------------------------
 #define LOCKDSK_Name    "TLK_Lock"
@@ -31,11 +33,8 @@ private:
     __int64 SysTime;                    // Текущее системное время
     int CompNum;                        // Номер компьютера
     int WorkTime;                       // Оставшееся время работы
-    char MsgFile[MAX_PATH+1];           // Путь к файлу с картинкой-сообщением
-    mutable CRITICAL_SECTION CS_Param;  // Блокировка доступа к этим параметрам
-
-    void Lock() const { ::EnterCriticalSection(&CS_Param); }
-    void UnLock() const { ::LeaveCriticalSection(&CS_Param); }
+    std::string MsgFile;                // Путь к файлу с картинкой-сообщением
+    mutable MWAPI::CRITICAL_SECTION CS_Param;   // Блокировка доступа к этим параметрам
 
     static DWORD WINAPI ThreadF(LPVOID Data_);
     DWORD ThreadP();

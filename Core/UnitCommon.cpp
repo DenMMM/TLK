@@ -1,5 +1,4 @@
 //---------------------------------------------------------------------------
-//#include <stddef.h>
 #include <stdio.h>
 #pragma hdrstop
 
@@ -22,6 +21,24 @@ const char *MemGetCLine(const char *Mem_, char *Line_,
     while( (*(Line_++)=*(Mem_++))!=0 );
 
     return Mem_;
+}
+
+const char *MemGetCLine(const char *Mem_, std::string &Line_,
+    unsigned MaxLength_, const char *Limit_)
+{
+    Line_.clear();
+    Line_.reserve(MaxLength_);      /// оптимизация
+
+    if ( (unsigned)(Limit_-Mem_)>(++MaxLength_) ) Limit_=Mem_+MaxLength_;
+
+    while(Mem_<Limit_)
+    {
+        if ( *Mem_==0 ) return ++Mem_;
+        Line_.push_back(*Mem_);
+        Mem_++;
+    }
+
+    return NULL;
 }
 //---------------------------------------------------------------------------
 void BasicEncode(unsigned char *Data_, unsigned DataSize_, unsigned Code_, int Round_)

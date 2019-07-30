@@ -69,8 +69,8 @@ void __fastcall TFormUsers::ListViewUsersSelectItem(TObject *Sender,
         SetEdit(true);
 
     MUser *user=(MUser*)ListViewUsers->Selected->Data;
-    EditLogin->Text=user->Login;
-    EditName->Text=user->Name;
+    EditLogin->Text=user->Login.c_str();
+    EditName->Text=user->Name.c_str();
 }
 //---------------------------------------------------------------------------
 void __fastcall TFormUsers::EditLoginExit(TObject *Sender)
@@ -79,7 +79,7 @@ void __fastcall TFormUsers::EditLoginExit(TObject *Sender)
 
     EditLogin->Text=EditLogin->Text.Trim();
     MUser *user=(MUser*)ListViewUsers->Selected->Data;
-    user->SetLogin(EditLogin->Text.c_str());
+    user->Login=EditLogin->Text.c_str();
     SetListViewUsersLine(ListViewUsers->Selected);
 }
 //---------------------------------------------------------------------------
@@ -101,7 +101,7 @@ void __fastcall TFormUsers::EditNameExit(TObject *Sender)
 
     EditName->Text=EditName->Text.Trim();
     MUser *user=(MUser*)ListViewUsers->Selected->Data;
-    user->SetName(EditName->Text.c_str());
+    user->Name=EditName->Text.c_str();
     SetListViewUsersLine(ListViewUsers->Selected);
 }
 //---------------------------------------------------------------------------
@@ -136,8 +136,8 @@ void __fastcall TFormUsers::ButtonAddClick(TObject *Sender)
 
     // Добавили в буфер нового пользователя
     MUser *user=(MUser*)TmpUsers.Add();
-    user->SetLogin("NewUser");
-    user->SetName("Новый пользователь");
+    user->Login="NewUser";
+    user->Name="Новый пользователь";
     // Добавили строку в список и связали с ним
     TListItem *item=ListViewUsers->Items->Add();
     item->Data=user;
@@ -207,8 +207,8 @@ void TFormUsers::SetListViewUsersLine(TListItem *Item_)
     MUser *user=(MUser*)Item_->Data;
 //    Item_->ImageIndex=user->Active?15:16;
     Item_->ImageIndex=user->Active?-1:16;
-    Item_->Caption=user->Login;
-    Item_->SubItems->Strings[0]=user->Name;
+    Item_->Caption=user->Login.c_str();
+    Item_->SubItems->Strings[0]=user->Name.c_str();
 }
 //---------------------------------------------------------------------------
 

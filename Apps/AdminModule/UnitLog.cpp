@@ -10,14 +10,8 @@ MLog::MLog()
 {
     SystemTime=0;
     BeginTime=0;
-    Directory=NULL;
     Opened=false;
     User=0;
-}
-//---------------------------------------------------------------------------
-MLog::~MLog()
-{
-    delete[] Directory;
 }
 //---------------------------------------------------------------------------
 void MLog::AddSimpleEvent(unsigned char Type_)
@@ -43,7 +37,7 @@ void MLog::AddStatesData(MStates *States_)
     for ( MState *state=(MState*)States_->gFirst(); state;
         state=(MState*)state->gNext(), i++ )
     {
-        state->GetStateData(&record->States[i]);
+        record->States[i]=*state;
     }
 }
 //---------------------------------------------------------------------------
@@ -61,7 +55,7 @@ void MLog::AddTariffsData(MTariffs *Tariffs_)
     for ( MTariff *tariff=(MTariff*)Tariffs_->gFirst(); tariff;
         tariff=(MTariff*)tariff->gNext(), i++ )
     {
-        tariff->GetTariffData(&record->Tariffs[i]);
+        record->Tariffs[i]=*tariff;
     }
 }
 //---------------------------------------------------------------------------
@@ -79,7 +73,7 @@ void MLog::AddFinesData(MFines *Fines_)
     for ( MFine *fine=(MFine*)Fines_->gFirst();
         fine; fine=(MFine*)fine->gNext(), i++ )
     {
-        fine->GetFineData(&record->Fines[i]);
+        record->Fines[i]=*fine;
     }
 }
 //---------------------------------------------------------------------------
@@ -98,7 +92,7 @@ void MLog::AddUsersData(MUsers *Users_)
         user=(MUser*)user->gNext(), i++ )
     {
         if ( !user->Active ) continue;
-        user->GetUserData(&record->Users[i]);
+        record->Users[i]=*user;
     }
 }
 //---------------------------------------------------------------------------
@@ -192,7 +186,7 @@ bool MLog::Rename() const
     // Окончание имени файла
     sprintf(file_name+name_length,".TLG");
     // Переименовываем файл
-    if ( !::MoveFile(Records.gDefFile(),file_name) ) goto error;
+    if ( !::MoveFile(Records.DefaultFile.c_str(),file_name) ) goto error;
 
     return true;
 error:
@@ -586,15 +580,10 @@ bool MLog::AddShutdown(char Number_)
 //    return AddCmd(mlrShutdown,Number_);
 }
 //---------------------------------------------------------------------------
-void MLog::SetDefault(char *Dir_, unsigned Code_)
+void MLog::SetDefault(const std::string &Dir_, unsigned Code_)
 {
-    char file_name[MAX_PATH];
-
-    delete[] Directory;
-    Directory=new char[strlen(Dir_)+1];
-    strcpy(Directory,Dir_);
-    sprintf(file_name,"%s\\CURRENT.TLG",Dir_);
-    Records.SetDefaultFile(file_name,Code_);
+    Directory=Dir_;
+    Records.SetDefaultFile(Dir_+"\\CURRENT.TLG",Code_);
 }
 //---------------------------------------------------------------------------
 void MLog::Timer(__int64 SystemTime_)

@@ -1,4 +1,4 @@
-del *.obj
-del *.tds
-del *.~*
-del *.cgl
+del /S *.obj
+del /S *.tds
+del /S *.~*
+del /S *.cgl

@@ -85,7 +85,7 @@ void __fastcall TFormMain::FormShow(TObject *Sender)
 #ifdef _DEBUG
     if ( !Options->Load() )         /// сброс пароля
     {
-        Options->SetPass("");
+        Options->Pass.Set("");
         Options->Save();
     }
 #else
@@ -802,7 +802,7 @@ void TFormMain::SetListViewComputersLine(TListItem *Item_, MStateInfo *Info_)
     if ( Info_->Changes&mdcTariff )
     {
         MTariff *Tariff=(MTariff*)Tariffs->SrchID(Info_->TariffID);
-        if ( Tariff ) SubItems->Strings[3]=Tariff->Name;
+        if ( Tariff ) SubItems->Strings[3]=Tariff->Name.c_str();
         else SubItems->Strings[3]="";
     }
     // Время работы
@@ -926,7 +926,7 @@ void TFormMain::SetShell()
 
     // Заголовок окна программы
     line="TLK - ";
-    if ( (User=(MUser*)Users->SrchID(ShellState->User))!=NULL ) line+=User->Login;
+    if ( (User=(MUser*)Users->SrchID(ShellState->User))!=NULL ) line+=User->Login.c_str();
     else line+="смена не начата";
     if ( ShellState->State&mssConfig ) line+=" (открыты настройки)";
     Caption=line;

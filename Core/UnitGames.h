@@ -2,6 +2,7 @@
 #ifndef UnitGamesH
 #define UnitGamesH
 //---------------------------------------------------------------------------
+#include <string>
 #include "UnitSLList.h"
 //---------------------------------------------------------------------------
 #define MAX_PrgNameLength   32      // Длина названия игры
@@ -20,16 +21,12 @@ private:
     char *SetData(char *Data_) const;
     const char *GetData(const char *Data_, const char *Limit_);
 
-
 public:
-    char Name[MAX_PrgNameLength+1];
-    char Command[MAX_PrgCmdLength+1];
-    char Icon[MAX_PrgIconLength+1];
+    std::string Name;
+    std::string Command;
+    std::string Icon;
     MGames *SubGames;
 
-    bool SetName(char *Name_);
-    bool SetCommand(char *Command_);
-    bool SetIcon(char *Icon_);
     MGames *AddSubGames();
     void DelSubGames();
     void Copy(const MListItem *SrcItem_);

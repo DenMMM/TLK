@@ -1,5 +1,4 @@
 //---------------------------------------------------------------------------
-#include <string.h>
 #pragma hdrstop
 
 #include "UnitGames.h"
@@ -9,7 +8,6 @@
 //---------------------------------------------------------------------------
 MGame::MGame()
 {
-    *Name=*Command=*Icon=0;
     SubGames=NULL;
 }
 
@@ -20,16 +18,17 @@ MGame::~MGame()
 
 void MGame::Copy(const MListItem *SrcItem_)
 {
-    MGame *Game_=(MGame*)SrcItem_;
+    const MGame *game=
+        dynamic_cast<const MGame*>(SrcItem_);
 
-    strcpy(Name,Game_->Name);
-    strcpy(Command,Game_->Command);
-    strcpy(Icon,Game_->Icon);
-    if ( (Game_->SubGames!=NULL)&&
-        (Game_->SubGames->gCount()>0) )
+    Name=game->Name;
+    Command=game->Command;
+    Icon=game->Icon;
+    if ( (game->SubGames!=NULL)&&
+        (game->SubGames->gCount()>0) )
     {
         if ( SubGames==NULL ) SubGames=new MGames;
-        SubGames->Copy(Game_->SubGames);
+        SubGames->Copy(game->SubGames);
     } else
     {
         delete SubGames;
@@ -42,9 +41,9 @@ unsigned MGame::GetDataSize() const
     const MGames vGames;            // Заглушка для SubGames=NULL
 
     return
-        strlen(Name)+1+
-        strlen(Command)+1+
-        strlen(Icon)+1+
+        Name.length()+sizeof('\0')+
+        Command.length()+sizeof('\0')+
+        Icon.length()+sizeof('\0')+
         ((SubGames==NULL)||(SubGames->gCount()==0)?
             vGames.GetAllDataSize():
             SubGames->GetAllDataSize());
@@ -54,9 +53,9 @@ char *MGame::SetData(char *Data_) const
 {
     const MGames vGames;            // Заглушка для SubGames=NULL
 
-    Data_=MemSetCLine(Data_,Name);
-    Data_=MemSetCLine(Data_,Command);
-    Data_=MemSetCLine(Data_,Icon);
+    Data_=MemSetCLine(Data_,Name.c_str());
+    Data_=MemSetCLine(Data_,Command.c_str());
+    Data_=MemSetCLine(Data_,Icon.c_str());
     Data_=(SubGames==NULL)||(SubGames->gCount()==0)?
         vGames.SetAllData(Data_):
         SubGames->SetAllData(Data_);
@@ -76,24 +75,6 @@ const char *MGame::GetData(const char *Data_, const char *Limit_)
     return Data_;
 error:
     return NULL;
-}
-
-bool MGame::SetName(char *Name_)
-{
-    return strlen(Name_)>MAX_PrgNameLength?
-        false: (bool)strcpy(Name,Name_);
-}
-
-bool MGame::SetCommand(char *Command_)
-{
-    return strlen(Command_)>MAX_PrgCmdLength?
-        false: (bool)strcpy(Command,Command_);
-}
-
-bool MGame::SetIcon(char *Icon_)
-{
-    return strlen(Icon_)>MAX_PrgIconLength?
-        false: (bool)strcpy(Icon,Icon_);
 }
 
 MGames *MGame::AddSubGames()

@@ -80,7 +80,7 @@ void __fastcall TFormTariffs::ListViewNamesSelectItem(TObject *Sender,
         SetEdit(true);
 
     MTariff *tariff=(MTariff*)ListViewNames->Selected->Data;
-    EditName->Text=tariff->Name;
+    EditName->Text=tariff->Name.c_str();
     // Проставляем группы программ
     unsigned Programs=tariff->Programs;
     CheckListBoxApps->Checked[0]=Programs&mgp1;
@@ -116,7 +116,7 @@ void __fastcall TFormTariffs::ButtonAddClick(TObject *Sender)
 
     // Добавляем новый тариф в буфер
     MTariff *tariff=(MTariff*)TmpTariffs.Add();
-    tariff->SetName("Новый тариф");
+    tariff->Name="Новый тариф";
     // Добавляем строку в список и связываем ее с тарифом
     TListItem *item=ListViewNames->Items->Add();
     item->Data=tariff;
@@ -152,7 +152,7 @@ void __fastcall TFormTariffs::EditNameExit(TObject *Sender)
 
     EditName->Text=EditName->Text.Trim();
     MTariff *tariff=(MTariff*)ListViewNames->Selected->Data;
-    tariff->SetName(EditName->Text.c_str());
+    tariff->Name=EditName->Text.c_str();
     SetListViewNamesLine(ListViewNames->Selected);
 }
 //---------------------------------------------------------------------------
@@ -263,7 +263,7 @@ void __fastcall TFormTariffs::ButtonTimesClick(TObject *Sender)
         MTariff *tariff=(MTariff*)ListViewNames->Selected->Data;
         // Открываем диалог редактирования
         form(new TFormTariffTimes(0));
-        form->Execute(&tariff->Times,tariff->Name,Left+30,Top+30);
+        form->Execute(&tariff->Times,tariff->Name.c_str(),Left+30,Top+30);
     }
     catch (Exception &ex)
     {
@@ -320,7 +320,7 @@ void TFormTariffs::SetEdit(bool Edit_)
 //---------------------------------------------------------------------------
 void TFormTariffs::SetListViewNamesLine(TListItem *Item_)
 {
-    Item_->Caption=((MTariff*)Item_->Data)->Name;
+    Item_->Caption=((MTariff*)Item_->Data)->Name.c_str();
 }
 //---------------------------------------------------------------------------
 

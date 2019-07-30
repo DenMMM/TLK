@@ -236,9 +236,9 @@ void __fastcall TFormClient::TreeViewGamesChange(TObject *Sender,
     }
     Game=(MGame*)Select->Data;
     if ( Game==NULL ) return;
-    EditName->Text=Game->Name;
-    EditCmd->Text=Game->Command;
-    EditIcon->Text=Game->Icon;
+    EditName->Text=Game->Name.c_str();
+    EditCmd->Text=Game->Command.c_str();
+    EditIcon->Text=Game->Icon.c_str();
     // Если элемент верхнего уровня (группы программ) или слишком вложенный,
     // корень ветви - запрещаем делать его новым корнем
     ButtonAddChild->Enabled=!(
@@ -259,7 +259,7 @@ void __fastcall TFormClient::EditNameExit(TObject *Sender)
 {
     if ( TreeViewGames->Selected==NULL ) return;
     EditName->Text=EditName->Text.Trim();
-    ((MGame*)TreeViewGames->Selected->Data)->SetName(EditName->Text.c_str());
+    ((MGame*)TreeViewGames->Selected->Data)->Name=EditName->Text.c_str();
     SetTreeViewGamesLine(TreeViewGames->Selected);
 }
 //---------------------------------------------------------------------------
@@ -267,7 +267,7 @@ void __fastcall TFormClient::EditCmdExit(TObject *Sender)
 {
     if ( TreeViewGames->Selected==NULL ) return;
     EditCmd->Text=EditCmd->Text.Trim();
-    ((MGame*)TreeViewGames->Selected->Data)->SetCommand(EditCmd->Text.c_str());
+    ((MGame*)TreeViewGames->Selected->Data)->Command=EditCmd->Text.c_str();
     SetTreeViewGamesLine(TreeViewGames->Selected);
 }
 //---------------------------------------------------------------------------
@@ -275,7 +275,7 @@ void __fastcall TFormClient::EditIconExit(TObject *Sender)
 {
     if ( TreeViewGames->Selected==NULL ) return;
     EditIcon->Text=EditIcon->Text.Trim();
-    ((MGame*)TreeViewGames->Selected->Data)->SetIcon(EditIcon->Text.c_str());
+    ((MGame*)TreeViewGames->Selected->Data)->Icon=EditIcon->Text.c_str();
     SetTreeViewGamesLine(TreeViewGames->Selected);
 }
 //---------------------------------------------------------------------------
@@ -369,21 +369,23 @@ void __fastcall TFormClient::ButtonCancelClick(TObject *Sender)
 //---------------------------------------------------------------------------
 void TFormClient::SetTreeViewGamesLine(TTreeNode *Node_)
 {
-//    char line[MAX_PrgNameLength+MAX_PrgCmdLength+MAX_PrgIconLength+10+1];
+//    AnsiString line;
     MGame *Game=(MGame*)Node_->Data;
 
     if ( Game==NULL ) return;
-/*    strcpy(line,Game->Name);
+
+/*    line=Game->Name.c_str();
     if ( Node_->Parent&&(!Node_->HasChildren) )
     {
-        strcat(line,"   { ");
-        strcat(line,Game->Command);
-        strcat(line," , ");
-        strcat(line,Game->Icon);
-        strcat(line," }");
+        line+="   { ";
+        line+=Game->Command.c_str();
+        line+=" , ";
+        line+=Game->Icon.c_str();
+        line+=" }";
     }
     Node_->Text=line; */
-    Node_->Text=Game->Name;
+
+    Node_->Text=Game->Name.c_str();
 }
 //---------------------------------------------------------------------------
 void TFormClient::AddGamesToTree(TTreeNode *Node_, MGames *Games_)
@@ -399,12 +401,12 @@ void TFormClient::AddGamesToTree(TTreeNode *Node_, MGames *Games_)
         dGame=new MGame;
         Node->Data=(void*)dGame;
         // Зададим имя программы/узла
-        dGame->SetName(sGame->Name);
+        dGame->Name=sGame->Name;
         // Зададим остальные параметры или добавим элементы нижних уровней
         if ( sGame->SubGames==NULL )
         {
-            dGame->SetCommand(sGame->Command);
-            dGame->SetIcon(sGame->Icon);
+            dGame->Command=sGame->Command;
+            dGame->Icon=sGame->Icon;
         } else AddGamesToTree(Node,sGame->SubGames);
         //
         SetTreeViewGamesLine(Node);
@@ -429,10 +431,10 @@ void TFormClient::CreateGamesTree(MGames *Games_)
         {
             char str[5+1];
             sprintf(str,"Page%i",i+1);
-            dGame->SetName(str);
+            dGame->Name=str;
         } else
         {
-            dGame->SetName(sGame->Name);
+            dGame->Name=sGame->Name;
             // Добавим элементы нижних уровней
             if ( sGame->SubGames!=NULL ) AddGamesToTree(Node,sGame->SubGames);
         }
@@ -454,7 +456,7 @@ void TFormClient::AddGamesFromTree(MGames *Games_, TTreeNode *Node_)
         dGame=(MGame*)Games_->Add();
         sGame=(MGame*)Node->Data;
         // Задаем имя программы/узла
-        dGame->SetName(sGame->Name);
+        dGame->Name=sGame->Name;
         // Если это узловой элемент, добавляем дочерние
         if ( Node->HasChildren )
         {
@@ -463,8 +465,8 @@ void TFormClient::AddGamesFromTree(MGames *Games_, TTreeNode *Node_)
         } else
         {
             // Иначе можно задать команду и путь к иконке
-            dGame->SetCommand(sGame->Command);
-            dGame->SetIcon(sGame->Icon);
+            dGame->Command=sGame->Command;
+            dGame->Icon=sGame->Icon;
         }
     }
 }
@@ -483,7 +485,7 @@ void TFormClient::CreateGamesFromTree(MGames *Games_)
         dGame=(MGame*)Games_->Add();
         sGame=(MGame*)node->Data;
         //
-        dGame->SetName(sGame->Name);
+        dGame->Name=sGame->Name;
         // Добавляем вложенные элементы
         if ( node->HasChildren )
         {

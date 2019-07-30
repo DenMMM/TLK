@@ -27,18 +27,19 @@ MRunTime::~MRunTime()
 
 void MRunTime::Copy(const MListItem *SrcItem_)
 {
-    MRunTime *RTime_=(MRunTime*)SrcItem_;
+    const MRunTime *rtime=
+        dynamic_cast<const MRunTime*>(SrcItem_);
 
-    TariffID=RTime_->TariffID;
-    Number=RTime_->Number;
-    StartTime=RTime_->StartTime;
-    Type=RTime_->Type;
-    BeginTime=RTime_->BeginTime;
-    EndTime=RTime_->EndTime;
-    SizeTime=RTime_->SizeTime;
-    WorkTime=RTime_->WorkTime;
-    MaxTime=RTime_->MaxTime;
-    Cost=RTime_->Cost;
+    TariffID=rtime->TariffID;
+    Number=rtime->Number;
+    StartTime=rtime->StartTime;
+    Type=rtime->Type;
+    BeginTime=rtime->BeginTime;
+    EndTime=rtime->EndTime;
+    SizeTime=rtime->SizeTime;
+    WorkTime=rtime->WorkTime;
+    MaxTime=rtime->MaxTime;
+    Cost=rtime->Cost;
 }
 //---------------------------------------------------------------------------
 MTariffTime::MTariffTime()
@@ -57,13 +58,14 @@ MTariffTime::~MTariffTime()
 
 void MTariffTime::Copy(const MListItem *SrcItem_)
 {
-    MTariffTime *TTime_=(MTariffTime*)SrcItem_;
+    const MTariffTime *ttime=
+        dynamic_cast<const MTariffTime*>(SrcItem_);
 
-    Type=TTime_->Type;
-    BeginTime=TTime_->BeginTime;
-    EndTime=TTime_->EndTime;
-    SizeTime=TTime_->SizeTime;
-    Cost=TTime_->Cost;
+    Type=ttime->Type;
+    BeginTime=ttime->BeginTime;
+    EndTime=ttime->EndTime;
+    SizeTime=ttime->SizeTime;
+    Cost=ttime->Cost;
 }
 
 unsigned MTariffTime::GetDataSize() const
@@ -111,7 +113,6 @@ int MTariffTime::MaxWorkTime(int Time_) const
 MTariffInfo::MTariffInfo()
 {
     ID=0;
-    *Name=0;
 }
 
 MTariffInfo::~MTariffInfo()
@@ -121,16 +122,13 @@ MTariffInfo::~MTariffInfo()
 
 void MTariffInfo::Copy(const MListItem *SrcItem_)
 {
-    MTariffInfo *TariffInfo_=(MTariffInfo*)SrcItem_;
-    ID=TariffInfo_->ID;
-    strcpy(Name,TariffInfo_->Name);
+    const MTariffInfo *ti=
+        dynamic_cast<const MTariffInfo*>(SrcItem_);
+
+    ID=ti->ID;
+    Name=ti->Name;
 }
 
-char *MTariffInfo::SetName(const char *Name_)
-{
-    return strlen(Name_)>MAX_TariffNameLen?
-        NULL: strcpy(Name,Name_);
-}
 //---------------------------------------------------------------------------
 MTariffInfo *MTariffsInfo::Search(unsigned ID_) const
 {
@@ -145,7 +143,6 @@ MTariffInfo *MTariffsInfo::Search(unsigned ID_) const
 //---------------------------------------------------------------------------
 MTariff::MTariff()
 {
-    *Name=0;
     Programs=0;
     Reboot=false;
     CompsCnt=0;
@@ -158,14 +155,15 @@ MTariff::~MTariff()
 
 void MTariff::Copy(const MListItem *SrcItem_)
 {
-    MTariff *Tariff_=(MTariff*)SrcItem_;
+    const MTariff *trf=
+        dynamic_cast<const MTariff*>(SrcItem_);
 
-    strcpy(Name,Tariff_->Name);
-    Programs=Tariff_->Programs;
-    Reboot=Tariff_->Reboot;
-    CompsCnt=Tariff_->CompsCnt;
-    for (int i=0; i<CompsCnt; i++) Comps[i]=Tariff_->Comps[i];
-    Times.Copy(&Tariff_->Times);
+    Name=trf->Name;
+    Programs=trf->Programs;
+    Reboot=trf->Reboot;
+    CompsCnt=trf->CompsCnt;
+    for (int i=0; i<CompsCnt; i++) Comps[i]=trf->Comps[i];
+    Times.Copy(&trf->Times);
     MIDListItem::Copy(SrcItem_);
 }
 
@@ -173,7 +171,7 @@ unsigned MTariff::GetDataSize() const
 {
     return
         MIDListItem::GetDataSize()+
-        strlen(Name)+1+
+        Name.length()+sizeof('\0')+
         sizeof(Programs)+
         sizeof(Reboot)+
         sizeof(CompsCnt)+
@@ -184,7 +182,7 @@ unsigned MTariff::GetDataSize() const
 char *MTariff::SetData(char *Data_) const
 {
     Data_=MIDListItem::SetData(Data_);
-    Data_=MemSetCLine(Data_,Name);
+    Data_=MemSetCLine(Data_,Name.c_str());
     Data_=MemSet(Data_,Programs);
     Data_=MemSet(Data_,Reboot);
     Data_=MemSet(Data_,CompsCnt);
@@ -197,7 +195,7 @@ const char *MTariff::GetData(const char *Data_, const char *Limit_)
 {
     if (
         (Data_=MIDListItem::GetData(Data_,Limit_))==NULL ||
-        (Data_=MemGetCLine(Data_,Name,sizeof(Name)-1,Limit_))==NULL ||
+        (Data_=MemGetCLine(Data_,Name,MAX_TariffNameLen,Limit_))==NULL ||
         (Data_=MemGet(Data_,&Programs,Limit_))==NULL ||
         (Data_=MemGet(Data_,&Reboot,Limit_))==NULL ||
         (Data_=MemGet(Data_,&CompsCnt,Limit_))==NULL ||
@@ -349,12 +347,6 @@ void MTariff::Cost(MRunTime *RunTime_, double Prec_) const
     RunTime_->Cost=ceil(RunTime_->Cost/Prec_)*Prec_;
 }
 
-char *MTariff::SetName(const char *Name_)
-{
-    return strlen(Name_)>MAX_TariffNameLen?
-        NULL: strcpy(Name,Name_);
-}
-
 bool MTariff::SetComps(char *Comps_, int Count_)
 {
     if ( (Count_<0)||(Count_>sizeof(Comps)) ) return false;
@@ -434,19 +426,8 @@ error:
 bool MTariff::GetInfo(MTariffInfo *Info_) const
 {
     Info_->ID=gItemID();
-    return Info_->SetName(Name);
-}
-
-void MTariff::GetTariffData(MTariffData *Data_) const 
-{
-    Data_->ID=ItemID;
-    strcpy(Data_->Name,Name);
-}
-
-void MTariff::SetTariffData(MTariffData *Data_)
-{
-    ItemID=Data_->ID;
-    strcpy(Name,Data_->Name);
+    Info_->Name=Name;
+    return true;
 }
 //---------------------------------------------------------------------------
 void MTariffs::GetForTime(__int64 &Time_, MTariffsInfo *TariffsInfo_) const

@@ -2,20 +2,15 @@
 #ifndef UnitFinesH
 #define UnitFinesH
 //---------------------------------------------------------------------------
-struct MFineData;
 class MFine;
 class MFines;
+//---------------------------------------------------------------------------
+#include <string>
 //---------------------------------------------------------------------------
 #include "UnitIDList.h"
 //---------------------------------------------------------------------------
 #define MAX_Fines           20      // Предел количества штрафов
 #define MAX_FineDescrLen    50      // Допустимая длина описания штрафа
-//---------------------------------------------------------------------------
-struct MFineData
-{
-    unsigned ID;                                // ID-номер штрафа
-    char Descr[MAX_FineDescrLen+1];             // Описание штрафа
-};
 //---------------------------------------------------------------------------
 class MFine:public MIDListItem
 {
@@ -27,16 +22,31 @@ private:
 
 public:
     short Time;                             // Время штрафа
-    char Descr[MAX_FineDescrLen+1];         // Описание штрафа
-
-    // Доступ к элементам класса
-      char *sDescr(char *Descr_);
+    std::string Descr;                      // Описание штрафа
 
     void Copy(const MListItem *SrcItem_);
 
     // Поддержка логов
-    void GetFineData(MFineData *Data_) const;
-    void SetFineData(MFineData *Data_);
+    struct LogData
+    {
+        unsigned ID;                    // ID-номер штрафа
+        std::string Descr;              // Описание штрафа
+
+        LogData &operator=(const MFine &Fine_)
+        {
+            ID=Fine_.ItemID;
+            Descr=Fine_.Descr;
+            return *this;
+        }
+    };
+    friend LogData;                     // Нужен дсотуп к "ItemID"
+
+    MFine &operator=(const LogData &Data_)
+    {
+        ItemID=Data_.ID;
+        Descr=Data_.Descr;
+        return *this;
+    }
 
     MFine();
     ~MFine();

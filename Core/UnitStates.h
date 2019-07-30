@@ -2,7 +2,6 @@
 #ifndef UnitStatesH
 #define UnitStatesH
 //---------------------------------------------------------------------------
-struct MStateData;
 struct MStateInfo;
 class MState;
 class MStates;
@@ -10,6 +9,8 @@ class MStateCl;
 //---------------------------------------------------------------------------
 #include <winsock2.h>
 //#include <windows.h>
+#include <string>
+#include "UnitWinAPI.h"
 #include "UnitSLList.h"
 #include "UnitComputers.h"
 #include "UnitTariffs.h"
@@ -53,18 +54,6 @@ class MStateCl;
 #define mdcAll (mdcNumber|mdcState|mdcTariff|mdcWorkTime|mdcFineTime|mdcCommands|mdcNetState)
 //#define mdcAllCl (mdcNumber|mdcState|mdcWorkTime|mdcFineTime|mdcPrograms|mdcCommands|mdcOptions)
 //---------------------------------------------------------------------------
-struct MStateData
-{
-    char Number;                // Номер компьютера
-    unsigned State;             // Состояние компьютера (режимы работы)
-    unsigned TariffID;          // ID-номер тарифа, по которому работает компьютер
-    __int64 StartWorkTime;      // Время запуска компьютера в работу (абсолютное время)
-    short SizeWorkTime;         // На какое время запущен компьютер (в минутах)
-    __int64 StartFineTime;      // Время, когда был применен штраф (абсолютное время)
-    short SizeFineTime;         // Время ожидания в режиме штрафа (в минутах)
-    __int64 StopTimerTime;      // Время остановки отсчета времени (абсолютное время)
-};
-
 struct MStateInfo
 {
     char Number;                // Номер компьютера
@@ -91,7 +80,7 @@ private:
     char *SetData(char *Data_) const;
     const char *GetData(const char *Data_, const char *Limit_);
 
-    mutable CRITICAL_SECTION CS_Main;   // Объект для синхронизации доступа потоков к данным
+    mutable MWAPI::CRITICAL_SECTION CS_Main;    // Объект для синхронизации доступа потоков к данным
     __int64 SystemTime;         // Системное время, используемое при всех расчетах
 
     char Number;                // Номер компьютера, с которым ассоциировано состояние
@@ -107,10 +96,6 @@ private:
     unsigned CmdsToReset;       // Команды требующие отмены по окончании выполнения
     unsigned NetState;          // Состояние сети
     unsigned Changes;           // Изменения данных для оболочки со времени их последнего запроса
-
-    // Функции синхронизации доступа разных потоков к данным
-    void Lock() const { ::EnterCriticalSection(&CS_Main); }
-    void UnLock() const { ::LeaveCriticalSection(&CS_Main); }
 
     // Функции проверки окончания времени работы и времени штрафа
     bool ControlWorkTime();
@@ -149,8 +134,51 @@ public:
     void NetPwrOnExecuted();
 
     // Поддержка логов
-    void GetStateData(MStateData *Data_);
-    void SetStateData(MStateData *Data_);
+    struct LogData
+    {
+        char Number;                // Номер компьютера
+        unsigned State;             // Состояние компьютера (режимы работы)
+        unsigned TariffID;          // ID-номер тарифа, по которому работает компьютер
+        __int64 StartWorkTime;      // Время запуска компьютера в работу (абсолютное время)
+        short SizeWorkTime;         // На какое время запущен компьютер (в минутах)
+        __int64 StartFineTime;      // Время, когда был применен штраф (абсолютное время)
+        short SizeFineTime;         // Время ожидания в режиме штрафа (в минутах)
+        __int64 StopTimerTime;      // Время остановки отсчета времени (абсолютное время)
+
+        LogData &operator=(const MState &State_)
+        {
+            MWAPI::CRITICAL_SECTION::Lock lckObj(State_.CS_Main);
+
+            Number=State_.Number;
+            State=State_.State;
+            TariffID=State_.TariffID;
+            StartWorkTime=State_.StartWorkTime;
+            SizeWorkTime=State_.SizeWorkTime;
+            StartFineTime=State_.StartFineTime;
+            SizeFineTime=State_.SizeFineTime;
+            StopTimerTime=State_.StopTimerTime;
+
+            return *this;
+        }
+    };
+    friend LogData;                 // Нужен доступ к "CS_Main"
+
+    MState &operator=(const LogData &Data_)
+    {
+        MWAPI::CRITICAL_SECTION::Lock lckObj(CS_Main);
+
+        Number=Data_.Number;
+        State=Data_.State;
+        TariffID=Data_.TariffID;
+        StartWorkTime=Data_.StartWorkTime;
+        SizeWorkTime=Data_.SizeWorkTime;
+        StartFineTime=Data_.StartFineTime;
+        SizeFineTime=Data_.SizeFineTime;
+        StopTimerTime=Data_.StopTimerTime;
+        Changes=mdcAll;
+
+        return *this;
+    }
 
     MState();
     ~MState();
@@ -162,11 +190,7 @@ private:
     MListItem *item_new(unsigned char TypeID_) const { return (MListItem*)new MState; }
     void item_del(MListItem *Item_) const { delete (MState*)Item_; }
 
-    CRITICAL_SECTION CS_File;   // Объект для синхронизации
-
-    // Функции синхронизации доступа разных потоков к данным
-    void Lock() { ::EnterCriticalSection(&CS_File); }
-    void UnLock() { ::LeaveCriticalSection(&CS_File); }
+    MWAPI::CRITICAL_SECTION CS_File;   // Объект для синхронизации
 
 public:
     // Вспомогательные функции
@@ -177,8 +201,8 @@ public:
     // Переопределяем функцию сохранения списка в файл
     bool Save();
 
-    MStates() { ::InitializeCriticalSection(&CS_File); }
-    ~MStates() { ::DeleteCriticalSection(&CS_File); Clear(); }
+    MStates() { }
+    ~MStates() { Clear(); }
 };
 //---------------------------------------------------------------------------
 class MStateCl:public MSLList
@@ -194,12 +218,12 @@ private:
     const char *GetData(const char *Data_, const char *Limit_);
     
     HKEY OptKey;                //
-    char *OptPath;              //
-    char *OptValue;             //
-    char *PrgFile;              // Файл для хранения списка программ
+    std::string OptPath;        //
+    std::string OptValue;       //
+    std::string PrgFile;        // Файл для хранения списка программ
     unsigned AutoLockTime;      // Время отсутствия связи с сервером до автоблокировки
 
-    mutable CRITICAL_SECTION CS_Main;   // Объект для синхронизации доступа потоков к данным
+    mutable MWAPI::CRITICAL_SECTION CS_Main;   // Объект для синхронизации доступа потоков к данным
     __int64 SystemTime;         // Системное время, используемое при всех расчетах
 
     char Number;                // Номер компьютера
@@ -213,10 +237,6 @@ private:
     unsigned Programs;          // Групы программ, разрешенных для запуска
     unsigned Commands;          // Дополнительные команды для компьютера
     unsigned Changes;           // Изменения данных для оболочки со времени их последнего запроса
-
-    // Функции синхронизации доступа разных потоков к данным
-    void Lock() const { ::EnterCriticalSection(&CS_Main); }
-    void UnLock() const { ::LeaveCriticalSection(&CS_Main); }
 
     // Функции проверки окончания времени работы и времени штрафа
     bool ControlWorkTime();
@@ -238,8 +258,15 @@ public:
     bool NewOptions(MClOptions *Options_);
 
     // Переадресуем обращения для загрузки/сохранения к методам базового класса MSLList
-    void SetDefault(HKEY RegKey_, char *RegPath_, char *RegValue_,
-        HKEY OptKey_, char *OptPath_, char *OptValue_, char *PrgFile_, unsigned RegCode_);
+    void SetDefault(
+        HKEY RegKey_,
+        const std::string &RegPath_,
+        const std::string &RegValue_,
+        HKEY OptKey_,
+        const std::string &OptPath_,
+        const std::string &OptValue_,
+        const std::string &PrgFile_,
+        unsigned RegCode_);
 
     MStateCl();
     ~MStateCl();

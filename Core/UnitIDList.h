@@ -26,8 +26,9 @@ protected:
 public:
     void Copy(const MListItem *SrcItem_)
     {
-        MIDListItem *Item_=(MIDListItem*)SrcItem_;
-        ItemID=Item_->ItemID;
+        const MIDListItem *item=
+            dynamic_cast<const MIDListItem*>(SrcItem_);
+        ItemID=item->ItemID;
     }
 
     unsigned gItemID() const { return ItemID; }

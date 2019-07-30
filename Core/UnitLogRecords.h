@@ -285,8 +285,8 @@ private:
     const char *GetData(const char *Data_, const char *Limit_);
 
 public:
-    __int64 SystemTime;             // Время, когда была применена команда
-    Marray <MStateData> States;     // Массив состояний компьютеров
+    __int64 SystemTime;                 // Время, когда была применена команда
+    Marray <MState::LogData> States;    // Массив состояний компьютеров
 
     unsigned char gTypeID() const { return mlrDataStates; }
     void Copy(const MListItem *SrcItem_);
@@ -303,8 +303,8 @@ private:
     const char *GetData(const char *Data_, const char *Limit_);
 
 public:
-    __int64 SystemTime;             // Время, когда была применена команда
-    Marray <MTariffData> Tariffs;   // Массив описаний тарифов
+    __int64 SystemTime;                 // Время, когда была применена команда
+    Marray <MTariff::LogData> Tariffs;  // Массив описаний тарифов
 
     unsigned char gTypeID() const { return mlrDataTariffs; }
     void Copy(const MListItem *SrcItem_);
@@ -322,7 +322,7 @@ private:
 
 public:
     __int64 SystemTime;                 // Время, когда была применена команда
-    Marray <MFineData> Fines;           // Массив описаний штрафов
+    Marray <MFine::LogData> Fines;      // Массив описаний штрафов
 
     unsigned char gTypeID() const { return mlrDataFines; }
     void Copy(const MListItem *SrcItem_);
@@ -339,8 +339,8 @@ private:
     const char *GetData(const char *Data_, const char *Limit_);
 
 public:
-    __int64 SystemTime;         // Время, когда была применена команда
-    Marray <MUserData> Users;   // Массив данных о пользователях
+    __int64 SystemTime;             // Время, когда была применена команда
+    Marray <MUser::LogData> Users;  // Массив данных о пользователях
 
     unsigned char gTypeID() const  { return mlrDataUsers; }
     void Copy(const MListItem *SrcItem_);

@@ -79,7 +79,7 @@ void __fastcall TFormRun::FormShow(TObject *Sender)
     // или с выбранными компьютерами (при добавлении времени)
     for ( MTariffInfo *Info=(MTariffInfo*)UseTariffs.gFirst();
         Info; Info=(MTariffInfo*)Info->gNext() )
-        ComboBoxTariff->Items->Add(Info->Name);
+        ComboBoxTariff->Items->Add(Info->Name.c_str());
 
     // Корректируем интерфейс в соответствии с режимом работы диалога
     if ( RunMode )
@@ -420,7 +420,7 @@ void TFormRun::SetListViewComputersLine(TListItem *Item_)
         SubItems->Strings[3]="";
     } else
     {
-        SubItems->Strings[1]=UseTariffs.Search(RunTime->TariffID)->Name;
+        SubItems->Strings[1]=UseTariffs.Search(RunTime->TariffID)->Name.c_str();
         if ( RunTime->Type==mttUndefined )
         {
             SubItems->Strings[2]="";

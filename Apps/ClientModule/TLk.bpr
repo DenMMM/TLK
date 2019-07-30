@@ -11,7 +11,8 @@
       ..\..\Core\UnitSync.obj ..\..\Core\UnitSend.obj 
       ..\..\Ext\BrianGladman\SHA\hmac.obj ..\..\Ext\BrianGladman\SHA\sha1.obj 
       ..\..\Ext\BrianGladman\SHA\sha2.obj ..\..\Core\UnitAuth.obj 
-      UnitFormGames.obj UnitService.obj UnitShared.obj UnitLockDsk.obj"/>
+      UnitFormGames.obj UnitService.obj UnitShared.obj UnitLockDsk.obj 
+      ..\..\Core\UnitWinAPI.obj"/>
     <RESFILES value="TLk.res Messages.res LockDesk.res"/>
     <IDLFILES value=""/>
     <IDLGENFILES value=""/>
@@ -21,7 +22,7 @@
     <LIBRARIES value="vclx.lib bcbsmp.lib bcbie.lib vcl.lib rtl.lib"/>
     <SPARELIBS value="rtl.lib vcl.lib bcbie.lib bcbsmp.lib vclx.lib"/>
     <PACKAGES value="rtl.bpi vcl.bpi vclx.bpi"/>
-    <PATHCPP value=".;..\..\Core;..\..\Core;..\..\Core;..\..\Core;..\..\Core;..\..\Core;..\..\Core;..\..\Core;..\..\Core;..\..\Ext\BrianGladman\SHA;..\..\Ext\BrianGladman\SHA;..\..\Ext\BrianGladman\SHA;..\..\Core"/>
+    <PATHCPP value=".;..\..\Core;..\..\Core;..\..\Core;..\..\Core;..\..\Core;..\..\Core;..\..\Core;..\..\Core;..\..\Core;..\..\Ext\BrianGladman\SHA;..\..\Ext\BrianGladman\SHA;..\..\Ext\BrianGladman\SHA;..\..\Core;..\..\Core"/>
     <PATHPAS value=".;"/>
     <PATHRC value=".;"/>
     <PATHASM value=".;"/>
@@ -79,6 +80,7 @@
       <FILE FILENAME="UnitLockDsk.cpp" FORMNAME="" UNITNAME="UnitLockDsk" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="LockDesk.res" FORMNAME="" UNITNAME="LockDesk.res" CONTAINERID="ResTool" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="userenv.lib" FORMNAME="" UNITNAME="userenv.lib" CONTAINERID="LibTool" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="..\..\Core\UnitWinAPI.cpp" FORMNAME="" UNITNAME="UnitWinAPI" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
   </FILELIST>
   <BUILDTOOLS>
   </BUILDTOOLS>

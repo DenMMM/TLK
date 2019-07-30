@@ -1,6 +1,4 @@
 //---------------------------------------------------------------------------
-#include <string.h>
-#include <mem.h>
 #pragma hdrstop
 
 #include "UnitComputers.h"
@@ -12,7 +10,6 @@ MComputer::MComputer()
 {
     Number=0;
     Color=mgcNone;
-    *Address=0;
     NotUsed=false;
 }
 
@@ -22,11 +19,13 @@ MComputer::~MComputer()
 
 void MComputer::Copy(const MListItem *SrcItem_)
 {
-    MComputer *comp_=(MComputer*)SrcItem_;
-    Number=comp_->Number;
-    Color=comp_->Color;
-    strcpy(Address,comp_->Address);
-    NotUsed=comp_->NotUsed;
+    const MComputer *comp=
+        dynamic_cast<const MComputer*>(SrcItem_);
+
+    Number=comp->Number;
+    Color=comp->Color;
+    Address=comp->Address;
+    NotUsed=comp->NotUsed;
 }
 
 unsigned MComputer::GetDataSize() const
@@ -34,7 +33,7 @@ unsigned MComputer::GetDataSize() const
     return
         sizeof(Number)+
         sizeof(Color)+
-        strlen(Address)+1+
+        Address.length()+sizeof('\0')+
         sizeof(NotUsed);
 }
 
@@ -42,7 +41,7 @@ char *MComputer::SetData(char *Data_) const
 {
     Data_=MemSet(Data_,Number);
     Data_=MemSet(Data_,Color);
-    Data_=MemSetCLine(Data_,Address);
+    Data_=MemSetCLine(Data_,Address.c_str());
     Data_=MemSet(Data_,NotUsed);
     return Data_;
 }
@@ -55,12 +54,6 @@ const char *MComputer::GetData(const char *Data_, const char *Limit_)
         (Data_=MemGetCLine(Data_,Address,MAX_CompAddrLen,Limit_))!=NULL &&
         (Data_=MemGet(Data_,&NotUsed,Limit_))!=NULL
         ? Data_: NULL;
-}
-
-char *MComputer::SetAddress(char *Address_)
-{
-    return strlen(Address_)>MAX_CompAddrLen?
-        NULL: strcpy(Address,Address_);
 }
 //---------------------------------------------------------------------------
 MComputer *MComputers::Search(char Number_) const

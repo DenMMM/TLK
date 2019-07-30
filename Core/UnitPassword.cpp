@@ -38,36 +38,31 @@ const char *MPassword::GetData(const char *Data_, const char *Limit_)
         ? Data_: NULL;
 }
 
-void MPassword::Copy(MPassword *SrcPass_)
+void MPassword::Copy(const MPassword *SrcPass_)
 {
     memcpy(Salt,SrcPass_->Salt,sizeof(Salt));
     memcpy(Hash,SrcPass_->Hash,sizeof(Hash));
 }
 
-void MPassword::Set(char *Pass_)
+void MPassword::Set(const std::string &Pass_)
 {
-    unsigned plen;
-
     // Генерируем "соль"
     for ( int i=0; i<sizeof(Salt); i++ ) Salt[i]=random(256);
 
-    plen=strlen(Pass_);
     // Вычисляем хэш введенного пароля и соли
     hmac_sha(PASS_Alg,
-        Pass_,plen,
+        Pass_.c_str(),Pass_.length(),
         Salt,sizeof(Salt),
         Hash,sizeof(Hash));
 }
 
-bool MPassword::Check(const char *Pass_) const
+bool MPassword::Check(const std::string &Pass_) const
 {
-    unsigned plen;
     unsigned char tmp[sizeof(Hash)];
 
-    plen=strlen(Pass_);
     // Вычисляем хэш введенного пароля и соли
     hmac_sha(PASS_Alg,
-        Pass_,plen,
+        Pass_.c_str(),Pass_.length(),
         Salt,sizeof(Salt),
         tmp,sizeof(tmp));
     // Сравниваем его с сохраненным ранее хэшем

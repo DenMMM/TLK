@@ -11,12 +11,10 @@ MMessage::MMessage()
     ThreadID=0;
     hBitmap=NULL;
     BITMAP Bitmap;
-    File=NULL;
 }
 //---------------------------------------------------------------------------
 MMessage::~MMessage()
 {
-    delete[] File;
 }
 //---------------------------------------------------------------------------
 DWORD WINAPI MMessage::ThreadFunc(LPVOID Data)
@@ -58,13 +56,6 @@ next:
     ::DeleteObject(hBitmap); hBitmap=NULL;
 }
 //---------------------------------------------------------------------------
-void MMessage::SetFile(char *File_)
-{
-    delete[] File;
-    File=new char[strlen(File_)+1];
-    strcpy(File,File_);
-}
-//---------------------------------------------------------------------------
 bool MMessage::Show()
 {
     DWORD ExitCode;
@@ -79,7 +70,7 @@ bool MMessage::Show()
     }
 
     // Загружаем картинку с сообщением
-    if ( (hBitmap=::LoadImage(NULL,File,IMAGE_BITMAP,0,0,LR_LOADFROMFILE))==NULL ) goto error;
+    if ( (hBitmap=::LoadImage(NULL,File.c_str(),IMAGE_BITMAP,0,0,LR_LOADFROMFILE))==NULL ) goto error;
     if ( ::GetObject(hBitmap,sizeof(BITMAP),&Bitmap)==NULL ) goto error;
     // Создаем поток для показа сообщения
     return (Thread=::CreateThread(NULL,0,&ThreadFunc,

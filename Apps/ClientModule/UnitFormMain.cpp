@@ -37,7 +37,7 @@ void __fastcall TFormMain::FormCreate(TObject *Sender)
     // Настраиваем пути для файлов
     ExePath=ExtractFilePath(Application->ExeName);
     AnsiString MsgFile=ExePath+"\\MSGTIMEWARN.BMP";
-    WarnMessage.SetFile(MsgFile.c_str());
+    WarnMessage.File=MsgFile.c_str();
 }
 //---------------------------------------------------------------------------
 void __fastcall TFormMain::FormShow(TObject *Sender)

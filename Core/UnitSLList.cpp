@@ -142,7 +142,7 @@ error:
     return NULL;
 }
 //---------------------------------------------------------------------------
-bool MSLList::SaveTo(char *File_, unsigned Code_, bool Always_, bool Safe_) const
+bool MSLList::SaveTo(const std::string &File_, unsigned Code_, bool Always_, bool Safe_) const
 {
     HANDLE file=INVALID_HANDLE_VALUE;
     DWORD data_size, rw_size;
@@ -173,7 +173,7 @@ bool MSLList::SaveTo(char *File_, unsigned Code_, bool Always_, bool Safe_) cons
     BasicEncode(all_data.begin(),data_size,Code_);
 
     // Создаем файл
-    if ( (file=::CreateFile(File_,GENERIC_WRITE,0,NULL,
+    if ( (file=::CreateFile(File_.c_str(),GENERIC_WRITE,0,NULL,
         Always_? (Safe_?OPEN_ALWAYS:CREATE_ALWAYS) :CREATE_NEW,
         Safe_?FILE_ATTRIBUTE_NORMAL|FILE_FLAG_WRITE_THROUGH:FILE_ATTRIBUTE_NORMAL,
         NULL))==INVALID_HANDLE_VALUE ) goto api_error;
@@ -198,7 +198,7 @@ api_error:
     return false;
 }
 //---------------------------------------------------------------------------
-bool MSLList::AttachTo(char *File_, unsigned Code_, bool Safe_) const
+bool MSLList::AttachTo(const std::string &File_, unsigned Code_, bool Safe_) const
 {
     HANDLE file=INVALID_HANDLE_VALUE;
     DWORD file_sizel, file_sizeh;
@@ -207,7 +207,7 @@ bool MSLList::AttachTo(char *File_, unsigned Code_, bool Safe_) const
 
     LastError=0;
     // Открываем файл
-    if ( (file=::CreateFile(File_,GENERIC_READ|GENERIC_WRITE,0,NULL,
+    if ( (file=::CreateFile(File_.c_str(),GENERIC_READ|GENERIC_WRITE,0,NULL,
         OPEN_EXISTING,
         Safe_?FILE_ATTRIBUTE_NORMAL|FILE_FLAG_WRITE_THROUGH:FILE_ATTRIBUTE_NORMAL,
         NULL))==INVALID_HANDLE_VALUE ) goto api_error;
@@ -289,7 +289,7 @@ error:
     return false;
 }
 //---------------------------------------------------------------------------
-bool MSLList::LoadFrom(char *File_, unsigned Code_)
+bool MSLList::LoadFrom(const std::string &File_, unsigned Code_)
 {
     HANDLE file=INVALID_HANDLE_VALUE;
     DWORD file_sizel, file_sizeh, rw_size;
@@ -297,7 +297,7 @@ bool MSLList::LoadFrom(char *File_, unsigned Code_)
 
     LastError=0;
     // Открываем файл
-    if ( (file=::CreateFile(File_,GENERIC_READ,0,NULL,OPEN_EXISTING,
+    if ( (file=::CreateFile(File_.c_str(),GENERIC_READ,0,NULL,OPEN_EXISTING,
         FILE_ATTRIBUTE_NORMAL,NULL))==INVALID_HANDLE_VALUE ) goto api_error;
     // Определяем его размер и проверяем на допустимость
     if ( (file_sizel=::GetFileSize(file,&file_sizeh))==0xFFFFFFFF ) goto api_error;
@@ -330,7 +330,7 @@ error:
     return false;
 }
 //---------------------------------------------------------------------------
-bool MSLList::StoreTo(HKEY Key_, char *SubKey_, char *Value_, unsigned Code_) const
+bool MSLList::StoreTo(HKEY Key_, const std::string &SubKey_, const std::string &Value_, unsigned Code_) const
 {
     HKEY key=NULL;
     std::vector <char> data;
@@ -360,10 +360,10 @@ bool MSLList::StoreTo(HKEY Key_, char *SubKey_, char *Value_, unsigned Code_) co
     BasicEncode(data.begin(),size,Code_);
 
     // Создаем ключ реестра
-    if ( ::RegCreateKeyEx(Key_,SubKey_,NULL,NULL,REG_OPTION_NON_VOLATILE,
+    if ( ::RegCreateKeyEx(Key_,SubKey_.c_str(),NULL,NULL,REG_OPTION_NON_VOLATILE,
         KEY_ALL_ACCESS,NULL,&key,NULL)!=ERROR_SUCCESS ) goto api_error;
     // Сохраняем параметр
-    if ( ::RegSetValueEx(key,Value_,NULL,
+    if ( ::RegSetValueEx(key,Value_.c_str(),NULL,
         REG_BINARY,data.begin(),size)!=ERROR_SUCCESS ) goto api_error;
 
     ::RegCloseKey(key);
@@ -374,7 +374,7 @@ api_error:
     return false;
 }
 //---------------------------------------------------------------------------
-bool MSLList::QueryFrom(HKEY Key_, char *SubKey_, char *Value_, unsigned Code_)
+bool MSLList::QueryFrom(HKEY Key_, const std::string &SubKey_, const std::string &Value_, unsigned Code_)
 {
     HKEY key=NULL;
     DWORD size;
@@ -382,7 +382,8 @@ bool MSLList::QueryFrom(HKEY Key_, char *SubKey_, char *Value_, unsigned Code_)
 
     LastError=0;
     // Открываем ключ реестра
-    if ( ::RegOpenKeyEx(Key_,SubKey_,NULL,KEY_QUERY_VALUE,&key)!=ERROR_SUCCESS ) goto api_error;
+    if ( ::RegOpenKeyEx(Key_,SubKey_.c_str(),
+        NULL,KEY_QUERY_VALUE,&key)!=ERROR_SUCCESS ) goto api_error;
     // Сразу выделяем память под данные (для реестра буфер маленький)
     try { data.resize(MAX_SLRegSize); }
     catch(std::bad_alloc &e)
@@ -393,7 +394,8 @@ bool MSLList::QueryFrom(HKEY Key_, char *SubKey_, char *Value_, unsigned Code_)
     }
     // Считываем сколько есть по-факту данных
     size=MAX_SLRegSize;
-    if ( ::RegQueryValueEx(key,Value_,NULL,NULL,data.begin(),&size)!=ERROR_SUCCESS ) goto api_error;
+    if ( ::RegQueryValueEx(key,Value_.c_str(),
+        NULL,NULL,data.begin(),&size)!=ERROR_SUCCESS ) goto api_error;
     // Закрываем ключ реестра
     ::RegCloseKey(key); key=NULL;
 
@@ -404,13 +406,18 @@ bool MSLList::QueryFrom(HKEY Key_, char *SubKey_, char *Value_, unsigned Code_)
 
     return true;
 api_error:
-    LastError=::GetLastError();    
+    LastError=::GetLastError();
 error:
     if ( key!=NULL ) ::RegCloseKey(key);
     return false;
 }
 //---------------------------------------------------------------------------
-bool MSLList::SaveAsReg(char *File_, HKEY Key_, char *SubKey_, char *Value_, unsigned Code_) const
+bool MSLList::SaveAsReg(
+    const char *File_,
+    HKEY Key_,
+    const char *SubKey_,
+    const char *Value_,
+    unsigned Code_) const
 {
     static const char hdr[]="REGEDIT4";
     static const char hk1[]="HKEY_LOCAL_MACHINE";
@@ -473,56 +480,44 @@ api_error:
     return false;
 }
 //---------------------------------------------------------------------------
-void MSLList::SetDefaultFile(char *File_, unsigned Code_)
+void MSLList::SetDefaultFile(const std::string &File_, unsigned Code_)
 {
-    delete[] DefaultFile; DefaultFile=NULL;
-    delete[] DefaultValue; DefaultValue=NULL;
-    // Копируем новый путь к файлу (параметра реестра нет)
-    DefaultFile=new char[strlen(File_)+1];
-    strcpy(DefaultFile,File_);
-    // Сохраняем код шифрования
+    DefaultFile=File_;
+    DefaultValue.clear();
     DefaultCode=Code_;
 }
 //---------------------------------------------------------------------------
-void MSLList::SetDefaultKey(HKEY Key_, char *SubKey_, char *Value_, unsigned Code_)
+void MSLList::SetDefaultKey(HKEY Key_, const std::string &SubKey_, const std::string &Value_, unsigned Code_)
 {
-    delete[] DefaultFile; DefaultFile=NULL;
-    delete[] DefaultValue; DefaultValue=NULL;
-    // Копируем имя раздела реестра
-    DefaultFile=new char[strlen(SubKey_)+1];
-    strcpy(DefaultFile,SubKey_);
-    // Копируем имя параметра реестра
-    DefaultValue=new char[strlen(Value_)+1];
-    strcpy(DefaultValue,Value_);
-    //
+    DefaultFile=SubKey_;
+    DefaultValue=Value_;
     DefaultKey=Key_;
-    // Сохраняем код шифрования
     DefaultCode=Code_;
 }
 //---------------------------------------------------------------------------
 bool MSLList::Save(bool Always_, bool Safe_) const
 {
-    if ( DefaultValue==NULL )
-        return DefaultFile==NULL? false:
+    if ( DefaultValue.empty() )
+        return DefaultFile.empty()? false:
         SaveTo(DefaultFile,DefaultCode,Always_,Safe_);
     else
-        return DefaultFile==NULL? false:
+        return DefaultFile.empty()? false:
         StoreTo(DefaultKey,DefaultFile,DefaultValue,DefaultCode);
 }
 //---------------------------------------------------------------------------
 bool MSLList::Attach(bool Safe_) const
 {
-    return (DefaultFile==NULL)||(DefaultValue!=NULL)?
+    return (DefaultFile.empty())||(!DefaultValue.empty())?
         false: AttachTo(DefaultFile,DefaultCode,Safe_);
 }
 //---------------------------------------------------------------------------
 bool MSLList::Load()
 {
-    if ( DefaultValue==NULL )
-        return DefaultFile==NULL?
+    if ( DefaultValue.empty() )
+        return DefaultFile.empty()?
             false: LoadFrom(DefaultFile,DefaultCode);
     else
-        return DefaultFile==NULL?
+        return DefaultFile.empty()?
             false: QueryFrom(DefaultKey,DefaultFile,DefaultValue,DefaultCode);
 }
 //---------------------------------------------------------------------------

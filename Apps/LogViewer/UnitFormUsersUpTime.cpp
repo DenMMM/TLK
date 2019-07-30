@@ -44,7 +44,7 @@ bool TFormUsersUpTime::Open(MLogFile *File_, MLogRecord *Begin_, MLogRecord *End
         Item->ImageIndex=-1;
         Item->Data=(void*)Time;
         if ( (user=(MUser*)Users.SrchID(Time->User))==NULL ) Item->SubItems->Add("");
-        else Item->SubItems->Add(user->Name);
+        else Item->SubItems->Add(user->Name.c_str());
         // Время
         if ( Int64ToSystemTime(&Time->BeginTime,&ss_time_b) )
                 sprintf(line,"%4d.%02d.%02d - %02d:%02d:%02d",

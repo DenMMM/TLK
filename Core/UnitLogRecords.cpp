@@ -92,7 +92,8 @@ void MLogRecords::item_del(MListItem *Item_) const
 //---------------------------------------------------------------------------
 void MLogRecordEvent::Copy(const MListItem *SrcItem_)
 {
-    MLogRecordEvent *record=(MLogRecordEvent*)SrcItem_;
+    const MLogRecordEvent *record=
+        dynamic_cast<const MLogRecordEvent*>(SrcItem_);
     SystemTime=record->SystemTime;
 }
 
@@ -123,7 +124,8 @@ MLogRecordConfig::MLogRecordConfig()
 
 void MLogRecordConfig::Copy(const MListItem *SrcItem_)
 {
-    MLogRecordConfig *record=(MLogRecordConfig*)SrcItem_;
+    const MLogRecordConfig *record=
+        dynamic_cast<const MLogRecordConfig*>(SrcItem_);
 
     SystemTime=record->SystemTime;
     Open=record->Open;
@@ -162,7 +164,8 @@ MLogRecordLogIn::MLogRecordLogIn()
 
 void MLogRecordLogIn::Copy(const MListItem *SrcItem_)
 {
-    MLogRecordLogIn *record=(MLogRecordLogIn*)SrcItem_;
+    const MLogRecordLogIn *record=
+        dynamic_cast<const MLogRecordLogIn*>(SrcItem_);
 
     SystemTime=record->SystemTime;
     User=record->User;
@@ -207,7 +210,8 @@ MLogRecordRun::MLogRecordRun()
 
 void MLogRecordRun::Copy(const MListItem *SrcItem_)
 {
-    MLogRecordRun *record=(MLogRecordRun*)SrcItem_;
+    const MLogRecordRun *record=
+        dynamic_cast<const MLogRecordRun*>(SrcItem_);
 
     SystemTime=record->SystemTime;
     Number=record->Number;
@@ -280,7 +284,8 @@ MLogRecordFine::MLogRecordFine()
 
 void MLogRecordFine::Copy(const MListItem *SrcItem_)
 {
-    MLogRecordFine *record=(MLogRecordFine*)SrcItem_;
+    const MLogRecordFine *record=
+        dynamic_cast<const MLogRecordFine*>(SrcItem_);
 
     SystemTime=record->SystemTime;
     Number=record->Number;
@@ -327,7 +332,8 @@ MLogRecordExchange::MLogRecordExchange()
 
 void MLogRecordExchange::Copy(const MListItem *SrcItem_)
 {
-    MLogRecordExchange *record=(MLogRecordExchange*)SrcItem_;
+    const MLogRecordExchange *record=
+        dynamic_cast<const MLogRecordExchange*>(SrcItem_);
 
     SystemTime=record->SystemTime;
     From=record->From;
@@ -371,7 +377,8 @@ MLogRecordMode::MLogRecordMode()
 
 void MLogRecordMode::Copy(const MListItem *SrcItem_)
 {
-    MLogRecordMode *record=(MLogRecordMode*)SrcItem_;
+    const MLogRecordMode *record=
+        dynamic_cast<const MLogRecordMode*>(SrcItem_);
 
     SystemTime=record->SystemTime;
     Number=record->Number;
@@ -414,7 +421,8 @@ MLogRecordCmd::MLogRecordCmd()
 
 void MLogRecordCmd::Copy(const MListItem *SrcItem_)
 {
-    MLogRecordCmd *record=(MLogRecordCmd*)SrcItem_;
+    const MLogRecordCmd *record=
+        dynamic_cast<const MLogRecordCmd*>(SrcItem_);
 
     SystemTime=record->SystemTime;
     Number=record->Number;
@@ -452,7 +460,8 @@ MLogRecordDataShState::MLogRecordDataShState()
 
 void MLogRecordDataShState::Copy(const MListItem *SrcItem_)
 {
-    MLogRecordDataShState *record=(MLogRecordDataShState*)SrcItem_;
+    const MLogRecordDataShState *record=
+        dynamic_cast<const MLogRecordDataShState*>(SrcItem_);
 
     SystemTime=record->SystemTime;
     State=record->State;
@@ -492,7 +501,8 @@ MLogRecordDataStates::MLogRecordDataStates()
 
 void MLogRecordDataStates::Copy(const MListItem *SrcItem_)
 {
-    MLogRecordDataStates *record=(MLogRecordDataStates*)SrcItem_;
+    const MLogRecordDataStates *record=
+        dynamic_cast<const MLogRecordDataStates*>(SrcItem_);
 
     SystemTime=record->SystemTime;
     States=record->States;
@@ -531,15 +541,15 @@ char *MLogRecordDataStates::SetData(char *Data_) const
 
     for ( unsigned i=0; i<Count; i++)
     {
-        MStateData &state=States[i];
-        Data_=MemSet(Data_,state.Number);
-        Data_=MemSet(Data_,state.State);
-        Data_=MemSet(Data_,state.TariffID);
-        Data_=MemSet(Data_,state.StartWorkTime);
-        Data_=MemSet(Data_,state.SizeWorkTime);
-        Data_=MemSet(Data_,state.StartFineTime);
-        Data_=MemSet(Data_,state.SizeFineTime);
-        Data_=MemSet(Data_,state.StopTimerTime);
+        MState::LogData &ld=States[i];
+        Data_=MemSet(Data_,ld.Number);
+        Data_=MemSet(Data_,ld.State);
+        Data_=MemSet(Data_,ld.TariffID);
+        Data_=MemSet(Data_,ld.StartWorkTime);
+        Data_=MemSet(Data_,ld.SizeWorkTime);
+        Data_=MemSet(Data_,ld.StartFineTime);
+        Data_=MemSet(Data_,ld.SizeFineTime);
+        Data_=MemSet(Data_,ld.StopTimerTime);
     }
 
     return Data_;
@@ -556,15 +566,15 @@ const char *MLogRecordDataStates::GetData(const char *Data_, const char *Limit_)
 
     for ( unsigned i=0; i<Count; i++ )
     {
-        MStateData &state=States[i];
-        if ( (Data_=MemGet(Data_,&state.Number,Limit_))==NULL ) goto error;
-        if ( (Data_=MemGet(Data_,&state.State,Limit_))==NULL ) goto error;
-        if ( (Data_=MemGet(Data_,&state.TariffID,Limit_))==NULL ) goto error;
-        if ( (Data_=MemGet(Data_,&state.StartWorkTime,Limit_))==NULL ) goto error;
-        if ( (Data_=MemGet(Data_,&state.SizeWorkTime,Limit_))==NULL ) goto error;
-        if ( (Data_=MemGet(Data_,&state.StartFineTime,Limit_))==NULL ) goto error;
-        if ( (Data_=MemGet(Data_,&state.SizeFineTime,Limit_))==NULL ) goto error;
-        if ( (Data_=MemGet(Data_,&state.StopTimerTime,Limit_))==NULL ) goto error;
+        MState::LogData &ld=States[i];
+        if ( (Data_=MemGet(Data_,&ld.Number,Limit_))==NULL ) goto error;
+        if ( (Data_=MemGet(Data_,&ld.State,Limit_))==NULL ) goto error;
+        if ( (Data_=MemGet(Data_,&ld.TariffID,Limit_))==NULL ) goto error;
+        if ( (Data_=MemGet(Data_,&ld.StartWorkTime,Limit_))==NULL ) goto error;
+        if ( (Data_=MemGet(Data_,&ld.SizeWorkTime,Limit_))==NULL ) goto error;
+        if ( (Data_=MemGet(Data_,&ld.StartFineTime,Limit_))==NULL ) goto error;
+        if ( (Data_=MemGet(Data_,&ld.SizeFineTime,Limit_))==NULL ) goto error;
+        if ( (Data_=MemGet(Data_,&ld.StopTimerTime,Limit_))==NULL ) goto error;
     }
 
     return Data_;
@@ -579,7 +589,8 @@ MLogRecordDataTariffs::MLogRecordDataTariffs()
 
 void MLogRecordDataTariffs::Copy(const MListItem *SrcItem_)
 {
-    MLogRecordDataTariffs *record=(MLogRecordDataTariffs*)SrcItem_;
+    const MLogRecordDataTariffs *record=
+        dynamic_cast<const MLogRecordDataTariffs*>(SrcItem_);
 
     SystemTime=record->SystemTime;
     Tariffs=record->Tariffs;
@@ -595,10 +606,10 @@ unsigned MLogRecordDataTariffs::GetDataSize() const
 
     for ( unsigned i=0, Count=Tariffs.Count(); i<Count; i++ )
     {
-        MTariffData &tariff=Tariffs[i];
+        MTariff::LogData &ld=Tariffs[i];
         Size+=
-            sizeof(tariff.ID)+
-            strlen(tariff.Name)+1;
+            sizeof(ld.ID)+
+            ld.Name.length()+1;
     }
 
     return Size;
@@ -613,9 +624,9 @@ char *MLogRecordDataTariffs::SetData(char *Data_) const
 
     for ( unsigned i=0; i<Count; i++ )
     {
-        MTariffData &tariff=Tariffs[i];
-        Data_=MemSet(Data_,tariff.ID);
-        Data_=MemSetCLine(Data_,tariff.Name);
+        MTariff::LogData &ld=Tariffs[i];
+        Data_=MemSet(Data_,ld.ID);
+        Data_=MemSetCLine(Data_,ld.Name.c_str());
     }
 
     return Data_;
@@ -632,9 +643,9 @@ const char *MLogRecordDataTariffs::GetData(const char *Data_, const char *Limit_
 
     for ( unsigned i=0; i<Count; i++ )
     {
-        MTariffData &tariff=Tariffs[i];
-        if ( (Data_=MemGet(Data_,&tariff.ID,Limit_))==NULL ) goto error;
-        if ( (Data_=MemGetCLine(Data_,tariff.Name,MAX_TariffNameLen,Limit_))==NULL ) goto error;
+        MTariff::LogData &ld=Tariffs[i];
+        if ( (Data_=MemGet(Data_,&ld.ID,Limit_))==NULL ) goto error;
+        if ( (Data_=MemGetCLine(Data_,ld.Name,MAX_TariffNameLen,Limit_))==NULL ) goto error;
     }
 
     return Data_;
@@ -649,7 +660,8 @@ MLogRecordDataFines::MLogRecordDataFines()
 
 void MLogRecordDataFines::Copy(const MListItem *SrcItem_)
 {
-    MLogRecordDataFines *record=(MLogRecordDataFines*)SrcItem_;
+    const MLogRecordDataFines *record=
+        dynamic_cast<const MLogRecordDataFines*>(SrcItem_);
 
     SystemTime=record->SystemTime;
     Fines=record->Fines;
@@ -665,10 +677,10 @@ unsigned MLogRecordDataFines::GetDataSize() const
 
     for ( unsigned i=0, cnt=Fines.Count(); i<cnt; i++ )
     {
-        MFineData &fine=Fines[i];
+        MFine::LogData &ld=Fines[i];
         Size+=
-            sizeof(fine.ID)+
-            strlen(fine.Descr)+1;
+            sizeof(ld.ID)+
+            ld.Descr.length()+1;
     }
 
     return Size;
@@ -683,9 +695,9 @@ char *MLogRecordDataFines::SetData(char *Data_) const
 
     for ( unsigned i=0; i<Count; i++ )
     {
-        MFineData &fine=Fines[i];
-        Data_=MemSet(Data_,fine.ID);
-        Data_=MemSetCLine(Data_,fine.Descr);
+        MFine::LogData &ld=Fines[i];
+        Data_=MemSet(Data_,ld.ID);
+        Data_=MemSetCLine(Data_,ld.Descr.c_str());
     }
 
     return Data_;
@@ -702,9 +714,9 @@ const char *MLogRecordDataFines::GetData(const char *Data_, const char *Limit_)
 
     for ( unsigned i=0; i<Count; i++ )
     {
-        MFineData &fine=Fines[i];
-        if ( (Data_=MemGet(Data_,&fine.ID,Limit_))==NULL ) goto error;
-        if ( (Data_=MemGetCLine(Data_,fine.Descr,MAX_FineDescrLen,Limit_))==NULL ) goto error;
+        MFine::LogData &ld=Fines[i];
+        if ( (Data_=MemGet(Data_,&ld.ID,Limit_))==NULL ) goto error;
+        if ( (Data_=MemGetCLine(Data_,ld.Descr,MAX_FineDescrLen,Limit_))==NULL ) goto error;
     }
 
     return Data_;
@@ -719,7 +731,8 @@ MLogRecordDataUsers::MLogRecordDataUsers()
 
 void MLogRecordDataUsers::Copy(const MListItem *SrcItem_)
 {
-    MLogRecordDataUsers *record=(MLogRecordDataUsers*)SrcItem_;
+    const MLogRecordDataUsers *record=
+        dynamic_cast<const MLogRecordDataUsers*>(SrcItem_);
 
     SystemTime=record->SystemTime;
     Users=record->Users;
@@ -735,11 +748,11 @@ unsigned MLogRecordDataUsers::GetDataSize() const
 
     for ( unsigned i=0, Count=Users.Count(); i<Count; i++ )
     {
-        MUserData &user=Users[i];
+        MUser::LogData &ld=Users[i];
         Size+=
-            sizeof(user.ID)+
-            strlen(user.Login)+1+
-            strlen(user.Name)+1;
+            sizeof(ld.ID)+
+            ld.Login.length()+1+
+            ld.Name.length()+1;
     }
 
     return Size;
@@ -753,10 +766,10 @@ char *MLogRecordDataUsers::SetData(char *Data_) const
     Count=Users.Count(); Data_=MemSet(Data_,Count);
     for ( unsigned i=0; i<Count; i++ )
     {
-        MUserData &user=Users[i];
-        Data_=MemSet(Data_,user.ID);
-        Data_=MemSetCLine(Data_,user.Login);
-        Data_=MemSetCLine(Data_,user.Name);
+        MUser::LogData &ld=Users[i];
+        Data_=MemSet(Data_,ld.ID);
+        Data_=MemSetCLine(Data_,ld.Login.c_str());
+        Data_=MemSetCLine(Data_,ld.Name.c_str());
     }
 
     return Data_;
@@ -773,10 +786,10 @@ const char *MLogRecordDataUsers::GetData(const char *Data_, const char *Limit_)
 
     for ( unsigned i=0; i<Count; i++ )
     {
-        MUserData &user=Users[i];
-        if ( (Data_=MemGet(Data_,&user.ID,Limit_))==NULL ) goto error;
-        if ( (Data_=MemGetCLine(Data_,user.Login,MAX_UserLoginLen,Limit_))==NULL ) goto error;
-        if ( (Data_=MemGetCLine(Data_,user.Name,MAX_UserNameLen,Limit_))==NULL ) goto error;
+        MUser::LogData &ld=Users[i];
+        if ( (Data_=MemGet(Data_,&ld.ID,Limit_))==NULL ) goto error;
+        if ( (Data_=MemGetCLine(Data_,ld.Login,MAX_UserLoginLen,Limit_))==NULL ) goto error;
+        if ( (Data_=MemGetCLine(Data_,ld.Name,MAX_UserNameLen,Limit_))==NULL ) goto error;
     }
 
     return Data_;

@@ -28,17 +28,14 @@ private:
     char *SetData(char *Data_) const;
     const char *GetData(const char *Data_, const char *Limit_);
 
-    MPassword Pass;             // Пароль на изменение настроек
-
 public:
     char LogPeriod;             // Период ведения файла лога
     short FilterFreeTime;       // Время до окончания работы компьютера, когда он подпадает под фильтр свободных (в минутах)
     short CostDialogTime;       // Время использования диалогов с расчетом цен (в минутах)
     double CostPrecision;       // Точность расчета цен
     unsigned UsersRights;       // Права пользователей (администраторов)
+    MPassword Pass;             // Пароль на изменение настроек
 
-    void SetPass(char *Pass_) { Pass.Set(Pass_); }
-    bool CheckPass(char *Pass_) { return Pass.Check(Pass_); }
     bool Copy(MOptions *Opt_);
 
     MOptions();

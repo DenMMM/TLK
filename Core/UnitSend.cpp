@@ -103,7 +103,7 @@ bool MSend::Accept()
     return rSocket!=INVALID_SOCKET;
 }
 //---------------------------------------------------------------------------
-bool MSend::Connect(char *IP_, unsigned Time_)
+bool MSend::Connect(const char *IP_, unsigned Time_)
 {
     MSG Msg;
     sockaddr_in Address;
@@ -485,7 +485,7 @@ void MSendSrv::ThreadSend()
         pComp=(*Comps)[i];
         // Устанавливаем соединение
         Event(pComp,mseConnecting);
-        if ( !Connect(pComp->Address,2) ) { Event(pComp,mseNotConnect); goto next; }
+        if ( !Connect(pComp->Address.c_str(),2) ) { Event(pComp,mseNotConnect); goto next; }
         Event(pComp,mseSending);
 
         // Выполнем обмен hello и генерируем ID сеанса
@@ -526,7 +526,7 @@ void MSendSrv::ThreadGet()
     if ( !Create(true) ) goto error;
     // Устанавливаем соединение
     Event(Comp,mseConnecting);
-    if ( !Connect((Comp)->Address,2) ) { Event(Comp,mseNotConnect); goto error; }
+    if ( !Connect((Comp)->Address.c_str(),2) ) { Event(Comp,mseNotConnect); goto error; }
     Event(Comp,mseReceiving);
 
     // Выполнем обмен hello и генерируем ID сеанса

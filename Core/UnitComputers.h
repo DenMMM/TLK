@@ -5,6 +5,7 @@
 class MComputer;
 class MComputers;
 //---------------------------------------------------------------------------
+#include <string>
 #include "UnitSLList.h"
 //---------------------------------------------------------------------------
 #define MAX_Comps                   50      // Сколько компьютеров разрешено обслуживать TLK
@@ -27,10 +28,9 @@ private:
 public:
     char Number;                                // Номер компьютера
     char Color;                                 // Цвет группы
-    char Address[MAX_CompAddrLen+1];            // IP-адрес компьютера
+    std::string Address;                        // IP-адрес компьютера
     bool NotUsed;                               // Игнорировать компьютер
 
-    char *SetAddress(char *Address_);
     void Copy(const MListItem *SrcItem_);
 
     MComputer();

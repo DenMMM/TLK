@@ -2,6 +2,7 @@
 #ifndef UnitLogH
 #define UnitLogH
 //---------------------------------------------------------------------------
+#include <string>
 #include "UnitLogRecords.h"
 #include "UnitShellState.h"
 #include "UnitStates.h"
@@ -19,7 +20,7 @@ class MLog
 private:
     __int64 SystemTime;     // Системное время для синхронизации с описателями состояний компьютеров
     __int64 BeginTime;      // Время, когда лог был начат
-    char *Directory;        // Директория для хранения файлов логов
+    std::string Directory;  // Директория для хранения файлов логов
     bool Opened;            // Лог был успешно открыт/начат
 //    bool Transaction;       // Флаг-не очищать буфер записей до "сброса" на диск
     MLogRecords Records;    // Буфер для записей
@@ -87,12 +88,11 @@ public:
     bool AddReboot(char Number_);
     bool AddShutdown(char Number_);
 
-    void SetDefault(char *Dir_, unsigned Code_);
+    void SetDefault(const std::string &Dir_, unsigned Code_);
     void Timer(__int64 SystemTime_);
     DWORD gLastErr() const { return Records.gLastErr(); }
 
     MLog();
-    ~MLog();
 };
 //---------------------------------------------------------------------------
 #endif

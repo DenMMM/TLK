@@ -12,7 +12,7 @@ __fastcall TFormTariffTimes::TFormTariffTimes(TComponent* Owner)
 {
 }
 //---------------------------------------------------------------------------
-bool TFormTariffTimes::Execute(MTariffTimes *Times_, char *Name_, int Left_, int Top_)
+bool TFormTariffTimes::Execute(MTariffTimes *Times_, const char *Name_, int Left_, int Top_)
 {
     if ( Times_==NULL ) return false;
 

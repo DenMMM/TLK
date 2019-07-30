@@ -2,6 +2,7 @@
 #ifndef UnitCommonH
 #define UnitCommonH
 //---------------------------------------------------------------------------
+#include <string>
 #include <winsock2.h>
 //#include <windows.h>
 #include <userenv.h>
@@ -154,6 +155,8 @@ type *MemSrch(type *Mem_, const type *Limit_, type Data_)
 //  опирование ANSI-строк со сдвигом указател€, контролем длины и выхода за границу
 char *MemSetCLine(char *Mem_, const char *Line_);
 const char *MemGetCLine(const char *Mem_, char *Line_,
+    unsigned MaxLength_, const char *Limit_);       /// дл€ совместимости, на врем€ рефакторинга
+const char *MemGetCLine(const char *Mem_, std::string &Line_,
     unsigned MaxLength_, const char *Limit_);
 
 inline char *MemSetBLine(char *Mem_, const char *Line_, unsigned Size_)

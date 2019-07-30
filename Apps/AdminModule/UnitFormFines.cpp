@@ -69,7 +69,7 @@ void __fastcall TFormFines::ListViewFinesSelectItem(TObject *Sender,
         SetEdit(true);
 
     MFine *fine=(MFine*)ListViewFines->Selected->Data;
-    EditDescription->Text=fine->Descr;
+    EditDescription->Text=fine->Descr.c_str();
     ComboBoxTime->ItemIndex=fine->Time==(24*60)? 0: fine->Time;
 }
 //---------------------------------------------------------------------------
@@ -79,7 +79,7 @@ void __fastcall TFormFines::EditDescriptionExit(TObject *Sender)
 
     EditDescription->Text=EditDescription->Text.Trim();
     MFine *fine=(MFine*)ListViewFines->Selected->Data;
-    fine->sDescr(EditDescription->Text.c_str());
+    fine->Descr=EditDescription->Text.c_str();
     SetListViewFinesLine(ListViewFines->Selected);
 }
 //---------------------------------------------------------------------------
@@ -102,7 +102,7 @@ void __fastcall TFormFines::ButtonAddClick(TObject *Sender)
 
     // Добавляем в буфер новый штраф
     MFine *fine=(MFine*)TmpFines.Add();
-    fine->sDescr("Новый штраф");
+    fine->Descr="Новый штраф";
     fine->Time=1;
     // Добавляем строку в список и связываем ее с тарифом
     TListItem *item=ListViewFines->Items->Add();
@@ -173,7 +173,7 @@ void TFormFines::SetEdit(bool Edit_)
 void TFormFines::SetListViewFinesLine(TListItem *Item_)
 {
     MFine *fine=(MFine*)Item_->Data;
-    Item_->Caption=fine->Descr;
+    Item_->Caption=fine->Descr.c_str();
     if ( fine->Time==(24*60) ) Item_->SubItems->Strings[0]="Все время";
     else Item_->SubItems->Strings[0]=IntToStr(fine->Time)+" мин.";
 }

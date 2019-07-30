@@ -5,6 +5,7 @@
 class MSLListItem;
 class MSLList;
 //---------------------------------------------------------------------------
+#include <string>
 #include <winsock2.h>
 //#include <windows.h>
 #include "UnitList.h"
@@ -28,8 +29,8 @@ class MSLList:public MList
 {
 public:
     HKEY DefaultKey;            // HKCR/HKCU/HKLM/HKU
-    char *DefaultFile;          // путь к файлу на диске / раздел реестра
-    char *DefaultValue;         // имя параметра в реестре
+    std::string DefaultFile;    // путь к файлу на диске / раздел реестра
+    std::string DefaultValue;   // имя параметра в реестре
     unsigned DefaultCode;       // двоичный ключ шифрования данных
     mutable DWORD LastError;    // код ошибки последней операции с файлом/реестром
 
@@ -47,15 +48,14 @@ public:
     char *SetAllData(char *Data_, bool Header_=true) const;
     const char *GetAllData(const char *Data_, const char *Limit_);
 
-    bool SaveTo(char *File_, unsigned Code_, bool Always_=true, bool Safe_=false) const;
-    bool AttachTo(char *File_, unsigned Code_, bool Safe_=false) const;
-    bool LoadFrom(char *File_, unsigned Code_);
-    bool StoreTo(HKEY Key_, char *SubKey_, char *Value_, unsigned Code_) const;
-    bool QueryFrom(HKEY Key_, char *SubKey_, char *Value_, unsigned Code_);
-    bool SaveAsReg(char *File_, HKEY Key_, char *SubKey_, char *Value_, unsigned Code_) const;
-    void SetDefaultFile(char *File_, unsigned Code_);
-    void SetDefaultKey(HKEY Key_, char *SubKey_, char *Value_, unsigned Code_);
-    char *gDefFile() const { return DefaultFile; }
+    bool SaveTo(const std::string &File_, unsigned Code_, bool Always_=true, bool Safe_=false) const;
+    bool AttachTo(const std::string &File_, unsigned Code_, bool Safe_=false) const;
+    bool LoadFrom(const std::string &File_, unsigned Code_);
+    bool StoreTo(HKEY Key_, const std::string &SubKey_, const std::string &Value_, unsigned Code_) const;
+    bool QueryFrom(HKEY Key_, const std::string &SubKey_, const std::string &Value_, unsigned Code_);
+    bool SaveAsReg(const char *File_, HKEY Key_, const char *SubKey_, const char *Value_, unsigned Code_) const;
+    void SetDefaultFile(const std::string &File_, unsigned Code_);
+    void SetDefaultKey(HKEY Key_, const std::string &SubKey_, const std::string &Value_, unsigned Code_);
     bool Save(bool Always_=true, bool Safe_=false) const;
     bool Attach(bool Safe_=false) const;
     bool Load();
@@ -63,17 +63,8 @@ public:
 
     MSLList()
     {
-        DefaultKey=NULL;
-        DefaultFile=NULL;
-        DefaultValue=NULL;
         DefaultCode=0;
         LastError=0;
-    }
-
-    ~MSLList()
-    {
-        delete[] DefaultFile;
-        delete[] DefaultValue;
     }
 };
 //---------------------------------------------------------------------------

@@ -256,7 +256,7 @@ void MSyncStates::Associate(MStates *States_, MComputers *Computers_)
         Computer=Computers_->Search(State->Associated());
         if ( Computer==NULL ) continue;
         // Конвертируем IP-адрес из текста в u_long
-        IP=::inet_addr(Computer->Address);
+        IP=::inet_addr(Computer->Address.c_str());
         if ( IP==INADDR_NONE ) continue;
         // Ищем по этому адресу состояние синхронизации
         // (чтобы сохранить возможно известный MAC-адрес)
@@ -315,13 +315,11 @@ MSync::MSync()
     States=NULL;
     Socket=INVALID_SOCKET;
     SocketBC=INVALID_SOCKET;
-    ::InitializeCriticalSection(&CS_PCount);
     PCount=0;
 }
 //---------------------------------------------------------------------------
 MSync::~MSync()
 {
-    ::DeleteCriticalSection(&CS_PCount);
 }
 //---------------------------------------------------------------------------
 void MSync::SetARPFile(char *File_, unsigned Code_, bool AutoSave_)
@@ -558,9 +556,9 @@ error:
 //---------------------------------------------------------------------------
 void MSync::sPCount(unsigned Value_)
 {
-    ::EnterCriticalSection(&CS_PCount);
+    MWAPI::CRITICAL_SECTION::Lock lckObj(CS_PCount);
+
     PCount=Value_;
-    ::LeaveCriticalSection(&CS_PCount);
 }
 //---------------------------------------------------------------------------
 unsigned MSync::gPCountMax() const
@@ -570,11 +568,9 @@ unsigned MSync::gPCountMax() const
 //---------------------------------------------------------------------------
 unsigned MSync::gPCount() const
 {
-    unsigned result;
-    ::EnterCriticalSection(&CS_PCount);
-    result=PCount;
-    ::LeaveCriticalSection(&CS_PCount);
-    return result;
+    MWAPI::CRITICAL_SECTION::Lock lckObj(CS_PCount);
+
+    return PCount;
 }
 //---------------------------------------------------------------------------
 MSyncCl::MSyncCl()

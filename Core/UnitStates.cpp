@@ -10,7 +10,6 @@
 //---------------------------------------------------------------------------
 MState::MState()
 {
-    ::InitializeCriticalSection(&CS_Main);
     SystemTime=0;
     Number=0;
     State=0;
@@ -29,7 +28,6 @@ MState::MState()
 //---------------------------------------------------------------------------
 MState::~MState()
 {
-    ::DeleteCriticalSection(&CS_Main);
 }
 //---------------------------------------------------------------------------
 unsigned MState::GetDataSize() const
@@ -49,7 +47,8 @@ unsigned MState::GetDataSize() const
 //---------------------------------------------------------------------------
 char *MState::SetData(char *Data_) const
 {
-    Lock();
+    MWAPI::CRITICAL_SECTION::Lock lckObj(CS_Main);
+
     Data_=MemSet(Data_,Number);
     Data_=MemSet(Data_,State);
     Data_=MemSet(Data_,TariffID);
@@ -60,7 +59,7 @@ char *MState::SetData(char *Data_) const
     Data_=MemSet(Data_,StopTimerTime);
     Data_=MemSet(Data_,Programs);
     Data_=MemSet(Data_,NetState&mnsSyncNeed);
-    UnLock();
+
     return Data_;
 }
 //---------------------------------------------------------------------------
@@ -113,9 +112,10 @@ bool MState::ControlFineTime()
 //---------------------------------------------------------------------------
 bool MState::CmdRun(MTariff *Tariff_, MRunTime *Time_, bool Check_)
 {
-    Lock();
-    if ( !((State==mcsFree)||(State&mcsWork)) ) { UnLock(); return false; }
-    if ( Check_ ) { UnLock(); return true; }
+    MWAPI::CRITICAL_SECTION::Lock lckObj(CS_Main);
+
+    if ( !((State==mcsFree)||(State&mcsWork)) ) return false;
+    if ( Check_ ) return true;
     //
     if ( State==mcsFree )
     {
@@ -137,15 +137,15 @@ bool MState::CmdRun(MTariff *Tariff_, MRunTime *Time_, bool Check_)
     }
     // Помечаем данные для отправки по сети
     NetState|=mnsSyncNeed|mnsSyncData; Changes|=mdcNetState;
-    UnLock();
     return true;
 }
 //---------------------------------------------------------------------------
 bool MState::CmdFine(short FineSize_, bool Check_)
 {
-    Lock();
-    if ( !(State&mcsWork) ) { UnLock(); return false; }
-    if ( Check_ ) { UnLock(); return true; }
+    MWAPI::CRITICAL_SECTION::Lock lckObj(CS_Main);
+
+    if ( !(State&mcsWork) ) return false;
+    if ( Check_ ) return true;
     //
     if ( FineSize_>0 )
     {
@@ -193,16 +193,15 @@ full:
     }
     // Помечаем данные для отправки по сети
     NetState|=mnsSyncNeed|mnsSyncData; Changes|=mdcNetState;
-    UnLock();
     return true;
 }
 //---------------------------------------------------------------------------
 bool MState::CmdExchange(MState *State_, bool Check_)
 {
-    Lock(); State_->Lock();
-    if ( !((State&mcsWork)&&(State_->State==mcsFree)) )
-        { State_->UnLock(); UnLock(); return false; }
-    if ( Check_ ) { State_->UnLock(); UnLock(); return true; }
+    MWAPI::CRITICAL_SECTION::DualLock lckObj(CS_Main,State_->CS_Main);
+
+    if ( !((State&mcsWork)&&(State_->State==mcsFree)) ) return false;
+    if ( Check_ ) return true;
     // Задаем новые режимы работы
     State_->State=State&(mcsWork|mcsFine|mcsLock|mcsPause);
     State_->TariffID=TariffID;
@@ -232,51 +231,52 @@ bool MState::CmdExchange(MState *State_, bool Check_)
     NetState|=mnsSyncNeed|mnsSyncData; Changes|=mdcNetState;
     // Перезагружаем компьютер при закрытии
 ///    if ( !(State&mcsOpen) ) { Commands|=mccReboot; Changes|=mdcCommands; }
-    State_->UnLock(); UnLock();
+
     return true;
 }
 //---------------------------------------------------------------------------
 bool MState::CmdLock(bool Apply_, bool Check_)
 {
-    Lock();
+    MWAPI::CRITICAL_SECTION::Lock lckObj(CS_Main);
+
     if ( Apply_ )
     {
         // Проверяем запущен ли компьютер и не прикрыт ли он уже
-        if ( (State&(mcsWork|mcsLock))!=mcsWork ) { UnLock(); return false; }
-        if ( Check_ ) { UnLock(); return true; }
+        if ( (State&(mcsWork|mcsLock))!=mcsWork ) return false;
+        if ( Check_ ) return true; 
         // Помечаем, что компьютер прикрыт
         State|=mcsLock;
     } else
     {
         // Проверяем прикрыт ли компьютер
-        if ( !(State&mcsLock) ) { UnLock(); return false; }
-        if ( Check_ ) { UnLock(); return true; }
+        if ( !(State&mcsLock) ) return false;
+        if ( Check_ ) return true;
         // Снимаем пометку, что компьютер прикрыт
         State&=~mcsLock;
     }
     Changes|=mdcState;
     // Помечаем данные для отправки по сети
     NetState|=mnsSyncNeed|mnsSyncData; Changes|=mdcNetState;
-    UnLock();
     return true;
 }
 //---------------------------------------------------------------------------
 bool MState::CmdPause(bool Apply_, bool Check_)
 {
-    Lock();
+    MWAPI::CRITICAL_SECTION::Lock lckObj(CS_Main);
+
     if ( Apply_ )
     {
         // Проверяем запущен ли компьютер и не приостановлен ли он уже
-        if ( (State&(mcsWork|mcsPause))!=mcsWork ) { UnLock(); return false; }
-        if ( Check_ ) { UnLock(); return true; }
+        if ( (State&(mcsWork|mcsPause))!=mcsWork ) return false;
+        if ( Check_ ) return true;
         if ( !(State&mcsOpen) ) StopTimerTime=SystemTime;
         // Помечаем, что компьютер приостановлен
         State|=mcsPause;
     } else
     {
         // Проверяем приостановлен ли компьютер
-        if ( !(State&mcsPause) ) { UnLock(); return false; }
-        if ( Check_ ) { UnLock(); return true; }
+        if ( !(State&mcsPause) ) return false;
+        if ( Check_ ) return true;
         // Если компьютер не открыт для обслуживания, корретируем время его работы
         if ( !(State&mcsOpen) )
         {
@@ -290,18 +290,18 @@ bool MState::CmdPause(bool Apply_, bool Check_)
     Changes|=mdcState;
     // Помечаем данные для отправки по сети
     NetState|=mnsSyncNeed|mnsSyncData; Changes|=mdcNetState;
-    UnLock();
     return true;
 }
 //---------------------------------------------------------------------------
 bool MState::CmdOpen(bool Apply_, bool Check_)
 {
-    Lock();
+    MWAPI::CRITICAL_SECTION::Lock lckObj(CS_Main);
+
     if ( Apply_ )
     {
         // Проверяем свободен или запущен компьютер и не открыт ли он уже
-        if ( (!(State&(mcsFree|mcsWork)))||(State&mcsOpen) ) { UnLock(); return false; }
-        if ( Check_ ) { UnLock(); return true; }
+        if ( (!(State&(mcsFree|mcsWork)))||(State&mcsOpen) ) return false;
+        if ( Check_ ) return true;
         // Если компьютер запущен и не приостановлен, сохраняем время его открытия
         if ( (State&(mcsWork|mcsPause))==mcsWork ) StopTimerTime=SystemTime;
         // Помечаем, что компьютер открыт
@@ -309,8 +309,8 @@ bool MState::CmdOpen(bool Apply_, bool Check_)
     } else
     {
         // Проверяем открыт ли компьютер
-        if ( !(State&mcsOpen) ) { UnLock(); return false; }
-        if ( Check_ ) { UnLock(); return true; }
+        if ( !(State&mcsOpen) ) return false;
+        if ( Check_ ) return true;
         // Если компьютер запущен и не приостановлен, корретируем время его работы
         if ( (State&(mcsWork|mcsPause))==mcsWork )
         {
@@ -324,44 +324,47 @@ bool MState::CmdOpen(bool Apply_, bool Check_)
     Changes|=mdcState;
     // Помечаем данные для отправки по сети
     NetState|=mnsSyncNeed|mnsSyncData; Changes|=mdcNetState;
-    UnLock();
     return true;
 }
 //---------------------------------------------------------------------------
 bool MState::CmdPowerOn(bool Check_)
 {
-    Lock();
-    if ( Check_ ) { UnLock(); return true; }
+    MWAPI::CRITICAL_SECTION::Lock lckObj(CS_Main);
+
+    if ( Check_ ) return true;
     Commands|=mccPowerOn; Changes|=mdcCommands;
-    UnLock();
+
     return true;
 }
 //---------------------------------------------------------------------------
 bool MState::CmdReboot(bool Check_)
 {
-    Lock();
-    if ( Check_ ) { UnLock(); return true; }
+    MWAPI::CRITICAL_SECTION::Lock lckObj(CS_Main);
+
+    if ( Check_ ) return true;
     Commands|=mccReboot; Changes|=mdcCommands;
     // Помечаем данные для отправки по сети
     NetState|=mnsSyncNeed|mnsSyncData; Changes|=mdcNetState;
-    UnLock();
+
     return true;
 }
 //---------------------------------------------------------------------------
 bool MState::CmdShutdown(bool Check_)
 {
-    Lock();
-    if ( Check_ ) { UnLock(); return true; }
+    MWAPI::CRITICAL_SECTION::Lock lckObj(CS_Main);
+
+    if ( Check_ ) return true;
     Commands|=mccShutdown; Changes|=mdcCommands;
     // Помечаем данные для отправки по сети
     NetState|=mnsSyncNeed|mnsSyncData; Changes|=mdcNetState;
-    UnLock();
+
     return true;
 }
 //---------------------------------------------------------------------------
 void MState::RunParam(MRunTime *RunTime_)
 {
-    Lock();
+    MWAPI::CRITICAL_SECTION::Lock lckObj(CS_Main);
+
     RunTime_->Number=Number;
     if ( State==mcsFree )
     {
@@ -382,14 +385,13 @@ void MState::RunParam(MRunTime *RunTime_)
         RunTime_->StartTime=0;
         RunTime_->MaxTime=0;
     }
-    UnLock();
 }
 //---------------------------------------------------------------------------
 void MState::StateInfo(MStateInfo *Info_)
 {
     memset(Info_,0,sizeof(MStateInfo));
 
-    Lock();
+    MWAPI::CRITICAL_SECTION::Lock lckObj(CS_Main);
     //
     Info_->Number=Number;
     Info_->State=State;
@@ -413,17 +415,14 @@ void MState::StateInfo(MStateInfo *Info_)
     Info_->Changes=Changes;
     //
     Changes=0;
-    UnLock();
 }
 //---------------------------------------------------------------------------
 bool MState::Timer(__int64 SystemTime_)
 {
-    bool result;
-    Lock();
+    MWAPI::CRITICAL_SECTION::Lock lckObj(CS_Main);
+
     SystemTime=SystemTime_;
-    result=ControlWorkTime()||ControlFineTime();
-    UnLock();
-    return result;
+    return ControlWorkTime()||ControlFineTime();
 }
 //---------------------------------------------------------------------------
 void MState::Associate(int Number_)
@@ -445,43 +444,40 @@ void MState::Associate(int Number_)
 //---------------------------------------------------------------------------
 bool MState::NetBegin()
 {
-    Lock();
+    MWAPI::CRITICAL_SECTION::Lock lckObj(CS_Main);
+
     // Проверяем не блокирован ли доступ к сетевым операциям
-    if ( NetState&mnsLock ) { UnLock(); return false; }
+    if ( NetState&mnsLock ) return false;
     // Блокируем доступ к сетевым операциям
     NetState|=mnsLock;
     // Сбрасываем флаг необходимости сохранения состояния на диск
     NetState&=~mnsNeedSave;
     // Задаем постоянную выдачу данных для несинхронизированного состояния
 ///    if ( NetState&mnsSyncNeed ) NetState|=mnsSyncData;
-    UnLock();
     return true;
 }
 //---------------------------------------------------------------------------
 bool MState::NetEnd()
 {
-    bool NeedSave;
-    Lock();
-    //
+    MWAPI::CRITICAL_SECTION::Lock lckObj(CS_Main);
+
     CmdsToReset&=~(mccReboot|mccShutdown);
     // Снимаем блокировку доступа к сетевым операциям
     NetState&=~mnsLock;
-    //
-    NeedSave=NetState&mnsNeedSave;
-    UnLock();
-    return NeedSave;
+    return NetState&mnsNeedSave;
 }
 //---------------------------------------------------------------------------
 bool MState::NetSyncNewData()
 {
-    bool result;
-    Lock(); result=NetState&mnsSyncData; UnLock();
-    return result;
+    MWAPI::CRITICAL_SECTION::Lock lckObj(CS_Main);
+
+    return NetState&mnsSyncData;
 }
 //---------------------------------------------------------------------------
 void MState::NetSyncData(MSyncData *Data_)
 {
-    Lock();
+    MWAPI::CRITICAL_SECTION::Lock lckObj(CS_Main);
+
     // Сбрасываем флаг наличия новых данных
     NetState&=~mnsSyncData;
     // Заносим новые данные о режиме работы
@@ -496,12 +492,12 @@ void MState::NetSyncData(MSyncData *Data_)
     Data_->Programs=Programs;
     Data_->Commands=Commands;
     CmdsToReset|=Data_->Commands;
-    UnLock();
 }
 //---------------------------------------------------------------------------
 void MState::NetSyncExecuted(bool Executed_)
 {
-    Lock();
+    MWAPI::CRITICAL_SECTION::Lock lckObj(CS_Main);
+
     if ( Executed_ )
     {
         // Если за время отправки последних запрошенных данных новых не поступило,
@@ -525,61 +521,31 @@ void MState::NetSyncExecuted(bool Executed_)
     }
     // Помечаем изменения для оболочки
     Changes|=mdcNetState;
-    UnLock();
 }
 //---------------------------------------------------------------------------
 bool MState::NetPwrOnNeed()
 {
-    bool result;
-    Lock(); result=Commands&mccPowerOn; UnLock();
-    return result;
+    MWAPI::CRITICAL_SECTION::Lock lckObj(CS_Main);
+
+    return Commands&mccPowerOn;
 }
 //---------------------------------------------------------------------------
 void MState::NetPwrOnExecuted()
 {
-    Lock();
+    MWAPI::CRITICAL_SECTION::Lock lckObj(CS_Main);
+
     // Сбрасываем команду для компьютера, т.к. она выполнена
     Commands&=~mccPowerOn;
     // Помечаем изменения для оболочки
     Changes|=mdcCommands;
-    UnLock();
-}
-//---------------------------------------------------------------------------
-void MState::GetStateData(MStateData *Data_)
-{
-    Lock();
-    Data_->Number=Number;
-    Data_->State=State;
-    Data_->TariffID=TariffID;
-    Data_->StartWorkTime=StartWorkTime;
-    Data_->SizeWorkTime=SizeWorkTime;
-    Data_->StartFineTime=StartFineTime;
-    Data_->SizeFineTime=SizeFineTime;
-    Data_->StopTimerTime=StopTimerTime;
-    UnLock();
-}
-//---------------------------------------------------------------------------
-void MState::SetStateData(MStateData *Data_)
-{
-    Lock();
-    Number=Data_->Number;
-    State=Data_->State;
-    TariffID=Data_->TariffID;
-    StartWorkTime=Data_->StartWorkTime;
-    SizeWorkTime=Data_->SizeWorkTime;
-    StartFineTime=Data_->StartFineTime;
-    SizeFineTime=Data_->SizeFineTime;
-    StopTimerTime=Data_->StopTimerTime;
-    Changes=mdcAll;
-    UnLock();
 }
 //---------------------------------------------------------------------------
 bool MStates::Save()
 {
-    bool result;
+    MWAPI::CRITICAL_SECTION::Lock lckObj(CS_File);
+
     // Сохраняем в файл с безопасной перезаписью и без кэширования
-    Lock(); result=MSLList::Save(true,true); UnLock();
-    return result;
+    return MSLList::Save(true,true);
 }
 //---------------------------------------------------------------------------
 MState *MStates::Search(int Number_)
@@ -651,10 +617,8 @@ bool MStates::Timer(__int64 SystemTime_)
 MStateCl::MStateCl()
 {
     OptKey=NULL;
-    OptPath=OptValue=PrgFile=NULL;
 //    OptCode=PrgCode=0;
     AutoLockTime=0;
-    ::InitializeCriticalSection(&CS_Main);
     SystemTime=LastSyncTime=::GetTickCount();
     Number=0;
     State=mcsFree;
@@ -670,10 +634,7 @@ MStateCl::MStateCl()
 //---------------------------------------------------------------------------
 MStateCl::~MStateCl()
 {
-    ::DeleteCriticalSection(&CS_Main);
-    delete[] OptPath;
-    delete[] OptValue;
-    delete[] PrgFile;
+//
 }
 //---------------------------------------------------------------------------
 unsigned MStateCl::GetDataSize() const
@@ -691,7 +652,8 @@ unsigned MStateCl::GetDataSize() const
 //---------------------------------------------------------------------------
 char *MStateCl::SetData(char *Data_) const 
 {
-    Lock();
+    MWAPI::CRITICAL_SECTION::Lock lckObj(CS_Main);
+
     Data_=MemSet(Data_,Number);
     Data_=MemSet(Data_,State);
     Data_=MemSet(Data_,StartWorkTime);
@@ -700,7 +662,7 @@ char *MStateCl::SetData(char *Data_) const
     Data_=MemSet(Data_,SizeFineTime);
     Data_=MemSet(Data_,StopTimerTime);
     Data_=MemSet(Data_,Programs);
-    UnLock();
+
     return Data_;
 }
 //---------------------------------------------------------------------------
@@ -764,9 +726,9 @@ bool MStateCl::ControlSyncTime()
 //---------------------------------------------------------------------------
 void MStateCl::StateInfo(MStateInfo *Info_)
 {
-    memset(Info_,0,sizeof(MStateInfo));
+    MWAPI::CRITICAL_SECTION::Lock lckObj(CS_Main);
 
-    Lock();
+    memset(Info_,0,sizeof(MStateInfo));
     //
     Info_->Number=Number;
     Info_->State=State;
@@ -789,49 +751,50 @@ void MStateCl::StateInfo(MStateInfo *Info_)
     Info_->Changes=Changes;
     //
     Commands=Changes=0;
-    UnLock();
 }
 //---------------------------------------------------------------------------
 bool MStateCl::GetOptions(MClOptions *Options_)
 {
+    MWAPI::CRITICAL_SECTION::Lock lckObj(CS_Main);
     bool result;
-    Lock();
+
     result=Options_->QueryFrom(OptKey,OptPath,OptValue,DefaultCode);
     if ( result ) AutoLockTime=Options_->AutoLockTime;
-    UnLock();
+
     return result;
 }
 //---------------------------------------------------------------------------
 bool MStateCl::GetGames(MGames *Games_)
 {
-    bool result;
-    Lock(); result=Games_->LoadFrom(PrgFile,DefaultCode); UnLock();
-    return result;
+    MWAPI::CRITICAL_SECTION::Lock lckObj(CS_Main);
+
+    return Games_->LoadFrom(PrgFile,DefaultCode);
 }
 //---------------------------------------------------------------------------
 bool MStateCl::Timer(__int64 SystemTime_)
 {
+    MWAPI::CRITICAL_SECTION::Lock lckObj(CS_Main);
     bool result;
-    Lock();
+
     SystemTime=SystemTime_;
     result=ControlWorkTime()||ControlFineTime();
     result=ControlSyncTime()||result;
-    UnLock();
+
     return result;
 }
 //---------------------------------------------------------------------------
 void MStateCl::CmdReboot()
 {
-    Lock();
+    MWAPI::CRITICAL_SECTION::Lock lckObj(CS_Main);
+
     Commands|=mccReboot; Changes|=mdcCommands;
-    UnLock();
 }
 //---------------------------------------------------------------------------
 void MStateCl::CmdShutdown()
 {
-    Lock();
+    MWAPI::CRITICAL_SECTION::Lock lckObj(CS_Main);
+
     Commands|=mccShutdown; Changes|=mdcCommands;
-    UnLock();
 }
 //---------------------------------------------------------------------------
 bool MStateCl::NewSyncData(MSyncData *Data_)
@@ -844,7 +807,7 @@ bool MStateCl::NewSyncData(MSyncData *Data_)
     CurrentTime=(CurrentTime-=Data_->SystemTime)<0?-CurrentTime:CurrentTime;
     if ( CurrentTime>=MAX_TimeShift*10000000i64 ) SetLocalTimeInt64(&Data_->SystemTime);
 
-    Lock();
+    CS_Main.Enter();
     // Заносим новые данные о режиме работы и помечаем события для оболочки
     if ( Data_->Number!=Number ) { Number=Data_->Number; Changes|=mdcNumber; NeedSave=true; }
     if ( Data_->State!=State ) { State=Data_->State; Changes|=mdcState; NeedSave=true; }
@@ -857,47 +820,51 @@ bool MStateCl::NewSyncData(MSyncData *Data_)
     if ( Data_->Commands!=Commands ) { Commands=Data_->Commands; Changes|=mdcCommands; NeedSave=true; }
     //
     LastSyncTime=::GetTickCount();
-    UnLock();
+    CS_Main.Leafe();
 
     return NeedSave;
 }
 //---------------------------------------------------------------------------
 bool MStateCl::NewGames(MGames *Games_)
 {
+    MWAPI::CRITICAL_SECTION::Lock lckObj(CS_Main);
     bool result=false;
-    Lock();
+
     try { result=Games_->SaveTo(PrgFile,DefaultCode); }
     catch (std::bad_alloc &e) {}
     if ( result ) Changes|=mdcPrograms;
-    UnLock();
+
     return result;
 }
 //---------------------------------------------------------------------------
 bool MStateCl::NewOptions(MClOptions *Options_)
 {
+    MWAPI::CRITICAL_SECTION::Lock lckObj(CS_Main);
     bool result=false;
-    Lock();
+
     try { result=Options_->StoreTo(OptKey,OptPath,OptValue,DefaultCode); }
     catch (std::bad_alloc &e) {}
     if ( result ) { AutoLockTime=Options_->AutoLockTime; Changes|=mdcOptions; }
-    UnLock();
+
     return result;
 }
 //---------------------------------------------------------------------------
-void MStateCl::SetDefault(HKEY RegKey_, char *RegPath_, char *RegValue_,
-        HKEY OptKey_, char *OptPath_, char *OptValue_, char *PrgFile_, unsigned RegCode_)
+void MStateCl::SetDefault(
+        HKEY RegKey_,
+        const std::string &RegPath_,
+        const std::string &RegValue_,
+        HKEY OptKey_,
+        const std::string &OptPath_,
+        const std::string &OptValue_,
+        const std::string &PrgFile_,
+        unsigned RegCode_)
 {
-    delete[] OptPath; OptPath=NULL;
-    delete[] OptValue; OptValue=NULL;
-    delete[] PrgFile; PrgFile=NULL;
     MSLList::SetDefaultKey(RegKey_,RegPath_,RegValue_,RegCode_);
-    OptPath=new char[strlen(OptPath_)+1];
-    OptValue=new char[strlen(OptValue_)+1];
-    PrgFile=new char[strlen(PrgFile_)+1];
+
     OptKey=OptKey_;
-    strcpy(OptPath,OptPath_);
-    strcpy(OptValue,OptValue_);
-    strcpy(PrgFile,PrgFile_);
+    OptPath=OptPath_;
+    OptValue=OptValue_;
+    PrgFile=PrgFile_;
 }
 //---------------------------------------------------------------------------
 

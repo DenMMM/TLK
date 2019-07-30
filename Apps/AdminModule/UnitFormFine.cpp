@@ -49,7 +49,7 @@ void __fastcall TFormFine::FormShow(TObject *Sender)
         fine=(MFine*)fine->gNext() )
     {
         char line[MAX_FineDescrLen+13+1]; *line=0;
-        strcat(line,fine->Descr);
+        strcat(line,fine->Descr.c_str());
         strcat(line,"  (");
         if ( fine->Time==(24*60) ) strcat(line,"все время)");
         else sprintf(line+strlen(line),"%.2i мин.)",fine->Time);
@@ -172,7 +172,7 @@ void __fastcall TFormFine::SetListViewFinesLine(TListItem *Item_)
     if ( selfine->Fine==NULL ) return;
 
     // Описание штрафа
-    Item_->SubItems->Strings[1]=selfine->Fine->Descr;
+    Item_->SubItems->Strings[1]=selfine->Fine->Descr.c_str();
     // Время штрафа
     if ( selfine->Warn ) Item_->SubItems->Strings[2]="";
     else

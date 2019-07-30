@@ -29,7 +29,7 @@
     <DEBUGLIBPATH value="$(BCB)\lib\debug"/>
     <RELEASELIBPATH value="$(BCB)\lib\release"/>
     <LINKER value="ilink32"/>
-    <USERDEFINES value=""/>
+    <USERDEFINES value="_DEBUG"/>
     <SYSDEFINES value="NO_STRICT"/>
     <MAINSOURCE value="LogView.cpp"/>
     <INCLUDEPATH value="..\..\Ext\BrianGladman\SHA;..\..\Core;$(BCB)\include;$(BCB)\include\vcl"/>
@@ -40,17 +40,17 @@
   <OPTIONS>
     <IDLCFLAGS value="-I..\..\Ext\BrianGladman\SHA -I..\..\Core -I$(BCB)\include 
       -I$(BCB)\include\vcl -src_suffix cpp -boa"/>
-    <CFLAG1 value="-O2 -Vx -Ve -X- -pr -a8 -6 -b- -k- -vi -c -tW -tWM"/>
-    <PFLAGS value="-$Y- -$L- -$D- -$A8 -v -JPHNE -M"/>
+    <CFLAG1 value="-vGc -vGt -vGd -Od -Vx -Ve -X- -r- -pr -a8 -6 -b- -k -y -v -vi- -c -tW -tWM"/>
+    <PFLAGS value="-$Y+ -$W -$O- -$A8 -v -JPHNE -M"/>
     <RFLAGS value=""/>
-    <AFLAGS value="/mx /w2 /zn"/>
-    <LFLAGS value="-D&quot;&quot; -aa -Tpe -x -Gn"/>
+    <AFLAGS value="/mx /w2 /zi"/>
+    <LFLAGS value="-D&quot;&quot; -aa -Tpe -x -Gn -v"/>
     <OTHERFILES value=""/>
   </OPTIONS>
   <LINKER>
     <ALLOBJ value="c0w32.obj sysinit.obj $(OBJFILES)"/>
     <ALLRES value="$(RESFILES)"/>
-    <ALLLIB value="$(LIBFILES) $(LIBRARIES) import32.lib cp32mt.lib"/>
+    <ALLLIB value="cg32.lib $(LIBFILES) $(LIBRARIES) import32.lib cp32mt.lib"/>
     <OTHERFILES value=""/>
   </LINKER>
   <FILELIST>
@@ -86,7 +86,7 @@ AutoIncBuild=1
 MajorVer=1
 MinorVer=0
 Release=0
-Build=19
+Build=22
 Debug=0
 PreRelease=0
 Special=0
@@ -98,7 +98,7 @@ CodePage=1251
 [Version Info Keys]
 CompanyName=MMM Groups
 FileDescription=Просмотр логов TLK
-FileVersion=1.0.0.19
+FileVersion=1.0.0.22
 InternalName=LogViewer
 LegalCopyright=
 LegalTrademarks=
@@ -125,6 +125,10 @@ Item3=D:\Program Files\Borland\CBuilder5\Projects\;$(BCB)\lib\obj;$(BCB)\lib
 Count=1
 Item0=$(BCB)\source\vcl
 
+[HistoryLists\hlConditionals]
+Count=1
+Item0=_DEBUG
+
 [Debugging]
 DebugSourceDirs=$(BCB)\source\vcl
 
@@ -143,11 +147,6 @@ RemoteDebug=0
 [Compiler]
 ShowInfoMsgs=0
 LinkDebugVcl=0
-LinkCGLIB=0
-
-[CORBA]
-AddServerUnit=1
-AddClientUnit=1
-PrecompiledHeaders=1
+LinkCGLIB=1
   </IDEOPTIONS>
 </PROJECT>

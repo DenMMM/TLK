@@ -254,7 +254,7 @@ void TFormEvents::SetListViewComputersLine(TListItem *Item_, MStateInfo *Info_,
     if ( Info_->Changes&mdcTariff )
     {
         MTariff *Tariff=(MTariff*)Tariffs_->SrchID(Info_->TariffID);
-        if ( Tariff ) SubItems->Strings[2]=Tariff->Name;
+        if ( Tariff ) SubItems->Strings[2]=Tariff->Name.c_str();
         else SubItems->Strings[2]="";
     }
     // Время работы
@@ -373,7 +373,7 @@ void TFormEvents::UpdateTariffs(MTariffs *Tariffs_, MLogRecordDataTariffs *LogRe
     for ( unsigned i=0; i<LogRecord_->Tariffs.Count(); i++ )
     {
         MTariff *trf=(MTariff*)Tariffs_->Add();
-        trf->SetTariffData(&LogRecord_->Tariffs[i]);
+        *trf=LogRecord_->Tariffs[i];
     }
 }
 //---------------------------------------------------------------------------
@@ -383,7 +383,7 @@ void TFormEvents::UpdateFines(MFines *Fines_, MLogRecordDataFines *LogRecord_)
     for ( unsigned i=0; i<LogRecord_->Fines.Count(); i++ )
     {
         MFine *fn=(MFine*)Fines_->Add();
-        fn->SetFineData(&LogRecord_->Fines[i]);
+        *fn=LogRecord_->Fines[i];
     }
 }
 //---------------------------------------------------------------------------
@@ -393,7 +393,7 @@ void TFormEvents::UpdateUsers(MUsers *Users_, MLogRecordDataUsers *LogRecord_)
     for ( unsigned i=0; i<LogRecord_->Users.Count(); i++ )
     {
         MUser *usr=(MUser*)Users_->Add();
-        usr->SetUserData(&LogRecord_->Users[i]);
+        *usr=LogRecord_->Users[i];
     }
 }
 //---------------------------------------------------------------------------
@@ -534,7 +534,7 @@ void TFormEvents::UpdateListViewEvents()
                 Item->SubItems->Add("");
                 MUser *usr;
                 usr=(MUser*)Users.SrchID(((MLogRecordLogIn*)Begin_)->User);
-                sprintf(line,"Смену начал(а) '%s'",usr?usr->Name:"???");
+                sprintf(line,"Смену начал(а) '%s'",usr?usr->Name.c_str():"???");
                 Item->SubItems->Add(line);
             }
                 break;
@@ -550,7 +550,7 @@ void TFormEvents::UpdateListViewEvents()
                 rcdr=(MLogRecordRun*)Begin_;
                 trf=(MTariff*)Tariffs.SrchID(rcdr->Tariff);
                 Item->SubItems->Add(IntToStr(rcdr->Number));
-                Item->SubItems->Add(trf?trf->Name:"???");
+                Item->SubItems->Add(trf?trf->Name.c_str():"???");
                 switch(rcdr->Type)
                 {
                     case mttHours:
@@ -582,7 +582,7 @@ void TFormEvents::UpdateListViewEvents()
                 rcdf=(MLogRecordFine*)Begin_;
                 Item->SubItems->Add(IntToStr(rcdf->Number));
                 fn=(MFine*)Fines.SrchID(rcdf->Fine);
-                sprintf(line,"Штраф '%s'",fn?fn->Descr:"???");
+                sprintf(line,"Штраф '%s'",fn?fn->Descr.c_str():"???");
                 Item->SubItems->Add(line);
                 if ( rcdf->Time==(24*60) ) sprintf(line,"Все время");
                 else if ( rcdf->Time<0 ) sprintf(line,"Снято %i мин.",-rcdf->Time);

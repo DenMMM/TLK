@@ -42,13 +42,13 @@ void __fastcall TFormOptionsPass::FormCloseQuery(TObject *Sender,
 {
     if ( ModalResult!=mrOk ) return;
     // Проверяем текущий пароль
-    if ( !TmpOptions->CheckPass(EditPassword->Text.c_str()) )
+    if ( !TmpOptions->Pass.Check(EditPassword->Text.c_str()) )
         { ActiveControl=EditPassword; goto error; }
     // Проверяем новый пароль
     if ( EditNew->Text!=EditConfirm->Text )
         { ActiveControl=EditNew; goto error; }
     //
-    TmpOptions->SetPass(EditNew->Text.c_str());
+    TmpOptions->Pass.Set(EditNew->Text.c_str());
 
     return;
 error:

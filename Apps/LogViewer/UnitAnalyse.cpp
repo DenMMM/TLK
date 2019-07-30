@@ -37,7 +37,7 @@ bool ProcessComputersState(MLogRecord *Position_,
     for ( unsigned i=0; i<rcdds->States.Count(); i++ )
     {
         if ( (state=(MState*)States_->Add())==NULL ) goto error;
-        state->SetStateData(&rcdds->States[i]);
+        *state=rcdds->States[i];
     }
     // Начинаем сбор данных за прошедшее время
     while(Record!=Position_)
@@ -94,7 +94,7 @@ bool ProcessComputersState(MLogRecord *Position_,
                 for ( unsigned i=0; i<rcddtrf->Tariffs.Count(); i++ )
                 {
                     tariff=(MTariff*)Tariffs_->Add();
-                    tariff->SetTariffData(&rcddtrf->Tariffs[i]);
+                    *tariff=rcddtrf->Tariffs[i];
                 }
                 break;
             default: break;
@@ -147,11 +147,11 @@ bool ProcessUsersUpTime(MLogRecord *Begin_, MLogRecord *End_,
                 for ( unsigned i=0; i<rcddusr->Users.Count(); i++ )
                 {
                     if ( (usr=(MUser*)Users_->SrchID(rcddusr->Users[i].ID))!=NULL )
-                        strcpy(usr->Name,rcddusr->Users[i].Name);
+                        usr->Name=rcddusr->Users[i].Name;
                     else
                     {
                         usr=(MUser*)Users_->Add();
-                        usr->SetUserData(&rcddusr->Users[i]);
+                        *usr=rcddusr->Users[i];
                     }
                 }
                 break;

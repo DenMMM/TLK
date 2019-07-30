@@ -9,8 +9,6 @@
 //---------------------------------------------------------------------------
 MUser::MUser()
 {
-    *Login=0;
-    *Name=0;
     Active=true;
 }
 
@@ -21,20 +19,21 @@ MUser::~MUser()
 
 void MUser::Copy(const MListItem *SrcItem_)
 {
-    MUser *User_=(MUser*)SrcItem_;
+    const MUser *usr=
+        dynamic_cast<const MUser*>(SrcItem_);
 
-    strcpy(Login,User_->Login);
-    strcpy(Name,User_->Name);
-    Active=User_->Active;
-    Pass.Copy(&User_->Pass);
+    Login=usr->Login;
+    Name=usr->Name;
+    Active=usr->Active;
+    Pass.Copy(&usr->Pass);
     MIDListItem::Copy(SrcItem_);
 }
 
 unsigned MUser::GetDataSize() const
 {
     return
-        strlen(Login)+1+
-        strlen(Name)+1+
+        Login.length()+sizeof('\0')+
+        Name.length()+sizeof('\0')+
         sizeof(Active)+
         Pass.GetDataSize()+
         MIDListItem::GetDataSize();     // ID-номер пользователя
@@ -43,8 +42,8 @@ unsigned MUser::GetDataSize() const
 char *MUser::SetData(char *Data_) const
 {
     Data_=MIDListItem::SetData(Data_);
-    Data_=MemSetCLine(Data_,Login);
-    Data_=MemSetCLine(Data_,Name);
+    Data_=MemSetCLine(Data_,Login.c_str());
+    Data_=MemSetCLine(Data_,Name.c_str());
     Data_=Pass.SetData(Data_);
     Data_=MemSet(Data_,Active);
     return Data_;
@@ -61,7 +60,7 @@ const char *MUser::GetData(const char *Data_, const char *Limit_)
         ? Data_: NULL;
 }
 
-void MUser::SetLogin(char *Login_)
+/*void MUser::SetLogin(char *Login_)
 {
     if ( strlen(Login_)>MAX_UserLoginLen )
     {
@@ -84,21 +83,9 @@ void MUser::SetName(char *Name_)
             );
     }
     strcpy(Name,Name_);
-}
+}*/
 
-void MUser::GetUserData(MUserData *Data_) const
-{
-    Data_->ID=ItemID;
-    strcpy(Data_->Login,Login);
-    strcpy(Data_->Name,Name);
-}
 
-void MUser::SetUserData(MUserData *Data_)
-{
-    ItemID=Data_->ID;
-    strcpy(Login,Data_->Login);
-    strcpy(Name,Data_->Name);
-}
 //---------------------------------------------------------------------------
 unsigned MUsers::ActiveCount() const
 {

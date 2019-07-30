@@ -203,7 +203,7 @@ protected:
     bool Create(bool Srv_);
     bool Listen();      // Ожидать входящее соединения
     bool Accept();      // Принять входящее соединение
-    bool Connect(char *IP_, unsigned Time_);    // Создать исходящее соединение
+    bool Connect(const char *IP_, unsigned Time_);    // Создать исходящее соединение
     bool Snd(char *Data_, unsigned Size_, unsigned Time_);
     bool Rcv(char *Data_, unsigned Size_, unsigned Time_);
     bool Disconnect(unsigned Time_);            // Закрыть исходящее соединение

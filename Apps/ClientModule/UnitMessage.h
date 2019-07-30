@@ -2,6 +2,7 @@
 #ifndef UnitMessageH
 #define UnitMessageH
 //---------------------------------------------------------------------------
+#include <string>
 #include <winsock2.h>
 //#include <windows.h>
 //---------------------------------------------------------------------------
@@ -12,12 +13,12 @@ private:
     DWORD ThreadID;             // Идентификатор потока
     HANDLE hBitmap;
     BITMAP Bitmap;
-    char *File;
 
     static DWORD WINAPI ThreadFunc(LPVOID Data);
     void ThreadProc();
 public:
-    void SetFile(char *File_);
+    std::string File;
+
     bool Show();
     void Stop();
 

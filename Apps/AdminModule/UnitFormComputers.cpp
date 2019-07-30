@@ -69,7 +69,7 @@ void __fastcall TFormComputers::ListViewComputersSelectItem(
 
     MComputer *comp=(MComputer*)ListViewComputers->Selected->Data;
     EditNumber->Text=IntToStr(comp->Number);
-    EditAddress->Text=comp->Address;
+    EditAddress->Text=comp->Address.c_str();
 }
 //---------------------------------------------------------------------------
 void __fastcall TFormComputers::ListViewComputersCompare(TObject *Sender,
@@ -108,7 +108,7 @@ void __fastcall TFormComputers::EditAddressExit(TObject *Sender)
 
     EditAddress->Text=EditAddress->Text.Trim();
     MComputer *comp=(MComputer*)ListViewComputers->Selected->Data;
-    comp->SetAddress(EditAddress->Text.c_str());
+    comp->Address=EditAddress->Text.c_str();
     SetListViewComputersLine(ListViewComputers->Selected);
 }
 //---------------------------------------------------------------------------
@@ -158,7 +158,7 @@ void __fastcall TFormComputers::ButtonAddClick(TObject *Sender)
     comp->Number= selcomp ? selcomp->Number+1 : 1;
     char Address[MAX_CompAddrLen+1];
     sprintf(Address,"192.168.1.%i",comp->Number);
-    comp->SetAddress(Address);
+    comp->Address=Address;
     // Добавили строку в список и связали с компьютером
     TListItem *item=ListViewComputers->Items->Add();
     item->Data=comp;
@@ -247,7 +247,7 @@ void TFormComputers::SetListViewComputersLine(TListItem *Item_)
     Item_->SubItemImages[0]=FormMain->GetCompColorIcon(comp);
     SubItems->Strings[0]=IntToStr(comp->Number);
     Item_->SubItemImages[1]=comp->NotUsed? 11: 4;
-    SubItems->Strings[1]=comp->Address;
+    SubItems->Strings[1]=comp->Address.c_str();
 }
 //---------------------------------------------------------------------------
 

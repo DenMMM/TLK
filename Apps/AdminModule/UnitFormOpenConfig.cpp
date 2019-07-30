@@ -37,7 +37,7 @@ void __fastcall TFormOpenConfig::FormCloseQuery(TObject *Sender,
 {
     if ( ModalResult!=mrOk ) return;
     // Проверяем пароль
-    if ( !Options->CheckPass(EditPassword->Text.c_str()) )
+    if ( !Options->Pass.Check(EditPassword->Text.c_str()) )
         { ActiveControl=EditPassword; CanClose=false; }
     return;
 }

@@ -4,6 +4,8 @@
 //---------------------------------------------------------------------------
 class MPassword;
 //---------------------------------------------------------------------------
+#include <string>
+//---------------------------------------------------------------------------
 #define SHA_256                             // SHA_512
 #include "sha1.h"
 #include "sha2.h"
@@ -25,10 +27,10 @@ public:
     unsigned GetDataSize() const;
     char *SetData(char *Data_) const;
     const char *GetData(const char *Data_, const char *Limit_);
-    void Copy(MPassword *SrcPass_);
+    void Copy(const MPassword *SrcPass_);
 
-    void Set(char *Pass_);
-    bool Check(const char *Pass_) const;
+    void Set(const std::string &Pass_);
+    bool Check(const std::string &Pass_) const;
 
     MPassword();
     ~MPassword();

@@ -18,7 +18,7 @@ bool TFormUserPass::Execute(MUser *User_, int Left_, int Top_, bool LeftTop_)
     Users=false;
     ComboBoxLogin->Enabled=false;
     SetEdit(false,true);
-    ComboBoxLogin->Items->AddObject(User_->Login,(TObject*)User_);
+    ComboBoxLogin->Items->AddObject(User_->Login.c_str(),(TObject*)User_);
     ComboBoxLogin->ItemIndex=0;
     ActiveControl=EditNew;
     SetCoord(Left_,Top_,LeftTop_);
@@ -34,7 +34,7 @@ bool TFormUserPass::Execute(MUsers *Users_, int Left_, int Top_, bool LeftTop_)
         User=(MUser*)User->gNext() )
     {
         if ( !User->Active ) continue;
-        ComboBoxLogin->Items->AddObject(User->Login,(TObject*)User);
+        ComboBoxLogin->Items->AddObject(User->Login.c_str(),(TObject*)User);
     }
     ActiveControl=ComboBoxLogin;
     SetCoord(Left_,Top_,LeftTop_);
@@ -88,13 +88,13 @@ void __fastcall TFormUserPass::FormCloseQuery(TObject *Sender,
         { ActiveControl=ComboBoxLogin; goto error; }
     User=(MUser*)ComboBoxLogin->Items->Objects[Index];
     // Проверяем текущий пароль
-    if ( Users&&(!User->CheckPass(EditPassword->Text.c_str())) )
+    if ( Users&&(!User->Pass.Check(EditPassword->Text.c_str())) )
         { ActiveControl=EditPassword; goto error; }
     // Проверяем новый пароль
     if ( EditNew->Text!=EditConfirm->Text )
         { ActiveControl=EditNew; goto error; }
     //
-    User->SetPass(EditNew->Text.c_str());
+    User->Pass.Set(EditNew->Text.c_str());
 
     return;
 error:
