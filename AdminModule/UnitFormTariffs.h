@@ -21,57 +21,51 @@ class TFormTariffs : public TForm
 {
 __published:	// IDE-managed Components
     TListView *ListViewNames;
-    TBitBtn *BitBtnSetSelComp;
-    TBitBtn *BitBtnSetAllComp;
-    TBitBtn *BitBtnResetSelComp;
-    TBitBtn *BitBtnResetAllComp;
     TBevel *BevelBorder;
     TEdit *EditName;
-    TCheckBox *CheckBoxPage1;
-    TCheckBox *CheckBoxPage2;
-    TCheckBox *CheckBoxPage3;
-    TLabel *LabelPages;
-    TBitBtn *BitBtnClose;
-    TImage *ImageIcon;
-    TBitBtn *BitBtnSelectIcon;
-    TBevel *BevelBorderIcon;
     TOpenPictureDialog *OpenPictureDialog;
     TLabel *Label1;
-    TCheckBox *CheckBoxPage4;
-    TCheckBox *CheckBoxPage5;
-    TCheckBox *CheckBoxRoute;
-    TBevel *Bevel1;
-    TBitBtn *BitBtnSave;
     TListView *ListViewComputers;
-    TBitBtn *BitBtnHelp;
-    TBevel *Bevel2;
     TButton *ButtonAdd;
-    TButton *ButtonDelete;
-    TButton *ButtonChange;
-    TButton *ButtonPorts;
+    TButton *ButtonDel;
     TButton *ButtonTimes;
     TCheckBox *CheckBoxReboot;
+    TButton *ButtonSave;
+    TButton *ButtonCancel;
+    TButton *ButtonHelp;
+    TBevel *Bevel7;
+    TLabel *LabelTariffName;
+    TBevel *Bevel10;
+    TLabel *LabelTariffApps;
+    TCheckListBox *CheckListBoxApps;
+    TLabel *LabelTariffComputers;
+    TButton *ButtonSetSelComp;
+    TButton *ButtonSetAllComp;
+    TButton *ButtonResAllComp;
+    TButton *ButtonResSelComp;
+    TCheckBox *CheckBoxRoute;
     void __fastcall FormShow(TObject *Sender);
-    void __fastcall ListViewNamesChange(TObject *Sender, TListItem *Item,
-          TItemChange Change);
-    void __fastcall EditNameExit(TObject *Sender);
-    void __fastcall BitBtnSetSelCompClick(TObject *Sender);
-    void __fastcall BitBtnSetAllCompClick(TObject *Sender);
-    void __fastcall BitBtnSelectIconClick(TObject *Sender);
     void __fastcall FormClose(TObject *Sender, TCloseAction &Action);
     void __fastcall ListViewComputersKeyPress(TObject *Sender, char &Key);
-    void __fastcall BitBtnSaveClick(TObject *Sender);
     void __fastcall ButtonAddClick(TObject *Sender);
-    void __fastcall ButtonDeleteClick(TObject *Sender);
-    void __fastcall ButtonChangeClick(TObject *Sender);
+    void __fastcall ButtonDelClick(TObject *Sender);
     void __fastcall ButtonTimesClick(TObject *Sender);
-    void __fastcall CheckBoxPage1Click(TObject *Sender);
-    void __fastcall CheckBoxRebootClick(TObject *Sender);
+    void __fastcall ButtonSaveClick(TObject *Sender);
+    void __fastcall ListViewNamesInsert(TObject *Sender, TListItem *Item);
+    void __fastcall ListViewNamesDeletion(TObject *Sender,
+          TListItem *Item);
+    void __fastcall ListViewNamesSelectItem(TObject *Sender,
+          TListItem *Item, bool Selected);
+    void __fastcall ListViewComputersExit(TObject *Sender);
+    void __fastcall CheckListBoxAppsExit(TObject *Sender);
+    void __fastcall ButtonSetSelCompClick(TObject *Sender);
+    void __fastcall ButtonSetAllCompClick(TObject *Sender);
+    void __fastcall CheckBoxRebootExit(TObject *Sender);
+    void __fastcall EditNameExit(TObject *Sender);
+    void __fastcall CheckBoxRouteExit(TObject *Sender);
 private:	// User declarations
-    MTariffs *TMPTariffs;
-    MTariff *TMPTariff;
-    unsigned int NewID;
-    void SetListViewNamesLine(int Number_);
+    void SetEdit(bool Edit_);
+    void SetListViewNamesLine(TListItem *Item_);
 public:		// User declarations
     __fastcall TFormTariffs(TComponent* Owner);
 };

@@ -1,8 +1,8 @@
 object FormMain: TFormMain
   Left = 195
   Top = 124
+  BorderIcons = []
   BorderStyle = bsNone
-  Caption = 'TimeLocker'
   ClientHeight = 504
   ClientWidth = 714
   Color = clBlack
@@ -12,7 +12,8 @@ object FormMain: TFormMain
   Font.Name = 'MS Sans Serif'
   Font.Style = []
   OldCreateOrder = False
-  Position = poScreenCenter
+  Position = poDefaultPosOnly
+  Visible = True
   OnClose = FormClose
   OnCloseQuery = FormCloseQuery
   OnShow = FormShow
@@ -2610,7 +2611,6 @@ object FormMain: TFormMain
   end
   object Timer: TTimer
     Enabled = False
-    Interval = 100
     OnTimer = TimerTimer
     Left = 4
     Top = 4

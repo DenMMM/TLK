@@ -2,52 +2,37 @@
 #ifndef UnitCommonH
 #define UnitCommonH
 //---------------------------------------------------------------------------
-#include <ComCtrls.hpp>
+#include <windows.h>
 //---------------------------------------------------------------------------
-#include "UnitComputers.h"
-#include "UnitTariffs.h"
+bool SystemTimeToInt64(SYSTEMTIME *lpSystemTime, __int64 *lpInt64);
+bool Int64ToSystemTime(__int64 *lpInt64, SYSTEMTIME *lpSystemTime);
+int ExtractHoursMin(__int64 Int64);
+bool GetLocalTimeInt64(__int64 *lpInt64);
+bool SetLocalTimeInt64(__int64 *lpInt64);
 //---------------------------------------------------------------------------
-extern AnsiString PrgDir;
+void BasicCode(char *Data_, unsigned DataSize_, unsigned Code_);
+void BasicEncode(char *Data_, unsigned DataSize_, unsigned Code_);
 //---------------------------------------------------------------------------
-struct MComputerSL;
+bool GeneratePassword(char *Line_, unsigned Length_,
+    bool Capital_, bool Small_, bool Numbers_);
 //---------------------------------------------------------------------------
-void BasicCode(char *Data_, int DataSize_, unsigned int Code_);
-void BasicEncode(char *Data_, int DataSize_, unsigned int Code_);
-//---------------------------------------------------------------------------
-bool CorrectComputersData(MComputers *Computers_,MTariffs *Tariffs_);
-bool CorrectTariffsData(MTariffs *Tariffs_, MComputers *Computers_);
-//---------------------------------------------------------------------------
-bool ComputerSave(MComputer *Computer_, char *FileName_);
-bool ComputersSave(MComputers *Computers_, char *FileName_);
-bool ComputersLoad(MComputers *Computers_, char *FileName_);
-//---------------------------------------------------------------------------
-int GetGamesDataSize(MGames *Games_);
-char *SetGamesData(char *Data_, MGames *Games_);
-char *GetGamesData(char *Data_, char *LimitData_, MGames *Games_);
-bool GamesSave(MGames *Games_, char *FileName_);
-bool GamesLoad(MGames *Games_, char *FileName_);
-//---------------------------------------------------------------------------
-struct MComputerSL
+template <class settype>
+char *MemSet(char *Mem_, settype Data_)
 {
-    unsigned int ID;
-    char Address[15+1];
-    int Number;
-    int GroupColor;
-    unsigned int State;
-    double StartWorkTime;
-    int SizeWorkTime;
-    double StartFineTime;
-    int SizeFineTime;
-    double StopTimerTime;
-    int FaceType;
-    unsigned int GamesPages;
-    unsigned int TariffID;
-    unsigned int StateVer;
-    unsigned int NetSync;
+    *((settype*)Mem_)=Data_;
+    return Mem_+sizeof(settype);
+}
 
-    void FromComputer(MComputer *Computer_);
-    void ToComputer(MComputer *Computer_);
-};
+template <class gettype>
+char *MemGet(char *Mem_, gettype *Data_, char *Limit_)
+{
+    if ( (Mem_+sizeof(gettype))>Limit_ ) return NULL;
+    *Data_=*((gettype*)Mem_);
+    return Mem_+sizeof(gettype);
+}
+
+char *MemSetCLine(char *Mem_, char *Line_);
+char *MemGetCLine(char *Mem_, char *Line_, unsigned MaxLength_, char *Limit_);
 //---------------------------------------------------------------------------
 #endif
 

@@ -16,49 +16,39 @@ class TFormUsers : public TForm
 {
 __published:	// IDE-managed Components
     TListView *ListViewUsers;
-    TEdit *EditFullName;
+    TEdit *EditName;
     TEdit *EditLogin;
-    TLabel *Label1;
-    TLabel *Label2;
-    TLabel *Label3;
-    TComboBox *ComboBoxJobTitle;
-    TButton *ButtonAdd;
-    TButton *ButtonDelete;
-    TButton *ButtonChange;
-    TBitBtn *BitBtnSave;
-    TBitBtn *BitBtnCancel;
-    TBitBtn *BitBtnHelp;
-    TLabel *Label4;
-    TEdit *EditPassword;
-    TComboBox *ComboBoxPasswordLength;
-    TCheckBox *CheckBoxActive;
-    TButton *ButtonAccessRights;
+    TLabel *LabelFullName;
+    TLabel *LabelLogin;
     TBevel *Bevel4;
     TBevel *Bevel1;
-    TBevel *Bevel2;
-    TButton *ButtonNewPassword;
-    void __fastcall ButtonAccessRightsClick(TObject *Sender);
+    TButton *ButtonSave;
+    TButton *ButtonCancel;
+    TButton *ButtonHelp;
+    TButton *ButtonAdd;
+    TButton *ButtonDel;
+    TLabel *LabelActive;
+    TBitBtn *BitBtnActive;
+    TBitBtn *BitBtnInactive;
+    TButton *ButtonPassword;
     void __fastcall FormShow(TObject *Sender);
     void __fastcall ListViewUsersInsert(TObject *Sender, TListItem *Item);
     void __fastcall ListViewUsersDeletion(TObject *Sender,
           TListItem *Item);
-    void __fastcall FormHide(TObject *Sender);
     void __fastcall EditLoginExit(TObject *Sender);
-    void __fastcall EditPasswordExit(TObject *Sender);
-    void __fastcall ComboBoxJobTitleExit(TObject *Sender);
-    void __fastcall EditFullNameExit(TObject *Sender);
-    void __fastcall ButtonAddClick(TObject *Sender);
-    void __fastcall ButtonDeleteClick(TObject *Sender);
-    void __fastcall ButtonChangeClick(TObject *Sender);
+    void __fastcall EditNameExit(TObject *Sender);
     void __fastcall ListViewUsersSelectItem(TObject *Sender,
           TListItem *Item, bool Selected);
-    void __fastcall BitBtnSaveClick(TObject *Sender);
-    void __fastcall CheckBoxActiveClick(TObject *Sender);
+    void __fastcall ButtonSaveClick(TObject *Sender);
+    void __fastcall ButtonAddClick(TObject *Sender);
+    void __fastcall ButtonDelClick(TObject *Sender);
+    void __fastcall FormClose(TObject *Sender, TCloseAction &Action);
+    void __fastcall ButtonPasswordClick(TObject *Sender);
+    void __fastcall BitBtnActiveClick(TObject *Sender);
 private:	// User declarations
-    unsigned int NewID;
-    void __fastcall SetListViewUsersLine(TListItem *Item_);
+    void SetEdit(bool Edit_);
+    void SetListViewUsersLine(TListItem *Item_);
 public:		// User declarations
-    MUser *TMPUser;
     __fastcall TFormUsers(TComponent* Owner);
 };
 //---------------------------------------------------------------------------

@@ -4,29 +4,28 @@
   <MACROS>
     <VERSION value="BCB.05.03"/>
     <PROJECT value="AdminMdl.exe"/>
-    <OBJFILES value="AdminMdl.obj UnitFormMain.obj UnitComputers.obj UnitTariffs.obj 
-      UnitFormOrder.obj UnitFormComputers.obj UnitBaseClassMList.obj 
-      UnitFormTariffs.obj UnitFormFines.obj UnitOrderComputers.obj 
-      UnitListOfComputers.obj UnitListOfTariffs.obj UnitListOfTariffTimes.obj 
-      UnitFormTariffTimes.obj UnitFormComputersConfig.obj 
-      UnitOptionsLoadSave.obj UnitCommon.obj UnitListOfIDs.obj UnitFines.obj 
-      UnitFineComputers.obj UnitFormFine.obj UnitFormUsers.obj 
-      UnitFormAccessRights.obj UnitGames.obj UnitFormChangePassword.obj 
-      UnitUsers.obj UnitFormLogIn.obj UnitThreadNetSync.obj UnitLogs.obj 
-      UnitState.obj"/>
-    <RESFILES value="AdminMdl.res"/>
+    <OBJFILES value="AdminMdl.obj UnitFormMain.obj UnitFormComputers.obj UnitFormTariffs.obj 
+      UnitFormTariffTimes.obj UnitFormFines.obj UnitFormUsers.obj 
+      UnitFormRun.obj UnitFormFine.obj UnitCommon.obj UnitList.obj UnitSLList.obj 
+      UnitComputers.obj UnitTariffs.obj UnitFines.obj UnitUsers.obj 
+      UnitStates.obj UnitSync.obj UnitFormUserPassword.obj 
+      UnitFormNewPassword.obj UnitLogRecords.obj UnitLog.obj UnitOptions.obj 
+      UnitFormOptions.obj UnitShellState.obj UnitFormLogIn.obj 
+      UnitFormClient.obj UnitGames.obj UnitSend.obj UnitClOptions.obj 
+      UnitFormOptionsPassword.obj UnitFormOpenConfig.obj"/>
+    <RESFILES value="AdminMdl.res ErrorMessages.res"/>
     <IDLFILES value=""/>
     <IDLGENFILES value=""/>
     <DEFFILE value=""/>
-    <RESDEPEN value="$(RESFILES) UnitFormMain.dfm UnitFormOrder.dfm UnitFormComputers.dfm 
-      UnitFormTariffs.dfm UnitFormFines.dfm UnitFormTariffTimes.dfm 
-      UnitFormComputersConfig.dfm UnitFormFine.dfm UnitFormUsers.dfm 
-      UnitFormAccessRights.dfm UnitFormChangePassword.dfm UnitFormLogIn.dfm"/>
-    <LIBFILES value=""/>
+    <RESDEPEN value="$(RESFILES) UnitFormMain.dfm UnitFormComputers.dfm UnitFormTariffs.dfm 
+      UnitFormTariffTimes.dfm UnitFormFines.dfm UnitFormUsers.dfm 
+      UnitFormRun.dfm UnitFormFine.dfm UnitFormUserPassword.dfm 
+      UnitFormNewPassword.dfm UnitFormOptions.dfm UnitFormLogIn.dfm 
+      UnitFormClient.dfm UnitFormOptionsPassword.dfm UnitFormOpenConfig.dfm"/>
+    <LIBFILES value="IPHLPAPI.LIB"/>
     <LIBRARIES value="bcbsmp50.lib VCLX50.lib Vcl50.lib"/>
     <SPARELIBS value="Vcl50.lib VCLX50.lib bcbsmp50.lib"/>
-    <PACKAGES value="Vcl50.bpi Vclx50.bpi bcbsmp50.bpi Vclmid50.bpi vclie50.bpi Inetdb50.bpi 
-      Inet50.bpi webmid50.bpi bcbie50.bpi dclocx50.bpi"/>
+    <PACKAGES value="Vcl50.bpi Vclx50.bpi VCLIB50.bpi"/>
     <PATHCPP value=".;"/>
     <PATHPAS value=".;"/>
     <PATHRC value=".;"/>
@@ -37,13 +36,14 @@
     <USERDEFINES value=""/>
     <SYSDEFINES value="NO_STRICT"/>
     <MAINSOURCE value="AdminMdl.cpp"/>
-    <INCLUDEPATH value="$(BCB)\include;$(BCB)\include\vcl"/>
-    <LIBPATH value="$(BCB)\lib\obj;$(BCB)\lib"/>
+    <INCLUDEPATH value="&quot;..\3.00 beta 4.8\AdminModule&quot;;$(BCB)\include;$(BCB)\include\vcl"/>
+    <LIBPATH value="&quot;..\3.00 beta 4.8\AdminModule&quot;;$(BCB)\lib\obj;$(BCB)\lib"/>
     <WARNINGS value="-w-par"/>
   </MACROS>
   <OPTIONS>
-    <IDLCFLAGS value="-I$(BCB)\include -I$(BCB)\include\vcl -src_suffix cpp -boa"/>
-    <CFLAG1 value="-O2 -H=$(BCB)\lib\vcl50.csm -Hc -Vx -Ve -X- -a8 -b- -k- -vi -c -tW -tWM"/>
+    <IDLCFLAGS value="-I&quot;..\3.00 beta 4.8\AdminModule&quot; -I$(BCB)\include -I$(BCB)\include\vcl 
+      -src_suffix cpp -boa"/>
+    <CFLAG1 value="-O2 -H=$(BCB)\lib\vcl50.csm -Hc -Vx -Ve -X- -a1 -b- -k- -vi -c -tW -tWM"/>
     <PFLAGS value="-$Y- -$L- -$D- -v -JPHNE -M"/>
     <RFLAGS value=""/>
     <AFLAGS value="/mx /w2 /zn"/>
@@ -61,7 +61,7 @@ AutoIncBuild=1
 MajorVer=1
 MinorVer=0
 Release=0
-Build=99
+Build=225
 Debug=0
 PreRelease=0
 Special=0
@@ -73,7 +73,7 @@ CodePage=1251
 [Version Info Keys]
 CompanyName=MMM Groups
 FileDescription=
-FileVersion=1.0.0.99
+FileVersion=1.0.0.225
 InternalName=
 LegalCopyright=
 LegalTrademarks=
@@ -83,29 +83,33 @@ ProductVersion=3.0.0.0
 Comments=
 
 [Excluded Packages]
-C:\WINDOWS\System32\ibsmp50.bpl=Borland C++ InterBase Alerter Component
-$(BCB)\Bin\dclado50.bpl=Borland ADO DB Components
-$(BCB)\Bin\dcldb50.bpl=Borland Database Components
-$(BCB)\Bin\dclbde50.bpl=Borland BDE DB Components
-$(BCB)\Bin\dclqrt50.bpl=QuickReport Components
 $(BCB)\Bin\dcltee50.bpl=TeeChart 5.0 Components
+$(BCB)\Bin\dclbde50.bpl=Borland BDE DB Components
+$(BCB)\Bin\dcldb50.bpl=Borland Database Components
+$(BCB)\Bin\dcl31w50.bpl=Delphi 1.0 Compatibility Components
+$(BCB)\Bin\dclqrt50.bpl=QuickReport Components
+$(BCB)\Bin\dcltqr50.bpl=TeeChart 5.0 for QuickReport Components Design Package
+$(BCB)\Bin\bcbsmp50.bpl=Borland C++ Sample Components
+$(BCB)\Bin\dclado50.bpl=Borland ADO DB Components
+C:\WINDOWS\System32\ibsmp50.bpl=Borland C++ InterBase Alerter Component
 $(BCB)\Bin\dcldss50.bpl=Borland Decision Cube Components
 $(BCB)\Bin\applet50.bpl=Borland Control Panel Applet Package
-$(BCB)\Bin\dcltqr50.bpl=TeeChart 5.0 for QuickReport Components Design Package
 $(BCB)\Bin\DCLIB50.bpl=InterBase Data Access Components
 $(BCB)\Bin\dclsmpedit50.bpl=Borland Editor Script Enhancements
 
 [HistoryLists\hlIncludePath]
-Count=3
-Item0=$(BCB)\include;$(BCB)\include\vcl
-Item1=;$(BCB)\include;$(BCB)\include\vcl
-Item2=Graphics;$(BCB)\include;$(BCB)\include\vcl
+Count=4
+Item0=..\3.00 beta 4.8\AdminModule;$(BCB)\include;$(BCB)\include\vcl
+Item1=$(BCB)\include;$(BCB)\include\vcl
+Item2=;$(BCB)\include;$(BCB)\include\vcl
+Item3=Graphics;$(BCB)\include;$(BCB)\include\vcl
 
 [HistoryLists\hlLibraryPath]
-Count=3
-Item0=$(BCB)\lib\obj;$(BCB)\lib
-Item1=;$(BCB)\lib\obj;$(BCB)\lib
-Item2=Graphics;$(BCB)\lib\obj;$(BCB)\lib
+Count=4
+Item0=..\3.00 beta 4.8\AdminModule;$(BCB)\lib\obj;$(BCB)\lib
+Item1=$(BCB)\lib\obj;$(BCB)\lib
+Item2=;$(BCB)\lib\obj;$(BCB)\lib
+Item3=Graphics;$(BCB)\lib\obj;$(BCB)\lib
 
 [HistoryLists\hlDebugSourcePath]
 Count=1

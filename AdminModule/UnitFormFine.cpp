@@ -1,12 +1,11 @@
 //---------------------------------------------------------------------------
 #include <vcl.h>
+#include <stdio.h>
 #pragma hdrstop
 
 #include "UnitFormFine.h"
 #include "UnitFormMain.h"
-#include "UnitFines.h"
-#include "UnitOptionsLoadSave.h"
-#include "UnitLogs.h"
+#include "UnitStates.h"
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
 #pragma resource "*.dfm"
@@ -19,270 +18,55 @@ __fastcall TFormFine::TFormFine(TComponent* Owner)
 //---------------------------------------------------------------------------
 void __fastcall TFormFine::FormShow(TObject *Sender)
 {
-    CurrentFineComputer=new MFineComputer;
-
+    MState *State;
+    MApplyFine *ApplyFine;
     // Заносим выбранные компьютеры в список для штрафования
-    ListViewComputersForFine->Items->Clear();
     TItemStates is=TItemStates()<<isSelected;
     for ( TListItem *Item=FormMain->ListViewComputers->Selected; Item;
         Item=FormMain->ListViewComputers->GetNextItem(Item,sdAll,is) )
     {
-        MComputer *Computer;
-        Computer=(MComputer*)Item->Data;
-        if ( !(Computer->State&mcsWork) ) continue;
         TListItem *NewItem;
-        NewItem=ListViewComputersForFine->Items->Add();
-        NewItem->Data=(void*)Computer;
+        // Проверяем применим ли к компьютеру штраф
+        State=States->Search((int)Item->Data);
+        if ( !State->CmdFine(0,true) ) continue;
+        //
+        NewItem=ListViewFines->Items->Add();
+        ApplyFine=(MApplyFine*)NewItem->Data;
+        ApplyFine->Number=State->Associated();
+        ApplyFine->Fine=NULL;
+        ApplyFine->Wait=false;
+        ApplyFine->Warn=false;
         NewItem->Selected=true;
-        SetListViewComputersForFineLine(NewItem);
+        SetListViewFinesLine(NewItem);
+    }
+    // Заполняем список времен штрафов
+    for ( MFine *Fine=(MFine*)Fines->First; Fine; Fine=(MFine*)Fine->Next )
+    {
+        char line[MAX_FineDescLength+13+1]; *line=0;
+        strcat(line,Fine->Description);
+        strcat(line,"  (");
+        if ( Fine->Time==(24*60) ) strcat(line,"все время)");
+        else sprintf(line+strlen(line),"%.2i мин.)",Fine->Time);
+        ComboBoxTime->Items->Add(line);
     }
 
-    // Заполняем список времен штрафов
-    ComboBoxFineTime->Items->Clear();
-    for ( MFine *Fine=(MFine*)Fines->FirstItem; Fine; Fine=(MFine*)Fine->NextItem )
-        ComboBoxFineTime->Items->Add(IntToStr(Fine->Time)+" мин. - "+Fine->Comment);
-    //
-    RadioButtonCertainTime->Checked=true;
-    TimerDialogLock->Enabled=true;
+    CheckBoxWait->Enabled=false; CheckBoxWait->Checked=true;
+    CheckBoxWarn->Enabled=false; CheckBoxWarn->Checked=false;
+    ActiveControl=ComboBoxTime;
 }
 //---------------------------------------------------------------------------
 void __fastcall TFormFine::FormHide(TObject *Sender)
 {
-    TimerDialogLock->Enabled=false;
-    ListViewComputersForFine->Items->Clear();
-    ListViewFineComputers->Items->Clear();
-    ComboBoxFineTime->Items->Clear();
-    delete CurrentFineComputer;
+    // Чистим интерфейсные элементы
+    ListViewFines->Items->Clear();
+    ComboBoxTime->Items->Clear();
 }
 //---------------------------------------------------------------------------
-void __fastcall TFormFine::TimerDialogLockTimer(TObject *Sender)
-{
-    if ( ProgressBarDialogUseTime->Position<ProgressBarDialogUseTime->Max )
-    {
-        ProgressBarDialogUseTime->Position++;
-    } else
-    {
-        TimerDialogLock->Enabled=false;
-    }
-}
-//---------------------------------------------------------------------------
-void __fastcall TFormFine::ListViewComputersForFineEnter(TObject *Sender)
-{
-    ListViewFineComputers->Selected=NULL;
-}
-//---------------------------------------------------------------------------
-void __fastcall TFormFine::RadioButtonCertainTimeClick(TObject *Sender)
-{
-    if ( Sender==RadioButtonCertainTime )
-    {
-        SetGroupStateCertTime(true);
-        SetGroupStateAllTime(false);
-        CurrentFineComputer->FineTime=24*60+1;
-        ComboBoxFineTimeChange(ComboBoxFineTime);
-    } else if ( Sender==RadioButtonAllTime )
-    {
-        SetGroupStateCertTime(false);
-        SetGroupStateAllTime(true);
-        CurrentFineComputer->FineTime=0;
-        CheckBoxReturnManyClick(CheckBoxReturnMany);
-    }
-}
-//---------------------------------------------------------------------------
-void __fastcall TFormFine::ComboBoxFineTimeChange(TObject *Sender)
-{
-    int ItemIndex;
-    if ( (ItemIndex=ComboBoxFineTime->ItemIndex)<0 ) return;
-    CurrentFineComputer->FineTime=((MFine*)Fines->Item(ItemIndex))->Time;
-    if ( !CheckBoxEnableWaiting->Checked )
-        CurrentFineComputer->FineTime=-CurrentFineComputer->FineTime;
-}
-//---------------------------------------------------------------------------
-void __fastcall TFormFine::CheckBoxEnableWaitingClick(TObject *Sender)
-{
-    if ( CurrentFineComputer->FineTime>(24*60) ) return;
-    if ( (CheckBoxEnableWaiting->Checked&&(CurrentFineComputer->FineTime<0))||
-         ((!CheckBoxEnableWaiting->Checked)&&(CurrentFineComputer->FineTime>0)) )
-        CurrentFineComputer->FineTime=-CurrentFineComputer->FineTime;
-}
-//---------------------------------------------------------------------------
-void __fastcall TFormFine::CheckBoxReturnManyClick(TObject *Sender)
-{
-    CurrentFineComputer->EnableReturnMany=CheckBoxReturnMany->Checked;
-}
-//---------------------------------------------------------------------------
-void __fastcall TFormFine::BitBtnCloseClick(TObject *Sender)
-{
-    Close();
-}
-//---------------------------------------------------------------------------
-void __fastcall TFormFine::SetListViewComputersForFineLine(TListItem *Item_)
-{
-    MComputer *Computer_=(MComputer*)Item_->Data;
-    Item_->ImageIndex=Computer_->GroupColor;
-    Item_->Caption=IntToStr(Computer_->Number);
-}
-//---------------------------------------------------------------------------
-void __fastcall TFormFine::SetListViewFineComputersLine(TListItem *Item_)
-{
-    MFineComputer *FineComputer_=(MFineComputer*)Item_->Data;
-    AnsiString line;
-    // Выставляем номер компьютера и цвет его группы
-    Item_->SubItems->Strings[0]=IntToStr(FineComputer_->Computer->Number);
-    Item_->SubItemImages[0]=FineComputer_->Computer->GroupColor;
-    // Название тарифа и его иконка
-    int TariffID;
-    if ( (TariffID=FineComputer_->Computer->TariffID)!=0 )
-    {
-        MTariff *Tariff=Tariffs->SearchID(TariffID);
-        Item_->SubItems->Strings[1]=Tariff->Name;
-        Item_->SubItemImages[1]=Tariff->IconNumber;
-    } else
-    {
-        Item_->SubItems->Strings[1]="";
-        Item_->SubItemImages[1]=-1;
-    }
-    // Время штрафа
-    int a=FineComputer_->FineTime;
-    if ( a )
-    {
-        if ( a<0 ) line=IntToStr(-a); else line=IntToStr(a);
-        line+=" мин.";
-    } else line="Все время";
-    Item_->SubItems->Strings[2]=line;
-    // Ожидание
-    if ( a ) { if ( a<0 ) line="Нет"; else line="Да"; }
-    else line="";
-    Item_->SubItems->Strings[3]=line;
-    // Сумма для возврата
-    if ( (!a)&&FineComputer_->EnableReturnMany )
-        line=FloatToStrF(FineComputer_->ReturnMany,ffCurrency,8,2);
-    else line="";
-    Item_->SubItems->Strings[4]=line;
-}
-//---------------------------------------------------------------------------
-void __fastcall TFormFine::SetGroupStateCertTime(bool State_)
-{
-    bool enabled;
-    TColor color;
-
-    if ( State_ ) { enabled=true; color=clWindow; }
-    else { enabled=false; color=clBtnFace; }
-
-    ComboBoxFineTime->Enabled=enabled;
-    ComboBoxFineTime->Color=color;
-    CheckBoxEnableWaiting->Enabled=enabled;
-}
-//---------------------------------------------------------------------------
-void __fastcall TFormFine::SetGroupStateAllTime(bool State_)
-{
-    bool enabled;
-
-    if ( State_ ) enabled=true;
-    else enabled=false;
-
-//    CheckBoxReturnMany->Enabled=enabled;
-}
-//---------------------------------------------------------------------------
-void __fastcall TFormFine::ButtonAddClick(TObject *Sender)
-{
-    if ( CurrentFineComputer->FineTime>(24*60) ) return;
-    // Обрабатываем выбранные компьютеры
-    TItemStates is=TItemStates()<<isSelected;
-    for ( TListItem *Item=ListViewComputersForFine->Selected, *NewItem; Item; )
-    {
-        // Добавляем очередной компьютер в список для штрафования
-        TListItem *NewItem;
-        NewItem=ListViewFineComputers->Items->Add();
-        CurrentFineComputer->Computer=(MComputer*)Item->Data;
-        if ( CurrentFineComputer->EnableReturnMany )
-        {
-            // Определяем сумму возвращаемых денег
-//            double ReturnMany;
-        }
-        *((MFineComputer*)NewItem->Data)=*CurrentFineComputer;
-        SetListViewFineComputersLine(NewItem); NewItem->Selected=true;
-        // Удаляем компьютер из списка для штрафования
-        NewItem=ListViewComputersForFine->GetNextItem(Item,sdAll,is);
-        Item->Delete(); Item=NewItem;
-    }
-    //
-    ComboBoxFineTime->ItemIndex=-1;
-    CheckBoxEnableWaiting->Checked=false;
-    CheckBoxReturnMany->Checked=false;
-    RadioButtonCertainTime->Checked=true;
-}
-//---------------------------------------------------------------------------
-void __fastcall TFormFine::ButtonChangeClick(TObject *Sender)
-{
-    if ( CurrentFineComputer->FineTime>(24*60) ) return;
-    TItemStates is=TItemStates()<<isSelected;
-    for ( TListItem *Item=ListViewFineComputers->Selected; Item;
-        Item=ListViewFineComputers->GetNextItem(Item,sdAll,is) )
-    {
-        MFineComputer *FineComputer;
-        FineComputer=(MFineComputer*)Item->Data;
-        MComputer *Computer;
-        Computer=FineComputer->Computer;
-        if ( CurrentFineComputer->EnableReturnMany )
-        {
-            // Определяем сумму возвращаемых денег
-//            double ReturnMany;
-        }
-        *FineComputer=*CurrentFineComputer;
-        FineComputer->Computer=Computer;
-        SetListViewFineComputersLine(Item);
-    }
-    //
-    ComboBoxFineTime->ItemIndex=-1;
-    CheckBoxEnableWaiting->Checked=false;
-    CheckBoxReturnMany->Checked=false;
-    RadioButtonCertainTime->Checked=true;
-}
-//---------------------------------------------------------------------------
-void __fastcall TFormFine::ButtonDeleteClick(TObject *Sender)
-{
-    TItemStates is=TItemStates()<<isSelected;
-    for ( TListItem *Item=ListViewFineComputers->Selected, *NewItem; Item; )
-    {
-        MFineComputer *FineComputer;
-        FineComputer=(MFineComputer*)Item->Data;
-        // Добавляем очередной компьютер в список для штрафования
-        NewItem=ListViewComputersForFine->Items->Add();
-        NewItem->Data=(void*)FineComputer->Computer;
-        SetListViewComputersForFineLine(NewItem);
-        // Удаляем компьютер из списка оформленных
-        NewItem=ListViewFineComputers->GetNextItem(Item,sdAll,is);
-        Item->Delete(); Item=NewItem;
-    }
-}
-//---------------------------------------------------------------------------
-void __fastcall TFormFine::ButtonFineClick(TObject *Sender)
-{
-    TItemStates is=TItemStates()<<isSelected;
-    for ( TListItem *Item=ListViewFineComputers->Selected, *NewItem; Item; )
-    {
-        MFineComputer *FineComputer;
-        FineComputer=(MFineComputer*)Item->Data;
-        //
-        if ( State->CurrentAdmin ) LogCompRun(FineComputer->Computer,(MTariff*)8,
-            FineComputer->FineTime,0.);
-        // Применяем штраф к компьютеру
-        FineComputer->Computer->CmdFine(FineComputer->FineTime);
-        // Удаляем компьютер из списка для применения штрафа
-        NewItem=ListViewFineComputers->GetNextItem(Item,sdAll,is);
-        Item->Delete(); Item=NewItem;
-    }
-}
-//---------------------------------------------------------------------------
-void __fastcall TFormFine::ListViewFineComputersEnter(TObject *Sender)
-{
-    ListViewComputersForFine->Selected=NULL;
-}
-//---------------------------------------------------------------------------
-void __fastcall TFormFine::ListViewFineComputersInsert(TObject *Sender,
+void __fastcall TFormFine::ListViewFinesInsert(TObject *Sender,
       TListItem *Item)
 {
-    Item->Data=(void*)new MFineComputer;
+    Item->ImageIndex=-1;  // Устранение ошибки VCL
+    Item->Data=new MApplyFine;
     Item->SubItems->Add("");
     Item->SubItems->Add("");
     Item->SubItems->Add("");
@@ -290,10 +74,117 @@ void __fastcall TFormFine::ListViewFineComputersInsert(TObject *Sender,
     Item->SubItems->Add("");
 }
 //---------------------------------------------------------------------------
-void __fastcall TFormFine::ListViewFineComputersDeletion(TObject *Sender,
+void __fastcall TFormFine::ListViewFinesDeletion(TObject *Sender,
       TListItem *Item)
 {
-    delete (MFineComputer*)Item->Data;
+    delete (MApplyFine*)Item->Data;
+}
+//---------------------------------------------------------------------------
+void __fastcall TFormFine::ComboBoxTimeClick(TObject *Sender)
+{
+    MFine *SelFine;
+    bool Wait, Warn;
+
+    SelFine=(MFine*)Fines->Item(ComboBoxTime->ItemIndex);
+    if ( SelFine==NULL ) return;
+
+//    CheckBoxWarn->Enabled=true;
+    Warn=CheckBoxWarn->Checked;
+    if ( (SelFine->Time==(24*60))||Warn )
+    {
+        CheckBoxWait->Enabled=false;
+        Wait=false;
+    } else
+    {
+        CheckBoxWait->Enabled=true;
+        Wait=CheckBoxWait->Checked;
+    }
+
+    // Заносим новые значения штрафа для выбранных компьютеров
+    TItemStates is=TItemStates()<<isSelected;
+    for ( TListItem *Item=ListViewFines->Selected; Item;
+        Item=ListViewFines->GetNextItem(Item,sdAll,is) )
+    {
+        MApplyFine *ApplyFine;
+        ApplyFine=(MApplyFine*)Item->Data;
+        ApplyFine->Fine=SelFine;
+        ApplyFine->Wait=Wait;
+        ApplyFine->Warn=Warn;
+        SetListViewFinesLine(Item);
+    }
+}
+//---------------------------------------------------------------------------
+void __fastcall TFormFine::BitBtnFineClick(TObject *Sender)
+{
+    MApplyFine *ApplyFine;
+    int Time;
+    MState *State;
+
+    // Удаляем оштрафованые компьютеры из списка
+    TItemStates is=TItemStates()<<isSelected;
+    TListItem *Item=ListViewFines->Selected, *NextItem;
+    while(Item)
+    {
+        NextItem=ListViewFines->GetNextItem(Item,sdAll,is);
+        ApplyFine=(MApplyFine*)Item->Data;
+        if ( ApplyFine->Fine!=NULL )
+        {
+            State=States->Search(ApplyFine->Number);
+            // Проверяем возможно ли применить команду
+            if ( State->CmdFine(0,true) )
+            {
+                Time=ApplyFine->Wait||(ApplyFine->Fine->Time==(24*60))?
+                    ApplyFine->Fine->Time: -ApplyFine->Fine->Time;
+                // Добавляем запись в лог
+                if ( !Log->AddFine(State->Associated(),ApplyFine->Fine->ID,Time) )
+                {
+                    ShellState->State|=mssErrorLog; FormMain->SetShell();
+                    FormMain->MessageBoxError(1,2); break;
+                }
+                // Применяем команду
+                State->CmdFine(Time,false);
+                // Удаляем строку из списка
+                Item->Delete();
+            }
+        }
+        Item=NextItem;
+    }
+    // Сохраняем новые состояния
+    if ( !States->Save() )
+    {
+        ShellState->State|=mssErrorState; FormMain->SetShell();
+        FormMain->MessageBoxError(1,3);
+    }
+    // Обновляем список компьютеров
+    FormMain->UpdateListViewComputers(false);
+}
+//---------------------------------------------------------------------------
+void __fastcall TFormFine::SetListViewFinesLine(TListItem *Item_)
+{
+    MApplyFine *SelFine=(MApplyFine*)Item_->Data;
+    MComputer *Computer=Computers->Search(SelFine->Number);
+
+    // Номер компьютера и цвет его группы
+    Item_->SubItemImages[0]=Computer->GroupColor;
+    Item_->SubItems->Strings[0]=IntToStr(SelFine->Number);
+    //
+    if ( SelFine->Fine!=NULL )
+    {
+        // Описание штрафа
+        Item_->SubItems->Strings[1]=SelFine->Fine->Description;
+        // Время штрафа
+        if ( SelFine->Warn ) Item_->SubItems->Strings[2]="";
+        else
+        {
+            int Time=SelFine->Fine->Time;
+            if ( Time==(24*60) ) Item_->SubItems->Strings[2]="Все время";
+            else Item_->SubItems->Strings[2]=IntToStr(Time);
+        }
+        // Ожидание
+        if ( (SelFine->Fine->Time==(24*60))||SelFine->Warn||
+            (!SelFine->Wait) ) Item_->SubItems->Strings[3]="";
+        else Item_->SubItems->Strings[3]="Да";
+    }
 }
 //---------------------------------------------------------------------------
 

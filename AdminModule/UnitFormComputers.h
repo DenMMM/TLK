@@ -16,61 +16,48 @@ class TFormComputers : public TForm
 {
 __published:	// IDE-managed Components
     TListView *ListViewComputers;
-    TLabel *LabelAddress;
-    TEdit *EditAddress;
+    TBevel *BevelBorder;
+    TBevel *Bevel3;
     TLabel *LabelNumber;
     TEdit *EditNumber;
-    TBevel *BevelBorder;
-    TBitBtn *BitBtnMarkerRed;
-    TBitBtn *BitBtnMarkerLime;
-    TLabel *LabelMarkerColor;
-    TBitBtn *BitBtnMarkerAqua;
-    TBitBtn *BitBtnMarkerYellow;
-    TShape *ShapeMarkerColor;
-    TBitBtn *BitBtnSave;
-    TRadioButton *RadioButtonJust;
-    TRadioButton *RadioButtonPattern;
-    TRadioButton *RadioButtonNet;
-    TLabel *LabelPattern;
-    TEdit *EditPattern;
-    TBevel *BevelJust;
-    TBevel *BevelPattern;
-    TLabel *LabelBeginNumber;
-    TEdit *EditBeginNumber;
-    TLabel *LabelEndNumber;
-    TEdit *EditEndNumber;
-    TLabel *LabelGlobalPattern;
-    TEdit *EditGlobalPattern;
-    TBevel *BevelNet;
-    TBitBtn *BitBtnCancel;
-    TBitBtn *BitBtnHelp;
+    TEdit *EditAddress;
+    TLabel *LabelAddress;
+    TBevel *Bevel2;
+    TLabel *LabelComputerMarker;
+    TBitBtn *BitBtnNone;
+    TBitBtn *BitBtnRed;
+    TBitBtn *BitBtnLime;
+    TBitBtn *BitBtnAqua;
+    TBitBtn *BitBtnYellow;
+    TBevel *Bevel11;
     TButton *ButtonAdd;
-    TButton *ButtonDelete;
-    TButton *ButtonChange;
-    TBevel *Bevel1;
-    TBitBtn *BitBtnMarkerNone;
+    TButton *ButtonDel;
+    TButton *ButtonSave;
+    TButton *ButtonCancel;
+    TButton *ButtonHelp;
+    TBitBtn *BitBtnUsed;
+    TBitBtn *BitBtnNotUsed;
+    TLabel *Label1;
     void __fastcall FormShow(TObject *Sender);
-    void __fastcall EditAddressExit(TObject *Sender);
-    void __fastcall EditNumberExit(TObject *Sender);
-    void __fastcall RadioButtonJustClick(TObject *Sender);
-    void __fastcall BitBtnSaveClick(TObject *Sender);
-    void __fastcall ButtonAddClick(TObject *Sender);
-    void __fastcall ButtonDeleteClick(TObject *Sender);
-    void __fastcall ButtonChangeClick(TObject *Sender);
     void __fastcall ListViewComputersDeletion(TObject *Sender,
           TListItem *Item);
-    void __fastcall ListViewComputersSelectItem(TObject *Sender,
-          TListItem *Item, bool Selected);
-    void __fastcall FormHide(TObject *Sender);
     void __fastcall ListViewComputersInsert(TObject *Sender,
           TListItem *Item);
-    void __fastcall BitBtnMarkerNoneClick(TObject *Sender);
+    void __fastcall EditNumberExit(TObject *Sender);
+    void __fastcall EditAddressExit(TObject *Sender);
+    void __fastcall ButtonAddClick(TObject *Sender);
+    void __fastcall ButtonDelClick(TObject *Sender);
+    void __fastcall ButtonSaveClick(TObject *Sender);
+    void __fastcall BitBtnNoneClick(TObject *Sender);
+    void __fastcall BitBtnUsedClick(TObject *Sender);
+    void __fastcall ListViewComputersSelectItem(TObject *Sender,
+          TListItem *Item, bool Selected);
+    void __fastcall FormClose(TObject *Sender, TCloseAction &Action);
+    void __fastcall ListViewComputersCompare(TObject *Sender,
+          TListItem *Item1, TListItem *Item2, int Data, int &Compare);
 private:	// User declarations
-    MCompParam *TMPCompParam;
-    void __fastcall SetListViewComputersLine(TListItem *Item_);
-    void __fastcall SetGroupStateJust(bool State_);
-    void __fastcall SetGroupStatePattern(bool State_);
-    void __fastcall SetGroupStateNet(bool State_);
+    void SetEdit(bool Edit_);
+    void SetListViewComputersLine(TListItem *Item_);
 public:		// User declarations
     __fastcall TFormComputers(TComponent* Owner);
 };

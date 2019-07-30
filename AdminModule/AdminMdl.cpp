@@ -3,61 +3,68 @@
 #pragma hdrstop
 USERES("AdminMdl.res");
 USEFORM("UnitFormMain.cpp", FormMain);
+USEFORM("UnitFormComputers.cpp", FormComputers);
+USEFORM("UnitFormTariffs.cpp", FormTariffs);
+USEFORM("UnitFormTariffTimes.cpp", FormTariffTimes);
+USEFORM("UnitFormFines.cpp", FormFines);
+USEFORM("UnitFormUsers.cpp", FormUsers);
+USEFORM("UnitFormRun.cpp", FormRun);
+USEFORM("UnitFormFine.cpp", FormFine);
+USEUNIT("UnitCommon.cpp");
+USEUNIT("UnitList.cpp");
+USEUNIT("UnitSLList.cpp");
 USEUNIT("UnitComputers.cpp");
 USEUNIT("UnitTariffs.cpp");
-USEFORM("UnitFormOrder.cpp", FormOrder);
-USEFORM("UnitFormComputers.cpp", FormComputers);
-USEUNIT("UnitBaseClassMList.cpp");
-USEFORM("UnitFormTariffs.cpp", FormTariffs);
-USEFORM("UnitFormFines.cpp", FormFines);
-USEUNIT("UnitOrderComputers.cpp");
-USEUNIT("UnitListOfComputers.cpp");
-USEUNIT("UnitListOfTariffs.cpp");
-USEUNIT("UnitListOfTariffTimes.cpp");
-USEFORM("UnitFormTariffTimes.cpp", FormTariffTimes);
-USEFORM("UnitFormComputersConfig.cpp", FormComputersConfig);
-USEUNIT("UnitOptionsLoadSave.cpp");
-USEUNIT("UnitCommon.cpp");
-USEUNIT("UnitListOfIDs.cpp");
 USEUNIT("UnitFines.cpp");
-USEUNIT("UnitFineComputers.cpp");
-USEFORM("UnitFormFine.cpp", FormFine);
-USEFORM("UnitFormUsers.cpp", FormUsers);
-USEFORM("UnitFormAccessRights.cpp", FormAccessRights);
-USEUNIT("UnitGames.cpp");
-USEFORM("UnitFormChangePassword.cpp", FormChangePassword);
 USEUNIT("UnitUsers.cpp");
+USEUNIT("UnitStates.cpp");
+USEUNIT("UnitSync.cpp");
+USELIB("IPHLPAPI.LIB");
+USEFORM("UnitFormUserPassword.cpp", FormUserPassword);
+USEFORM("UnitFormNewPassword.cpp", FormNewPassword);
+USEUNIT("UnitLogRecords.cpp");
+USEUNIT("UnitLog.cpp");
+USEUNIT("UnitOptions.cpp");
+USEFORM("UnitFormOptions.cpp", FormOptions);
+USEUNIT("UnitShellState.cpp");
 USEFORM("UnitFormLogIn.cpp", FormLogIn);
-USEUNIT("UnitThreadNetSync.cpp");
-USEUNIT("UnitLogs.cpp");
-USEUNIT("UnitState.cpp");
+USERES("ErrorMessages.res");
+USEFORM("UnitFormClient.cpp", FormClient);
+USEUNIT("UnitGames.cpp");
+USEUNIT("UnitSend.cpp");
+USEUNIT("UnitClOptions.cpp");
+USEFORM("UnitFormOptionsPassword.cpp", FormOptionsPassword);
+USEFORM("UnitFormOpenConfig.cpp", FormOpenConfig);
 //---------------------------------------------------------------------------
 WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 {
-    HANDLE mutex=::CreateMutex(NULL,true,"TLKRunMutex");
+    HANDLE mutex=::CreateMutex(NULL,true,"TLK30RunMutex");
     if ( (mutex==NULL)||(::GetLastError()==ERROR_ALREADY_EXISTS) )
     {
         ::CloseHandle(mutex);
-        ::MessageBox(NULL,"TimeLocker уже запущен или требуемый системный ресурс занят !",
-            "TimeLocker - ошибка",MB_OK|MB_ICONERROR|MB_APPLMODAL);
+        ::MessageBox(NULL,"TLK уже запущен или требуемый системный ресурс занят !",
+            "TLK - ошибка",MB_OK|MB_ICONERROR|MB_APPLMODAL);
         return 0;
     }
         try
         {
          Application->Initialize();
-         Application->Title = "TimeLocker 3.0";
+         Application->Title = "TLK 3.0";
          Application->CreateForm(__classid(TFormMain), &FormMain);
-         Application->CreateForm(__classid(TFormOrder), &FormOrder);
          Application->CreateForm(__classid(TFormComputers), &FormComputers);
          Application->CreateForm(__classid(TFormTariffs), &FormTariffs);
-         Application->CreateForm(__classid(TFormFines), &FormFines);
          Application->CreateForm(__classid(TFormTariffTimes), &FormTariffTimes);
-         Application->CreateForm(__classid(TFormComputersConfig), &FormComputersConfig);
-         Application->CreateForm(__classid(TFormFine), &FormFine);
+         Application->CreateForm(__classid(TFormFines), &FormFines);
          Application->CreateForm(__classid(TFormUsers), &FormUsers);
-         Application->CreateForm(__classid(TFormAccessRights), &FormAccessRights);
-         Application->CreateForm(__classid(TFormChangePassword), &FormChangePassword);
+         Application->CreateForm(__classid(TFormRun), &FormRun);
+         Application->CreateForm(__classid(TFormFine), &FormFine);
+         Application->CreateForm(__classid(TFormUserPassword), &FormUserPassword);
+         Application->CreateForm(__classid(TFormNewPassword), &FormNewPassword);
+         Application->CreateForm(__classid(TFormOptions), &FormOptions);
          Application->CreateForm(__classid(TFormLogIn), &FormLogIn);
+         Application->CreateForm(__classid(TFormClient), &FormClient);
+         Application->CreateForm(__classid(TFormOptionsPassword), &FormOptionsPassword);
+         Application->CreateForm(__classid(TFormOpenConfig), &FormOpenConfig);
          Application->Run();
         }
         catch (Exception &exception)

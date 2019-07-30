@@ -6,62 +6,45 @@
 #include <Controls.hpp>
 #include <StdCtrls.hpp>
 #include <Forms.hpp>
+#include <Menus.hpp>
 #include <ComCtrls.hpp>
-#include <ExtCtrls.hpp>
 #include <Dialogs.hpp>
-#include <Buttons.hpp>
+#include <ImgList.hpp>
 //---------------------------------------------------------------------------
-#include "UnitEvents.h"
+#include "UnitLogRecords.h"
+//---------------------------------------------------------------------------
+struct MLogFile
+{
+    char Name[MAX_PATH+1];
+    MLogRecords Records;
+};
 //---------------------------------------------------------------------------
 class TFormMain : public TForm
 {
 __published:	// IDE-managed Components
-    TLabel *Label1;
-    TEdit *EditName;
-    TLabel *Label2;
-    TEdit *EditJob;
-    TLabel *Label3;
-    TLabel *LabelOpenTime;
-    TLabel *Label5;
-    TBevel *Bevel1;
-    TLabel *LabelCloseTime;
-    TLabel *LabelDurationTime;
-    TLabel *LabelLengthTime;
-    TBevel *Bevel2;
-    TLabel *Label9;
-    TLabel *LabelPayTime;
-    TLabel *Label11;
-    TLabel *LabelPayMany;
-    TButton *ButtonSelect;
+    TMainMenu *MainMenu;
+    TStatusBar *StatusBar1;
+    TMenuItem *NOpen;
+    TMenuItem *N2;
+    TMenuItem *NClose;
     TOpenDialog *OpenDialog;
-    TBitBtn *BitBtnClose;
-    TMemo *MemoReport;
-    TButton *ButtonSaveReport;
-    TSaveDialog *SaveDialog;
-    TLabel *Label4;
-    TLabel *LabelSelPayMany;
-    TPanel *PanelLog;
-    TListView *ListViewEvents;
-    TListView *ListViewFiles;
-    TSplitter *SplitterLog;
-    TButton *ButtonShowFiles;
-    void __fastcall ButtonSelectClick(TObject *Sender);
-    void __fastcall ListViewEventsInsert(TObject *Sender, TListItem *Item);
-    void __fastcall BitBtnCloseClick(TObject *Sender);
-    void __fastcall ListViewEventsColumnClick(TObject *Sender,
-          TListColumn *Column);
-    void __fastcall ButtonSaveReportClick(TObject *Sender);
-    void __fastcall ListViewEventsDeletion(TObject *Sender,
-          TListItem *Item);
-    void __fastcall ListViewEventsSelectItem(TObject *Sender,
-          TListItem *Item, bool Selected);
-    void __fastcall ButtonShowFilesClick(TObject *Sender);
-    void __fastcall ListViewFilesSelectItem(TObject *Sender,
-          TListItem *Item, bool Selected);
+    TImageList *ImageList;
+    TMenuItem *NWindows;
+    TMenuItem *NFile;
+    TMenuItem *NCascade;
+    TMenuItem *NTile;
+    TMenuItem *N4;
+    void __fastcall NOpenClick(TObject *Sender);
+    void __fastcall NCloseClick(TObject *Sender);
+    void __fastcall FormClose(TObject *Sender, TCloseAction &Action);
+    void __fastcall NWindowsClick(TObject *Sender);
+    void __fastcall NCascadeClick(TObject *Sender);
+    void __fastcall NTileClick(TObject *Sender);
 private:	// User declarations
-    bool ShowFiles(AnsiString FilePath_);
-    bool ShowLog(AnsiString FileName_);
 public:		// User declarations
+    void WindowOpen(MLogFile *File_, TForm *Window_);
+    void WindowCaption(TForm *Window_, char *Caption_);
+    void WindowClose(TForm *Window_);
     __fastcall TFormMain(TComponent* Owner);
 };
 //---------------------------------------------------------------------------

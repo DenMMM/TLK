@@ -2,33 +2,44 @@
 #ifndef UnitGamesH
 #define UnitGamesH
 //---------------------------------------------------------------------------
-#include "UnitBaseClassMList.h"
+#include "UnitSLList.h"
+//---------------------------------------------------------------------------
+#define MAX_PrgNameLength   32
+#define MAX_PrgCmdLength    128
+#define MAX_PrgIconLength   128
 //---------------------------------------------------------------------------
 class MGame;
 class MGames;
 //---------------------------------------------------------------------------
-class MGame:public MListItem
+class MGame:public MSLListItem
 {
 public:
-    AnsiString Name;
-    AnsiString CommandLine;
-    AnsiString IconFile;
+    bool Copy(MListItem *SrcItem_);
+public:
+    char Name[MAX_PrgNameLength+1];
+    char Command[MAX_PrgCmdLength+1];
+    char Icon[MAX_PrgIconLength+1];
     MGames *SubGames;
 
-    MGame &operator=(MGame &Game_);
+    bool SetName(char *Name_);
+    bool SetCommand(char *Command_);
+    bool SetIcon(char *Icon_);
+
+    // Функции механизма сохранения/загрузки данных
+    unsigned GetDataSize();
+    char *SetData(char *Data_);
+    char *GetData(char *Data_, char *Limit_);
 
     MGame();
     ~MGame();
 };
 //---------------------------------------------------------------------------
-class MGames:public MList
+class MGames:public MSLList
 {
 private:
-    MListItem *new_() { return (MListItem*)(new MGame); }
-    void delete_(MListItem *ListItem_) { delete ((MGame*)ListItem_); }
+    MListItem *operator_new(unsigned Type_) { return (MListItem*)new MGame; }
+    void operator_delete(MListItem *DelItem_) { delete (MGame*)DelItem_; }
 public:
-    MGames &operator=(MGames &Games_);
-
     MGames() { constructor(); }
     ~MGames() { destructor(); }
 };

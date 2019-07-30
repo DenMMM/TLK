@@ -50,12 +50,12 @@ VOID WINAPI ServiceMain(DWORD dwArgc, LPTSTR *lpszArgv)
 
     //
     if ( (Event=::CreateEvent(NULL,FALSE,FALSE,"TLK_RegChange_Event"))==NULL ) goto exit;
-    if ( (::RegOpenKeyEx(HKEY_LOCAL_MACHINE,"SOFTWARE\\MMM Groups\\Time Locker\\3.0\\Client",
+    if ( (::RegOpenKeyEx(HKEY_LOCAL_MACHINE,"Software\\MMM Groups\\TLK\\3.0\\Client",
         0,KEY_NOTIFY|KEY_QUERY_VALUE,&Key))!=ERROR_SUCCESS ) goto exit;
 //    ServiceStartProcess();
 
-    // Считываем новые настройки клиента
-    if ( StateLoad(&State) ) Route(State.GamesPages&mgpRoute);
+    // Считываем настройки клиента
+    if ( StateLoad(&State) ) Route(&State);
 
     // Информируем SCM об успешном запуске службы
     service_status.dwCurrentState=SERVICE_RUNNING;
@@ -69,8 +69,11 @@ VOID WINAPI ServiceMain(DWORD dwArgc, LPTSTR *lpszArgv)
         if ( (::RegNotifyChangeKeyValue(Key,FALSE,
             REG_NOTIFY_CHANGE_LAST_SET,Event,TRUE))!=ERROR_SUCCESS ) break;
         // Ждем события и периодически проверяем очередь сообщений потока
-        while(::WaitForSingleObject(Event,200)!=WAIT_OBJECT_0)
+        while(true)
         {
+            if ( ::WaitForSingleObject(Event,200)==WAIT_OBJECT_0 )
+                { StateLoad(&State); break; }
+            else if ( Timer(&State) ) break;
             // Проверяем очередь сообщений
             if ( !::PeekMessage(&Message,NULL,0,0,PM_REMOVE) ) continue;
             //
@@ -78,8 +81,7 @@ VOID WINAPI ServiceMain(DWORD dwArgc, LPTSTR *lpszArgv)
                 (Message.message==scmSHUTDOWN) ) goto exit;
 //            if ( Message.message==scmINTERROGATE ) ;
         }
-        // Считываем новые настройки клиента
-        if ( StateLoad(&State) ) Route(State.GamesPages&mgpRoute);
+        Route(&State);
     }
 
 exit:
@@ -111,48 +113,94 @@ void ServiceStartProcess()
     ::SetServiceStatus(service_status_handle,&service_status);
 }
 //---------------------------------------------------------------------------
-void BasicEncode(char *Data_, int DataSize_, unsigned int Code_)
+void BasicEncode(char *Data_, unsigned DataSize_, unsigned Code_)
 {
-    for ( int i=DataSize_-sizeof(unsigned int); i>=0; i-- ) *((unsigned int*)(Data_+i))-=Code_;
+    Data_+=DataSize_-sizeof(unsigned);
+
+    while(DataSize_>=sizeof(unsigned))
+    {
+        *((unsigned*)Data_)-=Code_;
+        Data_--; DataSize_--;
+    }
 }
 //---------------------------------------------------------------------------
 bool StateLoad(MState *State_)
 {
     HKEY key=NULL;
     unsigned long data_size;
-    char *all_data=NULL;
 
     // Открываем
-    if ( ::RegOpenKeyEx(HKEY_LOCAL_MACHINE,"Software\\MMM Groups\\Time Locker\\3.0\\Client",
+    if ( ::RegOpenKeyEx(HKEY_LOCAL_MACHINE,"Software\\MMM Groups\\TLK\\3.0\\Client",
         NULL,KEY_QUERY_VALUE,&key)!=ERROR_SUCCESS ) goto error;
     // Определяем размер
     if ( ::RegQueryValueEx(key,"State",NULL,NULL,NULL,&data_size)!=ERROR_SUCCESS ) goto error;
     // Проверяем его на допустимость
     if ( data_size!=sizeof(MState) ) goto error;
-    // Выделяем память под данные
-    all_data=(char*)State_;
-//    if ( (all_data=new char[data_size])==NULL ) goto error;
     // Считываем данные
-    if ( ::RegQueryValueEx(key,"State",NULL,NULL,all_data,&data_size)!=ERROR_SUCCESS ) goto error;
+    if ( ::RegQueryValueEx(key,"State",NULL,NULL,(char*)State_,&data_size)!=ERROR_SUCCESS ) goto error;
     ::RegCloseKey(key); key=NULL;
 
-    BasicEncode(all_data,data_size,0xD7C1A2D3);
+    BasicEncode((char*)State_,data_size,0xE2B7C9F9);
+    // Дополнительные проверки
+    if ( (State_->Size!=(data_size-sizeof(unsigned)*2))||(State_->Zero!=0) ) goto error;
 
-//    delete[] all_data;
     return true;
 error:
     if ( key!=NULL ) ::RegCloseKey(key);
-//    delete[] all_data;
     return false;
 }
 //---------------------------------------------------------------------------
-void Route(bool Enable_)
+bool GetLocalTimeInt64(__int64 *lpInt64)
+{
+    SYSTEMTIME ssTime;
+    FILETIME FileTime;
+    LARGE_INTEGER LargeInteger;
+    ::GetLocalTime(&ssTime);
+    if ( !::SystemTimeToFileTime(&ssTime,&FileTime) ) return false;
+    memcpy(&LargeInteger,&FileTime,sizeof(LargeInteger));
+    *lpInt64=LargeInteger.QuadPart;
+    return true;
+}
+//---------------------------------------------------------------------------
+bool Timer(MState *State_)
+{
+    __int64 SystemTime;
+
+    // Берем системное время
+    if ( !GetLocalTimeInt64(&SystemTime) ) return false;
+    // Проверяем окончание времени работы и времени штрафа
+    if ( (!(State_->State&mcsWork))||(State_->State&(mcsPause|mcsOpen))||
+        (SystemTime<(State_->StartWorkTime+State_->SizeWorkTime*60*10000000i64)) )
+    {
+        if ( (!(State_->State&mcsFine))||
+            (SystemTime<(State_->StartFineTime+State_->SizeFineTime*60*10000000i64)) ) return false;
+        State_->StartFineTime=0; State_->SizeFineTime=0;
+        State_->State&=~mcsFine;
+    } else
+    {
+        State_->State=mcsFree|(State_->State&mcsOpen);
+        State_->StartWorkTime=0; State_->SizeWorkTime=0;
+        State_->StartFineTime=0; State_->SizeFineTime=0;
+        State_->StopTimerTime=0;
+        State_->Programs=0;
+    }
+    return true;
+}
+//---------------------------------------------------------------------------
+void Route(MState *State_)
 {
     ULONG TableSize;
     PMIB_IFTABLE TableIF=NULL;
     PMIB_IFROW RecordIF;
     PIP_PER_ADAPTER_INFO AdapterInfo;
     MIB_IPFORWARDROW Record;
+    bool Enable;
+
+    // Определяем добавить или удалить маршрут
+    Enable=(State_->State&mcsOpen)||
+        ((State_->State&mcsWork)&&
+        (!(State_->State&(mcsFine|mcsPause)))&&
+        (State.Programs&mgpRoute));
 
     // Запрашиваем размер таблицы интерфейсов
     TableSize=0;
@@ -186,7 +234,7 @@ void Route(bool Enable_)
 //        Record.dwForwardType=4;
 //        Record.dwForwardProto=3;
         // Добавляем/удаляем запись в таблицу
-        if ( Enable_ ) ::CreateIpForwardEntry(&Record);
+        if ( Enable ) ::CreateIpForwardEntry(&Record);
         else ::DeleteIpForwardEntry(&Record);
 error2:
         delete[] AdapterInfo;

@@ -13,20 +13,21 @@
 #include <ImgList.hpp>
 #include <ComCtrls.hpp>
 //---------------------------------------------------------------------------
-#include "UnitGames.h"
+#include "UnitClOptions.h"
 #include "UnitState.h"
-#include "UnitThreadNetSync.h"
+#include "UnitSync.h"
+#include "UnitSend.h"
+#include "UnitGames.h"
+#include "UnitMessage.h"
 //---------------------------------------------------------------------------
 #define Max_EnterPasswordTime ((int)30)
-#define WaitRebootTime ((int)20)
-#define MessageTime ((int)10)
 //---------------------------------------------------------------------------
-#define mimNone ((int)0)
-#define mimEndTime ((int)1)
-#define mimLocked ((int)2)
-#define mimPaused ((int)3)
-#define mimFine ((int)4)
-#define mimTimePaused ((int)5)
+#define mimNone ((int)0)        // Скрыть картинку с сообщением
+#define mimEndTime ((int)1)     // Время закончилось
+#define mimLocked ((int)2)      // Компьютер закрыт
+#define mimPaused ((int)3)      // Компьютер прикрыт адмиинстратором или аварийно
+#define mimFine ((int)4)        // Применен штраф
+#define mimTimePaused ((int)5)  // Время приостановлено
 //---------------------------------------------------------------------------
 class TFormMain : public TForm
 {
@@ -65,21 +66,23 @@ __published:	// IDE-managed Components
     void __fastcall SpeedButtonOptionsClick(TObject *Sender);
 private:	// User declarations
     int TimeToReboot;
-    int MessageTimer;
-    void __fastcall AddGamesToTree(MGames *Games_, TTreeNode *TreeNode_, TImageList *ImageList_);
+    bool MessageAreShowed;
+    void __fastcall SetState(MStateInfo *Info_);
     void __fastcall ShowGames(unsigned int Pages_);
     void __fastcall ShowImageMessage(int Message_);
     void __fastcall HideWindows(bool Hide_);
-    void __fastcall DrawMessage(HANDLE message_bitmap, BITMAP &bitmap);
+    void __fastcall AddGamesToTree(MGames *Games_, TTreeNode *TreeNode_, TImageList *ImageList_);
 public:		// User declarations
-    void __fastcall SetState();
     __fastcall TFormMain(TComponent* Owner);
 };
 //---------------------------------------------------------------------------
 extern PACKAGE TFormMain *FormMain;
 //---------------------------------------------------------------------------
+extern MClOptions *Options;
 extern MState *State;
-extern MThreadNetSync *ThreadNetSync;
+extern MSync *Sync;
+extern MSend *Send;
+extern MMessage *Message;
 //---------------------------------------------------------------------------
 #endif
 

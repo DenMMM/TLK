@@ -1,11 +1,11 @@
 object FormFines: TFormFines
-  Left = 359
-  Top = 213
+  Left = 285
+  Top = 216
   BorderIcons = [biSystemMenu]
   BorderStyle = bsSingle
   Caption = 'Штрафы'
-  ClientHeight = 227
-  ClientWidth = 371
+  ClientHeight = 329
+  ClientWidth = 549
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -17,130 +17,125 @@ object FormFines: TFormFines
   OnShow = FormShow
   PixelsPerInch = 96
   TextHeight = 13
-  object Bevel1: TBevel
-    Left = 6
-    Top = 6
-    Width = 359
-    Height = 191
+  object BevelBorder: TBevel
+    Left = 4
+    Top = 4
+    Width = 541
+    Height = 289
     Style = bsRaised
   end
-  object LabelTimeText: TLabel
-    Left = 174
-    Top = 122
+  object Bevel12: TBevel
+    Left = 12
+    Top = 228
+    Width = 441
+    Height = 57
+    Shape = bsFrame
+  end
+  object LabelDescription: TLabel
+    Left = 46
+    Top = 238
+    Width = 53
+    Height = 13
+    Alignment = taRightJustify
+    Caption = 'Описание:'
+  end
+  object LabelTime: TLabel
+    Left = 22
+    Top = 262
     Width = 117
     Height = 13
     Alignment = taRightJustify
     Caption = 'Время штрафа (минут):'
   end
-  object LabelCommentText: TLabel
-    Left = 59
-    Top = 146
+  object ButtonSave: TButton
+    Left = 268
+    Top = 300
+    Width = 85
+    Height = 25
+    Caption = 'Принять'
+    ModalResult = 1
+    TabOrder = 5
+    OnClick = ButtonSaveClick
+  end
+  object ButtonCancel: TButton
+    Left = 356
+    Top = 300
+    Width = 85
+    Height = 25
+    Caption = 'Отмена'
+    ModalResult = 2
+    TabOrder = 6
+  end
+  object ButtonHelp: TButton
+    Left = 452
+    Top = 300
+    Width = 85
+    Height = 25
+    Caption = 'Справка'
+    Enabled = False
+    TabOrder = 7
+  end
+  object ButtonAdd: TButton
+    Left = 462
+    Top = 234
     Width = 73
-    Height = 13
-    Alignment = taRightJustify
-    Caption = 'Комментарий:'
+    Height = 22
+    Caption = 'Добавить'
+    TabOrder = 3
+    OnClick = ButtonAddClick
+  end
+  object ButtonDel: TButton
+    Left = 462
+    Top = 258
+    Width = 73
+    Height = 22
+    Caption = 'Удалить'
+    TabOrder = 4
+    OnClick = ButtonDelClick
   end
   object ListViewFines: TListView
-    Left = 10
-    Top = 10
-    Width = 351
-    Height = 103
+    Left = 8
+    Top = 8
+    Width = 533
+    Height = 213
+    AllocBy = 20
     Columns = <
       item
-        Width = 0
+        Caption = 'Описание'
+        Width = 300
       end
       item
         Alignment = taRightJustify
-        Caption = 'Время штрафа'
-        Width = 90
-      end
-      item
-        Caption = 'Комментарий'
-        Width = 230
+        Caption = 'Время'
+        Width = 150
       end>
     HideSelection = False
     MultiSelect = True
     ReadOnly = True
     RowSelect = True
+    SortType = stText
     TabOrder = 0
     ViewStyle = vsReport
-    OnChange = ListViewFinesChange
+    OnDeletion = ListViewFinesDeletion
+    OnInsert = ListViewFinesInsert
+    OnSelectItem = ListViewFinesSelectItem
   end
-  object BitBtnAdd: TBitBtn
-    Left = 135
-    Top = 170
-    Width = 73
-    Height = 22
-    Caption = 'Добавить'
-    TabOrder = 3
-    OnClick = BitBtnAddClick
-    NumGlyphs = 2
-  end
-  object BitBtnDelete: TBitBtn
-    Left = 207
-    Top = 170
-    Width = 73
-    Height = 22
-    Caption = 'Удалить'
-    TabOrder = 4
-    OnClick = BitBtnDeleteClick
-    NumGlyphs = 2
-  end
-  object BitBtnChange: TBitBtn
-    Left = 284
-    Top = 170
-    Width = 73
-    Height = 22
-    Caption = 'Изменить'
-    TabOrder = 5
-    OnClick = BitBtnChangeClick
-    NumGlyphs = 2
+  object EditDescription: TEdit
+    Left = 104
+    Top = 234
+    Width = 341
+    Height = 21
+    TabOrder = 1
+    OnExit = EditDescriptionExit
   end
   object ComboBoxTime: TComboBox
-    Left = 296
-    Top = 118
-    Width = 65
+    Left = 144
+    Top = 258
+    Width = 153
     Height = 21
     Style = csDropDownList
     ItemHeight = 13
-    TabOrder = 1
-    OnChange = ComboBoxTimeChange
-  end
-  object EditComment: TEdit
-    Left = 136
-    Top = 142
-    Width = 225
-    Height = 21
-    MaxLength = 30
     TabOrder = 2
-    OnExit = EditCommentExit
-  end
-  object BitBtnSave: TBitBtn
-    Left = 25
-    Top = 201
-    Width = 105
-    Height = 24
-    Caption = 'Сохранить'
-    TabOrder = 6
-    OnClick = BitBtnSaveClick
-    Kind = bkOK
-  end
-  object BitBtnCancel: TBitBtn
-    Left = 133
-    Top = 201
-    Width = 105
-    Height = 24
-    Caption = 'Отмена'
-    TabOrder = 7
-    Kind = bkCancel
-  end
-  object BitBtnHelp: TBitBtn
-    Left = 241
-    Top = 201
-    Width = 105
-    Height = 24
-    Caption = 'Справка'
-    TabOrder = 8
-    Kind = bkHelp
+    OnClick = ComboBoxTimeClick
   end
 end

@@ -30,7 +30,7 @@
   </MACROS>
   <OPTIONS>
     <IDLCFLAGS value="-I$(BCB)\include -I$(BCB)\include\vcl -src_suffix cpp -boa"/>
-    <CFLAG1 value="-O2 -H=$(BCB)\lib\vcl50.csm -Hc -Vx -Ve -X- -a4 -b- -k- -vi -tW -tWM -c"/>
+    <CFLAG1 value="-O2 -H=$(BCB)\lib\vcl50.csm -Hc -Vx -Ve -X- -a1 -b- -k- -vi -tW -tWM -c"/>
     <PFLAGS value="-$Y- -$L- -$D- -v -JPHNE -M"/>
     <RFLAGS value=""/>
     <AFLAGS value="/mx /w2 /zn"/>
@@ -43,12 +43,12 @@
   </LINKER>
   <IDEOPTIONS>
 [Version Info]
-IncludeVerInfo=0
+IncludeVerInfo=1
 AutoIncBuild=1
 MajorVer=1
 MinorVer=0
 Release=0
-Build=10
+Build=11
 Debug=0
 PreRelease=0
 Special=0
@@ -60,7 +60,7 @@ CodePage=1251
 [Version Info Keys]
 CompanyName=MMM Groups
 FileDescription=TLK Route Support
-FileVersion=1.0.0.10
+FileVersion=1.0.0.11
 InternalName=
 LegalCopyright=
 LegalTrademarks=
@@ -71,17 +71,17 @@ Comments=
 
 [Excluded Packages]
 $(BCB)\Bin\dclstd50.bpl=Borland Standard Components
-$(BCB)\Bin\dcl31w50.bpl=Delphi 1.0 Compatibility Components
-$(BCB)\Bin\bcbsmp50.bpl=Borland C++ Sample Components
-C:\WINDOWS\System32\ibsmp50.bpl=Borland C++ InterBase Alerter Component
-$(BCB)\Bin\dclado50.bpl=Borland ADO DB Components
-$(BCB)\Bin\dcldb50.bpl=Borland Database Components
-$(BCB)\Bin\dclbde50.bpl=Borland BDE DB Components
-$(BCB)\Bin\dclqrt50.bpl=QuickReport Components
 $(BCB)\Bin\dcltee50.bpl=TeeChart 5.0 Components
+$(BCB)\Bin\dclbde50.bpl=Borland BDE DB Components
+$(BCB)\Bin\dcldb50.bpl=Borland Database Components
+$(BCB)\Bin\dcl31w50.bpl=Delphi 1.0 Compatibility Components
+$(BCB)\Bin\dclqrt50.bpl=QuickReport Components
+$(BCB)\Bin\dcltqr50.bpl=TeeChart 5.0 for QuickReport Components Design Package
+$(BCB)\Bin\bcbsmp50.bpl=Borland C++ Sample Components
+$(BCB)\Bin\dclado50.bpl=Borland ADO DB Components
+C:\WINDOWS\System32\ibsmp50.bpl=Borland C++ InterBase Alerter Component
 $(BCB)\Bin\dcldss50.bpl=Borland Decision Cube Components
 $(BCB)\Bin\applet50.bpl=Borland Control Panel Applet Package
-$(BCB)\Bin\dcltqr50.bpl=TeeChart 5.0 for QuickReport Components Design Package
 $(BCB)\Bin\DCLIB50.bpl=InterBase Data Access Components
 $(BCB)\Bin\dclsmpedit50.bpl=Borland Editor Script Enhancements
 

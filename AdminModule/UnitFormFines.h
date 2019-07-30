@@ -15,32 +15,33 @@
 class TFormFines : public TForm
 {
 __published:	// IDE-managed Components
+    TButton *ButtonSave;
+    TButton *ButtonCancel;
+    TButton *ButtonHelp;
+    TButton *ButtonAdd;
+    TButton *ButtonDel;
     TListView *ListViewFines;
-    TBitBtn *BitBtnAdd;
-    TBitBtn *BitBtnDelete;
-    TBitBtn *BitBtnChange;
-    TLabel *LabelTimeText;
+    TBevel *Bevel12;
+    TLabel *LabelDescription;
+    TEdit *EditDescription;
+    TBevel *BevelBorder;
     TComboBox *ComboBoxTime;
-    TLabel *LabelCommentText;
-    TEdit *EditComment;
-    TBevel *Bevel1;
-    TBitBtn *BitBtnSave;
-    TBitBtn *BitBtnCancel;
-    TBitBtn *BitBtnHelp;
+    TLabel *LabelTime;
     void __fastcall FormShow(TObject *Sender);
     void __fastcall FormClose(TObject *Sender, TCloseAction &Action);
-    void __fastcall ComboBoxTimeChange(TObject *Sender);
-    void __fastcall EditCommentExit(TObject *Sender);
-    void __fastcall BitBtnAddClick(TObject *Sender);
-    void __fastcall BitBtnDeleteClick(TObject *Sender);
-    void __fastcall BitBtnChangeClick(TObject *Sender);
-    void __fastcall BitBtnSaveClick(TObject *Sender);
-    void __fastcall ListViewFinesChange(TObject *Sender, TListItem *Item,
-          TItemChange Change);
+    void __fastcall ButtonSaveClick(TObject *Sender);
+    void __fastcall ButtonAddClick(TObject *Sender);
+    void __fastcall ButtonDelClick(TObject *Sender);
+    void __fastcall EditDescriptionExit(TObject *Sender);
+    void __fastcall ListViewFinesInsert(TObject *Sender, TListItem *Item);
+    void __fastcall ListViewFinesDeletion(TObject *Sender,
+          TListItem *Item);
+    void __fastcall ListViewFinesSelectItem(TObject *Sender,
+          TListItem *Item, bool Selected);
+    void __fastcall ComboBoxTimeClick(TObject *Sender);
 private:	// User declarations
-    MFines *TMPFines;
-    MFine *TMPFine;
-    void __fastcall SetListViewFinesLine(int Number_);
+    void SetEdit(bool Edit_);
+    void SetListViewFinesLine(TListItem *Item_);
 public:		// User declarations
     __fastcall TFormFines(TComponent* Owner);
 };

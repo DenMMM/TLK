@@ -1,15 +1,17 @@
 //---------------------------------------------------------------------------
 #include <vcl.h>
-#include "UnitCommon.h"
 #pragma hdrstop
 USERES("TLk.res");
 USEUNIT("UnitGames.cpp");
-USEUNIT("UnitOptionsLoadSave.cpp");
-USEUNIT("UnitBaseClassMList.cpp");
 USEUNIT("UnitCommon.cpp");
-USEUNIT("UnitState.cpp");
-USEUNIT("UnitThreadNetSync.cpp");
 USEFORM("UnitFormMain.cpp", FormMain);
+USEUNIT("UnitState.cpp");
+USEUNIT("UnitSync.cpp");
+USEUNIT("UnitSLList.cpp");
+USEUNIT("UnitList.cpp");
+USEUNIT("UnitSend.cpp");
+USEUNIT("UnitMessage.cpp");
+USEUNIT("UnitClOptions.cpp");
 //---------------------------------------------------------------------------
 typedef DWORD RegServProc(DWORD,DWORD);
 //---------------------------------------------------------------------------
@@ -30,14 +32,11 @@ WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
     {
         ::CloseHandle(mutex); return 0;
     }
-    // Запускаем программы из раздела автозапуска
-    RegExecList(HKEY_LOCAL_MACHINE,"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run");
-//    RegExecList(HKEY_LOCAL_MACHINE,"SOFTWARE\\MMM Groups\\Time Locker\\3.0\\Client\\Run");
     //
     try
     {
          Application->Initialize();
-         Application->Title = "TimeLocker";
+         Application->Title = "";
          Application->CreateForm(__classid(TFormMain), &FormMain);
          Application->Run();
     }

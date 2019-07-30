@@ -1,18 +1,20 @@
 //---------------------------------------------------------------------------
 #include <vcl.h>
+#include <stdio.h>
 #pragma hdrstop
 
-#include <inifiles.hpp>
 #include "UnitFormMain.h"
-#include "UnitOptionsLoadSave.h"
 #include "UnitCommon.h"
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
 #pragma resource "*.dfm"
 TFormMain *FormMain;
 //---------------------------------------------------------------------------
+MClOptions *Options;
 MState *State;
-MThreadNetSync *ThreadNetSync;
+MSync *Sync;
+MSend *Send;
+MMessage *Message;
 //---------------------------------------------------------------------------
 __fastcall TFormMain::TFormMain(TComponent* Owner)
     : TForm(Owner)
@@ -21,48 +23,57 @@ __fastcall TFormMain::TFormMain(TComponent* Owner)
 //---------------------------------------------------------------------------
 void __fastcall TFormMain::FormShow(TObject *Sender)
 {
-    WSADATA WSAData;
-    if ( ::WSAStartup(0x0002,&WSAData)!=0 )
+    Options=new MClOptions;
+    State=new MState;
+    Sync=new MSync;
+    Send=new MSend;
+    Message=new MMessage;
+
+    if ( !Sync->NetInit() )
     {
         ::MessageBox(Application->Handle,
             "Не установлена требуемая версия библиотеки WinSock или протокол TCP/IP.\nПрограмма не может быть запущена !",
-            "TimeLocker - ошибка",MB_OK|MB_ICONERROR|MB_APPLMODAL);
+            "TLK - ошибка",MB_OK|MB_ICONERROR|MB_APPLMODAL);
         Close(); return;
     }
 
     ::GetWindowsDirectory(win_dir,MAX_PATH);
     strcat(win_dir,"\\");
-
-    State=new MState;
-    State->InitCriticalSection();
-    ThreadNetSync=new MThreadNetSync(true);
-    ThreadNetSync->FreeOnTerminate=true;
-
-/*    char file_name[MAX_PATH];
-    strcpy(file_name,win_dir);
-    strcat(file_name,"SYSTEM.INI");
-    TIniFile *IniFile=new TIniFile(file_name);
-    if ( IniFile!=NULL )
     {
-        ::GetModuleFileName(NULL,file_name,MAX_PATH);
-        IniFile->WriteString("boot","shell",file_name);
-        IniFile->UpdateFile();
-        delete IniFile;
-    }*/
-
-    TimeToReboot=0;
-    MessageTimer=0;
-    State->Lock();
-    if ( !StateLoad(State) ) StateSave(State);
-    SetState();
-    State->UnLock();
+        char file[MAX_PATH+1];
+        strcpy(file,win_dir); strcat(file,"TLK.GMS");
+        State->SetDefault(
+            HKEY_LOCAL_MACHINE,"Software\\MMM Groups\\TLK\\3.0\\Client","State",0xE2B7C9F9,
+            HKEY_LOCAL_MACHINE,"Software\\MMM Groups\\TLK\\3.0\\Client","Options",0x8A5E3C7F,
+            file,0);
+        strcpy(file,win_dir); strcat(file,"TIMEWARN.BMP");
+        Message->SetFile(file);
+    }
+    if ( !State->Load() ) State->Save();
+    if ( !State->GetOptions(Options) )
+    {
+        Options->ToEndTime=2;
+        Options->MessageTime=15;
+        Options->RebootWait=20;
+        Options->AutoLockTime=15;
+        State->NewOptions(Options);
+    }
 
     TreeViewGames->Color=(TColor)0x0248422C;
     TreeViewGames->Font->Color=(TColor)0x02D2C66F;
-    TimerTimer(Timer);
+    TimeToReboot=0;
+    MessageAreShowed=false;
+
+    // Запускаем программы из раздела автозапуска
+    RegExecList(HKEY_LOCAL_MACHINE,"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run");
+//    RegExecList(HKEY_LOCAL_MACHINE,"SOFTWARE\\MMM Groups\\TLK\\3.0\\Client\\Run");
+
+    Timer->Interval=500;
+    TimerTimer(NULL);
     Timer->Enabled=true;
-    ThreadNetSync->Resume();
-    ThreadNetSync->Pause(false);
+
+    Sync->Associate(State); Sync->Start();
+    Send->Associate(State); Send->Start();
 }
 //---------------------------------------------------------------------------
 void __fastcall TFormMain::FormCloseQuery(TObject *Sender, bool &CanClose)
@@ -73,22 +84,23 @@ void __fastcall TFormMain::FormCloseQuery(TObject *Sender, bool &CanClose)
 void __fastcall TFormMain::FormClose(TObject *Sender, TCloseAction &Action)
 {
     Timer->Enabled=false;
-    ThreadNetSync->Exit();
-    State->DelCriticalSection();
+    Sync->Stop();
+    Sync->NetFree();
+    Send->Stop();
+    Message->Stop();
+    delete Sync;
+    delete Send;
     delete State;
-    ::WSACleanup();
+    delete Message;
+    delete Options;
 }
 //---------------------------------------------------------------------------
 void __fastcall TFormMain::TimerTimer(TObject *Sender)
 {
-    static unsigned int timer_1000msec=0;
-    static HANDLE message_bitmap=NULL;
-    static BITMAP bitmap;
+    static unsigned int timer_1000msec=1000;
+    __int64 SystemTime;
+    MStateInfo Info;
 
-    double SystemTime=(double)(Date()+Time());
-
-    // Показываем сообщение о скором окончании времени
-    if ( MessageTimer&&message_bitmap ) DrawMessage(message_bitmap,bitmap);
     // Позиционируем окно программы
     if ( Width!=Screen->Width ) { Left=0; Width=Screen->Width; }
     if ( Height!=Screen->Height ) { Top=0; Height=Screen->Height; }
@@ -98,59 +110,25 @@ void __fastcall TFormMain::TimerTimer(TObject *Sender)
         timer_1000msec=0;
         // Выводим текущее время
         LabelSysTime->Caption=Time().FormatString("hh:nn");
-        State->Lock();
-        // Проверяем окончание времени работы и времени штрафа
-        if ( State->ControlWorkTime() ) { TimeToReboot=1; StateSave(State); State->NeedUpdate=true; }
-        else if ( State->ControlFineTime() ) { StateSave(State); State->NeedUpdate=true; }
-        //
-        if ( State->SizeWorkTime )
-        {
-            // Выводим оставшееся время
-            double endtime=State->StartWorkTime+State->SizeWorkTime/(24.*60);
-            if ( State->State&(mcsPause|mcsAuto) ) endtime+=SystemTime-State->StopTimerTime;
-            LabelWorkTime->Caption=((TDate)endtime-SystemTime).FormatString("hh:nn");
-            // Если до окончания времени осталось 120 секунд, то запускаем показ сообщения
-            int timetoend=(State->SizeWorkTime-(SystemTime-State->StartWorkTime)*24*60)*6;
-            if ( (timetoend==12)&&(!MessageTimer) )
-            {
-                MessageTimer=1;
-                // Загружаем картинку с сообщением на все время его показа
-                char file_name[MAX_PATH];
-                strcpy(file_name,win_dir);
-                strcat(file_name,"TIMEWARN.BMP");
-                message_bitmap=::LoadImage(NULL,file_name,IMAGE_BITMAP,0,0,LR_LOADFROMFILE);
-                if ( message_bitmap!=NULL )
-                    if ( ::GetObject(message_bitmap,sizeof(BITMAP),&bitmap)==NULL )
-                        { ::DeleteObject(message_bitmap); message_bitmap=NULL; }
-            }
-        } else { LabelWorkTime->Caption="--:--";}
-        //
-        if ( MessageTimer&&((++MessageTimer)>=20) )
-        {
-            MessageTimer=0;
-            // Удаляем из памяти загруженную ранее картинку
-            if ( message_bitmap ) { ::DeleteObject(message_bitmap); message_bitmap=NULL; }
-        }
-        // Проверяем время последнего контакта с админским модулем
-        if ( State->ControlPingTime() ) { StateSave(State); State->NeedUpdate=true; }
         // Если таймер перезагрузки истек, то помечаем, что нужно перезагрузиться
-        if ( TimeToReboot&&((++TimeToReboot)>=WaitRebootTime) )
+        if ( TimeToReboot&&((--TimeToReboot)==0) )
         {
-            TimeToReboot=0; State->State|=mcsReboot;
-            State->NeedUpdate=true;
+            TimeToReboot=0;
+            ShowImageMessage(mimLocked);
+            State->CmdReboot();
         }
-        State->UnLock();
     }
+    //
+    GetLocalTimeInt64(&SystemTime);
+    if ( State->Timer(SystemTime) ) State->Save();
+    State->StateInfo(&Info);
+    SetState(&Info);
 
     // Блокируем CTRL+ALT+DEL
-//    ::SystemParametersInfo(SPI_SCREENSAVERRUNNING,1,NULL,0);
-    // Корректируем поведение программы в соответствии с режимом работы
-    State->Lock();
-    unsigned int st=State->State;
-    if ( (st&(mcsFree|mcsFine|mcsLock|mcsPause|mcsNotUse))&&(!(st&mcsAuto)) ) HideWindows(true);
-    else HideWindows(false);
-    if ( State->NeedUpdate ) { State->NeedUpdate=false; SetState(); }
-    State->UnLock();
+//    ::ShowWindow(Handle,SW_HIDE);
+//    BOOL old;
+//    ::SystemParametersInfo(SPI_SCREENSAVERRUNNING,0,&old,0);
+//    ::SystemParametersInfo(SPI_SETSCREENSAVEACTIVE,TRUE,&old,0);
 }
 //---------------------------------------------------------------------------
 void __fastcall TFormMain::TreeViewGamesDeletion(TObject *Sender,
@@ -194,7 +172,131 @@ void __fastcall TFormMain::TreeViewGamesDblClick(TObject *Sender)
 //---------------------------------------------------------------------------
 void __fastcall TFormMain::SpeedButtonRebootClick(TObject *Sender)
 {
-    Tag=Exit(EWX_REBOOT);
+    State->CmdReboot();
+//    Tag=Exit(EWX_REBOOT);
+}
+//---------------------------------------------------------------------------
+void __fastcall TFormMain::SpeedButtonOptionsClick(TObject *Sender)
+{
+    Tag=Exit(EWX_LOGOFF);
+}
+//---------------------------------------------------------------------------
+void __fastcall TFormMain::SetState(MStateInfo *Info_)
+{
+    char line[50];
+
+    // Запрашиваем новые настройки
+    if ( Info_->Changes&mdcOptions ) State->GetOptions(Options);
+    // Обновляем номер компьютера
+    if ( Info_->Changes&mdcNumber ) LabelComputerNumber->Caption=IntToStr(Info_->Number);
+    // Режим работы
+    if ( Info_->Changes&mdcState )
+    {
+        if ( Info_->State&mcsWtLocker )
+        {
+            // Клиент TLK отключен
+            TimeToReboot=0; Message->Stop();
+            ShowImageMessage(mimNone);
+            ShowGames(mgpNone);
+        } else if ( Info_->State&mcsOpen )
+        {
+            // Открыт для настройки
+            TimeToReboot=0; Message->Stop();
+            ShowImageMessage(mimNone);
+            ShowGames(mgpAll);
+        } else if ( Info_->State&mcsFree )
+        {
+            Message->Stop();
+            LabelWorkTime->Caption="--:--";
+            ShowGames(mgpNone);
+            if ( Info_->Changes&mdcWorkTime )
+            {
+                // Время закончилось
+                TimeToReboot=Options->RebootWait;
+                ShowImageMessage(Options->RebootWait?mimEndTime:mimLocked);
+            } else
+            {
+                // Компьютер закрыт
+                TimeToReboot=0;
+                ShowImageMessage(mimLocked);
+            }
+        } else if ( Info_->State&mcsWork )
+        {
+            if ( Info_->Changes&mdcWorkTime )
+            {
+                // Компьютер запущен
+                TimeToReboot=0;
+                Message->Stop(); MessageAreShowed=false;
+            }
+            // Дополнительные режимы
+            if ( Info_->State&mcsPause )
+            {
+                // Время приостановлено
+                ShowGames(mgpNone);
+                ShowImageMessage(mimTimePaused);
+            } else if ( Info_->State&mcsLock )
+            {
+                // Прикрыт
+                ShowGames(mgpNone);
+                ShowImageMessage(mimPaused);
+            } else if ( Info_->State&mcsFine )
+            {
+                // Штраф
+                ShowGames(mgpNone);
+                ShowImageMessage(mimFine);
+            } else
+            {
+                // Работа
+                ShowImageMessage(mimNone);
+                ShowGames(Info_->Programs);
+            }
+        }
+        SpeedButtonOptions->Enabled=Info_->State&mcsOpen;
+//        if ( Info_->State&mcsFree ) ::SystemParametersInfo(SPI_SCREENSAVERRUNNING,1,NULL,0);
+//        else ::SystemParametersInfo(SPI_SCREENSAVERRUNNING,0,NULL,0);
+    }
+    //
+    if ( Info_->Changes&mdcWorkTime ) MessageAreShowed=false;
+    // Выводим оставшееся время
+    if ( Info_->State&mcsWork )
+    {
+        sprintf(line,"%i:%.2i",Info_->ToEndWork/60,Info_->ToEndWork%60);
+        LabelWorkTime->Caption=line;
+        // Если до окончания времени осталось менее двух минут, запускаем показ сообщения
+        if ( Options->ToEndTime&&(!MessageAreShowed)&&
+            ((unsigned)Info_->ToEndWork<=Options->ToEndTime) )
+        {
+            MessageAreShowed=true;
+            Message->Show(Options->MessageTime);
+        }
+    }
+    //
+    if ( Info_->Changes&mdcPrograms )
+    {
+        // Список программ для запуска
+        if ( Info_->State==mcsWork ) ShowGames(Info_->Programs);
+        else if ( Info_->State&mcsOpen ) ShowGames(mgpAll);
+    }
+    //
+    if ( Info_->Changes&mdcCommands )
+    {
+        if ( Info_->Commands&mccShutdown )
+        {
+            State->Save();
+            Tag=Exit(EWX_POWEROFF);
+            return;
+        } else if ( Info_->Commands&mccReboot )
+        {
+            State->Save();
+            Tag=Exit(EWX_REBOOT);
+            return;
+//            Tag=Exit(EWX_REBOOT|EWX_FORCE);
+        }
+    }
+    //
+    if ( (Info_->State&(mcsWtLocker|mcsFree|mcsFine|mcsLock|mcsPause))&&
+        (!(Info_->State&mcsOpen)) ) HideWindows(true);
+    else HideWindows(false);
 }
 //---------------------------------------------------------------------------
 void __fastcall TFormMain::AddGamesToTree(MGames *Games_, TTreeNode *TreeNode_, TImageList *ImageList_)
@@ -203,11 +305,11 @@ void __fastcall TFormMain::AddGamesToTree(MGames *Games_, TTreeNode *TreeNode_, 
     static HICON icon;
 
     if ( Games_==NULL ) return;
-    for ( MGame *Game=(MGame*)Games_->FirstItem; Game; Game=(MGame*)Game->NextItem )
+    for ( MGame *Game=(MGame*)Games_->First; Game; Game=(MGame*)Game->Next )
     {
         NewTreeNode=TreeViewGames->Items->AddChild(TreeNode_,Game->Name);
         // Иконка
-        icon=::ExtractIcon(NULL,Game->IconFile.c_str(),0);
+        icon=::ExtractIcon(NULL,Game->Icon,0);
         if ( (icon==NULL)||(((int)icon)==1) )
         {
             NewTreeNode->ImageIndex=-1; NewTreeNode->SelectedIndex=-1;
@@ -217,8 +319,8 @@ void __fastcall TFormMain::AddGamesToTree(MGames *Games_, TTreeNode *TreeNode_, 
             NewTreeNode->SelectedIndex=NewTreeNode->ImageIndex;
         }
         // Командная строка для запуска
-        NewTreeNode->Data=(void*)new char[Game->CommandLine.Length()+1];
-        strcpy((char*)NewTreeNode->Data,Game->CommandLine.c_str());
+        NewTreeNode->Data=(void*)new char[strlen(Game->Command)+1];
+        strcpy((char*)NewTreeNode->Data,Game->Command);
         // Подуровни дерева
         AddGamesToTree(Game->SubGames,NewTreeNode,ImageList_);
     }
@@ -226,23 +328,33 @@ void __fastcall TFormMain::AddGamesToTree(MGames *Games_, TTreeNode *TreeNode_, 
 //---------------------------------------------------------------------------
 void __fastcall TFormMain::ShowGames(unsigned int Pages_)
 {
+    MGames Games;
+    MGame *Game;
+
     TreeViewGames->Items->Clear();
     ImageListGamesIcons->Clear();
     // Если не заданы группы программ для загрузки, то убираем панель программ...
     if ( Pages_==mgpNone ) { PanelGames->Hide(); return; }
     // иначе добавляем в список указанные программы.
-    MGames *Games=new MGames; if ( Games==NULL ) return;
-    State->LockGames();
-    if ( GamesLoad(Games) )
+    if ( State->GetGames(&Games) )
     {
-        if ( Pages_&mgp1 ) AddGamesToTree(((MGame*)Games->Item(0))->SubGames,NULL,ImageListGamesIcons);
-        if ( Pages_&mgp2 ) AddGamesToTree(((MGame*)Games->Item(1))->SubGames,NULL,ImageListGamesIcons);
-        if ( Pages_&mgp3 ) AddGamesToTree(((MGame*)Games->Item(2))->SubGames,NULL,ImageListGamesIcons);
-        if ( Pages_&mgp4 ) AddGamesToTree(((MGame*)Games->Item(3))->SubGames,NULL,ImageListGamesIcons);
-        if ( Pages_&mgp5 ) AddGamesToTree(((MGame*)Games->Item(4))->SubGames,NULL,ImageListGamesIcons);
+        if ( (Pages_&mgp1)&&((Game=(MGame*)Games.Item(0))!=NULL) )
+            AddGamesToTree(Game->SubGames,NULL,ImageListGamesIcons);
+        if ( (Pages_&mgp2)&&((Game=(MGame*)Games.Item(1))!=NULL) )
+            AddGamesToTree(Game->SubGames,NULL,ImageListGamesIcons);
+        if ( (Pages_&mgp3)&&((Game=(MGame*)Games.Item(2))!=NULL) )
+            AddGamesToTree(Game->SubGames,NULL,ImageListGamesIcons);
+        if ( (Pages_&mgp4)&&((Game=(MGame*)Games.Item(3))!=NULL) )
+            AddGamesToTree(Game->SubGames,NULL,ImageListGamesIcons);
+        if ( (Pages_&mgp5)&&((Game=(MGame*)Games.Item(4))!=NULL) )
+            AddGamesToTree(Game->SubGames,NULL,ImageListGamesIcons);
+        if ( (Pages_&mgp6)&&((Game=(MGame*)Games.Item(5))!=NULL) )
+            AddGamesToTree(Game->SubGames,NULL,ImageListGamesIcons);
+        if ( (Pages_&mgp7)&&((Game=(MGame*)Games.Item(6))!=NULL) )
+            AddGamesToTree(Game->SubGames,NULL,ImageListGamesIcons);
+        if ( (Pages_&mgp8)&&((Game=(MGame*)Games.Item(7))!=NULL) )
+            AddGamesToTree(Game->SubGames,NULL,ImageListGamesIcons);
     }
-    State->UnLockGames();
-    delete Games;
     PanelGames->Show();
 }
 //---------------------------------------------------------------------------
@@ -271,89 +383,16 @@ void __fastcall TFormMain::ShowImageMessage(int Message_)
     }
 }
 //---------------------------------------------------------------------------
-void __fastcall TFormMain::DrawMessage(HANDLE message_bitmap, BITMAP &bitmap)
-{
-    HWND dsk_wnd;
-    HDC dsk_dc, comp_dc;
-    HANDLE old_bitmap;
-
-    if ( (dsk_wnd=::GetDesktopWindow())==NULL ) return;
-    if ( (dsk_dc=::GetWindowDC(dsk_wnd))==NULL ) return;
-    if ( (comp_dc=::CreateCompatibleDC(dsk_dc))==NULL )
-        { ::ReleaseDC(dsk_wnd,dsk_dc); return; }
-    old_bitmap=::SelectObject(comp_dc,message_bitmap);
-    ::BitBlt(dsk_dc,0,0,bitmap.bmWidth,bitmap.bmHeight,
-        comp_dc,0,0,SRCINVERT);
-    old_bitmap=::SelectObject(comp_dc,old_bitmap);
-    ::DeleteDC(comp_dc);
-    ::ReleaseDC(dsk_wnd,dsk_dc);
-}
-//---------------------------------------------------------------------------
-void __fastcall TFormMain::SetState()
-{
-    LabelComputerNumber->Caption=IntToStr(State->Number);
-    unsigned int state=State->State;
-    //
-    unsigned int showgames;
-    int ImageMessage;
-    if ( state&mcsAuto ) { showgames=mgpAll; ImageMessage=mimNone; TimeToReboot=0; MessageTimer=100; }
-    else if ( state&mcsPause ) { showgames=mgpNone; ImageMessage=mimTimePaused; MessageTimer=100; }
-    else if ( state&mcsLock ) { showgames=mgpNone; ImageMessage=mimPaused; }
-    else if ( state&mcsFine ) { showgames=mgpNone; ImageMessage=mimFine; }
-    else if ( state&mcsWork ) { showgames=State->GamesPages; ImageMessage=mimNone; TimeToReboot=0; }
-    else if ( state&mcsFree ) { showgames=mgpNone; MessageTimer=100;
-        if ( TimeToReboot ) ImageMessage=mimEndTime; else ImageMessage=mimLocked; }
-    else { showgames=mgpNone; ImageMessage=mimNone; }
-    ShowGames(showgames);
-    ShowImageMessage(ImageMessage);
-    //
-    SpeedButtonOptions->Enabled=state&mcsAuto;
-    //
-    if ( state&mcsWtLocker )
-    {
-/*        char file_name[MAX_PATH];
-        strcpy(file_name,win_dir);
-        strcat(file_name,"SYSTEM.INI");
-        TIniFile *IniFile=new TIniFile(file_name);
-        if ( IniFile==NULL ) return;
-        strcpy(file_name,win_dir);
-        strcat(file_name,"EXPLORER.EXE");
-        IniFile->WriteString("boot","shell",file_name);
-        IniFile->UpdateFile();
-        delete IniFile;*/
-        State->State&=~mcsWtLocker;
-        StateSave(State);
-//        Tag=Exit(EWX_REBOOT);
-    } else if ( state&mcsReboot )
-    {
-        State->State&=~mcsReboot;
-        StateSave(State);
-        Tag=Exit(EWX_REBOOT);
-//        Tag=Exit(EWX_REBOOT|EWX_FORCE);
-    } else if ( state&mcsShutdown )
-    {
-        State->State&=~mcsShutdown;
-        StateSave(State);
-//        Tag=true; Close();
-        Tag=Exit(EWX_SHUTDOWN);
-    }
-}
-//---------------------------------------------------------------------------
-void __fastcall TFormMain::SpeedButtonOptionsClick(TObject *Sender)
-{
-    Tag=Exit(EWX_LOGOFF);
-}
-//---------------------------------------------------------------------------
 void __fastcall TFormMain::HideWindows(bool Hide_)
 {
     HWND Wnd;
-    char buff[24+1];
+    char buff[23+1];
 
     // Определяем текущее верхнее окно в системе
     Wnd=::GetForegroundWindow();
     // Провеяем можно ли это окно свернуть
-    if ( (Wnd==Handle)||(Wnd==Application->Handle) ) return;
-    if ( ::GetClassName(Wnd,buff,24)&&(!strcmp(buff,"WindowsScreenSaverClass")) ) return;
+    if ( (Wnd==Handle)||(Wnd==Application->Handle)||(!::IsWindow(Wnd)) ) return;
+    if ( ::GetClassName(Wnd,buff,23)&&(!strcmp(buff,"WindowsScreenSaverClass")) ) return;
     // Сворачиваем окно
     if ( Hide_ )
     {

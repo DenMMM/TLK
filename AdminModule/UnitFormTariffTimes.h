@@ -16,61 +16,53 @@
 class TFormTariffTimes : public TForm
 {
 __published:	// IDE-managed Components
-    TListView *ListViewTimesAndCosts;
+    TListView *ListViewTimes;
     TLabel *LabelTimeTypeText;
-    TComboBox *ComboBoxTimeType;
-    TBevel *Bevel1;
-    TLabel *LabelDaysText;
-    TCheckBox *CheckBoxDayMo;
-    TCheckBox *CheckBoxDayTu;
-    TCheckBox *CheckBoxDayWe;
-    TCheckBox *CheckBoxDayTh;
-    TCheckBox *CheckBoxDayFr;
-    TCheckBox *CheckBoxDaySa;
-    TCheckBox *CheckBoxDaySu;
-    TLabel *LabelBeginTimeText;
-    TLabel *LabelEndTimeText;
-    TLabel *LabelSizeTimeText;
+    TComboBox *ComboBoxType;
+    TLabel *LabelBeginText;
+    TLabel *LabelEndText;
+    TLabel *LabelSizeText;
     TLabel *LabelCostText;
     TEdit *EditCost;
-    TBitBtn *BitBtnSave;
-    TBitBtn *BitBtnCancel;
-    TComboBox *ComboBoxBeginTimeH;
-    TComboBox *ComboBoxBeginTimeM;
-    TComboBox *ComboBoxEndTimeH;
-    TComboBox *ComboBoxEndTimeM;
-    TComboBox *ComboBoxSizeTimeH;
-    TComboBox *ComboBoxSizeTimeM;
+    TComboBox *ComboBoxBeginH;
+    TComboBox *ComboBoxBeginM;
+    TComboBox *ComboBoxEndH;
+    TComboBox *ComboBoxEndM;
+    TComboBox *ComboBoxSizeH;
+    TComboBox *ComboBoxSizeM;
     TBevel *Bevel2;
-    TBitBtn *BitBtnHelp;
-    TCheckBox *CheckBoxEnableDesc;
+    TButton *ButtonSave;
+    TButton *ButtonCancel;
+    TButton *ButtonHelp;
     TButton *ButtonAdd;
-    TButton *ButtonDelete;
-    TButton *ButtonChange;
+    TButton *ButtonDel;
     void __fastcall FormShow(TObject *Sender);
-    void __fastcall ListViewTimesAndCostsChange(TObject *Sender,
-          TListItem *Item, TItemChange Change);
-    void __fastcall ComboBoxTimeTypeChange(TObject *Sender);
-    void __fastcall CheckBoxDayMoClick(TObject *Sender);
     void __fastcall EditCostExit(TObject *Sender);
     void __fastcall FormClose(TObject *Sender, TCloseAction &Action);
-    void __fastcall ComboBoxBeginTimeHChange(TObject *Sender);
-    void __fastcall ComboBoxEndTimeHChange(TObject *Sender);
-    void __fastcall ComboBoxSizeTimeHChange(TObject *Sender);
-    void __fastcall CheckBoxEnableDescClick(TObject *Sender);
     void __fastcall ButtonAddClick(TObject *Sender);
-    void __fastcall ButtonDeleteClick(TObject *Sender);
-    void __fastcall ButtonChangeClick(TObject *Sender);
+    void __fastcall ButtonDelClick(TObject *Sender);
+    void __fastcall ListViewTimesInsert(TObject *Sender, TListItem *Item);
+    void __fastcall ListViewTimesDeletion(TObject *Sender,
+          TListItem *Item);
+    void __fastcall ListViewTimesSelectItem(TObject *Sender,
+          TListItem *Item, bool Selected);
+    void __fastcall ButtonSaveClick(TObject *Sender);
+    void __fastcall ComboBoxSizeHClick(TObject *Sender);
+    void __fastcall ComboBoxBeginHClick(TObject *Sender);
+    void __fastcall ComboBoxEndHClick(TObject *Sender);
+    void __fastcall ComboBoxTypeClick(TObject *Sender);
+    void __fastcall ListViewTimesCompare(TObject *Sender, TListItem *Item1,
+          TListItem *Item2, int Data, int &Compare);
 private:	// User declarations
-    MTariffTimes *TMPTariffTimes;
-    MTariffTime *TMPTariffTime;
-    void __fastcall SetTimesAndCostsLine(TListItem *ListItem_,MTariffTime *TariffTime_);
-    void __fastcall SetTimeAndCostParam();
+    MTariffTimes *TariffTimes;
+    void SetEdit(bool Edit_);
+    void SetListViewTimesLine(TListItem *Item_);
 public:		// User declarations
-    void __fastcall Execute(MTariffTimes *TariffTimes_);
+    void Execute(MTariffTimes *Times_, char *Name_);
     __fastcall TFormTariffTimes(TComponent* Owner);
 };
 //---------------------------------------------------------------------------
 extern PACKAGE TFormTariffTimes *FormTariffTimes;
 //---------------------------------------------------------------------------
 #endif
+

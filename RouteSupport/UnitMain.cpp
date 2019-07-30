@@ -44,10 +44,10 @@ WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, in
     {
         SERVICE_TABLE_ENTRY service_table_entry[]={"TLKRoute",&ServiceMain,NULL,NULL};
         ::StartServiceCtrlDispatcher(service_table_entry);
-    }/* else if ( strcmpi(lpCmdLine,"/debug")==0 )
+    } else if ( strcmpi(lpCmdLine,"/debug")==0 )
     {
         ServiceMain(0,NULL);
-    } */
+    } 
 
     return 0;
 }

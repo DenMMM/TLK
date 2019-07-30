@@ -1,11 +1,11 @@
 object FormLogIn: TFormLogIn
-  Left = 361
-  Top = 248
-  BorderIcons = []
+  Left = 341
+  Top = 287
+  BorderIcons = [biSystemMenu]
   BorderStyle = bsSingle
-  Caption = 'Вход в TimeLocker'
-  ClientHeight = 185
-  ClientWidth = 334
+  Caption = 'Новая смена'
+  ClientHeight = 198
+  ClientWidth = 350
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -13,82 +13,89 @@ object FormLogIn: TFormLogIn
   Font.Name = 'MS Sans Serif'
   Font.Style = []
   OldCreateOrder = False
+  Position = poOwnerFormCenter
+  OnClose = FormClose
   OnCloseQuery = FormCloseQuery
-  OnHide = FormHide
   OnShow = FormShow
   PixelsPerInch = 96
   TextHeight = 13
   object Bevel1: TBevel
-    Left = 8
-    Top = 8
-    Width = 317
-    Height = 145
+    Left = 4
+    Top = 4
+    Width = 341
+    Height = 157
     Shape = bsFrame
   end
-  object LabelInfo: TLabel
-    Left = 20
-    Top = 24
-    Width = 293
-    Height = 57
-    AutoSize = False
-    Caption = 
-      'Для входа в программу выберите свой логин из списка и введите па' +
-      'роль. Если Ваш логин отсутствует в списке, то Вы удалены из спис' +
-      'ка пользователей программы. В таком случае обратитесь к системно' +
-      'му администратору.'
-    WordWrap = True
-  end
-  object Label1: TLabel
-    Left = 48
+  object LabelLogin: TLabel
+    Left = 62
     Top = 100
     Width = 34
     Height = 13
     Alignment = taRightJustify
     Caption = 'Логин:'
   end
-  object Label2: TLabel
-    Left = 41
+  object LabelPassword: TLabel
+    Left = 55
     Top = 124
     Width = 41
     Height = 13
     Alignment = taRightJustify
     Caption = 'Пароль:'
   end
+  object Bevel2: TBevel
+    Left = 12
+    Top = 76
+    Width = 325
+    Height = 9
+    Shape = bsTopLine
+  end
+  object Label5: TLabel
+    Left = 20
+    Top = 18
+    Width = 309
+    Height = 47
+    AutoSize = False
+    Caption = 
+      'Выберите логин и введите пароль. Если вашего логина нет в списке' +
+      ', возможно, он временно отключен сисадмином.'
+    Layout = tlCenter
+    WordWrap = True
+  end
   object ComboBoxLogin: TComboBox
-    Left = 88
+    Left = 100
     Top = 96
-    Width = 173
+    Width = 185
     Height = 21
     Style = csDropDownList
     ItemHeight = 13
     TabOrder = 0
+    OnClick = ComboBoxLoginClick
   end
   object EditPassword: TEdit
-    Left = 88
+    Left = 100
     Top = 120
-    Width = 173
+    Width = 185
     Height = 21
-    PasswordChar = '*'
     TabOrder = 1
   end
-  object BitBtnOk: TBitBtn
-    Left = 64
-    Top = 158
-    Width = 105
-    Height = 24
+  object ButtonApply: TButton
+    Left = 92
+    Top = 168
+    Width = 85
+    Height = 25
     Caption = 'Принять'
+    Default = True
+    ModalResult = 1
     TabOrder = 2
-    OnClick = BitBtnOkClick
-    Kind = bkOK
   end
-  object BitBtnCancel: TBitBtn
-    Left = 172
-    Top = 158
-    Width = 105
-    Height = 24
+  object ButtonCancel: TButton
+    Left = 180
+    Top = 168
+    Width = 85
+    Height = 25
+    Cancel = True
     Caption = 'Отмена'
+    ModalResult = 2
     TabOrder = 3
-    OnClick = BitBtnCancelClick
-    Kind = bkCancel
   end
 end
