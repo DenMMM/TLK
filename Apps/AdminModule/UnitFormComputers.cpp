@@ -217,12 +217,13 @@ void __fastcall TFormComputers::ButtonSaveClick(TObject *Sender)
             ShellState->State|=mssErrorState; FormMain->SetShell();
             ResMessageBox(Handle,1,8,MB_APPLMODAL|MB_OK|MB_ICONERROR,States->gLastErr());
         }
-        //
-        Sync->Associate(States,Computers);      
-        FormMain->ProgressBarNetProcess->Max=Sync->gPCountMax();
-        // Обновляем список компьютеров в главном окне
-        FormMain->UpdateListViewComputers(true);
     }
+    //
+    Sync->Associate(States,Computers);
+    // Обновляем индикатор сетевой активности и список компьютеров в главном окне
+    FormMain->ProgressBarNetProcess->Max=Sync->gPCountMax();
+    FormMain->UpdateListViewComputers(true);
+    // Запускаем сетевые операции
     Sync->Start();
 }
 //---------------------------------------------------------------------------

@@ -44,7 +44,6 @@ void __fastcall TFormMain::FormShow(TObject *Sender)
 {
     try
     {
-
     // Создадим объекты глобального пользования
     ShellState=new MShellState;
     Options=new MOptions;
@@ -123,7 +122,7 @@ void __fastcall TFormMain::FormShow(TObject *Sender)
     ProgressBarNetProcess->Max=Sync->gPCountMax();
 
     // Таймер нужен до логов, т.к. им нужно системное время
-    Timer->Interval=200;
+    Timer->Interval=1000;
     Timer->Enabled=true;
     TimerTimer(NULL);
 
@@ -159,8 +158,14 @@ void __fastcall TFormMain::FormShow(TObject *Sender)
     StatusBar->SimplePanel=true;
     SetShell();
 
+    TimerNet->Interval=250;
+    TimerNet->Enabled=true;
     // Запускаем синхронизацию
     Sync->Start();
+
+    // Включим буферизацию отрисовки, чтобы не мерцало
+    ListViewComputers->DoubleBuffered=true;
+    ProgressBarNetProcess->DoubleBuffered=true;
 
     }
     catch (std::bad_alloc &e)
@@ -182,6 +187,7 @@ void __fastcall TFormMain::FormShow(TObject *Sender)
 //---------------------------------------------------------------------------
 void __fastcall TFormMain::FormClose(TObject *Sender, TCloseAction &Action)
 {
+    TimerNet->Enabled=false;
     Timer->Enabled=false;
     Sync->Stop();
     Sync->NetFree();
@@ -203,23 +209,25 @@ void __fastcall TFormMain::FormClose(TObject *Sender, TCloseAction &Action)
 //---------------------------------------------------------------------------
 void __fastcall TFormMain::TimerTimer(TObject *Sender)
 {
-    static unsigned int timer_1000msec=1000;
     __int64 SystemTime;
 
-    if ( (++timer_1000msec)>=(1000/Timer->Interval) )
-    {
-        timer_1000msec=0;
-        //
-        GetLocalTimeInt64(&SystemTime);
-        if ( States->Timer(SystemTime) )
-            if ( !States->Save() ) { ShellState->State|=mssErrorState; SetShell(); }
-        Log->Timer(SystemTime);
-        // Выводим текущее системное время
-        TDate CurrentTime=Time();
-        LabelTimeSecs->Caption=CurrentTime.FormatString("ss");
-        LabelTimeHoursMins->Caption=CurrentTime.FormatString("hh : mm");
-        UpdateListViewComputers(false);
-    }
+    // Берем системное время
+    GetLocalTimeInt64(&SystemTime);
+    // Подаем его модулю лога
+    Log->Timer(SystemTime);
+    // Обновляем состояния компьютеров и сохраняем в случае изменений
+    if ( States->Timer(SystemTime) )
+        if ( !States->Save() ) { ShellState->State|=mssErrorState; SetShell(); }
+    // Обновляем показания часов
+    TDate CurrentTime=Time();
+    LabelTimeSecs->Caption=CurrentTime.FormatString("ss");
+    LabelTimeHoursMins->Caption=CurrentTime.FormatString("hh : mm");
+    // И список компьютеров
+    UpdateListViewComputers(false);
+}
+//---------------------------------------------------------------------------
+void __fastcall TFormMain::TimerNetTimer(TObject *Sender)
+{
     ProgressBarNetProcess->Position=Sync->gPCount();
 }
 //---------------------------------------------------------------------------
@@ -811,17 +819,7 @@ void TFormMain::UpdateListViewComputers(bool Full_)
     TListItem *Item;
     MStateInfo Info;
 
-    if ( Full_ )
-    {
-        // Убираем строки, не сопоставленные с состоянием компьютера
-/*        for ( int i=ListViewComputers->Items->Count-1; i>=0; i-- )
-        {
-            Item=ListViewComputers->Items->Item[i];
-            if ( States->Search((int)Item->Data) ) continue;
-            Item->Delete();
-        }*/
-        ListViewComputers->Items->Clear();
-    }
+    if ( Full_ ) ListViewComputers->Items->Clear();
 
     // Убираем из списка компьютеры, не подходящие под фильтр. Добавляем новые.
     for ( MState *State=(MState*)States->gFirst();

@@ -23,7 +23,7 @@ struct MUserData
     char Name[MAX_UserNameLen+1];
 };
 //---------------------------------------------------------------------------
-class MUser:public MIDListItem
+class MUser:public MIDListItem 
 {
 private:
     // Функции механизма сохранения/загрузки данных
@@ -38,8 +38,11 @@ public:
     char Name[MAX_UserNameLen+1];
     bool Active;
 
-    bool SetLogin(char *Login_);
-    bool SetName(char *Name_);
+    void SetLogin(char *Login_);
+//    const char* gLogin() { return Login; }
+
+    void SetName(char *Name_);
+//    const char* gName() { return Name; }
     void SetPass(char *Pass_) { Pass.Set(Pass_); }
     bool CheckPass(char *Pass_) const { return Pass.Check(Pass_); }
     void Copy(const MListItem *SrcItem_);
@@ -59,6 +62,10 @@ private:
     void item_del(MListItem *Item_) const { delete (MUser*)Item_; }
 
 public:
+    // Доступ к атрибутам списка
+//    gFirst <MUser> () const;
+//    gLast <MUser> () const;
+
     unsigned ActiveCount() const;
 
     MUsers() {}

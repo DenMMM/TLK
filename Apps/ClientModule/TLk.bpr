@@ -10,15 +10,16 @@
       ..\..\Core\UnitTariffs.obj ..\..\Core\UnitStates.obj 
       ..\..\Core\UnitSync.obj ..\..\Core\UnitSend.obj 
       ..\..\Ext\BrianGladman\SHA\hmac.obj ..\..\Ext\BrianGladman\SHA\sha1.obj 
-      ..\..\Ext\BrianGladman\SHA\sha2.obj ..\..\Core\UnitAuth.obj"/>
-    <RESFILES value="TLk.res Messages.res"/>
+      ..\..\Ext\BrianGladman\SHA\sha2.obj ..\..\Core\UnitAuth.obj 
+      UnitFormDesk.obj UnitFormGames.obj UnitLockDsk.obj"/>
+    <RESFILES value="TLk.res Messages.res LockDesk.res"/>
     <IDLFILES value=""/>
     <IDLGENFILES value=""/>
     <DEFFILE value=""/>
-    <RESDEPEN value="$(RESFILES) UnitFormMain.dfm"/>
+    <RESDEPEN value="$(RESFILES) UnitFormMain.dfm UnitFormDesk.dfm UnitFormGames.dfm"/>
     <LIBFILES value=""/>
-    <LIBRARIES value="bcbie.lib vcl.lib rtl.lib"/>
-    <SPARELIBS value="rtl.lib vcl.lib bcbie.lib"/>
+    <LIBRARIES value="vclx.lib bcbsmp.lib bcbie.lib vcl.lib rtl.lib"/>
+    <SPARELIBS value="rtl.lib vcl.lib bcbie.lib bcbsmp.lib vclx.lib"/>
     <PACKAGES value="rtl.bpi vcl.bpi vclx.bpi"/>
     <PATHCPP value=".;..\..\Core;..\..\Core;..\..\Core;..\..\Core;..\..\Core;..\..\Core;..\..\Core;..\..\Core;..\..\Core;..\..\Ext\BrianGladman\SHA;..\..\Ext\BrianGladman\SHA;..\..\Ext\BrianGladman\SHA;..\..\Core"/>
     <PATHPAS value=".;"/>
@@ -70,6 +71,10 @@
       <FILE FILENAME="..\..\Ext\BrianGladman\SHA\sha2.c" FORMNAME="" UNITNAME="sha2.c" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="..\..\Core\UnitAuth.cpp" FORMNAME="" UNITNAME="UnitAuth" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="Messages.res" FORMNAME="" UNITNAME="Messages.res" CONTAINERID="ResTool" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="UnitFormDesk.cpp" FORMNAME="FormDesk" UNITNAME="UnitFormDesk" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="UnitFormGames.cpp" FORMNAME="FormGames" UNITNAME="UnitFormGames" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="UnitLockDsk.cpp" FORMNAME="" UNITNAME="UnitLockDsk" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="LockDesk.res" FORMNAME="" UNITNAME="LockDesk.res" CONTAINERID="ResTool" DESIGNCLASS="" LOCALCOMMAND=""/>
   </FILELIST>
   <BUILDTOOLS>
   </BUILDTOOLS>
@@ -81,7 +86,7 @@ AutoIncBuild=1
 MajorVer=1
 MinorVer=0
 Release=0
-Build=102
+Build=107
 Debug=0
 PreRelease=0
 Special=0
@@ -93,13 +98,13 @@ CodePage=1251
 [Version Info Keys]
 CompanyName=MMM Groups
 FileDescription=Клиент TLK
-FileVersion=1.0.0.102
+FileVersion=1.0.0.107
 InternalName=ClientModule
 LegalCopyright=
 LegalTrademarks=
 OriginalFilename=TLK.exe
 ProductName=TLK
-ProductVersion=3.10
+ProductVersion=3.11
 
 [HistoryLists\hlIncludePath]
 Count=3

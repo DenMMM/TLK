@@ -18,61 +18,47 @@
 #include "UnitSync.h"
 #include "UnitSend.h"
 #include "UnitAuth.h"
-#include "UnitGames.h"
 #include "UnitMessage.h"
+#include "UnitLockDsk.h"
 //---------------------------------------------------------------------------
-#define Max_EnterPasswordTime ((int)30)
-//---------------------------------------------------------------------------
-#define mimNone ((int)0)        // Скрыть картинку с сообщением
-#define mimEndTime ((int)1)     // Время закончилось
-#define mimLocked ((int)2)      // Компьютер закрыт
-#define mimPaused ((int)3)      // Компьютер прикрыт адмиинстратором или аварийно
-#define mimFine ((int)4)        // Применен штраф
-#define mimTimePaused ((int)5)  // Время приостановлено
+// Сообщения (картинки)
+#define mimNone             0       // Скрыть картинку с сообщением
+#define mimEndTime          1       // Время закончилось
+#define mimLocked           2       // Компьютер закрыт
+#define mimPaused           3       // Компьютер прикрыт адмиинстратором или аварийно
+#define mimFine             4       // Применен штраф
+#define mimTimePaused       5       // Время приостановлено
 //---------------------------------------------------------------------------
 class TFormMain : public TForm
 {
 __published:	// IDE-managed Components
     TPanel *PanelMenu;
-    TImage *ImageFace;
-    TImage *ImageLogo;
+    TImage *ImageMenu;
     TSpeedButton *SpeedButtonReboot;
     TLabel *Label1;
     TLabel *Label2;
     TLabel *LabelWorkTime;
     TLabel *LabelSysTime;
     TTimer *Timer;
-    TImageList *ImageListGamesIcons;
-    TPanel *PanelGames;
-    TImage *Image1;
-    TImage *Image2;
-    TImage *Image3;
-    TImage *Image4;
-    TImage *Image5;
-    TImage *Image6;
-    TImage *Image7;
-    TImage *Image8;
-    TTreeView *TreeViewGames;
-    TImage *ImageMessage;
-    TLabel *LabelComputerNumber;
+    TLabel *LabelCompNum;
     TSpeedButton *SpeedButtonOptions;
+    TLabel *LabelCompNumShad;
     void __fastcall TimerTimer(TObject *Sender);
     void __fastcall FormShow(TObject *Sender);
     void __fastcall FormClose(TObject *Sender, TCloseAction &Action);
-    void __fastcall TreeViewGamesDeletion(TObject *Sender,
-          TTreeNode *Node);
     void __fastcall SpeedButtonRebootClick(TObject *Sender);
-    void __fastcall TreeViewGamesDblClick(TObject *Sender);
     void __fastcall FormCloseQuery(TObject *Sender, bool &CanClose);
     void __fastcall SpeedButtonOptionsClick(TObject *Sender);
+    void __fastcall FormResize(TObject *Sender);
 private:	// User declarations
     int TimeToReboot;
+    int TimeMsgEndTime;
     bool MessageAreShowed;
-    void __fastcall SetState(MStateInfo *Info_);
-    void __fastcall ShowGames(unsigned int Pages_);
-    void __fastcall ShowImageMessage(int Message_);
-    void __fastcall HideWindows(bool Hide_);
-    void __fastcall AddGamesToTree(MGames *Games_, TTreeNode *TreeNode_, TImageList *ImageList_);
+    MLockDsk LockDesk;
+    void SetState(MStateInfo *Info_);
+    void SetTransp(bool Transp_);
+    void ShowGames(unsigned Pages_);
+    void ShowImageMessage(int Message_);
 public:		// User declarations
     __fastcall TFormMain(TComponent* Owner);
 };

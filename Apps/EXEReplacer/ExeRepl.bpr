@@ -62,7 +62,7 @@ AutoIncBuild=1
 MajorVer=1
 MinorVer=0
 Release=0
-Build=14
+Build=15
 Debug=0
 PreRelease=0
 Special=0
@@ -74,13 +74,13 @@ CodePage=1251
 [Version Info Keys]
 CompanyName=MMM Groups
 FileDescription=Заглушка
-FileVersion=1.0.0.14
+FileVersion=1.0.0.15
 InternalName=EXEReplacer
 LegalCopyright=MMM Groups
 LegalTrademarks=
 OriginalFilename=EXERepl.exe
 ProductName=TLK
-ProductVersion=3.10
+ProductVersion=3.11
 Comments=
 
 [HistoryLists\hlIncludePath]

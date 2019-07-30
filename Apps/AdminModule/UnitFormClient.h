@@ -60,6 +60,9 @@ __published:	// IDE-managed Components
     TBevel *Bevel4;
     TBevel *Bevel5;
     TPanel *PanelProcess;
+    TCheckBox *CheckBoxTransp;
+    TLabel *Label2;
+    TComboBox *ComboBoxMsgEndTime;
     void __fastcall FormShow(TObject *Sender);
     void __fastcall ButtonOperationsClick(TObject *Sender);
     void __fastcall NOpenClick(TObject *Sender);
@@ -81,6 +84,8 @@ __published:	// IDE-managed Components
     void __fastcall ComboBoxToEndTimeClick(TObject *Sender);
     void __fastcall PageControlChange(TObject *Sender);
     void __fastcall NLoadClick(TObject *Sender);
+    void __fastcall ComboBoxMsgEndTimeClick(TObject *Sender);
+    void __fastcall ComboBoxRebootWaitClick(TObject *Sender);
 private:	// User declarations
     MSendSrv Send;                      // TCP-рассыльщик объектов
     Marray <MComputer*> SendComps;      // Массив указателей на компьютеры, куда рассылать

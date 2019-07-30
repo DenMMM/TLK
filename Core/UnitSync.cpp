@@ -349,9 +349,9 @@ bool MSync::Associate(MStates *States_, MComputers *Computers_)
 {
     States=NULL;
     SyncStates.Associate(States_,Computers_);
-    if ( !SyncStates.Save() ) return false;
     States=States_;
-    return true;
+    // Сохраним кэш MAC-адресов
+    return AutoSaveARP? SyncStates.Save(): true;
 }
 //---------------------------------------------------------------------------
 bool MSync::Start()

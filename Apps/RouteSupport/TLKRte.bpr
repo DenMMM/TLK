@@ -89,12 +89,12 @@ CodePage=1251
 CompanyName=MMM Groups
 FileDescription=TLK Route Support
 FileVersion=1.0.0.11
-InternalName=
+InternalName=RouteSupport
 LegalCopyright=
 LegalTrademarks=
 OriginalFilename=TLKRte.exe
-ProductName=Time Locker
-ProductVersion=1.0.0.0
+ProductName=TLK
+ProductVersion=3.11
 Comments=
 
 [HistoryLists\hlIncludePath]

@@ -21,6 +21,7 @@ void __fastcall TFormEvents::FormShow(TObject *Sender)
 {
     Filter=mcfAll;
     CheckBoxCompAUpd->Checked=true;
+    ListViewComputers->DoubleBuffered=true;
 }
 //---------------------------------------------------------------------------
 void __fastcall TFormEvents::FormClose(TObject *Sender,
@@ -29,7 +30,7 @@ void __fastcall TFormEvents::FormClose(TObject *Sender,
     ListViewEvents->Items->Clear();
     ListViewComputers->Items->Clear();
     Action=caFree;
-    FormMain->WindowClose(this);
+    FormMain->WindowClose(this);        /// нужно ли ??
 }
 //---------------------------------------------------------------------------
 void __fastcall TFormEvents::ListViewComputersInsert(TObject *Sender,

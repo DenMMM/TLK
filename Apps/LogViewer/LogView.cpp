@@ -11,7 +11,7 @@ WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
     try
     {
          Application->Initialize();
-         Application->Title = "TLK Log Viewer";
+         Application->Title = "TLK - Просмотр логов";
          Application->CreateForm(__classid(TFormMain), &FormMain);
          Application->Run();
     }

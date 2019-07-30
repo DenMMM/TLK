@@ -86,7 +86,7 @@ AutoIncBuild=1
 MajorVer=1
 MinorVer=0
 Release=0
-Build=17
+Build=18
 Debug=0
 PreRelease=0
 Special=0
@@ -98,13 +98,13 @@ CodePage=1251
 [Version Info Keys]
 CompanyName=MMM Groups
 FileDescription=Просмотр логов TLK
-FileVersion=1.0.0.17
+FileVersion=1.0.0.18
 InternalName=LogViewer
 LegalCopyright=
 LegalTrademarks=
 OriginalFilename=LogView.exe
 ProductName=TLK
-ProductVersion=3.10
+ProductVersion=3.11
 Comments=
 
 [HistoryLists\hlIncludePath]

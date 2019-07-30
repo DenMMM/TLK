@@ -31,6 +31,7 @@ class MTariffsInfo;         /// больше нигде не используются
 #define mgp7        64
 #define mgp8        128
 #define mgpRoute    256
+#define mgpDesktop  512
 #define mgpAll (mgp1|mgp2|mgp3|mgp4|mgp5|mgp6|mgp7|mgp8|mgpRoute)
 //---------------------------------------------------------------------------
 #define mttUndefined    0

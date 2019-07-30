@@ -20,29 +20,6 @@ object FormMain: TFormMain
   OnShow = FormShow
   PixelsPerInch = 96
   TextHeight = 13
-  object Label4: TLabel
-    Left = 193
-    Top = 8
-    Width = 87
-    Height = 13
-    Alignment = taRightJustify
-    Caption = #1046#1076#1072#1090#1100' '#1084#1080#1085#1080#1084#1091#1084':'
-  end
-  object Label5: TLabel
-    Left = 292
-    Top = 8
-    Width = 76
-    Height = 13
-    AutoSize = False
-    Caption = '00 '#1095#1072#1089'. 00 '#1084#1080#1085'.'
-  end
-  object Bevel15: TBevel
-    Left = 188
-    Top = 4
-    Width = 189
-    Height = 21
-    Style = bsRaised
-  end
   object StatusBar: TStatusBar
     Left = 0
     Top = 435
@@ -361,78 +338,69 @@ object FormMain: TFormMain
       OnClick = BitBtnAdditionalsClick
     end
   end
-  object PanelGeneral: TPanel
+  object ListViewComputers: TListView
     Left = 0
     Top = 0
     Width = 596
     Height = 435
     Align = alClient
+    BiDiMode = bdLeftToRight
+    Columns = <
+      item
+        Width = 0
+      end
+      item
+        Alignment = taRightJustify
+        Caption = #8470
+        Width = 40
+      end
+      item
+        Caption = 'Net'
+        Width = 30
+      end
+      item
+        Caption = #1057#1086#1089#1090#1086#1103#1085#1080#1077
+        Width = 130
+      end
+      item
+        Caption = #1053#1072#1079#1074#1072#1085#1080#1077' '#1090#1072#1088#1080#1092#1072
+        Width = 130
+      end
+      item
+        Caption = #1042#1088#1077#1084#1103' '#1088#1072#1073#1086#1090#1099
+        Width = 90
+      end
+      item
+        Caption = #1054#1089#1090#1072#1083#1086#1089#1100
+        Width = 70
+      end
+      item
+        Caption = #1044#1086
+        Width = 70
+      end
+      item
+        Caption = #1042#1088#1077#1084#1103' '#1096#1090#1088#1072#1092#1072
+        Width = 90
+      end
+      item
+        Caption = #1054#1089#1090#1072#1083#1086#1089#1100
+        Width = 70
+      end>
+    HideSelection = False
+    MultiSelect = True
+    ReadOnly = True
+    RowSelect = True
+    ParentBiDiMode = False
+    SmallImages = ImageListIcons
+    SortType = stData
     TabOrder = 2
-    object ListViewComputers: TListView
-      Left = 1
-      Top = 1
-      Width = 594
-      Height = 433
-      Align = alClient
-      AllocBy = 100
-      BiDiMode = bdLeftToRight
-      Columns = <
-        item
-          Width = 0
-        end
-        item
-          Alignment = taRightJustify
-          Caption = #8470
-          Width = 40
-        end
-        item
-          Caption = 'Net'
-          Width = 30
-        end
-        item
-          Caption = #1057#1086#1089#1090#1086#1103#1085#1080#1077
-          Width = 130
-        end
-        item
-          Caption = #1053#1072#1079#1074#1072#1085#1080#1077' '#1090#1072#1088#1080#1092#1072
-          Width = 130
-        end
-        item
-          Caption = #1042#1088#1077#1084#1103' '#1088#1072#1073#1086#1090#1099
-          Width = 90
-        end
-        item
-          Caption = #1054#1089#1090#1072#1083#1086#1089#1100
-          Width = 70
-        end
-        item
-          Caption = #1044#1086
-          Width = 70
-        end
-        item
-          Caption = #1042#1088#1077#1084#1103' '#1096#1090#1088#1072#1092#1072
-          Width = 90
-        end
-        item
-          Caption = #1054#1089#1090#1072#1083#1086#1089#1100
-          Width = 70
-        end>
-      HideSelection = False
-      MultiSelect = True
-      ReadOnly = True
-      RowSelect = True
-      ParentBiDiMode = False
-      SmallImages = ImageListIcons
-      SortType = stData
-      TabOrder = 0
-      ViewStyle = vsReport
-      OnCompare = ListViewComputersCompare
-      OnInsert = ListViewComputersInsert
-    end
+    ViewStyle = vsReport
+    OnCompare = ListViewComputersCompare
+    OnInsert = ListViewComputersInsert
   end
   object ImageListIcons: TImageList
     AllocBy = 22
-    Left = 460
+    Left = 488
     Top = 28
     Bitmap = {
       494C010112001300040010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
@@ -1104,7 +1072,6 @@ object FormMain: TFormMain
   end
   object Timer: TTimer
     Enabled = False
-    Interval = 200
     OnTimer = TimerTimer
     Left = 432
     Top = 28
@@ -1291,5 +1258,12 @@ object FormMain: TFormMain
       Caption = #1053#1086#1088#1084#1072#1083#1100#1085#1099#1081' '#1088#1077#1078#1080#1084
       OnClick = NOpenClick
     end
+  end
+  object TimerNet: TTimer
+    Enabled = False
+    Interval = 200
+    OnTimer = TimerNetTimer
+    Left = 460
+    Top = 28
   end
 end

@@ -7,6 +7,8 @@ class MClOptions;
 #include "UnitSLList.h"
 #include "UnitCommon.h"
 //---------------------------------------------------------------------------
+#define mcoTransp       0x00000001      // Полупрозрачный shell
+//---------------------------------------------------------------------------
 class MClOptions:public MSLList
 {
 private:
@@ -22,8 +24,10 @@ private:
 public:
     short ToEndTime;                    // За сколько минут предупреждать об окончании времени (0-no show)
     short MessageTime;                  // Сколько секунд показывать предупреждение
-    short RebootWait;                   // Секунд до перезагрузки после этого (0-no reboot)
+    short MsgEndTime;                   // Время показа сообщения об окончании времени, секунд (0-no show)
+    short RebootWait;                   // Секунд до перезагрузки после окончании времени (0-no reboot)
     short AutoLockTime;                 // Минут без связи с сервером до блокировки (0-no lock)
+    unsigned Flags;                     // Остальные настройки - флаги
 
     bool Copy(MClOptions *ClOptions_);
 

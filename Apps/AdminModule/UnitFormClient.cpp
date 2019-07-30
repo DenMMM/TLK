@@ -50,20 +50,22 @@ void __fastcall TFormClient::FormShow(TObject *Sender)
     CreateGamesTree(&TmpGames);
 
     ComboBoxToEndTime->Items->Add("Не показывать");
+    ComboBoxMsgEndTime->Items->Add("Не показывать");
     ComboBoxRebootWait->Items->Add("Не перезагружать");
     ComboBoxAutoLockTime->Items->Add("Не блокировать");
     for ( int i=1; i<=30; i++ )
     {
-        ComboBoxToEndTime->Items->Add(IntToStr(i));
-        ComboBoxMessageTime->Items->Add(IntToStr(i));
-        ComboBoxRebootWait->Items->Add(IntToStr(i));
-        ComboBoxAutoLockTime->Items->Add(IntToStr(i));
+        AnsiString line=IntToStr(i);
+        ComboBoxToEndTime->Items->Add(line);
+        ComboBoxMessageTime->Items->Add(line);
+        ComboBoxMsgEndTime->Items->Add(line);
+        ComboBoxRebootWait->Items->Add(line);
+        ComboBoxAutoLockTime->Items->Add(line);
     }
-    ComboBoxToEndTime->ItemIndex=2;
-    ComboBoxMessageTime->ItemIndex=10-1;
-    ComboBoxRebootWait->ItemIndex=20;
-    ComboBoxAutoLockTime->ItemIndex=15;
+    OptionsToShell(&TmpOptions);
     ComboBoxToEndTimeClick(NULL);
+    ComboBoxMsgEndTimeClick(NULL);
+    ComboBoxRebootWaitClick(NULL);
 
     ActiveControl=ListViewComputers;
 }
@@ -184,10 +186,7 @@ void __fastcall TFormClient::NSendClick(TObject *Sender)
     } else if ( PageControl->ActivePage==TabSheetOptions )
     {
         // Заполняем объект для отправки
-        TmpOptions.ToEndTime=ComboBoxToEndTime->ItemIndex;
-        TmpOptions.MessageTime=ComboBoxMessageTime->ItemIndex+1;
-        TmpOptions.RebootWait=ComboBoxRebootWait->ItemIndex;
-        TmpOptions.AutoLockTime=ComboBoxAutoLockTime->ItemIndex;
+        ShellToOptions(&TmpOptions);
         // Запускаем отправку данных
         SetNet(true,true);
         if ( !Send.Send(&SendComps,NULL,&TmpOptions) ) goto error;
@@ -475,7 +474,7 @@ void TFormClient::CreateGamesFromTree(MGames *Games_)
     {
         TTreeNode *node=items->Item[i];
         if ( node->Level ) continue;
-        dGame=(MGame*)Games_->Add(); 
+        dGame=(MGame*)Games_->Add();
         sGame=(MGame*)node->Data;
         //
         dGame->SetName(sGame->Name);
@@ -492,17 +491,22 @@ void TFormClient::OptionsToShell(MClOptions *Options_)
 {
     ComboBoxToEndTime->ItemIndex=Options_->ToEndTime;
     ComboBoxMessageTime->ItemIndex=Options_->MessageTime-1;
+    ComboBoxMsgEndTime->ItemIndex=Options_->MsgEndTime;
     ComboBoxRebootWait->ItemIndex=Options_->RebootWait;
     ComboBoxAutoLockTime->ItemIndex=Options_->AutoLockTime;
     ComboBoxToEndTimeClick(NULL);
+    CheckBoxTransp->Checked=Options_->Flags&mcoTransp;
 }
 //---------------------------------------------------------------------------
 void TFormClient::ShellToOptions(MClOptions *Options_)
 {
     Options_->ToEndTime=ComboBoxToEndTime->ItemIndex;
     Options_->MessageTime=ComboBoxMessageTime->ItemIndex+1;
+    Options_->MsgEndTime=ComboBoxMsgEndTime->ItemIndex;
     Options_->RebootWait=ComboBoxRebootWait->ItemIndex;
     Options_->AutoLockTime=ComboBoxAutoLockTime->ItemIndex;
+    Options_->Flags=
+        (CheckBoxTransp->Checked?mcoTransp:0);
 }
 //---------------------------------------------------------------------------
 void TFormClient::SetEdit(bool Edit_, bool Full_)
@@ -620,6 +624,20 @@ void __fastcall TFormClient::ComboBoxToEndTimeClick(TObject *Sender)
 {
     ComboBoxMessageTime->Enabled=ComboBoxToEndTime->ItemIndex;
     ComboBoxMessageTime->Color=ComboBoxToEndTime->ItemIndex?clWindow:clBtnFace;
+}
+//---------------------------------------------------------------------------
+void __fastcall TFormClient::ComboBoxMsgEndTimeClick(TObject *Sender)
+{
+    int time1=ComboBoxMsgEndTime->ItemIndex;
+    int time2=ComboBoxRebootWait->ItemIndex;
+    if ( time1>time2 ) ComboBoxRebootWait->ItemIndex=time1;
+}
+//---------------------------------------------------------------------------
+void __fastcall TFormClient::ComboBoxRebootWaitClick(TObject *Sender)
+{
+    int time1=ComboBoxMsgEndTime->ItemIndex;
+    int time2=ComboBoxRebootWait->ItemIndex;
+    if ( time2<time1 ) ComboBoxMsgEndTime->ItemIndex=time2;
 }
 //---------------------------------------------------------------------------
 

@@ -2,6 +2,8 @@
 #include <vcl.h>
 #pragma hdrstop
 USEFORM("UnitFormMain.cpp", FormMain);
+USEFORM("UnitFormDesk.cpp", FormDesk);
+USEFORM("UnitFormGames.cpp", FormGames);
 //---------------------------------------------------------------------------
 typedef DWORD RegServProc(DWORD,DWORD);
 //---------------------------------------------------------------------------
@@ -22,12 +24,16 @@ WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
     {
         ::CloseHandle(mutex); return 0;
     }
-    //
+    // Инициализируем генератор случайных чисел
+    randomize();
+
     try
     {
          Application->Initialize();
-         Application->Title = "TLK 3.10";
+         Application->Title = "TLK - Клиент";
          Application->CreateForm(__classid(TFormMain), &FormMain);
+         Application->CreateForm(__classid(TFormGames), &FormGames);
+         Application->CreateForm(__classid(TFormDesk), &FormDesk);
          Application->Run();
     }
     catch (Exception &exception)

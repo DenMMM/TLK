@@ -55,8 +55,6 @@ __published:	// IDE-managed Components
     TBitBtn *BitBtnAdd;
     TBitBtn *BitBtnFine;
     TBitBtn *BitBtnAdditionals;
-    TPanel *PanelGeneral;
-    TListView *ListViewComputers;
     TBevel *Bevel1;
     TProgressBar *ProgressBarNetProcess;
     TBevel *Bevel4;
@@ -89,9 +87,6 @@ __published:	// IDE-managed Components
     TBevel *Bevel13;
     TBevel *Bevel8;
     TBitBtn *BitBtnClose;
-    TLabel *Label4;
-    TLabel *Label5;
-    TBevel *Bevel15;
     TPopupMenu *PopupMenuSystem;
     TMenuItem *NOpen;
     TMenuItem *NClose;
@@ -112,6 +107,8 @@ __published:	// IDE-managed Components
     TMenuItem *NAuth;
     TMenuItem *N9;
     TMenuItem *N8;
+    TListView *ListViewComputers;
+    TTimer *TimerNet;
     void __fastcall TimerTimer(TObject *Sender);
     void __fastcall BitBtnRunClick(TObject *Sender);
     void __fastcall NClosePrgClick(TObject *Sender);
@@ -137,11 +134,12 @@ __published:	// IDE-managed Components
     void __fastcall NConfigOpenClick(TObject *Sender);
     void __fastcall NLogResetClick(TObject *Sender);
     void __fastcall NOptionsPasswordClick(TObject *Sender);
+    void __fastcall TimerNetTimer(TObject *Sender);
 private:	// User declarations
-    bool EnableConfig;          // Настройка модуля
-    bool EnableLogReSet;        // Ручное заведение нового файла лога
-    bool EnableCompCmd;         // Команды для компьютеров
-    bool EnableCommon;
+//    bool EnableConfig;          // Настройка модуля
+//    bool EnableLogReSet;        // Ручное заведение нового файла лога
+//    bool EnableCompCmd;         // Команды для компьютеров
+//    bool EnableCommon;        ///
     int Filter;                 // Режим фильтрации показываемых в списке компьютеров
     bool CheckFilter(MStateInfo *Info_, int FreeTime_);
     void SetListViewComputersLine(TListItem *Item_, MStateInfo *Info_);

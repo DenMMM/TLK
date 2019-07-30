@@ -14,8 +14,8 @@ private:
 
 public:
     // Доступ к элементам класса
-    MListItem *gPrev() const { return Prev; }
-    MListItem *gNext() const { return Next; }
+    MListItem* gPrev() const { return Prev; }
+    MListItem* gNext() const { return Next; }
 
     virtual unsigned char gTypeID() const { return 0; }
     virtual void Copy(const MListItem *SrcItem_)=0;
@@ -23,6 +23,15 @@ public:
     MListItem();
     ~MListItem();
 };
+//---------------------------------------------------------------------------
+/*template <class type>
+class _MListItem
+{
+public:
+    // Шаблоны для доступа к элементам класса
+    type* gPrev() const { return (type*)MListItem::gPrev(); }
+    type* gNext() const { return (type*)MListItem::gNext(); }
+};*/
 //---------------------------------------------------------------------------
 class MList
 {
@@ -49,6 +58,12 @@ protected:
     // Определяет могут ли элементы списка быть разных типов
     // Для 'true' MListItem::TypeID() должна быть переопределена
     virtual bool Typed() const { return false; }
+
+    // Шаблоны для доступа к атрибутам списка
+//    template <typename type>
+//    type *gFirst() const { return (type*)MList::gFirst(); }
+//    template <typename type>
+//    type *gLast() const { return (type*)MList::gLast(); }
 
 public:
     // Доступ к атрибутам списка

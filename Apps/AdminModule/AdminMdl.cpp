@@ -36,7 +36,7 @@ WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
         try
         {
          Application->Initialize();
-         Application->Title = "TLK 3.10";
+         Application->Title = "TLK - Модуль управления";
          Application->CreateForm(__classid(TFormMain), &FormMain);
          Application->Run();
         }

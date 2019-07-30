@@ -10,7 +10,7 @@
 //---------------------------------------------------------------------------
 WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
-    char file_name[MAX_PATH];
+    char file_name[MAX_PATH+1];
     SC_HANDLE sc_manager_handle;
     SC_HANDLE service_handle;
 
@@ -45,10 +45,10 @@ WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, in
     {
         SERVICE_TABLE_ENTRY service_table_entry[]={"TLKRoute",&ServiceMain,NULL,NULL};
         ::StartServiceCtrlDispatcher(service_table_entry);
-    } else if ( strcmpi(lpCmdLine,"/debug")==0 )
-    {
-        ServiceMain(0,NULL);
-    } 
+    } //else if ( strcmpi(lpCmdLine,"/debug")==0 )
+//    {
+//        ServiceMain(0,NULL);      /// для отладки
+//    }
 
     return 0;
 }

@@ -61,16 +61,29 @@ const char *MUser::GetData(const char *Data_, const char *Limit_)
         ? Data_: NULL;
 }
 
-bool MUser::SetLogin(char *Login_)
+void MUser::SetLogin(char *Login_)
 {
-    return strlen(Login_)>MAX_UserLoginLen?
-        false: (bool)strcpy(Login,Login_);
+    if ( strlen(Login_)>MAX_UserLoginLen )
+    {
+        throw std::runtime_error (
+        TEXT("MUser::SetLogin()\n")
+        TEXT("Длина строки превышает MAX_UserLoginLen.")
+        );
+
+    }
+    strcpy(Login,Login_);
 }
 
-bool MUser::SetName(char *Name_)
+void MUser::SetName(char *Name_)
 {
-    return strlen(Name_)>MAX_UserNameLen?
-        false: (bool)strcpy(Name,Name_);
+    if ( strlen(Name_)>MAX_UserNameLen )
+    {
+        throw std::runtime_error (
+        TEXT("MUser::SetName()\n")
+        TEXT("Длина строки превышает MAX_UserNameLen.")
+        );
+    }
+    strcpy(Name,Name_);
 }
 
 void MUser::GetUserData(MUserData *Data_) const

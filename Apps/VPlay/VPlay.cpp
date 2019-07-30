@@ -17,7 +17,7 @@ WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
     try
     {
          Application->Initialize();
-         Application->Title = "TLK Видео-плейер";
+         Application->Title = "TLK - Видео-плейер";
          Application->CreateForm(__classid(TFormMain), &FormMain);
          Application->Run();
     }
