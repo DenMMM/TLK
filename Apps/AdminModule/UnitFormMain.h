@@ -150,10 +150,11 @@ __published:	// IDE-managed Components
     void __fastcall NOptionsPasswordClick(TObject *Sender);
     void __fastcall TimerNetTimer(TObject *Sender);
 private:	// User declarations
-//    bool EnableConfig;          // Настройка модуля
+    bool EnableConfig;          // Настройка модуля
 //    bool EnableLogReSet;        // Ручное заведение нового файла лога
 //    bool EnableCompCmd;         // Команды для компьютеров
 //    bool EnableCommon;        ///
+    bool ConfigMode;
     int Filter;                 // Режим фильтрации показываемых в списке компьютеров
     bool CheckFilter(MStateInfo *Info_, int FreeTime_);
     void SetListViewComputersLine(TListItem *Item_, MStateInfo *Info_);

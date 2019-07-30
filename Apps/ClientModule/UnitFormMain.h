@@ -12,23 +12,11 @@
 #include <Graphics.hpp>
 #include <ImgList.hpp>
 #include <ComCtrls.hpp>
-//---------------------------------------------------------------------------
-#include "UnitClOptions.h"
-#include "UnitStates.h"
-#include "UnitSync.h"
-#include "UnitSend.h"
-#include "UnitAuth.h"
-#include "UnitMessage.h"
-#include "UnitLockDsk.h"
 #include <Menus.hpp>
 //---------------------------------------------------------------------------
-// Сообщения (картинки)
-#define mimNone             0       // Скрыть картинку с сообщением
-#define mimEndTime          1       // Время закончилось
-#define mimLocked           2       // Компьютер закрыт
-#define mimPaused           3       // Компьютер прикрыт адмиинстратором или аварийно
-#define mimFine             4       // Применен штраф
-#define mimTimePaused       5       // Время приостановлено
+#include "UnitMessage.h"
+#include "UnitLockDsk.h"
+#include "UnitShared.h"
 //---------------------------------------------------------------------------
 class TFormMain : public TForm
 {
@@ -59,29 +47,33 @@ __published:	// IDE-managed Components
     void __fastcall NLogOffClick(TObject *Sender);
     void __fastcall NShutdownClick(TObject *Sender);
 private:	// User declarations
-    int TimeMsgEndTime;
-    int TimeToReboot;
-    bool MessageAreShowed;
-    bool MyClose;
-    MLockDsk LockDesk;
-    void SetState(MStateInfo *Info_);
-    void SetTransp(bool Transp_);
-    void ShowGames(unsigned Pages_);
-    void ShowImageMessage(int Message_);
-public:		// User declarations
+    MMessage WarnMessage;
+    MLockDsk LockDsk;
+    bool Transp;
+    unsigned CompNumVer;
+    unsigned SysTimeVer;
+    unsigned WorkTimeVer;
+    unsigned WarnMsgVer;
+    unsigned ImageMsgVer;
+    unsigned GamesVer;
+    unsigned TranspVer;
     bool ConfigMode;
+    unsigned ConfigModeVer;
+    AnsiString ExePath;
+
+    void SetTransp(bool Transp_);
+    void SharedProcess();
+    void __fastcall MQueryEndSession(TMessage &Msg);
+    BEGIN_MESSAGE_MAP
+    MESSAGE_HANDLER(WM_QUERYENDSESSION,TMessage,MQueryEndSession);
+    END_MESSAGE_MAP(TForm);
+public:		// User declarations
     __fastcall TFormMain(TComponent* Owner);
 };
 //---------------------------------------------------------------------------
 extern PACKAGE TFormMain *FormMain;
 //---------------------------------------------------------------------------
-extern char win_dir[];
-extern Mptr <MClOptions> Options;
-extern Mptr <MStateCl> State;
-extern Mptr <MSyncCl> Sync;
-extern Mptr <MSendCl> Send;
-extern Mptr <MAuth> Auth;
-extern Mptr <MMessage> Message;
+extern MShared Shared;
 //---------------------------------------------------------------------------
 #endif
 

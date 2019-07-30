@@ -179,7 +179,7 @@ object FormGames: TFormGames
     Height = 422
     Anchors = [akLeft, akTop, akRight, akBottom]
     BorderStyle = bsNone
-    Color = clBlack
+    Color = clTeal
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clBlack
     Font.Height = -13
@@ -194,7 +194,6 @@ object FormGames: TFormGames
     TabOrder = 0
     ToolTips = False
     OnDblClick = TreeViewGamesDblClick
-    OnKeyPress = TreeViewGamesKeyPress
   end
   object ImageListGamesIcons: TImageList
     AllocBy = 50

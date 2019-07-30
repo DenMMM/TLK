@@ -12,7 +12,6 @@ MMessage::MMessage()
     hBitmap=NULL;
     BITMAP Bitmap;
     File=NULL;
-    ShowTime=0;
 }
 //---------------------------------------------------------------------------
 MMessage::~MMessage()
@@ -34,12 +33,10 @@ DWORD WINAPI MMessage::ThreadFunc(LPVOID Data)
 void MMessage::ThreadProc()
 {
     MSG Msg;
-    DWORD stime;
     HWND dsk_wnd;
     HDC dsk_dc, comp_dc;
     HANDLE old_bitmap;
 
-    ShowTime*=1000; stime=::GetTickCount();
     do
     {
         if ( ((dsk_wnd=::GetDesktopWindow())==NULL)||
@@ -55,8 +52,7 @@ void MMessage::ThreadProc()
         ::ReleaseDC(dsk_wnd,dsk_dc);
 next:
         ::Sleep(20);
-        if ( ::PeekMessage(&Msg,(HANDLE)-1,0,0,PM_REMOVE) ) break;
-    } while((::GetTickCount()-stime)<ShowTime);
+    } while(!::PeekMessage(&Msg,NULL,0,0,PM_REMOVE));
 
     // Удаляем из памяти загруженную ранее картинку
     ::DeleteObject(hBitmap); hBitmap=NULL;
@@ -69,7 +65,7 @@ void MMessage::SetFile(char *File_)
     strcpy(File,File_);
 }
 //---------------------------------------------------------------------------
-bool MMessage::Show(unsigned ShowTime_)
+bool MMessage::Show()
 {
     DWORD ExitCode;
 
@@ -85,8 +81,6 @@ bool MMessage::Show(unsigned ShowTime_)
     // Загружаем картинку с сообщением
     if ( (hBitmap=::LoadImage(NULL,File,IMAGE_BITMAP,0,0,LR_LOADFROMFILE))==NULL ) goto error;
     if ( ::GetObject(hBitmap,sizeof(BITMAP),&Bitmap)==NULL ) goto error;
-    // Задаем отсчет времени
-    ShowTime=ShowTime_;
     // Создаем поток для показа сообщения
     return (Thread=::CreateThread(NULL,0,&ThreadFunc,
         (LPVOID)this,0,&ThreadID))!=NULL;

@@ -49,6 +49,7 @@ void __fastcall TFormClient::FormShow(TObject *Sender)
     //
     CreateGamesTree(&TmpGames);
 
+    EditShellUser->MaxLength=MAX_ClUNameLen;
     ComboBoxToEndTime->Items->Add("Не показывать");
     ComboBoxMsgEndTime->Items->Add("Не показывать");
     ComboBoxRebootWait->Items->Add("Не перезагружать");
@@ -85,8 +86,10 @@ void __fastcall TFormClient::FormClose(TObject *Sender,
     EditName->Text=""; EditName->ClearUndo();
     EditCmd->Text=""; EditCmd->ClearUndo();
     EditIcon->Text=""; EditIcon->ClearUndo();
+    EditShellUser->Text=""; EditShellUser->ClearUndo();
     ComboBoxToEndTime->Clear();
     ComboBoxMessageTime->Clear();
+    ComboBoxMsgEndTime->Clear();
     ComboBoxRebootWait->Clear();
     ComboBoxAutoLockTime->Clear();
 }
@@ -252,24 +255,27 @@ void __fastcall TFormClient::TreeViewGamesDeletion(TObject *Sender,
     delete Game;
 }
 //---------------------------------------------------------------------------
-void __fastcall TFormClient::EditNameChange(TObject *Sender)
+void __fastcall TFormClient::EditNameExit(TObject *Sender)
 {
-    if ( (!EditName->Modified)||(TreeViewGames->Selected==NULL) ) return;
-    ((MGame*)TreeViewGames->Selected->Data)->SetName(EditName->Text.Trim().c_str());
+    if ( TreeViewGames->Selected==NULL ) return;
+    EditName->Text=EditName->Text.Trim();
+    ((MGame*)TreeViewGames->Selected->Data)->SetName(EditName->Text.c_str());
     SetTreeViewGamesLine(TreeViewGames->Selected);
 }
 //---------------------------------------------------------------------------
-void __fastcall TFormClient::EditCmdChange(TObject *Sender)
+void __fastcall TFormClient::EditCmdExit(TObject *Sender)
 {
-    if ( (!EditCmd->Modified)||(TreeViewGames->Selected==NULL) ) return;
-    ((MGame*)TreeViewGames->Selected->Data)->SetCommand(EditCmd->Text.Trim().c_str());
+    if ( TreeViewGames->Selected==NULL ) return;
+    EditCmd->Text=EditCmd->Text.Trim();
+    ((MGame*)TreeViewGames->Selected->Data)->SetCommand(EditCmd->Text.c_str());
     SetTreeViewGamesLine(TreeViewGames->Selected);
 }
 //---------------------------------------------------------------------------
-void __fastcall TFormClient::EditIconChange(TObject *Sender)
+void __fastcall TFormClient::EditIconExit(TObject *Sender)
 {
-    if ( (!EditIcon->Modified)||(TreeViewGames->Selected==NULL) ) return;
-    ((MGame*)TreeViewGames->Selected->Data)->SetIcon(EditIcon->Text.Trim().c_str());
+    if ( TreeViewGames->Selected==NULL ) return;
+    EditIcon->Text=EditIcon->Text.Trim();
+    ((MGame*)TreeViewGames->Selected->Data)->SetIcon(EditIcon->Text.c_str());
     SetTreeViewGamesLine(TreeViewGames->Selected);
 }
 //---------------------------------------------------------------------------
@@ -489,6 +495,7 @@ void TFormClient::CreateGamesFromTree(MGames *Games_)
 //---------------------------------------------------------------------------
 void TFormClient::OptionsToShell(MClOptions *Options_)
 {
+    EditShellUser->Text=Options_->ShellUser;
     ComboBoxToEndTime->ItemIndex=Options_->ToEndTime;
     ComboBoxMessageTime->ItemIndex=Options_->MessageTime-1;
     ComboBoxMsgEndTime->ItemIndex=Options_->MsgEndTime;
@@ -496,17 +503,22 @@ void TFormClient::OptionsToShell(MClOptions *Options_)
     ComboBoxAutoLockTime->ItemIndex=Options_->AutoLockTime;
     ComboBoxToEndTimeClick(NULL);
     CheckBoxTransp->Checked=Options_->Flags&mcoTransp;
+    CheckBoxRoute->Checked=Options_->Flags&mcoAddRoute;
+    CheckBoxAutoRun->Checked=Options_->Flags&mcoAutoRun;
 }
 //---------------------------------------------------------------------------
 void TFormClient::ShellToOptions(MClOptions *Options_)
 {
+    Options_->SetShellUser(EditShellUser->Text.c_str());
     Options_->ToEndTime=ComboBoxToEndTime->ItemIndex;
     Options_->MessageTime=ComboBoxMessageTime->ItemIndex+1;
     Options_->MsgEndTime=ComboBoxMsgEndTime->ItemIndex;
     Options_->RebootWait=ComboBoxRebootWait->ItemIndex;
     Options_->AutoLockTime=ComboBoxAutoLockTime->ItemIndex;
     Options_->Flags=
-        (CheckBoxTransp->Checked?mcoTransp:0);
+        (CheckBoxTransp->Checked?mcoTransp:0)|
+        (CheckBoxRoute->Checked?mcoAddRoute:0)|
+        (CheckBoxAutoRun->Checked?mcoAutoRun:0);
 }
 //---------------------------------------------------------------------------
 void TFormClient::SetEdit(bool Edit_, bool Full_)
@@ -620,6 +632,11 @@ void __fastcall TFormClient::Dispatch(void *Message)
     TForm::Dispatch(Message);
 }
 //---------------------------------------------------------------------------
+void __fastcall TFormClient::EditShellUserExit(TObject *Sender)
+{
+    EditShellUser->Text=EditShellUser->Text.Trim();
+}
+//---------------------------------------------------------------------------
 void __fastcall TFormClient::ComboBoxToEndTimeClick(TObject *Sender)
 {
     ComboBoxMessageTime->Enabled=ComboBoxToEndTime->ItemIndex;
@@ -630,6 +647,7 @@ void __fastcall TFormClient::ComboBoxMsgEndTimeClick(TObject *Sender)
 {
     int time1=ComboBoxMsgEndTime->ItemIndex;
     int time2=ComboBoxRebootWait->ItemIndex;
+    if ( time2==0 ) return;
     if ( time1>time2 ) ComboBoxRebootWait->ItemIndex=time1;
 }
 //---------------------------------------------------------------------------
@@ -637,6 +655,7 @@ void __fastcall TFormClient::ComboBoxRebootWaitClick(TObject *Sender)
 {
     int time1=ComboBoxMsgEndTime->ItemIndex;
     int time2=ComboBoxRebootWait->ItemIndex;
+    if ( time2==0 ) return;
     if ( time2<time1 ) ComboBoxMsgEndTime->ItemIndex=time2;
 }
 //---------------------------------------------------------------------------

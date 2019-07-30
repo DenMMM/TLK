@@ -7,31 +7,6 @@
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
 //---------------------------------------------------------------------------
-MListItem::MListItem()
-{
-    Prev=Next=NULL;
-}
-
-MListItem::~MListItem()
-{
-//
-}
-//---------------------------------------------------------------------------
-MList::MList()
-{
-    First=Last=NULL;
-    Count=0;
-}
-
-MList::~MList()
-{
-// Вызывать в деструкторе класса, где определена ф-я item_del(),
-// т.к. к моменту вызова ~MList() доступа к этому оператору уже нет.
-// Иначе элементы списка не будут удалены - memory leak !
-
-//    Clear();
-}
-
 MListItem *MList::Add(unsigned char TypeID_)
 {
     MListItem *NewItem;
@@ -102,50 +77,6 @@ void MList::Del(MListItem *DelItem_)
     // Удаляем объект из памяти
     item_del(DelItem_);
 }
-
-/*void MList::item_insert(MListItem *InsItem_, MListItem *AfterItem_)
-{
-    // Инициализируем новый объект, соседние с ним и общие для списка указатели
-    InsItem_->Prev=AfterItem_;
-    if ( AfterItem_==NULL )
-    {
-        InsItem_->Next=First;
-        if ( First==NULL ) Last=InsItem_;
-        else First->Prev=InsItem_;
-        First=InsItem_;
-    } else
-    {
-        InsItem_->Next=AfterItem_->Next;
-        if ( AfterItem_->Next!=NULL ) AfterItem_->Next->Prev=InsItem_;
-        else Last=InsItem_;
-        AfterItem_->Next=InsItem_;
-    }
-    // Корректируем счетчик
-    Count++;
-}*/
-
-/*MListItem *MList::Insert(MListItem *AfterItem_, unsigned Type_)
-{
-    MListItem *NewItem;
-
-    // Создаем новый объект элемента списка
-    if ( (NewItem=item_new(Type_))==NULL ) return NULL;
-    //
-    item_insert(NewItem,AfterItem_);
-
-    return NewItem;
-}*/
-
-/*MListItem *MList::Search(unsigned Type_, MListItem *Start_, bool Forward_)
-{
-    // Проверяем направление просмотра списка
-    if ( Forward_ )
-        while(Start_&&(Start_->TypeID()!=Type_)) Start_=Start_->Next;
-    else
-        while(Start_&&(Start_->TypeID()!=Type_)) Start_=Start_->Prev;
-
-    return NULL;
-}*/
 
 void MList::Clear()
 {

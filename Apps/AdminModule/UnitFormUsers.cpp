@@ -77,9 +77,9 @@ void __fastcall TFormUsers::EditLoginExit(TObject *Sender)
 {
     if ( ListViewUsers->Selected==NULL ) return;
 
+    EditLogin->Text=EditLogin->Text.Trim();
     MUser *user=(MUser*)ListViewUsers->Selected->Data;
-    user->SetLogin(EditLogin->Text.Trim().c_str());
-    EditLogin->Text=user->Login;
+    user->SetLogin(EditLogin->Text.c_str());
     SetListViewUsersLine(ListViewUsers->Selected);
 }
 //---------------------------------------------------------------------------
@@ -99,9 +99,9 @@ void __fastcall TFormUsers::EditNameExit(TObject *Sender)
 {
     if ( ListViewUsers->Selected==NULL ) return;
 
+    EditName->Text=EditName->Text.Trim();
     MUser *user=(MUser*)ListViewUsers->Selected->Data;
-    user->SetName(EditName->Text.Trim().c_str());
-    EditName->Text=user->Name;
+    user->SetName(EditName->Text.c_str());
     SetListViewUsersLine(ListViewUsers->Selected);
 }
 //---------------------------------------------------------------------------

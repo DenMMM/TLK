@@ -90,16 +90,6 @@ void MLogRecords::item_del(MListItem *Item_) const
     }
 }
 //---------------------------------------------------------------------------
-MLogRecordEvent::MLogRecordEvent()
-{
-    SystemTime=0;
-}
-
-MLogRecordEvent::~MLogRecordEvent()
-{
-//
-}
-
 void MLogRecordEvent::Copy(const MListItem *SrcItem_)
 {
     MLogRecordEvent *record=(MLogRecordEvent*)SrcItem_;
@@ -129,11 +119,6 @@ MLogRecordConfig::MLogRecordConfig()
 {
     SystemTime=0;
     Open=false;
-}
-
-MLogRecordConfig::~MLogRecordConfig()
-{
-//
 }
 
 void MLogRecordConfig::Copy(const MListItem *SrcItem_)
@@ -175,11 +160,6 @@ MLogRecordLogIn::MLogRecordLogIn()
     User=0;
 }
 
-MLogRecordLogIn::~MLogRecordLogIn()
-{
-//
-}
-
 void MLogRecordLogIn::Copy(const MListItem *SrcItem_)
 {
     MLogRecordLogIn *record=(MLogRecordLogIn*)SrcItem_;
@@ -212,9 +192,7 @@ const char *MLogRecordLogIn::GetData(const char *Data_, const char *Limit_)
 error:
     return NULL;
 }
-
 //---------------------------------------------------------------------------
-
 MLogRecordRun::MLogRecordRun()
 {
     SystemTime=0;
@@ -225,11 +203,6 @@ MLogRecordRun::MLogRecordRun()
     BeginTime=EndTime=0;
     SizeTime=WorkTime=0;
     Cost=0.;
-}
-
-MLogRecordRun::~MLogRecordRun()
-{
-//
 }
 
 void MLogRecordRun::Copy(const MListItem *SrcItem_)
@@ -296,20 +269,13 @@ const char *MLogRecordRun::GetData(const char *Data_, const char *Limit_)
 error:
     return NULL;
 }
-
 //---------------------------------------------------------------------------
-
 MLogRecordFine::MLogRecordFine()
 {
     SystemTime=0;
     Number=0;
     Fine=0;
     Time=0;
-}
-
-MLogRecordFine::~MLogRecordFine()
-{
-//
 }
 
 void MLogRecordFine::Copy(const MListItem *SrcItem_)
@@ -359,10 +325,6 @@ MLogRecordExchange::MLogRecordExchange()
     From=To=0;
 }
 
-MLogRecordExchange::~MLogRecordExchange()
-{
-}
-
 void MLogRecordExchange::Copy(const MListItem *SrcItem_)
 {
     MLogRecordExchange *record=(MLogRecordExchange*)SrcItem_;
@@ -399,18 +361,12 @@ const char *MLogRecordExchange::GetData(const char *Data_, const char *Limit_)
 error:
     return NULL;
 }
-
 //---------------------------------------------------------------------------
-
 MLogRecordMode::MLogRecordMode()
 {
     SystemTime=0;
     Number=0;
     Apply=false;
-}
-
-MLogRecordMode::~MLogRecordMode()
-{
 }
 
 void MLogRecordMode::Copy(const MListItem *SrcItem_)
@@ -449,17 +405,11 @@ const char *MLogRecordMode::GetData(const char *Data_, const char *Limit_)
 error:
     return NULL;
 }
-
 //---------------------------------------------------------------------------
-
 MLogRecordCmd::MLogRecordCmd()
 {
     SystemTime=0;
     Number=0;
-}
-
-MLogRecordCmd::~MLogRecordCmd()
-{
 }
 
 void MLogRecordCmd::Copy(const MListItem *SrcItem_)
@@ -492,18 +442,12 @@ const char *MLogRecordCmd::GetData(const char *Data_, const char *Limit_)
 error:
     return NULL;
 }
-
 //---------------------------------------------------------------------------
-
 MLogRecordDataShState::MLogRecordDataShState()
 {
     SystemTime=0;
     State=0;
     User=0;
-}
-
-MLogRecordDataShState::~MLogRecordDataShState()
-{
 }
 
 void MLogRecordDataShState::Copy(const MListItem *SrcItem_)
@@ -540,16 +484,10 @@ const char *MLogRecordDataShState::GetData(const char *Data_, const char *Limit_
 error:
     return NULL;
 }
-
 //---------------------------------------------------------------------------
 MLogRecordDataStates::MLogRecordDataStates()
 {
     SystemTime=0;
-}
-
-MLogRecordDataStates::~MLogRecordDataStates()
-{
-//
 }
 
 void MLogRecordDataStates::Copy(const MListItem *SrcItem_)
@@ -639,11 +577,6 @@ MLogRecordDataTariffs::MLogRecordDataTariffs()
     SystemTime=0;
 }
 
-MLogRecordDataTariffs::~MLogRecordDataTariffs()
-{
-//
-}
-
 void MLogRecordDataTariffs::Copy(const MListItem *SrcItem_)
 {
     MLogRecordDataTariffs *record=(MLogRecordDataTariffs*)SrcItem_;
@@ -714,10 +647,6 @@ MLogRecordDataFines::MLogRecordDataFines()
     SystemTime=0;
 }
 
-MLogRecordDataFines::~MLogRecordDataFines()
-{
-}
-
 void MLogRecordDataFines::Copy(const MListItem *SrcItem_)
 {
     MLogRecordDataFines *record=(MLogRecordDataFines*)SrcItem_;
@@ -786,11 +715,6 @@ error:
 MLogRecordDataUsers::MLogRecordDataUsers()
 {
     SystemTime=0;
-}
-
-MLogRecordDataUsers::~MLogRecordDataUsers()
-{
-//
 }
 
 void MLogRecordDataUsers::Copy(const MListItem *SrcItem_)

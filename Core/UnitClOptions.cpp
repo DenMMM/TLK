@@ -7,6 +7,7 @@
 //---------------------------------------------------------------------------
 MClOptions::MClOptions()
 {
+    *ShellUser=0;
     ToEndTime=2;
     MessageTime=15;
     MsgEndTime=10;
@@ -20,8 +21,21 @@ MClOptions::~MClOptions()
 //
 }
 
+void MClOptions::SetShellUser(const char *Name_)
+{
+    if ( strlen(Name_)>MAX_ClUNameLen )
+    {
+        throw std::out_of_range (
+            "MClOptions::SetShellUser()\n"
+            "Длина имени превышет MAX_ClUNameLen."
+            );
+    }
+    strcpy(ShellUser,Name_);
+}
+
 bool MClOptions::Copy(MClOptions *ClOptions_)
 {
+    strcpy(ShellUser,ClOptions_->ShellUser);
     ToEndTime=ClOptions_->ToEndTime;
     MessageTime=ClOptions_->MessageTime;
     MsgEndTime=ClOptions_->MsgEndTime;
@@ -34,6 +48,7 @@ bool MClOptions::Copy(MClOptions *ClOptions_)
 unsigned MClOptions::GetDataSize() const
 {
     return
+        strlen(ShellUser)+1+
         sizeof(ToEndTime)+
         sizeof(MessageTime)+
         sizeof(MsgEndTime)+
@@ -44,6 +59,7 @@ unsigned MClOptions::GetDataSize() const
 
 char *MClOptions::SetData(char *Data_) const
 {
+    Data_=MemSetCLine(Data_,ShellUser);
     Data_=MemSet(Data_,ToEndTime);
     Data_=MemSet(Data_,MessageTime);
     Data_=MemSet(Data_,MsgEndTime);
@@ -56,6 +72,7 @@ char *MClOptions::SetData(char *Data_) const
 const char *MClOptions::GetData(const char *Data_, const char *Limit_)
 {
     return
+        (Data_=MemGetCLine(Data_,ShellUser,MAX_ClUNameLen,Limit_))!=NULL &&
         (Data_=MemGet(Data_,&ToEndTime,Limit_))!=NULL &&
         (Data_=MemGet(Data_,&MessageTime,Limit_))!=NULL &&
         (Data_=MemGet(Data_,&MsgEndTime,Limit_))!=NULL &&

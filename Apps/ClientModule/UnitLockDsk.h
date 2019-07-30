@@ -12,12 +12,13 @@ class MLockDsk
 {
 private:
     // Сообщения для потока
-    #define MSG_Exit            (WM_USER+0)     // Завершить работу
-    #define MSG_UpdTransp       (WM_USER+1)     // Обновить режим прозрачности окна
-    #define MSG_UpdMsg          (WM_USER+2)     // Обновить картинку с сообщением
-    #define MSG_UpdCompNum      (WM_USER+3)     // Обновить номер компьютера
-    #define MSG_UpdSysTime      (WM_USER+4)     // Обновить системное время
-    #define MSG_UpdWorkTime     (WM_USER+5)     // Обновить время работы
+    #define MSG_Exit            WM_USER+1   // Завершить работу
+    #define MSG_UnLock          WM_USER+2   // Вернуть прежний рабочий стол и завершить работу
+    #define MSG_UpdTransp       WM_USER+3   // Обновить режим прозрачности окна
+    #define MSG_UpdMsg          WM_USER+4   // Обновить картинку с сообщением
+    #define MSG_UpdCompNum      WM_USER+5   // Обновить номер компьютера
+    #define MSG_UpdSysTime      WM_USER+6   // Обновить системное время
+    #define MSG_UpdWorkTime     WM_USER+7   // Обновить время работы
 
     HANDLE hThread;             // Дескриптор потока
     DWORD ThreadID;             // ID потока
@@ -80,7 +81,7 @@ private:
     static LRESULT CALLBACK WndProc(HWND hWnd_,
         UINT Msg_, WPARAM wParam_, LPARAM lParam_);
 
-    HWND MLockDsk::CreateText(
+    HWND CreateText(
         const char *Text_,
         DWORD Left_, DWORD Top_,
         DWORD Width_, DWORD Height_,
@@ -108,7 +109,7 @@ public:
     bool UpdateCompNum(int Num_);
     bool UpdateSysTime(__int64 Time_);
     bool UpdateWorkTime(int Time_);
-    void Hide();
+    void Hide(bool UnLock_=true);
 
     MLockDsk();
     ~MLockDsk();

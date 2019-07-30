@@ -22,7 +22,9 @@ MLockDsk::MLockDsk()
 //---------------------------------------------------------------------------
 MLockDsk::~MLockDsk()
 {
-    Hide();         /// правильно ли вызывать в деструкторе ?
+    // Завершим работу потока без разблокировки экрана
+    Hide(false);
+    //
     ::DeleteCriticalSection(&CS_Param);
 }
 //---------------------------------------------------------------------------
@@ -210,6 +212,18 @@ DWORD MLockDsk::ThreadP()
 
         // Обработаем сообщения потоку
         if ( Msg.message==MSG_Exit ) break;
+        else if ( Msg.message==MSG_UnLock )
+        {
+#ifndef _DEBUG
+            // Вернем прежние настройки экрана
+            ::ChangeDisplaySettings(&dmPrev,CDS_RESET);
+            // Переключимся на прежний рабочий стол
+            ::SwitchDesktop(hPrevDsk);
+#endif
+            // Завершим работу
+            break;
+        }
+
         switch(Msg.message)
         {
 #ifndef _DEBUG
@@ -228,12 +242,8 @@ DWORD MLockDsk::ThreadP()
 
     // Уничтожим основное окно и все что в нем создано
     ::DestroyWindow(hwMain);
-
 #ifndef _DEBUG
-    // Вернем прежние настройки экрана
-    ::ChangeDisplaySettings(&dmPrev,CDS_RESET);
-    // Переключимся на прежний рабочий стол и уничтожим свой
-    ::SwitchDesktop(hPrevDsk);
+    // Уничтожим свой рабочий стол
     ::SetThreadDesktop(hPrevDsk);
 #endif
     ::CloseDesktop(hMainDsk);
@@ -242,7 +252,9 @@ DWORD MLockDsk::ThreadP()
 api_error:
     LastError=::GetLastError();
     if ( hMainDsk!=NULL ) { ::CloseDesktop(hMainDsk); hMainDsk=NULL; }
-//    ResMessageBox(NULL,1,1,MB_APPLMODAL|MB_OK|MB_ICONERROR,LastError);  /// для отладки
+#ifdef _DEBUG
+    ResMessageBox(NULL,1,1,MB_APPLMODAL|MB_OK|MB_ICONERROR,LastError);
+#endif
     return LastError;
 }
 //---------------------------------------------------------------------------
@@ -346,10 +358,11 @@ bool MLockDsk::ThreadMsg(UINT Msg_) const
 //---------------------------------------------------------------------------
 bool MLockDsk::SetTransp(bool Transp_)
 {
-    Lock();
+    return true;            /// с прозрачностью баг - отключена
+/*    Lock();
     Transp=Transp_;
     UnLock();
-    return ThreadMsg(MSG_UpdTransp);
+    return ThreadMsg(MSG_UpdTransp);*/
 }
 //---------------------------------------------------------------------------
 bool MLockDsk::Show(const char *File_)
@@ -394,7 +407,7 @@ bool MLockDsk::UpdateWorkTime(int Time_)
     return ThreadMsg(MSG_UpdWorkTime);
 }
 //---------------------------------------------------------------------------
-void MLockDsk::Hide()
+void MLockDsk::Hide(bool UnLock_)
 {
    DWORD ExitCode;
 
@@ -404,7 +417,10 @@ void MLockDsk::Hide()
     if ( ::GetExitCodeThread(hThread,&ExitCode)&&(ExitCode==STILL_ACTIVE) )
     {
         // Посылаем потоку сообщение и ждем завершения его работы
-        ::PostThreadMessage(ThreadID,MSG_Exit,0,0);
+        ::PostThreadMessage(
+            ThreadID,
+            UnLock_? MSG_UnLock: MSG_Exit,
+            0,0);
         ::WaitForSingleObject(hThread,INFINITE);
     }
     // Удаляем объект потока

@@ -90,14 +90,14 @@ void __fastcall TFormComputers::EditNumberExit(TObject *Sender)
 
     // Пытаемся сконвертировать текстовый номер в число
     int Number;
-    try { Number=StrToInt(((TEdit*)Sender)->Text); }
+    try { Number=StrToInt(EditNumber->Text); }
     catch ( EConvertError *Error ) { goto error; }
     // Проверяем допустимый диапазон
     if ( (Number<=0)||(Number>MAX_Comps) ) goto error;
     comp->Number=Number;
-    
+
 error:
-    ((TEdit*)Sender)->Text=IntToStr(comp->Number);
+    EditNumber->Text=IntToStr(comp->Number);
     SetListViewComputersLine(ListViewComputers->Selected);
     ListViewComputers->AlphaSort();
 }
@@ -106,9 +106,9 @@ void __fastcall TFormComputers::EditAddressExit(TObject *Sender)
 {
     if ( ListViewComputers->Selected==NULL ) return;
 
+    EditAddress->Text=EditAddress->Text.Trim();
     MComputer *comp=(MComputer*)ListViewComputers->Selected->Data;
-    comp->SetAddress(((TEdit*)Sender)->Text.Trim().c_str());
-    ((TEdit*)Sender)->Text=comp->Address;
+    comp->SetAddress(EditAddress->Text.c_str());
     SetListViewComputersLine(ListViewComputers->Selected);
 }
 //---------------------------------------------------------------------------

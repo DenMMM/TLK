@@ -13,8 +13,6 @@
 //---------------------------------------------------------------------------
 #include "UnitGames.h"
 //---------------------------------------------------------------------------
-//#define CMD_VPlay           "vplay:"
-//---------------------------------------------------------------------------
 class TFormGames : public TForm
 {
 __published:	// IDE-managed Components
@@ -29,18 +27,20 @@ __published:	// IDE-managed Components
     TImage *Image7;
     TImage *Image6;
     void __fastcall TreeViewGamesDblClick(TObject *Sender);
-    void __fastcall FormCloseQuery(TObject *Sender, bool &CanClose);
-    void __fastcall TreeViewGamesKeyPress(TObject *Sender, char &Key);
-    void __fastcall FormClose(TObject *Sender, TCloseAction &Action);
     void __fastcall FormCreate(TObject *Sender);
+    void __fastcall FormClose(TObject *Sender, TCloseAction &Action);
+    void __fastcall FormCloseQuery(TObject *Sender, bool &CanClose);
 private:	// User declarations
-    bool Transp;
     MGames Games;
+
     void AddGamesToTree(MGames *Games_, TTreeNode *TreeNode_, TImageList *ImageList_);
-public:		// User declarations
-    bool MyClose;
-    void ShowGames(unsigned Pages_);
     void UpdateGames(unsigned Pages_);
+    void __fastcall MQueryEndSession(TMessage &Msg);
+    BEGIN_MESSAGE_MAP
+    MESSAGE_HANDLER(WM_QUERYENDSESSION,TMessage,MQueryEndSession);
+    END_MESSAGE_MAP(TForm);
+public:		// User declarations
+    void ShowGames(unsigned Pages_);
     __fastcall TFormGames(TComponent* Owner);
 };
 //---------------------------------------------------------------------------

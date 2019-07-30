@@ -4,6 +4,7 @@
 //---------------------------------------------------------------------------
 #include <winsock2.h>
 //#include <windows.h>
+#include <userenv.h>
 #include <mem.h>
 #include <stdexcept.h>
 //---------------------------------------------------------------------------
@@ -25,9 +26,9 @@ public:
             delete ptr_;
             // Кинем исплючение
             throw std::runtime_error (
-            TEXT("Munique_ptr::()\n")
-            TEXT("Попытка присвоения не пустому указателю.")
-            );
+                "Munique_ptr::()\n"
+                "Попытка присвоения не пустому указателю."
+                );
         }
         ptr=ptr_;
     }
@@ -70,9 +71,9 @@ public:
         if ( Num_>=ICount )
         {
             throw std::out_of_range (
-            TEXT("MArray::[]\n")
-            TEXT("Попытка выйти за пределы массива.")
-            );
+                "MArray::[]\n"
+                "Попытка выйти за пределы массива."
+                );
         }
         return Items[Num_];
     }
@@ -265,7 +266,7 @@ int ResMessageBox(HWND Owner_, UINT uCaption, UINT uMessage, UINT Type_, DWORD L
 bool WinExit(UINT uFlags);
 //---------------------------------------------------------------------------
 // Запуск программ по списку из реестра
-void RegExecList(HKEY hkey, LPCTSTR subkey);
+void RegExecList(HKEY hKey_, LPCTSTR SubKey_, HANDLE hToken_=INVALID_HANDLE_VALUE);
 //---------------------------------------------------------------------------
 #endif
 

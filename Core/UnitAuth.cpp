@@ -42,9 +42,9 @@ void MAuth::SetKey(const char *Key_, int Size_)
     if ( Size_!=sizeof(Key) )
     {
         throw std::runtime_error (
-        TEXT("MAuth::SetKey")
-        TEXT("Не допустимый размер ключа.")
-        );
+            "MAuth::SetKey"
+            "Не допустимый размер ключа."
+            );
     }
     memcpy(Key,Key_,sizeof(Key));
 }
@@ -54,9 +54,9 @@ void MAuth::GetKey(char *Buff_, int Size_) const
     if ( Size_!=sizeof(Key) )
     {
         throw std::runtime_error (
-        TEXT("MAuth::GetKey")
-        TEXT("Не допустимый размер буфера для ключа.")
-        );
+            "MAuth::GetKey"
+            "Не допустимый размер буфера для ключа."
+            );
     }
     memcpy(Buff_,Key,sizeof(Key));
 }

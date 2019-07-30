@@ -9,7 +9,7 @@ MAKE = $(ROOT)\bin\make.exe -$(MAKEFLAGS) -f$**
 DCC = $(ROOT)\bin\dcc32.exe $**
 BRCC = $(ROOT)\bin\brcc32.exe $**
 #------------------------------------------------------------------------------
-PROJECTS = AdminMdl.exe TLk.exe ExeRepl.exe LogView.exe TLKRte.exe VPlay.exe
+PROJECTS = AdminMdl.exe TLk.exe ExeRepl.exe LogView.exe VPlay.exe
 #------------------------------------------------------------------------------
 default: $(PROJECTS)
 #------------------------------------------------------------------------------
@@ -28,10 +28,6 @@ ExeRepl.exe: Apps\EXEReplacer\ExeRepl.bpr
   $(ROOT)\bin\make -$(MAKEFLAGS) -f$*.mak
 
 LogView.exe: Apps\LogViewer\LogView.bpr
-  $(ROOT)\bin\bpr2mak $**
-  $(ROOT)\bin\make -$(MAKEFLAGS) -f$*.mak
-
-TLKRte.exe: Apps\RouteSupport\TLKRte.bpr
   $(ROOT)\bin\bpr2mak $**
   $(ROOT)\bin\make -$(MAKEFLAGS) -f$*.mak
 

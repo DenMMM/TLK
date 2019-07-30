@@ -51,7 +51,6 @@ protected:
     bool Typed() const { return true; }
 
 public:
-    MLogRecords() {}
     ~MLogRecords() { Clear(); }
 };
 //---------------------------------------------------------------------------
@@ -68,8 +67,10 @@ public:
 
     void Copy(const MListItem *SrcItem_);
 
-    MLogRecordEvent();
-    ~MLogRecordEvent();
+    MLogRecordEvent()
+    {
+        SystemTime=0;
+    }
 };
 //---------------------------------------------------------------------------
 class MLogRecordBegin:public MLogRecordEvent
@@ -100,7 +101,6 @@ public:
     void Copy(const MListItem *SrcItem_);
 
     MLogRecordConfig();
-    ~MLogRecordConfig();
 };
 
 class MLogRecordComputers:public MLogRecordEvent
@@ -134,7 +134,6 @@ public:
     void Copy(const MListItem *SrcItem_);
 
     MLogRecordLogIn();
-    ~MLogRecordLogIn();
 };
 
 class MLogRecordLogOut:public MLogRecordEvent
@@ -164,7 +163,6 @@ public:
     void Copy(const MListItem *SrcItem_);
 
     MLogRecordRun();
-    ~MLogRecordRun();
 };
 //---------------------------------------------------------------------------
 class MLogRecordFine:public MLogRecord
@@ -185,7 +183,6 @@ public:
     void Copy(const MListItem *SrcItem_);
 
     MLogRecordFine();
-    ~MLogRecordFine();
 };
 //---------------------------------------------------------------------------
 class MLogRecordExchange:public MLogRecord
@@ -205,7 +202,6 @@ public:
     void Copy(const MListItem *SrcItem_);
 
     MLogRecordExchange();
-    ~MLogRecordExchange();
 };
 //---------------------------------------------------------------------------
 class MLogRecordMode:public MLogRecord
@@ -224,7 +220,6 @@ public:
     void Copy(const MListItem *SrcItem_);
 
     MLogRecordMode();
-    ~MLogRecordMode();
 };
 
 class MLogRecordLock:public MLogRecordMode
@@ -251,7 +246,6 @@ public:
     void Copy(const MListItem *SrcItem_);
 
     MLogRecordCmd();
-    ~MLogRecordCmd();
 };
 
 class MLogRecordPowerOn:public MLogRecordCmd
@@ -280,7 +274,6 @@ public:
     void Copy(const MListItem *SrcItem_);
 
     MLogRecordDataShState();
-    ~MLogRecordDataShState();
 };
 //---------------------------------------------------------------------------
 class MLogRecordDataStates:public MLogRecord
@@ -299,7 +292,6 @@ public:
     void Copy(const MListItem *SrcItem_);
 
     MLogRecordDataStates();
-    ~MLogRecordDataStates();
 };
 //---------------------------------------------------------------------------
 class MLogRecordDataTariffs:public MLogRecord
@@ -318,7 +310,6 @@ public:
     void Copy(const MListItem *SrcItem_);
 
     MLogRecordDataTariffs();
-    ~MLogRecordDataTariffs();
 };
 //---------------------------------------------------------------------------
 class MLogRecordDataFines:public MLogRecord
@@ -337,7 +328,6 @@ public:
     void Copy(const MListItem *SrcItem_);
 
     MLogRecordDataFines();
-    ~MLogRecordDataFines();
 };
 //---------------------------------------------------------------------------
 class MLogRecordDataUsers:public MLogRecord
@@ -356,53 +346,7 @@ public:
     void Copy(const MListItem *SrcItem_);
 
     MLogRecordDataUsers();
-    ~MLogRecordDataUsers();
 };
 //---------------------------------------------------------------------------
 #endif
-
-
-
-
-/*
-    static MItemFunc item_func[2];
-
-    template <class MItemType>
-    static MListItem *item_new(unsigned Type_)
-    {
-        return (MListItem*)new MItemType;
-    }
-
-    template static MListItem *item_new<MLogRecordBegin>();
-    template static MListItem *item_new<MLogRecordEnd>();
-    template static MListItem *item_new<MLogRecordStart>();
-    template static MListItem *item_new<MLogRecordWork>();
-    template static MListItem *item_new<MLogRecordStop>();
-    template static MListItem *item_new<MLogRecordConfig>();
-    template static MListItem *item_new<MLogRecordComputers>();
-    template static MListItem *item_new<MLogRecordTariffs>();
-    template static MListItem *item_new<MLogRecordFines>();
-    template static MListItem *item_new<MLogRecordUsers>();
-    template static MListItem *item_new<MLogRecordOptions>();
-    template static MListItem *item_new<MLogRecordLogIn>();
-    template static MListItem *item_new<MLogRecordLogOut>();
-    template static MListItem *item_new<MLogRecordRun>();
-    template static MListItem *item_new<MLogRecordFine>();
-    template static MListItem *item_new<MLogRecordExchange>();
-    template static MListItem *item_new<MLogRecordLock>();
-    template static MListItem *item_new<MLogRecordPause>();
-    template static MListItem *item_new<MLogRecordOpen>();
-    template static MListItem *item_new<MLogRecordWtLocker>();
-    template static MListItem *item_new<MLogRecordPowerOn>();
-    template static MListItem *item_new<MLogRecordReboot>();
-    template static MListItem *item_new<MLogRecordShutdown>();
-    template static MListItem *item_new<MLogRecordDataShellState>();
-    template static MListItem *item_new<MLogRecordDataStates>();
-    template static MListItem *item_new<MLogRecordDataTariffs>();
-    template static MListItem *item_new<MLogRecordDataFines>();
-    template static MListItem *item_new<MLogRecordDataUsers>();
-
-    template void item_del(MListItem *Item_);
-
-*/
 

@@ -38,12 +38,15 @@ Mptr <MLog> Log;
 __fastcall TFormMain::TFormMain(TComponent* Owner)
         : TForm(Owner)
 {
+    EnableConfig=false;
+    Tag=false;
 }
 //---------------------------------------------------------------------------
 void __fastcall TFormMain::FormShow(TObject *Sender)
 {
     try
     {
+
     // Создадим объекты глобального пользования
     ShellState(new MShellState);
     Options(new MOptions);
@@ -57,29 +60,35 @@ void __fastcall TFormMain::FormShow(TObject *Sender)
     Log(new MLog);
 
     // Настроим пути хранения файлов и коды шифрования
-    char dir[MAX_PATH+1], file[MAX_PATH+1];
-    strcpy(dir,ExtractFilePath(Application->ExeName).c_str());
-    strcpy(file,dir); strcat(file,"OPTIONS.DAT");
-    Options->SetDefaultFile(file,ENC_Code);
-    strcpy(file,dir); strcat(file,"COMPUTERS.DAT");
-    Computers->SetDefaultFile(file,ENC_Code);
-    strcpy(file,dir); strcat(file,"TARIFFS.DAT");
-    Tariffs->SetDefaultFile(file,ENC_Code);
-    strcpy(file,dir); strcat(file,"FINES.DAT");
-    Fines->SetDefaultFile(file,ENC_Code);
-    strcpy(file,dir); strcat(file,"USERS.DAT");
-    Users->SetDefaultFile(file,ENC_Code);
-    strcpy(file,dir); strcat(file,"STATES.DAT");
-    States->SetDefaultFile(file,ENC_Code);
-    strcpy(file,dir); strcat(file,"ARP.DAT");
-    Sync->SetARPFile(file,ENC_Code,true);
-    strcpy(file,dir); strcat(file,"AUTH.DAT");
-    Auth->SetDefaultFile(file,ENC_Code);
-    Auth->SetDefaultFile(file,0);
-    strcpy(file,dir); strcat(file,"LOGS");
-    Log->SetDefault(file,ENC_Code);
+    Options->SetDefaultKey(HKEY_LOCAL_MACHINE,
+        "Software\\MMM Groups\\TLK\\3.0\\Admin","Options",ENC_Code);
+    Auth->SetDefaultKey(HKEY_LOCAL_MACHINE,
+        "Software\\MMM Groups\\TLK\\3.0\\Admin","Auth",ENC_Code);
 
-//    if ( !Options->Load() ) { Options->SetPass(""); Options->Save(); } /// сброс пароля
+    AnsiString path=ExtractFilePath(Application->ExeName), file;
+
+    file=path+"COMPUTERS.DAT";
+    Computers->SetDefaultFile(file.c_str(),ENC_Code);
+    file=path+"TARIFFS.DAT";
+    Tariffs->SetDefaultFile(file.c_str(),ENC_Code);
+    file=path+"FINES.DAT";
+    Fines->SetDefaultFile(file.c_str(),ENC_Code);
+    file=path+"USERS.DAT";
+    Users->SetDefaultFile(file.c_str(),ENC_Code);
+    file=path+"STATES.DAT";
+    States->SetDefaultFile(file.c_str(),ENC_Code);
+    file=path+"ARP.DAT";
+    Sync->SetARPFile(file.c_str(),ENC_Code,true);
+    file=path+"LOGS";
+    Log->SetDefault(file.c_str(),ENC_Code);
+
+#ifdef _DEBUG
+    if ( !Options->Load() )         /// сброс пароля
+    {
+        Options->SetPass("");
+        Options->Save();
+    }
+#else
     // Загрузим основные настройки
     if ( !Options->Load() )
     {
@@ -88,6 +97,7 @@ void __fastcall TFormMain::FormShow(TObject *Sender)
         Tag=true; Close();
         return;
     }
+#endif
 
     // Загрузим остальные настройки, возможно не все
     bool all_load=true;
@@ -178,6 +188,12 @@ void __fastcall TFormMain::FormShow(TObject *Sender)
     {
         ::MessageBox(Handle, e.what(),
             "TLK - ошибка",MB_APPLMODAL|MB_OK|MB_ICONERROR);
+        Tag=true; Close();
+        return;
+    }
+    catch (Exception &exception)
+    {
+        Application->ShowException(&exception);
         Tag=true; Close();
         return;
     }
@@ -307,6 +323,9 @@ void __fastcall TFormMain::NConfigOpenClick(TObject *Sender)
 void __fastcall TFormMain::NComputersClick(TObject *Sender)
 {
     Mptr <TForm> form;
+
+    // Доп. проверка для большей безопасности
+    if ( !EnableConfig ) return;
 
     try
     {
@@ -637,6 +656,9 @@ void __fastcall TFormMain::NPauseClick(TObject *Sender)
 //---------------------------------------------------------------------------
 void __fastcall TFormMain::NOpenClick(TObject *Sender)
 {
+    // Доп. проверка для большей безопасности
+    if ( !EnableConfig ) return;
+
     bool open;
     if ( Sender==NOpen ) open=true;
     else if ( Sender==NClose ) open=false;
@@ -884,6 +906,7 @@ void TFormMain::SetShell()
     // Настройки, доступные только сисадмину
     NConfigOpen->Caption=ShellState->State&mssConfig? "Закрыть": "Открыть...";
     enable=(ShellState->State&mssConfig)&&(!(ShellState->State&mssErrorLog));
+    EnableConfig=enable;
     NAdmin->Enabled=enable;
     NComputers->Enabled=enable;
     NTariffs->Enabled=enable;

@@ -11,13 +11,13 @@
       ..\..\Core\UnitSync.obj ..\..\Core\UnitSend.obj 
       ..\..\Ext\BrianGladman\SHA\hmac.obj ..\..\Ext\BrianGladman\SHA\sha1.obj 
       ..\..\Ext\BrianGladman\SHA\sha2.obj ..\..\Core\UnitAuth.obj 
-      UnitFormGames.obj UnitLockDsk.obj"/>
+      UnitFormGames.obj UnitService.obj UnitShared.obj UnitLockDsk.obj"/>
     <RESFILES value="TLk.res Messages.res LockDesk.res"/>
     <IDLFILES value=""/>
     <IDLGENFILES value=""/>
     <DEFFILE value=""/>
     <RESDEPEN value="$(RESFILES) UnitFormMain.dfm UnitFormGames.dfm"/>
-    <LIBFILES value=""/>
+    <LIBFILES value="iphlpapi.lib wtsapi32.lib userenv.lib"/>
     <LIBRARIES value="vclx.lib bcbsmp.lib bcbie.lib vcl.lib rtl.lib"/>
     <SPARELIBS value="rtl.lib vcl.lib bcbie.lib bcbsmp.lib vclx.lib"/>
     <PACKAGES value="rtl.bpi vcl.bpi vclx.bpi"/>
@@ -72,8 +72,13 @@
       <FILE FILENAME="..\..\Core\UnitAuth.cpp" FORMNAME="" UNITNAME="UnitAuth" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="Messages.res" FORMNAME="" UNITNAME="Messages.res" CONTAINERID="ResTool" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="UnitFormGames.cpp" FORMNAME="FormGames" UNITNAME="UnitFormGames" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="UnitService.cpp" FORMNAME="" UNITNAME="UnitService" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="iphlpapi.lib" FORMNAME="" UNITNAME="iphlpapi.lib" CONTAINERID="LibTool" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="wtsapi32.lib" FORMNAME="" UNITNAME="wtsapi32.lib" CONTAINERID="LibTool" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="UnitShared.cpp" FORMNAME="" UNITNAME="UnitShared" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="UnitLockDsk.cpp" FORMNAME="" UNITNAME="UnitLockDsk" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="LockDesk.res" FORMNAME="" UNITNAME="LockDesk.res" CONTAINERID="ResTool" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="userenv.lib" FORMNAME="" UNITNAME="userenv.lib" CONTAINERID="LibTool" DESIGNCLASS="" LOCALCOMMAND=""/>
   </FILELIST>
   <BUILDTOOLS>
   </BUILDTOOLS>
@@ -85,7 +90,7 @@ AutoIncBuild=1
 MajorVer=1
 MinorVer=0
 Release=0
-Build=110
+Build=119
 Debug=0
 PreRelease=0
 Special=0
@@ -97,7 +102,7 @@ CodePage=1251
 [Version Info Keys]
 CompanyName=MMM Groups
 FileDescription=Клиент TLK
-FileVersion=1.0.0.110
+FileVersion=1.0.0.119
 InternalName=ClientModule
 LegalCopyright=
 LegalTrademarks=
@@ -131,7 +136,7 @@ Item0=_DEBUG
 DebugSourceDirs=$(BCB)\source\vcl
 
 [Parameters]
-RunParams=
+RunParams=/shell
 Launcher=
 UseLauncher=0
 DebugCWD=
@@ -146,10 +151,5 @@ RemoteDebug=0
 ShowInfoMsgs=0
 LinkDebugVcl=0
 LinkCGLIB=0
-
-[CORBA]
-AddServerUnit=1
-AddClientUnit=1
-PrecompiledHeaders=1
   </IDEOPTIONS>
 </PROJECT>

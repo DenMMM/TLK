@@ -119,7 +119,7 @@ void __fastcall TFormUserPass::ButtonGenerateClick(TObject *Sender)
     try
     {
         form(new TFormNewPass(0));
-        if ( !form->Execute(buffer,5,sizeof(buffer),
+        if ( !form->Execute(buffer,5,MAX_UserPassLen,
             Left+20,Top+30,true) ) return;
         EditNew->Text=buffer;
         EditConfirm->Text=""; EditConfirm->ClearUndo();

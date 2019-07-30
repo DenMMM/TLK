@@ -150,9 +150,9 @@ void __fastcall TFormTariffs::EditNameExit(TObject *Sender)
 {
     if ( ListViewNames->Selected==NULL ) return;
 
+    EditName->Text=EditName->Text.Trim();
     MTariff *tariff=(MTariff*)ListViewNames->Selected->Data;
-    tariff->SetName(((TEdit*)Sender)->Text.Trim().c_str());
-    ((TEdit*)Sender)->Text=tariff->Name;
+    tariff->SetName(EditName->Text.c_str());
     SetListViewNamesLine(ListViewNames->Selected);
 }
 //---------------------------------------------------------------------------

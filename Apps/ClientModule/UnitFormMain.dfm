@@ -1,6 +1,6 @@
 object FormMain: TFormMain
-  Left = 327
-  Top = 145
+  Left = 329
+  Top = 147
   BorderIcons = []
   BorderStyle = bsNone
   ClientHeight = 454
@@ -31,7 +31,6 @@ object FormMain: TFormMain
     Anchors = [akTop, akRight]
     AutoSize = True
     BevelOuter = bvNone
-    Color = clBlack
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clBlack
     Font.Height = -11
@@ -2646,7 +2645,6 @@ object FormMain: TFormMain
       Font.Style = []
       ParentFont = False
       Transparent = True
-      Layout = tlCenter
     end
     object SpeedButtonOptions: TSpeedButton
       Left = 179

@@ -13,9 +13,9 @@ unsigned MIDList::FirstID()
     if ( !GetLocalTimeInt64(&time) )
     {
         throw std::runtime_error (
-        TEXT("MIDList::FirstID()")
-        TEXT("Ќе удалось запросить системное врем€. √енераци€ уникальных ID не возможна.")
-        );
+            "MIDList::FirstID()"
+            "Ќе удалось запросить системное врем€. √енераци€ уникальных ID не возможна."
+            );
     }
 //    id=::GetTickCount();                // чуток случайности
 //    id<<=16;

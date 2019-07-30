@@ -63,6 +63,11 @@ __published:	// IDE-managed Components
     TCheckBox *CheckBoxTransp;
     TLabel *Label2;
     TComboBox *ComboBoxMsgEndTime;
+    TCheckBox *CheckBoxRoute;
+    TCheckBox *CheckBoxAutoRun;
+    TEdit *EditShellUser;
+    TLabel *Label3;
+    TBevel *Bevel6;
     void __fastcall FormShow(TObject *Sender);
     void __fastcall ButtonOperationsClick(TObject *Sender);
     void __fastcall NOpenClick(TObject *Sender);
@@ -74,9 +79,6 @@ __published:	// IDE-managed Components
     void __fastcall BitBtnUpClick(TObject *Sender);
     void __fastcall BitBtnDownClick(TObject *Sender);
     void __fastcall TreeViewGamesChange(TObject *Sender, TTreeNode *Node);
-    void __fastcall EditNameChange(TObject *Sender);
-    void __fastcall EditCmdChange(TObject *Sender);
-    void __fastcall EditIconChange(TObject *Sender);
     void __fastcall FormClose(TObject *Sender, TCloseAction &Action);
     void __fastcall TreeViewGamesDeletion(TObject *Sender,
           TTreeNode *Node);
@@ -86,6 +88,10 @@ __published:	// IDE-managed Components
     void __fastcall NLoadClick(TObject *Sender);
     void __fastcall ComboBoxMsgEndTimeClick(TObject *Sender);
     void __fastcall ComboBoxRebootWaitClick(TObject *Sender);
+    void __fastcall EditShellUserExit(TObject *Sender);
+    void __fastcall EditNameExit(TObject *Sender);
+    void __fastcall EditCmdExit(TObject *Sender);
+    void __fastcall EditIconExit(TObject *Sender);
 private:	// User declarations
     MSendSrv Send;                      // TCP-рассыльщик объектов
     Marray <MComputer*> SendComps;      // Массив указателей на компьютеры, куда рассылать

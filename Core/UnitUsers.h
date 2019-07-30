@@ -13,7 +13,7 @@ class MUsers;
 //---------------------------------------------------------------------------
 #define MAX_Users               20
 #define MAX_UserLoginLen        16
-#define MAX_UserPassLen         8
+#define MAX_UserPassLen         16
 #define MAX_UserNameLen         50
 //---------------------------------------------------------------------------
 struct MUserData

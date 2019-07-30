@@ -66,9 +66,9 @@ void MUser::SetLogin(char *Login_)
     if ( strlen(Login_)>MAX_UserLoginLen )
     {
         throw std::runtime_error (
-        TEXT("MUser::SetLogin()\n")
-        TEXT("Длина строки превышает MAX_UserLoginLen.")
-        );
+            "MUser::SetLogin()\n"
+            "Длина строки превышает MAX_UserLoginLen."
+            );
 
     }
     strcpy(Login,Login_);
@@ -79,9 +79,9 @@ void MUser::SetName(char *Name_)
     if ( strlen(Name_)>MAX_UserNameLen )
     {
         throw std::runtime_error (
-        TEXT("MUser::SetName()\n")
-        TEXT("Длина строки превышает MAX_UserNameLen.")
-        );
+            "MUser::SetName()\n"
+            "Длина строки превышает MAX_UserNameLen."
+            );
     }
     strcpy(Name,Name_);
 }

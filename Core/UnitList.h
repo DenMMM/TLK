@@ -20,18 +20,11 @@ public:
     virtual unsigned char gTypeID() const { return 0; }
     virtual void Copy(const MListItem *SrcItem_)=0;
 
-    MListItem();
-    ~MListItem();
+    MListItem()
+    {
+        Prev=Next=NULL;
+    }
 };
-//---------------------------------------------------------------------------
-/*template <class type>
-class _MListItem
-{
-public:
-    // Шаблоны для доступа к элементам класса
-    type* gPrev() const { return (type*)MListItem::gPrev(); }
-    type* gNext() const { return (type*)MListItem::gNext(); }
-};*/
 //---------------------------------------------------------------------------
 class MList
 {
@@ -45,25 +38,9 @@ private:
     virtual void item_del(MListItem *Item_) const=0;
 
 protected:
-/*
-    /// Так было бы правильнее, чем длинные switch/case...
-    struct MItemFunc
-    {
-        unsigned char type;
-        MListItem *(*item_new)(unsigned char Type_);
-        void (*item_del)(MListItem *Item_);
-    } item_f[sizeof(MItemFunc::type)*8];
-*/
-
     // Определяет могут ли элементы списка быть разных типов
     // Для 'true' MListItem::TypeID() должна быть переопределена
     virtual bool Typed() const { return false; }
-
-    // Шаблоны для доступа к атрибутам списка
-//    template <typename type>
-//    type *gFirst() const { return (type*)MList::gFirst(); }
-//    template <typename type>
-//    type *gLast() const { return (type*)MList::gLast(); }
 
 public:
     // Доступ к атрибутам списка
@@ -76,8 +53,6 @@ public:
     MListItem *Item(unsigned Number_) const;
     void Exch(MListItem *Item1_, MListItem *Item2_);
     void Del(MListItem *DelItem_);
-//    MListItem *Insert(MListItem *AfterItem_, unsigned Type_=0);
-//    MListItem *Search(unsigned Type_, MListItem *Start_, bool Forward_);
 
     // Операции над списком целиком (не трогая атрибуты наследника MList)
     void Clear();                       // Удалить все элементы списка
@@ -85,8 +60,19 @@ public:
     void Move(MList *SrcList_);         // Заместить элементы списка исходными
     void Attach(MList *AtchList_);      // Присоединить элементы исходного списка
 
-    MList();
-    ~MList();
+    MList()
+    {
+        First=Last=NULL;
+        Count=0;
+    }
+//    ~MList()
+//    {
+// Вызывать в деструкторе класса, где определена ф-я item_del(),
+// т.к. к моменту вызова ~MList() доступа к этому оператору уже нет.
+// Иначе элементы списка не будут удалены - memory leak !
+
+//    Clear();
+//    }
 };
 //---------------------------------------------------------------------------
 #endif

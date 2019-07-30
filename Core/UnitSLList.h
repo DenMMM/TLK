@@ -22,10 +22,6 @@ private:
     virtual const char *GetData(const char *Data_, const char *Limit_)=0;
     // Доступ к ним нужен в MSLList
     friend class MSLList;
-
-public:
-    MSLListItem() {}
-    ~MSLListItem() {}
 };
 //---------------------------------------------------------------------------
 class MSLList:public MList
@@ -65,8 +61,20 @@ public:
     bool Load();
     DWORD gLastErr() const { return LastError; }
 
-    MSLList();
-    ~MSLList();
+    MSLList()
+    {
+        DefaultKey=NULL;
+        DefaultFile=NULL;
+        DefaultValue=NULL;
+        DefaultCode=0;
+        LastError=0;
+    }
+
+    ~MSLList()
+    {
+        delete[] DefaultFile;
+        delete[] DefaultValue;
+    }
 };
 //---------------------------------------------------------------------------
 #endif

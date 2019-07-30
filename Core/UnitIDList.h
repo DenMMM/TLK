@@ -33,7 +33,6 @@ public:
     unsigned gItemID() const { return ItemID; }
 
     MIDListItem() { ItemID=0; }
-    ~MIDListItem() {}
 };
 
 class MIDList:public MSLList

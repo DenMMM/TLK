@@ -13,13 +13,12 @@ private:
     HANDLE hBitmap;
     BITMAP Bitmap;
     char *File;
-    unsigned ShowTime;
 
     static DWORD WINAPI ThreadFunc(LPVOID Data);
     void ThreadProc();
 public:
     void SetFile(char *File_);
-    bool Show(unsigned ShowTime_);
+    bool Show();
     void Stop();
 
     MMessage();

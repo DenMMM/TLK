@@ -13,7 +13,6 @@ TFormGames *FormGames;
 __fastcall TFormGames::TFormGames(TComponent* Owner)
     : TForm(Owner)
 {
-    MyClose=true;
 }
 //---------------------------------------------------------------------------
 void TFormGames::ShowGames(unsigned Pages_)
@@ -24,11 +23,11 @@ void TFormGames::ShowGames(unsigned Pages_)
     // Если не заданы группы программ скроем окно
     if ( Pages_==mgpNone )
     {
-        MyClose=true; Close();
+        Tag=true; Close();
     } else
     {
         UpdateGames(Pages_);
-        MyClose=false; Show();
+        Tag=false; Show();
     }
 }
 //---------------------------------------------------------------------------
@@ -40,7 +39,7 @@ void TFormGames::UpdateGames(unsigned Pages_)
     Games.Clear();
 
     // Загрузим и добавим новые
-    if ( State->GetGames(&Games) )
+    if ( Games.Load() )
     {
         MGame *Game;
         
@@ -111,14 +110,20 @@ void TFormGames::AddGamesToTree(MGames *Games_, TTreeNode *TreeNode_, TImageList
 //---------------------------------------------------------------------------
 void __fastcall TFormGames::FormCreate(TObject *Sender)
 {
+    Tag=false;
     this->DoubleBuffered=true;
     TreeViewGames->DoubleBuffered=true;
     TreeViewGames->Font->Color=(TColor)0x02D2C66F;
+
+    // Настраиваем пути для файлов
+    AnsiString GmsFile=
+        ExtractFilePath(Application->ExeName)+"\\TLK.GMS";
+    Games.SetDefaultFile(GmsFile.c_str(),ENC_Code);
 }
 //---------------------------------------------------------------------------
 void __fastcall TFormGames::FormCloseQuery(TObject *Sender, bool &CanClose)
 {
-    CanClose=MyClose;
+    CanClose=Tag;
 }
 //---------------------------------------------------------------------------
 void __fastcall TFormGames::FormClose(TObject *Sender,
@@ -130,58 +135,40 @@ void __fastcall TFormGames::FormClose(TObject *Sender,
     Games.Clear();
 }
 //---------------------------------------------------------------------------
+void __fastcall TFormGames::MQueryEndSession(TMessage &Msg)
+{
+    Msg.Result=TRUE;
+}
+//---------------------------------------------------------------------------
 void __fastcall TFormGames::TreeViewGamesDblClick(TObject *Sender)
 {
     TTreeNode *TreeNode=TreeViewGames->Selected;
     if ( (TreeNode==NULL)||TreeNode->HasChildren ) return;
 
-/*
-    char buff[MAX_PrgCmdLength+1];
-    char *cmd=(char*)TreeNode->Data;
-
-    // Проверим спец-команды shell'а
-    if ( strncmp(cmd,CMD_VPlay,strlen(CMD_VPlay))==0 )
-    {
-        Munique_ptr <TFormVPlay> form;
-
-        try
-        {
-    /// От интеграции плейера в оболочку пока отказался ради стабильности
-            // Открываем плеер
-            form(new TFormVPlay(0));        /// new TFormVPlay(this) ?
-            form.get()->ShowModal();
-        }
-        catch (Exception &ex)
-        {
-            Application->ShowException(&ex);
-        }
-        return;
-    }
-*/
-
-    // Запустим обычное приложение
     AnsiString path, command=(char*)TreeNode->Data;
     int pos;
-    //
-    STARTUPINFO si;
-    memset(&si,0,sizeof(STARTUPINFO));
-    si.cb=sizeof(STARTUPINFO);
-    PROCESS_INFORMATION pi;
-    // Запускаем игру
+
+    // Извлечем из командной строки путь
     if ( (pos=command.AnsiPos("\""))==NULL ) return;
     path=command.SubString(pos+1,command.Length()-pos);
     if ( (pos=path.AnsiPos("\""))==NULL ) return;
     path.Delete(pos,path.Length()-pos+1);
     path=ExtractFilePath(path);
-    ::CreateProcess(NULL,command.c_str(),NULL,NULL,false,
+
+    STARTUPINFO si;
+    PROCESS_INFORMATION pi;
+    memset(&si,0,sizeof(STARTUPINFO));
+    si.cb=sizeof(STARTUPINFO);
+
+    // Запустим приложение
+    ::CreateProcess(
+        NULL,
+        command.c_str(),
+        NULL,NULL,false,
         CREATE_DEFAULT_ERROR_MODE|NORMAL_PRIORITY_CLASS,NULL,
-        path.c_str(),&si,&pi);
+        path.c_str(),
+        &si,&pi);
 }
 //---------------------------------------------------------------------------
-void __fastcall TFormGames::TreeViewGamesKeyPress(TObject *Sender,
-      char &Key)
-{
-//    if ( Key==VK_RETURN ) TreeViewGamesDblClick(NULL);
-}
-//---------------------------------------------------------------------------
+
 

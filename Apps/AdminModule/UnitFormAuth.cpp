@@ -79,9 +79,9 @@ void __fastcall TFormAuth::MemoHEXExit(TObject *Sender)
         TmpKey,sizeof(TmpKey))!=sizeof(TmpKey) )
     {
         throw std::runtime_error (
-        TEXT("TFormAuth::MemoHEXExit")
-        TEXT("Длина ключа в байтах получилась меньше ожидаемого.")
-        );
+            "TFormAuth::MemoHEXExit"
+            "Длина ключа в байтах получилась меньше ожидаемого."
+            );
     }
 }
 //---------------------------------------------------------------------------

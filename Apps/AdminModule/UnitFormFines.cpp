@@ -77,9 +77,9 @@ void __fastcall TFormFines::EditDescriptionExit(TObject *Sender)
 {
     if ( ListViewFines->Selected==NULL ) return;
 
+    EditDescription->Text=EditDescription->Text.Trim();
     MFine *fine=(MFine*)ListViewFines->Selected->Data;
-    fine->sDescr(((TEdit*)Sender)->Text.Trim().c_str());
-    ((TEdit*)Sender)->Text=fine->Descr;
+    fine->sDescr(EditDescription->Text.c_str());
     SetListViewFinesLine(ListViewFines->Selected);
 }
 //---------------------------------------------------------------------------

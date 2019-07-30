@@ -133,24 +133,28 @@ int ByteToHEX(const unsigned char *Bytes_, int BytesCount_,
         '0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F'};
 
     int pin=0, pout=0;
-    while((pin<BytesCount_)&&(pout<(LineSize_-2)))
+    while((pin<BytesCount_)&&(pout<(LineSize_-2)))  /// баг: (LineSize_-2)
     {
         Line_[pout+0]=sym[Bytes_[pin]>>4];
         Line_[pout+1]=sym[Bytes_[pin]&0x0F];
-        Line_[pout+2]=Delim_;
+        if ( Delim_=='\0' ) pout+=2;
+        else
+        {
+            Line_[pout+2]=Delim_;
+            pout+=3;
+        }
         pin++;
-        pout+=3;
     }
     // Буфер для строки закончился раньше, чем считали все байты
     if ( pin!=BytesCount_ )
     {
         throw std::runtime_error (
-        TEXT("ByteToHEX\n")
-        TEXT("Не достаточный размер буфера для HEX-строки.")
-        );
+            "ByteToHEX\n"
+            "Не достаточный размер буфера для HEX-строки."
+            );
     }
     // Последний разделитель заменим концом строки
-    Line_[--pout]=0;
+    Line_[Delim_=='\0'? pout: --pout]=0;
 
     return pout;
 }
@@ -211,9 +215,11 @@ bool GeneratePassword(char *Line_, unsigned Len_,
     if ( Num_ ) { memcpy(buff+use,dig,sizeof(dig)); use+=sizeof(dig); }
     if ( use==0 ) goto error;
 
-    // Заполняем строку с паролем случайными символами из буфера
+    // Заполним буфер случайными значениями
+    TimeRand(Line_,Len_);
+    // Заменим их выбранными символами
     for (unsigned i=0; i<Len_; i++)
-        Line_[i]=buff[random(use)];
+        Line_[i]=buff[((unsigned)Line_[i])%use];
     *(Line_+Len_)=0;
 
     return true;
@@ -287,36 +293,67 @@ error:
     return false;
 }
 //---------------------------------------------------------------------------
-void RegExecList(HKEY hkey, LPCTSTR subkey)
+void RegExecList(HKEY hKey_, LPCTSTR SubKey_, HANDLE hToken_)
 {
     HKEY key;
     DWORD index, type, name_size, data_size;
     char name[256+1], value[MAX_PATH+1];
+    LPVOID lpEnv=NULL;
     STARTUPINFO si;
     PROCESS_INFORMATION pi;
 
-    if ( ::RegOpenKeyEx(hkey,subkey,0,
-        KEY_ENUMERATE_SUB_KEYS|KEY_QUERY_VALUE,&key)!=ERROR_SUCCESS ) return;
+    // Запросим параметры среды пользователя
+    if ( (hToken_!=INVALID_HANDLE_VALUE)&&
+        (!::CreateEnvironmentBlock(&lpEnv,hToken_,FALSE)) ) return;
+
+    // Откроем раздел реестра
+    if ( ::RegOpenKeyEx(
+            hKey_,SubKey_,0,
+            KEY_ENUMERATE_SUB_KEYS|KEY_QUERY_VALUE,
+            &key)!=ERROR_SUCCESS )
+    {
+        if ( lpEnv!=NULL ) ::DestroyEnvironmentBlock(lpEnv);
+        return;
+    }
 
     index=0;
     while(true)
     {
         name_size=256;
         data_size=MAX_PATH;
+
+        // Получим значение очередного параметра реестра
         if ( ::RegEnumValue(key,index,name,&name_size,NULL,
             &type,value,&data_size)!=ERROR_SUCCESS ) break;
+
         if ( (data_size>1)&&(type==REG_SZ) )
         {
             memset(&si,0,sizeof(STARTUPINFO));
             si.cb=sizeof(STARTUPINFO);
-            ::CreateProcess(NULL,value,NULL,NULL,FALSE,
-                CREATE_DEFAULT_ERROR_MODE|NORMAL_PRIORITY_CLASS,
-                NULL,NULL,&si,&pi);
+
+            // Запустим процесс
+            if ( hToken_==INVALID_HANDLE_VALUE )
+            {
+                ::CreateProcess(
+                    NULL,value,
+                    NULL,NULL,FALSE,
+                    CREATE_DEFAULT_ERROR_MODE|NORMAL_PRIORITY_CLASS,
+                    NULL,NULL,&si,&pi);
+            } else
+            {
+                ::CreateProcessAsUser(
+                    hToken_,
+                    NULL,value,
+                    NULL,NULL,FALSE,
+                    CREATE_DEFAULT_ERROR_MODE|NORMAL_PRIORITY_CLASS|CREATE_UNICODE_ENVIRONMENT,
+                    lpEnv,NULL,&si,&pi);
+            }
         }
         if ( (++index)>=100 ) break;
     }
 
     ::RegCloseKey(key);
+    if ( lpEnv!=NULL ) ::DestroyEnvironmentBlock(lpEnv);
 }
 //---------------------------------------------------------------------------
 
