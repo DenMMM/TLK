@@ -1,0 +1,42 @@
+#------------------------------------------------------------------------------
+VERSION = BWS.01
+#------------------------------------------------------------------------------
+!ifndef ROOT
+ROOT = $(MAKEDIR)\..
+!endif
+#------------------------------------------------------------------------------
+MAKE = $(ROOT)\bin\make.exe -$(MAKEFLAGS) -f$**
+DCC = $(ROOT)\bin\dcc32.exe $**
+BRCC = $(ROOT)\bin\brcc32.exe $**
+#------------------------------------------------------------------------------
+PROJECTS = AdminMdl.exe TLk.exe ExeRepl.exe LogView.exe TLKRte.exe VPlay.exe
+#------------------------------------------------------------------------------
+default: $(PROJECTS)
+#------------------------------------------------------------------------------
+
+
+AdminMdl.exe: Apps\AdminModule\AdminMdl.bpr
+  $(ROOT)\bin\bpr2mak $**
+  $(ROOT)\bin\make -$(MAKEFLAGS) -f$*.mak
+
+TLk.exe: Apps\ClientModule\TLk.bpr
+  $(ROOT)\bin\bpr2mak $**
+  $(ROOT)\bin\make -$(MAKEFLAGS) -f$*.mak
+
+ExeRepl.exe: Apps\EXEReplacer\ExeRepl.bpr
+  $(ROOT)\bin\bpr2mak $**
+  $(ROOT)\bin\make -$(MAKEFLAGS) -f$*.mak
+
+LogView.exe: Apps\LogViewer\LogView.bpr
+  $(ROOT)\bin\bpr2mak $**
+  $(ROOT)\bin\make -$(MAKEFLAGS) -f$*.mak
+
+TLKRte.exe: Apps\RouteSupport\TLKRte.bpr
+  $(ROOT)\bin\bpr2mak $**
+  $(ROOT)\bin\make -$(MAKEFLAGS) -f$*.mak
+
+VPlay.exe: Apps\VPlay\VPlay.bpr
+  $(ROOT)\bin\bpr2mak $**
+  $(ROOT)\bin\make -$(MAKEFLAGS) -f$*.mak
+
+
