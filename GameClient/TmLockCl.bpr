@@ -1,0 +1,286 @@
+# ---------------------------------------------------------------------------
+!if !$d(BCB)
+BCB = $(MAKEDIR)\..
+!endif
+
+# ---------------------------------------------------------------------------
+# IDE SECTION
+# ---------------------------------------------------------------------------
+# The following section of the project makefile is managed by the BCB IDE.
+# It is recommended to use the IDE to change any of the values in this
+# section.
+# ---------------------------------------------------------------------------
+
+VERSION = BCB.03
+# ---------------------------------------------------------------------------
+PROJECT = TmLockCl.exe
+OBJFILES = TmLockCl.obj UnitFormMain.obj UnitCommon.obj
+RESFILES = TmLockCl.res
+DEFFILE =
+RESDEPEN = $(RESFILES) UnitFormMain.dfm
+LIBFILES =
+LIBRARIES = VCLX35.lib NMFast35.lib VCL35.lib
+SPARELIBS = VCL35.lib NMFast35.lib VCLX35.lib
+PACKAGES = vclx35.bpi VCL35.bpi vcldb35.bpi vcldbx35.bpi bcbsmp35.bpi dclocx35.bpi \
+  Qrpt35.bpi teeui35.bpi VclSmp35.bpi teedb35.bpi tee35.bpi ibsmp35.bpi dss35.bpi \
+  NMFast35.bpi inetdb35.bpi inet35.bpi VclMid35.bpi
+# ---------------------------------------------------------------------------
+PATHCPP = .;
+PATHASM = .;
+PATHPAS = .;
+PATHRC = .;
+DEBUGLIBPATH = $(BCB)\lib\debug
+RELEASELIBPATH = $(BCB)\lib\release
+# ---------------------------------------------------------------------------
+CFLAG1 = -O2 -Hc -w -Ve -k- -vi -c -b- -w-par -w-inl -Vx -tW
+CFLAG2 = -I$(BCB)\include;$(BCB)\include\vcl -H=$(BCB)\lib\vcl35.csm
+CFLAG3 = -4
+PFLAGS = -U$(BCB)\lib\obj;$(BCB)\lib;$(RELEASELIBPATH) \
+  -I$(BCB)\include;$(BCB)\include\vcl -$L- -$D-
+PFPFLAGS = -Ut;$(DEBUGLIBPATH) \
+  -It;nt;ent;ient;lient;client;"er client";"ker client";"cker client";"ocker client";"locker client";"e locker client";"me locker client";"ime locker client";"time locker client";"..\..\..\..\..\time locker client";"л\time locker client";"ол\time locker client";"тол\time locker client";"стол\time locker client";"й стол\time locker client";"ий стол\time locker client";"чий стол\time locker client";"очий стол\time locker client";"абочий стол\time locker client";"рабочий стол\time locker client";"..\..\..\..\..\рабочий стол\time locker client";"р\рабочий стол\time locker client";"ор\рабочий стол\time locker client";"тор\рабочий стол\time locker client";"атор\рабочий стол\time locker client";"ратор\рабочий стол\time locker client";"тратор\рабочий стол\time locker client";"стратор\рабочий стол\time locker client";"истратор\рабочий стол\time locker client";"нистратор\рабочий стол\time locker client";"инистратор\рабочий стол\time locker client";"министратор\рабочий стол\time locker client";"дминистратор\рабочий
+LPFLAGS = -Unt;$(DEBUGLIBPATH) \
+  -Int;ent;ient;lient;client;"er client";"ker client";"cker client";"ocker client";"locker client";"e locker client";"me locker client";"ime locker client";"time locker client";"..\..\..\..\..\time locker client";"л\time locker client";"ол\time locker client";"тол\time locker client";"стол\time locker client";"й стол\time locker client";"ий стол\time locker client";"чий стол\time locker client";"очий стол\time locker client";"абочий стол\time locker client";"рабочий стол\time locker client";"..\..\..\..\..\рабочий стол\time locker client";"р\рабочий стол\time locker client";"ор\рабочий стол\time locker client";"тор\рабочий стол\time locker client";"атор\рабочий стол\time locker client";"ратор\рабочий стол\time locker client";"тратор\рабочий стол\time locker client";"стратор\рабочий стол\time locker client";"истратор\рабочий стол\time locker client";"нистратор\рабочий стол\time locker client";"инистратор\рабочий стол\time locker client";"министратор\рабочий стол\time locker client";"дминистратор\рабочий ст
+AGPFLAGS = -Uient;$(DEBUGLIBPATH) \
+  -Iient;lient;client;"er client";"ker client";"cker client";"ocker client";"locker client";"e locker client";"me locker client";"ime locker client";"time locker client";"..\..\..\..\..\time locker client";"л\time locker client";"ол\time locker client";"тол\time locker client";"стол\time locker client";"й стол\time locker client";"ий стол\time locker client";"чий стол\time locker client";"очий стол\time locker client";"абочий стол\time locker client";"рабочий стол\time locker client";"..\..\..\..\..\рабочий стол\time locker client";"р\рабочий стол\time locker client";"ор\рабочий стол\time locker client";"тор\рабочий стол\time locker client";"атор\рабочий стол\time locker client";"ратор\рабочий стол\time locker client";"тратор\рабочий стол\time locker client";"стратор\рабочий стол\time locker client";"истратор\рабочий стол\time locker client";"нистратор\рабочий стол\time locker client";"инистратор\рабочий стол\time locker client";"министратор\рабочий стол\time locker client";"дминистратор\рабочий стол\time l
+PFLAPFLAGS = -Uent;$(DEBUGLIBPATH) \
+  -Ient;ient;lient;client;"er client";"ker client";"cker client";"ocker client";"locker client";"e locker client";"me locker client";"ime locker client";"time locker client";"..\..\..\..\..\time locker client";"л\time locker client";"ол\time locker client";"тол\time locker client";"стол\time locker client";"й стол\time locker client";"ий стол\time locker client";"чий стол\time locker client";"очий стол\time locker client";"абочий стол\time locker client";"рабочий стол\time locker client";"..\..\..\..\..\рабочий стол\time locker client";"р\рабочий стол\time locker client";"ор\рабочий стол\time locker client";"тор\рабочий стол\time locker client";"атор\рабочий стол\time locker client";"ратор\рабочий стол\time locker client";"тратор\рабочий стол\time locker client";"стратор\рабочий стол\time locker client";"истратор\рабочий стол\time locker client";"нистратор\рабочий стол\time locker client";"инистратор\рабочий стол\time locker client";"министратор\рабочий стол\time locker client";"дминистратор\рабочий стол\t -U
+LAGS = -Uclient;$(DEBUGLIBPATH) \
+  -Iclient;"er client";"ker client";"cker client";"ocker client";"locker client";"e locker client";"me locker client";"ime locker client";"time locker client";"..\..\..\..\..\time locker client";"л\time locker client";"ол\time locker client";"тол\time locker client";"стол\time locker client";"й стол\time locker client";"ий стол\time locker client";"чий стол\time locker client";"очий стол\time locker client";"абочий стол\time locker client";"рабочий стол\time locker client";"..\..\..\..\..\рабочий стол\time locker client";"р\рабочий стол\time locker client";"ор\рабочий стол\time locker client";"тор\рабочий стол\time locker client";"атор\рабочий стол\time locker client";"ратор\рабочий стол\time locker client";"тратор\рабочий стол\time locker client";"стратор\рабочий стол\time locker client";"истратор\рабочий стол\time locker client";"нистратор\рабочий стол\time locker client";"инистратор\рабочий стол\time locker client";"министратор\рабочий стол\time locker client";"дминистратор\рабочий стол\time locker client"
+  client";$(DEBUGLIBPATH) -I"er client";"ker client";"cker client";"ocker \
+  client";"locker client";"e locker client";"me locker client";"ime locker \
+  client";"time locker client";"..\..\..\..\..\time locker client";"л\time locker \
+  client";"ол\time locker client";"тол\time locker client";"стол\time locker \
+  client";"й стол\time locker client";"ий стол\time locker client";"чий стол\time \
+  locker client";"очий стол\time locker client";"абочий стол\time locker \
+  client";"рабочий стол\time locker client";"..\..\..\..\..\рабочий стол\time \
+  locker client";"р\рабочий стол\time locker client";"ор\рабочий стол\time locker \
+  client";"тор\рабочий стол\time locker client";"атор\рабочий стол\time locker \
+  client";"ратор\рабочий стол\time locker client";"тратор\рабочий стол\time \
+  locker client";"стратор\рабочий стол\time locker client";"истратор\рабочий \
+  стол\time locker client";"нистратор\рабочий стол\time locker \
+  client";"инистратор\рабочий стол\time locker client";"министратор\рабочий \
+  стол\time locker client";"дминистратор\рабочий стол\time locker client";"админ
+
+-I"ker client";"cker client";"ocker client";"locker client";"e locker client";"me locker client";"ime locker client";"time locker client";"..\..\..\..\..\time locker client";"л\time locker client";"ол\time locker client";"тол\time locker client";"стол\time locker client";"й стол\time locker client";"ий стол\time locker client";"чий стол\time locker client";"очий стол\time locker client";"абочий стол\time locker client";"рабочий стол\time locker client";"..\..\..\..\..\рабочий стол\time locker client";"р\рабочий стол\time locker client";"ор\рабочий стол\time locker client";"тор\рабочий стол\time locker client";"атор\рабочий стол\time locker client";"ратор\рабочий стол\time locker client";"тратор\рабочий стол\time locker client";"стратор\рабочий стол\time locker client";"истратор\рабочий стол\time locker client";"нистратор\рабочий стол\time locker client";"инистратор\рабочий стол\time locker client";"министратор\рабочий стол\time locker client";"дминистратор\рабочий стол\time locker client";"администратор\раб
+
+er client";"ocker client";"locker client";"e locker client";"me locker client";"ime locker client";"time locker client";"..\..\..\..\..\time locker client";"л\time locker client";"ол\time locker client";"тол\time locker client";"стол\time locker client";"й стол\time locker client";"ий стол\time locker client";"чий стол\time locker client";"очий стол\time locker client";"абочий стол\time locker client";"рабочий стол\time locker client";"..\..\..\..\..\рабочий стол\time locker client";"р\рабочий стол\time locker client";"ор\рабочий стол\time locker client";"тор\рабочий стол\time locker client";"атор\рабочий стол\time locker client";"ратор\рабочий стол\time locker client";"тратор\рабочий стол\time locker client";"стратор\рабочий стол\time locker client";"истратор\рабочий стол\time locker client";"нистратор\рабочий стол\time locker client";"инистратор\рабочий стол\time locker client";"министратор\рабочий стол\time locker client";"дминистратор\рабочий стол\time locker client";"администратор\рабочий стол\tim
+
+er client";"locker client";"e locker client";"me locker client";"ime locker client";"time locker client";"..\..\..\..\..\time locker client";"л\time locker client";"ол\time locker client";"тол\time locker client";"стол\time locker client";"й стол\time locker client";"ий стол\time locker client";"чий стол\time locker client";"очий стол\time locker client";"абочий стол\time locker client";"рабочий стол\time locker client";"..\..\..\..\..\рабочий стол\time locker client";"р\рабочий стол\time locker client";"ор\рабочий стол\time locker client";"тор\рабочий стол\time locker client";"атор\рабочий стол\time locker client";"ратор\рабочий стол\time locker client";"тратор\рабочий стол\time locker client";"стратор\рабочий стол\time locker client";"истратор\рабочий стол\time locker client";"нистратор\рабочий стол\time locker client";"инистратор\рабочий стол\time locker client";"министратор\рабочий стол\time locker client";"дминистратор\рабочий стол\time locker client";"администратор\рабочий стол\time locker clien
+
+er client";"e locker client";"me locker client";"ime locker client";"time locker client";"..\..\..\..\..\time locker client";"л\time locker client";"ол\time locker client";"тол\time locker client";"стол\time locker client";"й стол\time locker client";"ий стол\time locker client";"чий стол\time locker client";"очий стол\time locker client";"абочий стол\time locker client";"рабочий стол\time locker client";"..\..\..\..\..\рабочий стол\time locker client";"р\рабочий стол\time locker client";"ор\рабочий стол\time locker client";"тор\рабочий стол\time locker client";"атор\рабочий стол\time locker client";"ратор\рабочий стол\time locker client";"тратор\рабочий стол\time locker client";"стратор\рабочий стол\time locker client";"истратор\рабочий стол\time locker client";"нистратор\рабочий стол\time locker client";"инистратор\рабочий стол\time locker client";"министратор\рабочий стол\time locker client";"дминистратор\рабочий стол\time locker client";"администратор\рабочий стол\time locker client";"..\админист
+
+ker client";"me locker client";"ime locker client";"time locker client";"..\..\..\..\..\time locker client";"л\time locker client";"ол\time locker client";"тол\time locker client";"стол\time locker client";"й стол\time locker client";"ий стол\time locker client";"чий стол\time locker client";"очий стол\time locker client";"абочий стол\time locker client";"рабочий стол\time locker client";"..\..\..\..\..\рабочий стол\time locker client";"р\рабочий стол\time locker client";"ор\рабочий стол\time locker client";"тор\рабочий стол\time locker client";"атор\рабочий стол\time locker client";"ратор\рабочий стол\time locker client";"тратор\рабочий стол\time locker client";"стратор\рабочий стол\time locker client";"истратор\рабочий стол\time locker client";"нистратор\рабочий стол\time locker client";"инистратор\рабочий стол\time locker client";"министратор\рабочий стол\time locker client";"дминистратор\рабочий стол\time locker client";"администратор\рабочий стол\time locker client";"..\администратор\рабочий ст
+;$(DEBUGLIBPATH)
+
+er client";"time locker client";"..\..\..\..\..\time locker client";"л\time locker client";"ол\time locker client";"тол\time locker client";"стол\time locker client";"й стол\time locker client";"ий стол\time locker client";"чий стол\time locker client";"очий стол\time locker client";"абочий стол\time locker client";"рабочий стол\time locker client";"..\..\..\..\..\рабочий стол\time locker client";"р\рабочий стол\time locker client";"ор\рабочий стол\time locker client";"тор\рабочий стол\time locker client";"атор\рабочий стол\time locker client";"ратор\рабочий стол\time locker client";"тратор\рабочий стол\time locker client";"стратор\рабочий стол\time locker client";"истратор\рабочий стол\time locker client";"нистратор\рабочий стол\time locker client";"инистратор\рабочий стол\time locker client";"министратор\рабочий стол\time locker client";"дминистратор\рабочий стол\time locker client";"администратор\рабочий стол\time locker client";"..\администратор\рабочий стол\time locker client";"..\..\..\..\.
+
+\..\..\time locker client";"л\time locker client";"ол\time locker client";"тол\time locker client";"стол\time locker client";"й стол\time locker client";"ий стол\time locker client";"чий стол\time locker client";"очий стол\time locker client";"абочий стол\time locker client";"рабочий стол\time locker client";"..\..\..\..\..\рабочий стол\time locker client";"р\рабочий стол\time locker client";"ор\рабочий стол\time locker client";"тор\рабочий стол\time locker client";"атор\рабочий стол\time locker client";"ратор\рабочий стол\time locker client";"тратор\рабочий стол\time locker client";"стратор\рабочий стол\time locker client";"истратор\рабочий стол\time locker client";"нистратор\рабочий стол\time locker client";"инистратор\рабочий стол\time locker client";"министратор\рабочий стол\time locker client";"дминистратор\рабочий стол\time locker client";"администратор\рабочий стол\time locker client";"..\администратор\рабочий стол\time locker client";"..\..\..\..\..\администратор\рабо
+
+..\..\..\..\..\time locker client";"л\time locker client";"ол\time locker client";"тол\time locker client";"стол\time locker client";"й стол\time locker client";"ий стол\time locker client";"чий стол\time locker client";"очий стол\time locker client";"абочий стол\time locker client";"рабочий стол\time locker client";"..\..\..\..\..\рабочий стол\time locker client";"р\рабочий стол\time locker client";"ор\рабочий стол\time locker client";"тор\рабочий стол\time locker client";"атор\рабочий стол\time locker client";"ратор\рабочий стол\time locker client";"тратор\рабочий стол\time locker client";"стратор\рабочий стол\time locker client";"истратор\рабочий стол\time locker client";"нистратор\рабочий стол\time locker client";"инистратор\рабочий стол\time locker client";"министратор\рабочий стол\time locker client";"дминистратор\рабочий стол\time locker client";"администратор\рабочий стол\time locker client";"..\администратор\рабочий стол\time locker client";"..\..\..\..\..\администратор\рабочий стол\time locker
+
+time locker client";"ол\time locker client";"тол\time locker client";"стол\time locker client";"й стол\time locker client";"ий стол\time locker client";"чий стол\time locker client";"очий стол\time locker client";"абочий стол\time locker client";"рабочий стол\time locker client";"..\..\..\..\..\рабочий стол\time locker client";"р\рабочий стол\time locker client";"ор\рабочий стол\time locker client";"тор\рабочий стол\time locker client";"атор\рабочий стол\time locker client";"ратор\рабочий стол\time locker client";"тратор\рабочий стол\time locker client";"стратор\рабочий стол\time locker client";"истратор\рабочий стол\time locker client";"нистратор\рабочий стол\time locker client";"инистратор\рабочий стол\time locker client";"министратор\рабочий стол\time locker client";"дминистратор\рабочий стол\time locker client";"администратор\рабочий стол\time locker client";"..\администратор\рабочий стол\time locker client";"..\..\..\..\..\администратор\рабочий стол\time locker client";"..\..\администратор\рабочий
+
+ client";"стол\time locker client";"й стол\time locker client";"ий стол\time locker client";"чий стол\time locker client";"очий стол\time locker client";"абочий стол\time locker client";"рабочий стол\time locker client";"..\..\..\..\..\рабочий стол\time locker client";"р\рабочий стол\time locker client";"ор\рабочий стол\time locker client";"тор\рабочий стол\time locker client";"атор\рабочий стол\time locker client";"ратор\рабочий стол\time locker client";"тратор\рабочий стол\time locker client";"стратор\рабочий стол\time locker client";"истратор\рабочий стол\time locker client";"нистратор\рабочий стол\time locker client";"инистратор\рабочий стол\time locker client";"министратор\рабочий стол\time locker client";"дминистратор\рабочий стол\time locker client";"администратор\рабочий стол\time locker client";"..\администратор\рабочий стол\time locker client";"..\..\..\..\..\администратор\рабочий стол\time locker client";"..\..\администратор\рабочий стол\time locker clien
+
+\time locker client";"стол\time locker client";"й стол\time locker client";"ий стол\time locker client";"чий стол\time locker client";"очий стол\time locker client";"абочий стол\time locker client";"рабочий стол\time locker client";"..\..\..\..\..\рабочий стол\time locker client";"р\рабочий стол\time locker client";"ор\рабочий стол\time locker client";"тор\рабочий стол\time locker client";"атор\рабочий стол\time locker client";"ратор\рабочий стол\time locker client";"тратор\рабочий стол\time locker client";"стратор\рабочий стол\time locker client";"истратор\рабочий стол\time locker client";"нистратор\рабочий стол\time locker client";"инистратор\рабочий стол\time locker client";"министратор\рабочий стол\time locker client";"дминистратор\рабочий стол\time locker client";"администратор\рабочий стол\time locker client";"..\администратор\рабочий стол\time locker client";"..\..\..\..\..\администратор\рабочий стол\time locker client";"..\..\администратор\рабочий стол\time locker client";"..\..\..\администрат
+BPATH) locker client";$(DEBUGLIBPATH) \
+  -I"стол\time locker client";"й стол\time locker client";"ий стол\time locker client";"чий стол\time locker client";"очий стол\time locker client";"абочий стол\time locker client";"рабочий стол\time locker client";"..\..\..\..\..\рабочий стол\time locker client";"р\рабочий стол\time locker client";"ор\рабочий стол\time locker client";"тор\рабочий стол\time locker client";"атор\рабочий стол\time locker client";"ратор\рабочий стол\time locker client";"тратор\рабочий стол\time locker client";"стратор\рабочий стол\time locker client";"истратор\рабочий стол\time locker client";"нистратор\рабочий стол\time locker client";"инистратор\рабочий стол\time locker client";"министратор\рабочий стол\time locker client";"дминистратор\рабочий стол\time locker client";"администратор\рабочий стол\time locker client";"..\администратор\рабочий стол\time locker client";"..\..\..\..\..\администратор\рабочий стол\time locker client";"..\..\администратор\рабочий стол\time locker client";"..\..\..\администратор\рабочий стол\time lock
+$(DEBUGLIBPATH) -I"й стол\time locker client";"ий \
+  стол\time locker client";"чий стол\time locker client";"очий стол\time locker \
+  client";"абочий стол\time locker client";"рабочий стол\time locker \
+  client";"..\..\..\..\..\рабочий стол\time locker client";"р\рабочий стол\time \
+  locker client";"ор\рабочий стол\time locker client";"тор\рабочий стол\time \
+  locker client";"атор\рабочий стол\time locker client";"ратор\рабочий стол\time \
+  locker client";"тратор\рабочий стол\time locker client";"стратор\рабочий \
+  стол\time locker client";"истратор\рабочий стол\time locker \
+  client";"нистратор\рабочий стол\time locker client";"инистратор\рабочий \
+  стол\time locker client";"министратор\рабочий стол\time locker \
+  client";"дминистратор\рабочий стол\time locker client";"администратор\рабочий \
+  стол\time locker client";"..\администратор\рабочий стол\time locker \
+  client";"..\..\..\..\..\администратор\рабочий стол\time locker \
+  client";"..\..\администратор\рабочий стол\time locker \
+  client";"..\..\..\администратор\рабочий стол\time locker client";$(BCB)\include;
+client";"очий стол\time locker client";"абочий стол\time locker client";"рабочий стол\time locker client";"..\..\..\..\..\рабочий стол\time locker client";"р\рабочий стол\time locker client";"ор\рабочий стол\time locker client";"тор\рабочий стол\time locker client";"атор\рабочий стол\time locker client";"ратор\рабочий стол\time locker client";"тратор\рабочий стол\time locker client";"стратор\рабочий стол\time locker client";"истратор\рабочий стол\time locker client";"нистратор\рабочий стол\time locker client";"инистратор\рабочий стол\time locker client";"министратор\рабочий стол\time locker client";"дминистратор\рабочий стол\time locker client";"администратор\рабочий стол\time locker client";"..\администратор\рабочий стол\time locker client";"..\..\..\..\..\администратор\рабочий стол\time locker client";"..\..\администратор\рабочий стол\time locker client";"..\..\..\администратор\рабочий стол\time locker client";$(BCB)\include;$(BCB)\include\vcl \
+  -$Y -$W -$O- -v -JPHN -M
+RFLAGS = 
+RFLAGS = -i"ий стол\time locker client";"чий 
+RFLAGS = -i"й стол\time locker client";"ий стол
+RFLAGS = -i"стол\time locker client";"й стол\time locker c
+RFLAGS = -i"тол\time locker client";"стол\time locker cl
+RFLAGS = -i"ол\time locker client";"тол\time locker 
+RFLAGS = -i"л\time locker client";"ол\time locker client";"тол\time locker client";"стол\time locker client";"й стол\time 
+RFLAGS = -i"..\..\..\..\..\time locker client"
+RFLAGS = -i"time locker client";"..\..\..\..\..\tim
+RFLAGS = -i"ime locker client";"time locker client";"..\..\..\..\..\time locker client";"
+RFLAGS = -i"me locker client";"ime locker clien
+RFLAGS = -i"e locker client";"me locker cli
+RFLAGS = -i"locker client";"e locker 
+RFLAGS = -i"ocker client";"locker 
+RFLAGS = -i"cker client";"ocker
+RFLAG
+RFLAGS = -ilient;client;"er client";"ker client";"cker client";"ocker client";"locker client";"e locker client";"me locker client";"ime locker client";"time locker client";"..\..\..\..\..\time locker client";"л\time locker client";"ол\time locker client";"тол\time locker client";"стол\time locker client";"й стол\time locker client";"ий стол\time locker client";"чий стол\time locker client";"очий стол\time locker client";"абочий стол\time locker client";"рабочий стол\time locker client";"..\..\..\..\..\рабочий стол\time locker client";"р\рабочий стол\time locker client";"ор\рабочий стол\time locker client";"тор\рабочий стол\time locker client";"атор\рабочий стол\time locker client";"ратор\рабочий стол\time locker client";"тратор\рабочий стол\time locker client";"стратор\рабочий стол\time locker client";"истратор\рабочий стол\time locker client";"нистратор\рабочий стол\time locker client";"инистратор\рабочий стол\time locker client";"министратор\рабочий стол\time locker client";"дминистратор\рабочий стол\time l
+S  LFLAGS = -Llient;$(DEBUGLIBPATH)
+
+RFLAG
+RFLAGS = -iient;lient;cli
+RFL
+RF
+RFLAGS = -i$(BCB)\include;$(BCB)\include\vcl
+AFLAGS = /i$(BCB)\include /i$(BCB)\include\vcl /mx /w2 /zn
+LFLAGS = -L$(BCB)\lib\obj;$(BCB)\lib;$(RELEASELIBPATH) -aa -Tpe -x -Gn
+IFLAGS =
+FLAGS = -Lnt;$(DEBUGLIBPATH)
+LAGS = -Lent;$(DEBUGLIBPATH)
+IBPATH)
+AGS = -Lclient;$(DEBUGLIBPATH)
+LAGS = -L"er client";$(DEBUGLIBPATH)
+EBUGLIBPATH)
+UGLIBPATH)
+LIBPATH)
+BPATH)
+TH)
+nt";$(DEBUGLIBPATH)
+cker client";$(DEBUGLIBPATH)
+locker client";"..\..\..\..\..\рабочий стол\time locker client";"р\рабочий стол\time locker client";"ор\рабочий стол\time locker client";"тор\рабочий стол\time locker client";"атор\рабочий стол\time locker client";"ратор\рабочий стол\time locker client";"тратор\рабочий стол\time locker client";"стратор\рабочий стол\time locker client";"истратор\рабочий стол\time locker client";"нистратор\рабочий стол\time locker client";"инистратор\рабочий стол\time locker client";"министратор\рабочий стол\time locker client";"дминистратор\рабочий стол\time locker client";"администратор\рабочий стол\time locker client";"..\администратор\рабочий стол\time locker client";"..\..\..\..\..\администратор\рабочий стол\time locker client";"..\..\администратор\рабочий стол\time locker client";"..\..\..\администратор\рабочий стол\time locker client";$(BCB)\lib\obj;$(BCB)\lib;$(RELEASEL
+  -aa -Tpe -x -Gn -v
+=
+# ---------------------------------------------------------------------------
+ALLOBJ = c0w32.obj sysinit.obj $(OBJFILES)
+ALLRES = $(RESFILES)
+ALLLIB = $(LIBFILES) $(LIBRARIES) import32.lib cp32mt.lib
+# ---------------------------------------------------------------------------
+!ifdef IDEOPTIONS
+
+[Version Info]
+IncludeVerInfo=1
+AutoIncBuild=0
+MajorVer=3
+MinorVer=0
+Release=3
+Build=147
+Debug=0
+PreRelease=0
+Special=0
+Private=0
+DLL=0
+Locale=1049
+CodePage=1251
+
+[Version Info Keys]
+CompanyName=MMM Groups
+FileDescription=Клиентская часть TimeLocker'a
+FileVersion=3.0.3.147
+InternalName=Time Locker
+LegalCopyright=Матвеев Денис Александрович
+LegalTrademarks=
+OriginalFilename=TmLockCl.exe
+ProductName=Управление игровым клубом - TimeLocker
+ProductVersion=2.43
+Comments=
+
+[HistoryLists\hlIncludePath]
+Count=4
+Item0=$(BCB)\include;$(BCB)\include\vcl
+Item1=..\..\..\администратор\рабочий стол\time locker client;$(BCB)\include;$(BCB)\include\vcl
+Item2=d:\program files\borland\cbuilder3\projects;$(BCB)\include;$(BCB)\include\vcl
+Item3=..\..\..\администратор\рабочий стол\remotemessanger;d:\program files\borland\cbuilder3\projects;$(BCB)\include;$(BCB)\include\vcl
+
+[HistoryLists\hlLibraryPath]
+Count=4
+Item0=$(BCB)\lib\obj;$(BCB)\lib
+Item1=..\..\..\администратор\рабочий стол\time locker client;$(BCB)\lib\obj;$(BCB)\lib
+Item2=d:\program files\borland\cbuilder3\projects;$(BCB)\lib\obj;$(BCB)\lib
+Item3=..\..\..\администратор\рабочий стол\remotemessanger;d:\program files\borland\cbuilder3\projects;$(BCB)\lib\obj;$(BCB)\lib
+
+[HistoryLists\hlDebugSourcePath]
+Count=1
+Item0=$(BCB)\source\vcl
+
+[HistoryLists\hlConditionals]
+Count=1
+Item0=_RTLDLL;USEPACKAGES
+
+[Debugging]
+DebugSourceDirs=$(BCB)\source\vcl
+
+[Parameters]
+RunParams=
+HostApplication=
+
+!endif
+
+# ---------------------------------------------------------------------------
+# MAKE SECTION
+# ---------------------------------------------------------------------------
+# This section of the project file is not used by the BCB IDE.  It is for
+# the benefit of building from the command-line using the MAKE utility.
+# ---------------------------------------------------------------------------
+
+.autodepend
+# ---------------------------------------------------------------------------
+!if !$d(BCC32)
+BCC32 = bcc32
+!endif
+
+!if !$d(DCC32)
+DCC32 = dcc32
+!endif
+
+!if !$d(TASM32)
+TASM32 = tasm32
+!endif
+
+!if !$d(LINKER)
+LINKER = ilink32
+!endif
+
+!if !$d(BRCC32)
+BRCC32 = brcc32
+!endif
+# ---------------------------------------------------------------------------
+!if $d(PATHCPP)
+.PATH.CPP = $(PATHCPP)
+.PATH.C   = $(PATHCPP)
+!endif
+
+!if $d(PATHPAS)
+.PATH.PAS = $(PATHPAS)
+!endif
+
+!if $d(PATHASM)
+.PATH.ASM = $(PATHASM)
+!endif
+
+!if $d(PATHRC)
+.PATH.RC  = $(PATHRC)
+!endif
+# ---------------------------------------------------------------------------
+$(PROJECT): $(OBJFILES) $(RESDEPEN) $(DEFFILE)
+    $(BCB)\BIN\$(LINKER) @&&!
+    $(LFLAGS) +
+    $(ALLOBJ), +
+    $(PROJECT),, +
+    $(ALLLIB), +
+    $(DEFFILE), +
+    $(ALLRES)
+!
+# ---------------------------------------------------------------------------
+.pas.hpp:
+    $(BCB)\BIN\$(DCC32) $(PFLAGS) {$< }
+
+.pas.obj:
+    $(BCB)\BIN\$(DCC32) $(PFLAGS) {$< }
+
+.cpp.obj:
+    $(BCB)\BIN\$(BCC32) $(CFLAG1) $(CFLAG2) $(CFLAG3) -n$(@D) {$< }
+
+.c.obj:
+    $(BCB)\BIN\$(BCC32) $(CFLAG1) $(CFLAG2) $(CFLAG3) -n$(@D) {$< }
+
+.asm.obj:
+    $(BCB)\BIN\$(TASM32) $(AFLAGS) $<, $@
+
+.rc.res:
+    $(BCB)\BIN\$(BRCC32) $(RFLAGS) -fo$@ $<
+# ---------------------------------------------------------------------------

@@ -1,0 +1,187 @@
+# ---------------------------------------------------------------------------
+!if !$d(BCB)
+BCB = $(MAKEDIR)\..
+!endif
+
+# ---------------------------------------------------------------------------
+# IDE SECTION
+# ---------------------------------------------------------------------------
+# The following section of the project makefile is managed by the BCB IDE.
+# It is recommended to use the IDE to change any of the values in this
+# section.
+# ---------------------------------------------------------------------------
+
+VERSION = BCB.03
+# ---------------------------------------------------------------------------
+PROJECT = TmLockSr.exe
+OBJFILES = TmLockSr.obj UnitFormMain.obj UnitFormMainOptions.obj UnitFormAbout.obj \
+  UnitCommon.obj UnitFormClientConfig.obj UnitFormGamesList.obj \
+  UnitFormPasswords.obj UnitModeChange.obj
+RESFILES = TmLockSr.res
+DEFFILE =
+RESDEPEN = $(RESFILES) UnitFormMain.dfm UnitFormMainOptions.dfm UnitFormAbout.dfm \
+  UnitFormClientConfig.dfm UnitFormGamesList.dfm UnitFormPasswords.dfm \
+  UnitModeChange.dfm
+LIBFILES =
+LIBRARIES = VCLX35.lib NMFast35.lib VCL35.lib
+SPARELIBS = VCL35.lib NMFast35.lib VCLX35.lib
+PACKAGES = vclx35.bpi VCL35.bpi vcldb35.bpi vcldbx35.bpi bcbsmp35.bpi dclocx35.bpi \
+  Qrpt35.bpi teeui35.bpi VclSmp35.bpi teedb35.bpi tee35.bpi ibsmp35.bpi dss35.bpi \
+  NMFast35.bpi inetdb35.bpi inet35.bpi VclMid35.bpi
+# ---------------------------------------------------------------------------
+PATHCPP = .;
+PATHASM = .;
+PATHPAS = .;
+PATHRC = .;
+DEBUGLIBPATH = $(BCB)\lib\debug
+RELEASELIBPATH = $(BCB)\lib\release
+# ---------------------------------------------------------------------------
+CFLAG1 = -O2 -Hc -w -Ve -k- -vi -c -b- -w-par -w-inl -Vx -tW
+CFLAG2 = -I"..\..\..\администратор\рабочий стол\server";$(BCB)\include;$(BCB)\include\vcl \
+  -H=$(BCB)\lib\vcl35.csm
+CFLAG3 = -Tkh30000 -4
+PFLAGS = -U"..\..\..\администратор\рабочий стол\server";$(BCB)\lib\obj;$(BCB)\lib;$(RELEASELIBPATH) \
+  -I"..\..\..\администратор\рабочий стол\server";$(BCB)\include;$(BCB)\include\vcl \
+  -$L- -$D- -v -JPHN -M
+RFLAGS = -i"..\..\..\администратор\рабочий стол\server";$(BCB)\include;$(BCB)\include\vcl
+AFLAGS = /i$(BCB)\include /i$(BCB)\include\vcl /mx /w2 /zn /d_RTLDLL /dUSEPACKAGES
+LFLAGS = -L"..\..\..\администратор\рабочий стол\server";$(BCB)\lib\obj;$(BCB)\lib;$(RELEASELIBPATH) \
+  -aa -Tpe -x -Gn
+IFLAGS =
+# ---------------------------------------------------------------------------
+ALLOBJ = c0w32.obj sysinit.obj $(OBJFILES)
+ALLRES = $(RESFILES)
+ALLLIB = $(LIBFILES) $(LIBRARIES) import32.lib cp32mt.lib
+# ---------------------------------------------------------------------------
+!ifdef IDEOPTIONS
+
+[Version Info]
+IncludeVerInfo=1
+AutoIncBuild=0
+MajorVer=3
+MinorVer=0
+Release=3
+Build=123
+Debug=0
+PreRelease=0
+Special=0
+Private=0
+DLL=0
+Locale=1049
+CodePage=1251
+
+[Version Info Keys]
+CompanyName=MMM Groups
+FileDescription=Серверная часть TimeLocker'a
+FileVersion=3.0.3.123
+InternalName=Time Locker Server
+LegalCopyright=Матвеев Денис Александрович
+LegalTrademarks=
+OriginalFilename=TmLockSr.exe
+ProductName=Управление игровым клубом - TimeLocker
+ProductVersion=2.43
+Comments=
+
+[HistoryLists\hlIncludePath]
+Count=3
+Item0=$(BCB)\include;$(BCB)\include\vcl
+Item1=..\..\..\администратор\рабочий стол\time locker server;$(BCB)\include;$(BCB)\include\vcl
+Item2=..\time locker client config;$(BCB)\include;$(BCB)\include\vcl
+
+[HistoryLists\hlLibraryPath]
+Count=3
+Item0=$(BCB)\lib\obj;$(BCB)\lib
+Item1=..\..\..\администратор\рабочий стол\time locker server;$(BCB)\lib\obj;$(BCB)\lib
+Item2=..\time locker client config;$(BCB)\lib\obj;$(BCB)\lib
+
+[HistoryLists\hlDebugSourcePath]
+Count=1
+Item0=$(BCB)\source\vcl
+
+[HistoryLists\hlConditionals]
+Count=1
+Item0=_RTLDLL;USEPACKAGES
+
+[Debugging]
+DebugSourceDirs=$(BCB)\source\vcl
+
+[Parameters]
+RunParams=
+HostApplication=
+
+!endif
+
+# ---------------------------------------------------------------------------
+# MAKE SECTION
+# ---------------------------------------------------------------------------
+# This section of the project file is not used by the BCB IDE.  It is for
+# the benefit of building from the command-line using the MAKE utility.
+# ---------------------------------------------------------------------------
+
+.autodepend
+# ---------------------------------------------------------------------------
+!if !$d(BCC32)
+BCC32 = bcc32
+!endif
+
+!if !$d(DCC32)
+DCC32 = dcc32
+!endif
+
+!if !$d(TASM32)
+TASM32 = tasm32
+!endif
+
+!if !$d(LINKER)
+LINKER = ilink32
+!endif
+
+!if !$d(BRCC32)
+BRCC32 = brcc32
+!endif
+# ---------------------------------------------------------------------------
+!if $d(PATHCPP)
+.PATH.CPP = $(PATHCPP)
+.PATH.C   = $(PATHCPP)
+!endif
+
+!if $d(PATHPAS)
+.PATH.PAS = $(PATHPAS)
+!endif
+
+!if $d(PATHASM)
+.PATH.ASM = $(PATHASM)
+!endif
+
+!if $d(PATHRC)
+.PATH.RC  = $(PATHRC)
+!endif
+# ---------------------------------------------------------------------------
+$(PROJECT): $(OBJFILES) $(RESDEPEN) $(DEFFILE)
+    $(BCB)\BIN\$(LINKER) @&&!
+    $(LFLAGS) +
+    $(ALLOBJ), +
+    $(PROJECT),, +
+    $(ALLLIB), +
+    $(DEFFILE), +
+    $(ALLRES)
+!
+# ---------------------------------------------------------------------------
+.pas.hpp:
+    $(BCB)\BIN\$(DCC32) $(PFLAGS) {$< }
+
+.pas.obj:
+    $(BCB)\BIN\$(DCC32) $(PFLAGS) {$< }
+
+.cpp.obj:
+    $(BCB)\BIN\$(BCC32) $(CFLAG1) $(CFLAG2) $(CFLAG3) -n$(@D) {$< }
+
+.c.obj:
+    $(BCB)\BIN\$(BCC32) $(CFLAG1) $(CFLAG2) $(CFLAG3) -n$(@D) {$< }
+
+.asm.obj:
+    $(BCB)\BIN\$(TASM32) $(AFLAGS) $<, $@
+
+.rc.res:
+    $(BCB)\BIN\$(BRCC32) $(RFLAGS) -fo$@ $<
+# ---------------------------------------------------------------------------

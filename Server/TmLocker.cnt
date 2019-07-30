@@ -1,0 +1,13 @@
+; This contents file was created with HelpScribble 3.4.0
+; *** UNREGISTERED ***
+
+:BASE TmLocker.hlp
+:TITLE TimeLocker Help
+1 Описание=Scribble20
+1 Лицензия=Scribble10
+1 Настройка клиента=Scribble30
+1 Настройка сервера=Scribble40
+1 Информация о состоянии клиентов=Scribble50
+1 Команды сервера=Scribble45
+1 Замеченные глюки и возможные неприятности=Scribble70
+1 Версии и планы=Scribble60
