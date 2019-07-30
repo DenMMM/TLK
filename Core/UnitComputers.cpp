@@ -6,21 +6,9 @@
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
 //---------------------------------------------------------------------------
-MComputer::MComputer()
+void MComputersItem::Copy(const MListItem *SrcItem_)
 {
-    Number=0;
-    Color=mgcNone;
-    NotUsed=false;
-}
-
-MComputer::~MComputer()
-{
-}
-
-void MComputer::Copy(const MListItem *SrcItem_)
-{
-    const MComputer *comp=
-        dynamic_cast<const MComputer*>(SrcItem_);
+	auto comp=dynamic_cast<const MComputersItem*>(SrcItem_);
 
     Number=comp->Number;
     Color=comp->Color;
@@ -28,60 +16,60 @@ void MComputer::Copy(const MListItem *SrcItem_)
     NotUsed=comp->NotUsed;
 }
 
-unsigned MComputer::GetDataSize() const
+unsigned MComputersItem::GetDataSize() const
 {
     return
-        sizeof(Number)+
-        sizeof(Color)+
-        Address.length()+sizeof('\0')+
-        sizeof(NotUsed);
+		sizeof(Number)+
+		sizeof(Color)+
+		sizeofLine(Address)+
+		sizeof(NotUsed);
 }
 
-char *MComputer::SetData(char *Data_) const
+void *MComputersItem::SetData(void *Data_) const
 {
-    Data_=MemSet(Data_,Number);
-    Data_=MemSet(Data_,Color);
-    Data_=MemSetCLine(Data_,Address.c_str());
-    Data_=MemSet(Data_,NotUsed);
-    return Data_;
+	Data_=MemSet(Data_,Number);
+	Data_=MemSet(Data_,Color);
+	Data_=MemSetLine(Data_,Address);
+	Data_=MemSet(Data_,NotUsed);
+	return Data_;
 }
 
-const char *MComputer::GetData(const char *Data_, const char *Limit_)
+const void *MComputersItem::GetData(const void *Data_, const void *Limit_)
 {
     return
-        (Data_=MemGet(Data_,&Number,Limit_))!=NULL &&
-        (Data_=MemGet(Data_,&Color,Limit_))!=NULL &&
-        (Data_=MemGetCLine(Data_,Address,MAX_CompAddrLen,Limit_))!=NULL &&
-        (Data_=MemGet(Data_,&NotUsed,Limit_))!=NULL
-        ? Data_: NULL;
+		(Data_=MemGet(Data_,&Number,Limit_)) &&
+		(Data_=MemGet(Data_,&Color,Limit_)) &&
+		(Data_=MemGetLine(Data_,Address,MAX_CompAddrLen,Limit_)) &&
+		(Data_=MemGet(Data_,&NotUsed,Limit_))
+        ? Data_: nullptr;
 }
 //---------------------------------------------------------------------------
-MComputer *MComputers::Search(char Number_) const
+MComputersItem *MComputers::Search(char Number_) const
 {
-    MComputer *Computer=(MComputer*)gFirst();
-    while(Computer)
-    {
-        if ( Computer->Number==Number_ ) break;
-        Computer=(MComputer*)Computer->gNext();
-    }
-    return Computer;
+	MComputersItem *Computer=gFirst();
+	while(Computer)
+	{
+		if ( Computer->Number==Number_ ) break;
+		Computer=Computer->gNext();
+	}
+	return Computer;
 }
 
 void MComputers::Sort()
 {
-    MComputer *Computer, *NextComputer;
+    MComputersItem *Computer, *NextComputer;
     bool Sorted;
 
-    if ( gFirst()==NULL ) return;
+    if ( gFirst()==nullptr ) return;
 
     do
     {
-        Sorted=true; Computer=(MComputer*)gFirst();
-        while((NextComputer=(MComputer*)Computer->gNext())!=NULL)
+		Sorted=true; Computer=gFirst();
+		while((NextComputer=Computer->gNext())!=nullptr)
         {
             if ( Computer->Number>NextComputer->Number )
             {
-                Exch(Computer,NextComputer);
+                Swap(Computer,NextComputer);
                 Sorted=false;
             } else Computer=NextComputer;
         }

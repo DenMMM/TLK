@@ -6,21 +6,21 @@
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
 //---------------------------------------------------------------------------
-std::string MShared::InhToHEX() const
+std::wstring MShared::InhToHEX() const
 {
     MInheritData Data;
-    char hex[sizeof(Data)*2+2]; /// "+2" - баг в ByteToHEX()
+    wchar_t hex[sizeof(Data)*2+1];
 
     // Заполним поля
     Data.hMap=hMap;
     Data.hMtxMap=hMtxMap;
     Data.hMtxLive=hMtxLive;
     // Зашифруем
-    BasicEncode((char*)&Data,sizeof(Data),ENC_Code);    /// смысл есть ?
-    // Сконвертируем в HEX-строку
-    ByteToHEX((char*)&Data,sizeof(Data),hex,sizeof(hex)-1,'\0');
+	BasicEncode(&Data,sizeof(Data),ENC_Code);	/// смысл есть ?
+	// Сконвертируем в HEX-строку
+	ByteToHEX(&Data, sizeof(Data), hex, sizeof(hex)-1, L'\0');
 
-    return std::string(hex);
+	return std::wstring(hex);
 }
 //---------------------------------------------------------------------------
 bool MShared::Create()
@@ -28,59 +28,61 @@ bool MShared::Create()
     SECURITY_ATTRIBUTES sa;
 
     sa.nLength=sizeof(sa);
-    sa.lpSecurityDescriptor=NULL;
+    sa.lpSecurityDescriptor=nullptr;
     sa.bInheritHandle=TRUE;
 
     // Создадим область общей памяти
     hMap=::CreateFileMapping(INVALID_HANDLE_VALUE,&sa,
-        PAGE_READWRITE,0,sizeof(MSharedData),NULL);
-    if ( hMap==NULL ) goto error;
-    pData=(MSharedData*)::MapViewOfFile(hMap,FILE_MAP_WRITE,0,0,0);
-    if ( pData==NULL ) goto error;
+        PAGE_READWRITE,0,sizeof(MSharedData),nullptr);
+    if ( hMap==nullptr ) goto error;
+	pData=reinterpret_cast<MSharedData*>(
+		::MapViewOfFile(hMap,FILE_MAP_WRITE,0,0,0));
+    if ( pData==nullptr ) goto error;
     // Создадим мьютекс для синхронизации доступа к ней
-    hMtxMap=::CreateMutex(&sa,FALSE,NULL);
-    if ( hMtxMap==NULL ) goto error;
+    hMtxMap=::CreateMutex(&sa,FALSE,nullptr);
+    if ( hMtxMap==nullptr ) goto error;
     // Создадим мьютекс-маркер состояния процесса службы
-    hMtxLive=::CreateMutex(&sa,TRUE,NULL);
-    if ( hMtxLive==NULL ) goto error;
+    hMtxLive=::CreateMutex(&sa,TRUE,nullptr);
+    if ( hMtxLive==nullptr ) goto error;
 
     return true;
 error:
 #ifdef _DEBUG
 {
-    char msg[256+1];
-    ::FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM,NULL,
-        ::GetLastError(),MAKELANGID(LANG_NEUTRAL,SUBLANG_DEFAULT),
-        (LPTSTR)msg,256,NULL);
-    ::MessageBox(NULL,msg,"MShared::Create()",MB_SERVICE_NOTIFICATION);
+    wchar_t msg[256+1];
+	::FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM,nullptr,
+		::GetLastError(),MAKELANGID(LANG_NEUTRAL,SUBLANG_DEFAULT),
+		(LPTSTR)msg,256,nullptr);
+	::MessageBox(nullptr, msg, L"MShared::Create()", MB_SERVICE_NOTIFICATION);
 }
 #endif
     return false;
 }
 //---------------------------------------------------------------------------
-bool MShared::Open(char *InhLine_)
+bool MShared::Open(wchar_t *InhLine_)
 {
-    MInheritData Data;
+	MInheritData Data;
 
-    // Восстановим из HEX-строки наследованные хэндлы
-    if ( HEXToByte(InhLine_,(char*)&Data,sizeof(Data))!=sizeof(Data) ) return false;
-    // Расшифруем
-    BasicDecode((char*)&Data,sizeof(Data),ENC_Code);
-    //
+	// Восстановим из HEX-строки наследованные хэндлы
+	if ( HEXToByte(InhLine_, &Data, sizeof(Data))!=sizeof(Data) ) return false;
+	// Расшифруем
+	BasicDecode(&Data, sizeof(Data), ENC_Code);
+	//
     hMap=Data.hMap;
     hMtxMap=Data.hMtxMap;
     hMtxLive=Data.hMtxLive;
     // Отобразим общий блок памяти в пространство процесса
-    pData=(MSharedData*)::MapViewOfFile(hMap,FILE_MAP_READ,0,0,sizeof(MSharedData));
-    return pData!=NULL;
+	pData=reinterpret_cast<MSharedData*>(
+		::MapViewOfFile(hMap,FILE_MAP_READ,0,0,sizeof(MSharedData)));
+    return pData!=nullptr;
 }
 //---------------------------------------------------------------------------
 void MShared::Close()
 {
-    ::UnmapViewOfFile(pData); pData=NULL;
-    ::CloseHandle(hMtxLive); hMtxLive=NULL;
-    ::CloseHandle(hMtxMap); hMtxMap=NULL;
-    ::CloseHandle(hMap); hMap=NULL;
+    ::UnmapViewOfFile(pData); pData=nullptr;
+    ::CloseHandle(hMtxLive); hMtxLive=nullptr;
+    ::CloseHandle(hMtxMap); hMtxMap=nullptr;
+	::CloseHandle(hMap); hMap=nullptr;
 }
 //---------------------------------------------------------------------------
 void MShared::UpdateSysTime(__int64 SysTime_)

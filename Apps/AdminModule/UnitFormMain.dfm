@@ -1,9 +1,9 @@
 object FormMain: TFormMain
   Left = 201
   Top = 115
-  Width = 740
-  Height = 500
   Caption = 'TLK'
+  ClientHeight = 444
+  ClientWidth = 724
   Color = clBtnFace
   Constraints.MinHeight = 500
   Constraints.MinWidth = 740
@@ -22,18 +22,17 @@ object FormMain: TFormMain
   TextHeight = 13
   object StatusBar: TStatusBar
     Left = 0
-    Top = 435
-    Width = 732
+    Top = 425
+    Width = 724
     Height = 19
     Enabled = False
     Panels = <>
-    SimplePanel = False
   end
   object PanelButtons: TPanel
-    Left = 596
+    Left = 588
     Top = 0
     Width = 136
-    Height = 435
+    Height = 425
     Align = alRight
     TabOrder = 1
     object Bevel11: TBevel
@@ -217,7 +216,6 @@ object FormMain: TFormMain
       Width = 124
       Height = 8
       Hint = #1048#1085#1076#1080#1082#1072#1090#1086#1088' '#1089#1077#1090#1077#1074#1086#1081' '#1072#1082#1090#1080#1074#1085#1086#1089#1090#1080
-      Min = 0
       Max = 0
       TabOrder = 12
     end
@@ -307,8 +305,6 @@ object FormMain: TFormMain
       Height = 25
       Cancel = True
       Caption = #1047#1072#1082#1088#1099#1090#1100
-      TabOrder = 11
-      OnClick = NClosePrgClick
       Glyph.Data = {
         DE010000424DDE01000000000000760000002800000024000000120000000100
         0400000000006801000000000000000000001000000000000000000000000000
@@ -327,6 +323,8 @@ object FormMain: TFormMain
         3333333333333333333888330000333333333333333333333333333333333333
         0000}
       NumGlyphs = 2
+      TabOrder = 11
+      OnClick = NClosePrgClick
     end
     object BitBtnSystem: TBitBtn
       Left = 6
@@ -341,8 +339,8 @@ object FormMain: TFormMain
   object ListViewComputers: TListView
     Left = 0
     Top = 0
-    Width = 596
-    Height = 435
+    Width = 588
+    Height = 425
     Align = alClient
     BiDiMode = bdLeftToRight
     Columns = <
@@ -404,7 +402,7 @@ object FormMain: TFormMain
     Left = 488
     Top = 28
     Bitmap = {
-      494C010112001300040010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C0101120013005C0010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000005000000001002000000000000050
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

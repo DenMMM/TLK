@@ -4,14 +4,14 @@
 USERES("VPlay.res");
 USEFORM("UnitFormMain.cpp", FormMain);
 //---------------------------------------------------------------------------
-WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
+int WINAPI _tWinMain(HINSTANCE, HINSTANCE, LPTSTR, int)
 {
-    HANDLE mutex=::CreateMutex(NULL,true,"VPlayRunMutex");
-    if ( (mutex==NULL)||(::GetLastError()==ERROR_ALREADY_EXISTS) )
+    HANDLE mutex=::CreateMutex(nullptr,true,L"VPlayRunMutex");
+    if ( (mutex==nullptr)||(::GetLastError()==ERROR_ALREADY_EXISTS) )
     {
         ::CloseHandle(mutex);
-        ::MessageBox(NULL,"Плейер уже запущен !\nИспользуйте ALT+TAB для переключения между программами.",
-            "VPlay - ошибка",MB_OK|MB_ICONERROR|MB_APPLMODAL);
+        ::MessageBox(nullptr,L"Плейер уже запущен !\nИспользуйте ALT+TAB для переключения между программами.",
+            L"VPlay - ошибка",MB_OK|MB_ICONERROR|MB_APPLMODAL);
         return 0;
     }
     try

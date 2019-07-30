@@ -12,6 +12,7 @@
 #include <ImgList.hpp>
 //---------------------------------------------------------------------------
 #include "UnitGames.h"
+#include <System.ImageList.hpp>
 //---------------------------------------------------------------------------
 class TFormGames : public TForm
 {

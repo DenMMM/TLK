@@ -1,11 +1,11 @@
 object FormFine: TFormFine
   Left = 282
   Top = 227
-  Width = 473
-  Height = 316
   BorderIcons = []
   BorderStyle = bsSizeToolWin
   Caption = #1064#1090#1088#1072#1092#1086#1074#1072#1085#1080#1077
+  ClientHeight = 280
+  ClientWidth = 457
   Color = clBtnFace
   Constraints.MaxHeight = 500
   Constraints.MaxWidth = 473
@@ -20,8 +20,8 @@ object FormFine: TFormFine
   OnClose = FormClose
   OnShow = FormShow
   DesignSize = (
-    465
-    289)
+    457
+    280)
   PixelsPerInch = 96
   TextHeight = 13
   object Bevel2: TBevel
@@ -132,7 +132,6 @@ object FormFine: TFormFine
     MultiSelect = True
     ReadOnly = True
     RowSelect = True
-    SmallImages = FormMain.ImageListIcons
     TabOrder = 0
     ViewStyle = vsReport
     OnInsert = ListViewFinesInsert
@@ -144,8 +143,9 @@ object FormFine: TFormFine
     Height = 25
     Anchors = [akLeft, akBottom]
     Caption = #1047#1072#1082#1088#1099#1090#1100
-    TabOrder = 5
     Kind = bkCancel
+    NumGlyphs = 2
+    TabOrder = 5
   end
   object BitBtnFine: TBitBtn
     Left = 348
@@ -154,8 +154,6 @@ object FormFine: TFormFine
     Height = 25
     Anchors = [akLeft, akBottom]
     Caption = #1064#1090#1088#1072#1092#1086#1074#1072#1090#1100
-    TabOrder = 4
-    OnClick = BitBtnFineClick
     Glyph.Data = {
       F2010000424DF201000000000000760000002800000024000000130000000100
       0400000000007C01000000000000000000001000000000000000000000000000
@@ -174,6 +172,8 @@ object FormFine: TFormFine
       A224333333333333338F38F300003333333333333A223333333333333338F8F3
       000033333333333333A3333333333333333383330000}
     NumGlyphs = 2
+    TabOrder = 4
+    OnClick = BitBtnFineClick
   end
   object CheckBoxWait: TCheckBox
     Left = 344
@@ -192,7 +192,6 @@ object FormFine: TFormFine
     Height = 21
     Style = csDropDownList
     Anchors = [akLeft, akBottom]
-    ItemHeight = 13
     TabOrder = 1
     OnClick = ComboBoxTimeClick
   end

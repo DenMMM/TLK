@@ -6,74 +6,104 @@
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
 //---------------------------------------------------------------------------
-char *MemSetCLine(char *Mem_, const char *Line_)
+/// шаблон тут просится
+void *MemSetLine(void *Mem__, const std::string &Line__)
 {
-    while ( (*(Mem_++)=*(Line_++))!=0 );
-    return Mem_;
+	char *Mem_=static_cast<char*>(Mem__);
+	const char *Line_=Line__.c_str();           /// лучше использовать UTF8
+
+	while ( (*(Mem_++)=*(Line_++))!='\0' );
+	return Mem_;
 }
 
-const char *MemGetCLine(const char *Mem_, char *Line_,
-    unsigned MaxLength_, const char *Limit_)
+void *MemSetLine(void *Mem__, const std::wstring &Line__)
 {
-    if ( (unsigned)(Limit_-Mem_)>(++MaxLength_) ) Limit_=Mem_+MaxLength_;
+	wchar_t *Mem_=static_cast<wchar_t*>(Mem__);
+	const wchar_t *Line_=Line__.c_str();        /// лучше использовать UTF8
 
-    do { if ( Mem_>=Limit_ ) return NULL; }
-    while( (*(Line_++)=*(Mem_++))!=0 );
-
-    return Mem_;
+	while ( (*(Mem_++)=*(Line_++))!=L'\0' );
+	return Mem_;
 }
 
-const char *MemGetCLine(const char *Mem_, std::string &Line_,
-    unsigned MaxLength_, const char *Limit_)
+const void *MemGetLine(const void *Mem__, std::string &Line_,
+	size_t MaxLength_, const void *Limit__)
 {
-    Line_.clear();
-    Line_.reserve(MaxLength_);      /// оптимизация
+	const char *Mem_=static_cast<const char*>(Mem__);
+	const char *Limit_=static_cast<const char*>(Limit__);
 
-    if ( (unsigned)(Limit_-Mem_)>(++MaxLength_) ) Limit_=Mem_+MaxLength_;
+	if ( (size_t)(Limit_-Mem_)>(++MaxLength_) ) Limit_=Mem_+MaxLength_;
+	Line_.clear();
+	Line_.reserve(MaxLength_);      			// оптимизация
 
-    while(Mem_<Limit_)
-    {
-        if ( *Mem_==0 ) return ++Mem_;
-        Line_.push_back(*Mem_);
-        Mem_++;
-    }
+	do
+	{
+		if ( Mem_>=Limit_ ) return nullptr;     /// throw ?
+		if ( *Mem_=='\0' ) break;
+		Line_.push_back(*Mem_);
+		Mem_++;
+	} while(true);
+	Mem_++;
 
-    return NULL;
+	return Mem_;
+}
+
+const void *MemGetLine(const void *Mem__, std::wstring &Line_,
+	size_t MaxLength_, const void *Limit__)
+{
+	const wchar_t *Mem_=static_cast<const wchar_t*>(Mem__);
+	const wchar_t *Limit_=static_cast<const wchar_t*>(Limit__);
+
+	if ( (size_t)(Limit_-Mem_)>(++MaxLength_) ) Limit_=Mem_+MaxLength_;
+	Line_.clear();
+	Line_.reserve(MaxLength_);      			// оптимизация
+
+	do
+	{
+		if ( Mem_>=Limit_ ) return nullptr;     /// throw ?
+		if ( *Mem_==L'\0' ) break;
+		Line_.push_back(*Mem_);
+		Mem_++;
+	} while(true);
+	Mem_++;
+
+	return Mem_;
 }
 //---------------------------------------------------------------------------
-void BasicEncode(unsigned char *Data_, unsigned DataSize_, unsigned Code_, int Round_)
+void BasicEncode(void *Data__, size_t DataSize_, unsigned Code_, int Round_)
 {
-    unsigned char *limit;
-    unsigned blk;
+	unsigned char *Data_=static_cast<unsigned char*>(Data__);
+	unsigned char *limit;
+	unsigned blk;
 
-    if ( DataSize_<sizeof(blk) ) return;
+	if ( DataSize_<sizeof(blk) ) return;
 
-    limit=Data_+DataSize_-sizeof(blk);
-    // Считаем начальный блок целиком
-    blk=*((unsigned*)Data_);
-    goto begin;
+	limit=Data_+DataSize_-sizeof(blk);
+	// Считаем начальный блок целиком
+	blk=*((unsigned*)Data_);
+	goto begin;
 
-    do
-    {
-        // Сохраним в выход младший байт блока
-        Data_[0]=blk;
-        // Сдвинем блок вправо и загрузим старший байт из входа
-        blk>>=8;
-        blk|=( (unsigned)Data_[sizeof(blk)] )<<(sizeof(blk)*8-8);
-        ++Data_;
+	do
+	{
+		// Сохраним в выход младший байт блока
+		Data_[0]=blk;
+		// Сдвинем блок вправо и загрузим старший байт из входа
+		blk>>=8;
+		blk|=( (unsigned)Data_[sizeof(blk)] )<<(sizeof(blk)*8-8);
+		++Data_;
 begin:
-        // Перемешаем биты блока
-        for ( int i=Round_; i; i-- )
-            blk=BasicEncodeRound(blk,Code_);
-    } while(Data_!=limit);
+		// Перемешаем биты блока
+		for ( int i=Round_; i; i-- )
+			blk=BasicEncodeRound(blk,Code_);
+	} while(Data_!=limit);
 
-    // Сохраним в выход последний блок целиком
-    *((unsigned*)Data_)=blk;
+	// Сохраним в выход последний блок целиком
+	*((unsigned*)Data_)=blk;
 }
 
-void BasicDecode(unsigned char *Data_, unsigned DataSize_, unsigned Code_, int Round_)
+void BasicDecode(void *Data__, size_t DataSize_, unsigned Code_, int Round_)
 {
-    unsigned char *limit;
+	unsigned char *Data_=static_cast<unsigned char*>(Data__);
+	unsigned char *limit;
     unsigned blk;
 
     if ( DataSize_<sizeof(blk) ) return;
@@ -111,8 +141,9 @@ unsigned BasicMix(unsigned Key1_, unsigned Key2_)
     // Шифруем каждый ключ друг другом
     BasicEncode((char*)&Key2_,sizeof(Key2_),k1,sizeof(Key2_)*8);
     BasicEncode((char*)&Key1_,sizeof(Key1_),k2,sizeof(Key1_)*8);
-    // XOR результатов с проверкой на равенство
-    return (Key1_^=Key2_)? Key1_: Key2_;
+	// XOR результатов с проверкой на равенство
+//	return (Key1_^=Key2_)? Key1_: Key2_;
+	return Key1_^=Key2_;
 }
 
 unsigned BasicRand()
@@ -123,67 +154,83 @@ unsigned BasicRand()
     return rnd;
 }
 
-bool TimeRand(char *Buff_, unsigned Size_)
+bool TimeRand(void *Buff__, size_t Size_)
 {
-    LARGE_INTEGER ent1;
+	unsigned char *Buff_=static_cast<unsigned char*>(Buff__);
+	LARGE_INTEGER ent1;
     DWORD ent2;
 
     // Считываем счетчик тактов процессора
-    if ( !::QueryPerformanceCounter(&ent1) ) return false;
+    if ( !::QueryPerformanceCounter(&ent1) ) return false;  /// throw ?
     // Считываем таймер активности ОС
     ent2=::GetTickCount();
 
     // Заполним выходной буфер псевдослучайными значениями
-    for ( unsigned i=0; i<Size_; i++ ) Buff_[i]=random(256);
-    // Добавим энтропии
-    BasicEncode(Buff_,Size_,ent1.LowPart,32);
-    BasicEncode(Buff_,Size_,ent1.HighPart,32);
-    BasicEncode(Buff_,Size_,ent2,32);
+	for ( size_t i=0; i<Size_; i++ ) Buff_[i]=random(256);
+	// Добавим энтропии
+	BasicEncode(Buff_, Size_, ent1.LowPart, 32);
+	BasicEncode(Buff_, Size_, ent1.HighPart, 32);
+	BasicEncode(Buff_, Size_, ent2, 32);
 
-    return true;
+	return true;
 }
 //---------------------------------------------------------------------------
-int ByteToHEX(const unsigned char *Bytes_, int BytesCount_,
-    char *Line_, int LineSize_, char Delim_)
+size_t ByteToHEX(const void *Bytes__, size_t BytesCount_,
+	wchar_t *Line_, size_t LineSize_, wchar_t Delim_)
 {
-    static const char sym[]={
-        '0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F'};
+	static const wchar_t sym[]={
+		L'0', L'1', L'2', L'3', L'4', L'5', L'6', L'7',
+		L'8', L'9', L'A', L'B', L'C', L'D', L'E', L'F'};
+	const unsigned char *Bytes_=static_cast<const unsigned char*>(Bytes__);
 
-    int pin=0, pout=0;
-    while((pin<BytesCount_)&&(pout<(LineSize_-2)))  /// баг: (LineSize_-2)
-    {
-        Line_[pout+0]=sym[Bytes_[pin]>>4];
-        Line_[pout+1]=sym[Bytes_[pin]&0x0F];
-        if ( Delim_=='\0' ) pout+=2;
-        else
-        {
-            Line_[pout+2]=Delim_;
-            pout+=3;
-        }
-        pin++;
-    }
-    // Буфер для строки закончился раньше, чем считали все байты
-    if ( pin!=BytesCount_ )
-    {
-        throw std::runtime_error (
-            "ByteToHEX\n"
-            "Не достаточный размер буфера для HEX-строки."
-            );
-    }
-    // Последний разделитель заменим концом строки
-    Line_[Delim_=='\0'? pout: --pout]=0;
+	size_t pin=0, pout=0;
+	if ( Delim_==L'\0' )
+	{
+		while((pin<BytesCount_)&&(pout<(LineSize_-2)))
+		{
+			Line_[pout+0]=sym[Bytes_[pin]>>4];
+			Line_[pout+1]=sym[Bytes_[pin]&0x0F];
+			pout+=2;
+			pin++;
+		}
+	} else
+	{
+		while((pin<BytesCount_)&&(pout<(LineSize_-3)))
+		{
+			Line_[pout+0]=sym[Bytes_[pin]>>4];
+			Line_[pout+1]=sym[Bytes_[pin]&0x0F];
+			Line_[pout+2]=Delim_;
+			pout+=3;
+			pin++;
+		}
+	}
 
-    return pout;
+	// Буфер для строки закончился раньше, чем считали все байты
+	if ( pin!=BytesCount_ )
+	{
+		throw std::runtime_error (
+			"ByteToHEX\n"
+			"Не достаточный размер буфера для HEX-строки."
+			);
+	}
+
+	// Последний разделитель заменим концом строки
+	Line_[Delim_==L'\0'? pout: --pout]=0;
+
+	return pout;
 }
 
-int HEXToByte(const char *Line_, unsigned char *Buff_, int BuffSize_)
+size_t HEXToByte(const wchar_t *Line_, void *Buff__, size_t BuffSize_)
 {
-    static const char sym[]={
-        '0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F',
-        '0','1','2','3','4','5','6','7','8','9','a','b','c','d','e','f'};
+	static const wchar_t sym[]={
+		L'0', L'1', L'2', L'3', L'4', L'5', L'6', L'7',
+		L'8', L'9', L'A', L'B', L'C', L'D', L'E', L'F',
+		L'0', L'1', L'2', L'3', L'4', L'5', L'6', L'7',
+		L'8', L'9', L'a', L'b', L'c', L'd', L'e', L'f'};
+	unsigned char *Buff_=static_cast<unsigned char*>(Buff__);
 
-    int pin=0, pout=0;
-    const char *pos;
+    size_t pin=0, pout=0;
+    const wchar_t *pos;
     unsigned char byte;
 
     while(pout<BuffSize_)
@@ -192,16 +239,18 @@ int HEXToByte(const char *Line_, unsigned char *Buff_, int BuffSize_)
         do
         {
             if ( Line_[pin]==0 ) return pout;
-            pos=(const char*)memchr(sym,Line_[pin++],sizeof(sym));
-        } while(pos==NULL);
-        byte=((pos-sym)%16)<<4;
+			pos=static_cast<const wchar_t*>(
+				memchr(sym, Line_[pin++], sizeof(sym)));
+		} while(pos==nullptr);
+		byte=((pos-sym)%16)<<4;
 
-        // Ищем символы младшей половинки байта
-        do
-        {
-            if ( Line_[pin]==0 ) return pout;
-            pos=(const char*)memchr(sym,Line_[pin++],sizeof(sym));
-        } while(pos==NULL);
+		// Ищем символы младшей половинки байта
+		do
+		{
+			if ( Line_[pin]==0 ) return pout;
+			pos=static_cast<const wchar_t*>(
+				memchr(sym, Line_[pin++], sizeof(sym)));
+        } while(pos==nullptr);
         byte+=(pos-sym)%16;
 
         // Сохраняем сформированный байт в выходном буфере
@@ -247,26 +296,26 @@ error:
 //---------------------------------------------------------------------------
 int ResMessageBox(HWND Owner_, UINT uCaption_, UINT uMessage_, UINT Type_, DWORD LastErr_)
 {
-    char Caption[128], Message[128+2+128];
+    wchar_t Caption[128], Message[128+2+128];
     HINSTANCE HInstance;
     DWORD Error;
 
-    HInstance=::GetModuleHandle(NULL);
+    HInstance=::GetModuleHandle(nullptr);
     // Загружаем заголовок сообщения
-    if ( ::LoadString(HInstance,uCaption_,Caption,128)==0 )
-        sprintf(Caption,"<< Текст заголовка не найден ! >>");
-    // Загружаем сообщение
-    if ( ::LoadString(HInstance,uMessage_,Message,128)==0 )
-        sprintf(Message,"<< Текст сообщения не найден ! >>");
+	if ( ::LoadString(HInstance, uCaption_, Caption, 128)==0 )
+		swprintf(Caption, sizeof(Caption), L"<< Текст заголовка не найден ! >>");
+	// Загружаем сообщение
+	if ( ::LoadString(HInstance,uMessage_,Message,128)==0 )
+		swprintf(Message, sizeof(Caption), L"<< Текст сообщения не найден ! >>");
 
     if ( LastErr_!=0 )
     {
         // Добавляем пару пустых строк
-        strcat(Message,"\n\n");
+		wcscat(Message, L"\n\n");
         // Добавляем к строке сообщение об ошибке Windows
-        ::FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM,NULL,
+        ::FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM,nullptr,
             LastErr_,MAKELANGID(LANG_NEUTRAL,SUBLANG_DEFAULT),
-            (LPTSTR)(Message+strlen(Message)),128,NULL);
+            (LPTSTR)(Message+wcslen(Message)),128,nullptr);
     }
     
     // Выводим сообщение/диалог
@@ -275,102 +324,111 @@ int ResMessageBox(HWND Owner_, UINT uCaption_, UINT uMessage_, UINT Type_, DWORD
 //---------------------------------------------------------------------------
 bool WinExit(UINT uFlags)
 {
-    OSVERSIONINFO vi;
-    HANDLE Process, Token=NULL;
+	OSVERSIONINFOW vi;
+	HANDLE Process, Token=nullptr;
     LUID Luid;
     TOKEN_PRIVILEGES Privileges;
 
-    // Запрашиваем информацию о версии ОС
-    vi.dwOSVersionInfoSize=sizeof(OSVERSIONINFO);
-    if ( !GetVersionEx(&vi) ) goto error;
-    // Проверяем не WinNT-система ли и требуются ли дополнительные права на выполнение операции
-    if ( (vi.dwPlatformId==VER_PLATFORM_WIN32_NT)&&
-        (uFlags&(EWX_POWEROFF|EWX_REBOOT|EWX_SHUTDOWN)) )
+/*
+	// Запрашиваем информацию о версии ОС
+	vi.dwOSVersionInfoSize=sizeof(OSVERSIONINFO);
+	if ( !GetVersionExW(&vi) ) goto error;
+	// Проверяем не WinNT-система ли и требуются ли дополнительные права на выполнение операции
+	if ( (vi.dwPlatformId==VER_PLATFORM_WIN32_NT)&&
+		(uFlags&(EWX_POWEROFF|EWX_REBOOT|EWX_SHUTDOWN)) )
+*/
     {
         // Берем описатель процесса
         Process=::GetCurrentProcess();
         // Берем токен процесса
         if ( !::OpenProcessToken(Process,TOKEN_ADJUST_PRIVILEGES,&Token) ) goto error;
         // Запрашиваем LUID для SE_SHUTDOWN_NAME
-        if ( !::LookupPrivilegeValue(NULL,SE_SHUTDOWN_NAME,&Luid) ) goto error;
+        if ( !::LookupPrivilegeValue(nullptr,SE_SHUTDOWN_NAME,&Luid) ) goto error;
         // Устанавливаем привелегию для выполнения выхода из системы
         Privileges.PrivilegeCount=1;
         Privileges.Privileges[0].Luid=Luid;
         Privileges.Privileges[0].Attributes=SE_PRIVILEGE_ENABLED;
-        if ( !::AdjustTokenPrivileges(Token,FALSE,&Privileges,0,NULL,NULL) ) goto error;
+        if ( !::AdjustTokenPrivileges(Token,FALSE,&Privileges,0,nullptr,nullptr) ) goto error;
         //
-        ::CloseHandle(Token); Token=NULL;
+        ::CloseHandle(Token); Token=nullptr;
     }
 
     if ( !::ExitWindowsEx(uFlags,0) ) goto error;
 
-    return true;
+	return true;
 error:
-    if ( Token ) ::CloseHandle(Token);
-    return false;
+	if ( Token ) ::CloseHandle(Token);
+	return false;
 }
 //---------------------------------------------------------------------------
-void RegExecList(HKEY hKey_, LPCTSTR SubKey_, HANDLE hToken_)
+void RegExecList(HKEY hKey_, LPCWSTR SubKey_, HANDLE hToken_)
 {
-    HKEY key;
-    DWORD index, type, name_size, data_size;
-    char name[256+1], value[MAX_PATH+1];
-    LPVOID lpEnv=NULL;
-    STARTUPINFO si;
-    PROCESS_INFORMATION pi;
+	HKEY key;
+	DWORD index, type, name_size, data_size;
+	wchar_t name[256+1], value[MAX_PATH+1];
+	LPVOID lpEnv=nullptr;
 
-    // Запросим параметры среды пользователя
-    if ( (hToken_!=INVALID_HANDLE_VALUE)&&
-        (!::CreateEnvironmentBlock(&lpEnv,hToken_,FALSE)) ) return;
+	// Запросим параметры среды пользователя
+	if ( (hToken_!=INVALID_HANDLE_VALUE)&&
+		(!::CreateEnvironmentBlock(&lpEnv,hToken_,FALSE)) ) return;
 
-    // Откроем раздел реестра
-    if ( ::RegOpenKeyEx(
-            hKey_,SubKey_,0,
-            KEY_ENUMERATE_SUB_KEYS|KEY_QUERY_VALUE,
-            &key)!=ERROR_SUCCESS )
-    {
-        if ( lpEnv!=NULL ) ::DestroyEnvironmentBlock(lpEnv);
-        return;
-    }
+	// Откроем раздел реестра
+	if ( ::RegOpenKeyExW(
+			hKey_, SubKey_, 0,
+			KEY_ENUMERATE_SUB_KEYS|KEY_QUERY_VALUE,
+			&key)!=ERROR_SUCCESS )
+	{
+		if ( lpEnv!=nullptr ) ::DestroyEnvironmentBlock(lpEnv);
+		return;
+	}
 
-    index=0;
-    while(true)
-    {
-        name_size=256;
-        data_size=MAX_PATH;
+	index=0;
+	while(true)
+	{
+		name_size=256;
+		data_size=MAX_PATH;
 
-        // Получим значение очередного параметра реестра
-        if ( ::RegEnumValue(key,index,name,&name_size,NULL,
-            &type,value,&data_size)!=ERROR_SUCCESS ) break;
+		// Получим значение очередного параметра реестра
+		if ( ::RegEnumValueW(key, index, name, &name_size, nullptr,
+			&type, (BYTE*)value, &data_size)!=ERROR_SUCCESS ) break;
 
-        if ( (data_size>1)&&(type==REG_SZ) )
-        {
-            memset(&si,0,sizeof(STARTUPINFO));
-            si.cb=sizeof(STARTUPINFO);
+		if ( (data_size>1)&&(type==REG_SZ) )
+		{
+			bool result=false;
+			STARTUPINFOW si;
+			PROCESS_INFORMATION pi;
 
-            // Запустим процесс
-            if ( hToken_==INVALID_HANDLE_VALUE )
-            {
-                ::CreateProcess(
-                    NULL,value,
-                    NULL,NULL,FALSE,
-                    CREATE_DEFAULT_ERROR_MODE|NORMAL_PRIORITY_CLASS,
-                    NULL,NULL,&si,&pi);
-            } else
-            {
-                ::CreateProcessAsUser(
-                    hToken_,
-                    NULL,value,
-                    NULL,NULL,FALSE,
-                    CREATE_DEFAULT_ERROR_MODE|NORMAL_PRIORITY_CLASS|CREATE_UNICODE_ENVIRONMENT,
-                    lpEnv,NULL,&si,&pi);
-            }
+			memset(&si,0,sizeof(STARTUPINFO));
+			si.cb=sizeof(STARTUPINFO);
+
+			// Запустим процесс
+			if ( hToken_==INVALID_HANDLE_VALUE )
+			{
+				result=::CreateProcessW(
+					nullptr, value,
+					nullptr, nullptr, FALSE,
+					CREATE_DEFAULT_ERROR_MODE|NORMAL_PRIORITY_CLASS,
+					nullptr, nullptr, &si, &pi);
+			} else
+			{
+				result=::CreateProcessAsUserW(
+					hToken_,
+					nullptr, value,
+					nullptr, nullptr, FALSE,
+					CREATE_DEFAULT_ERROR_MODE|NORMAL_PRIORITY_CLASS|CREATE_UNICODE_ENVIRONMENT,
+					lpEnv, nullptr, &si, &pi);
+			}
+			if (result)
+			{
+				::CloseHandle(pi.hThread);
+				::CloseHandle(pi.hProcess);
+			}
         }
         if ( (++index)>=100 ) break;
     }
 
     ::RegCloseKey(key);
-    if ( lpEnv!=NULL ) ::DestroyEnvironmentBlock(lpEnv);
+    if ( lpEnv!=nullptr ) ::DestroyEnvironmentBlock(lpEnv);
 }
 //---------------------------------------------------------------------------
 

@@ -144,7 +144,6 @@ object FormOptions: TFormOptions
     Width = 141
     Height = 21
     Style = csDropDownList
-    ItemHeight = 13
     TabOrder = 0
     OnExit = ComboBoxLogPeriodExit
     Items.Strings = (

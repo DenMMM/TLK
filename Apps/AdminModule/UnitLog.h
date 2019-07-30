@@ -20,7 +20,7 @@ class MLog
 private:
     __int64 SystemTime;     // Системное время для синхронизации с описателями состояний компьютеров
     __int64 BeginTime;      // Время, когда лог был начат
-    std::string Directory;  // Директория для хранения файлов логов
+    std::wstring Directory;  // Директория для хранения файлов логов
     bool Opened;            // Лог был успешно открыт/начат
 //    bool Transaction;       // Флаг-не очищать буфер записей до "сброса" на диск
     MLogRecords Records;    // Буфер для записей
@@ -28,15 +28,15 @@ private:
     DWORD LastError;
 
     // Добавить в буфер событие/данные
-    void AddSimpleEvent(unsigned char Type_);
-    void AddStatesData(MStates *States_);
-    void AddTariffsData(MTariffs *Tariffs_);
-    void AddFinesData(MFines *Fines_);
-    void AddUsersData(MUsers *Users_);
-    // Записать в лог простое событие/команду
-    bool AddEvent(unsigned char Type_);
-    bool AddMode(unsigned char Type_, char Number_, bool Apply_);
-    bool AddCmd(unsigned char Type_, char Number_);
+	void AddSimpleEvent(MLogRecords::ItemType Type_);
+	void AddStatesData(MStates *States_);
+	void AddTariffsData(MTariffs *Tariffs_);
+	void AddFinesData(MFines *Fines_);
+	void AddUsersData(MUsers *Users_);
+	// Записать в лог простое событие/команду
+	bool AddEvent(MLogRecords::ItemType Type_);
+	bool AddMode(MLogRecords::ItemType Type_, char Number_, bool Apply_);
+	bool AddCmd(MLogRecords::ItemType Type_, char Number_);
     //
     bool Rename() const;
 
@@ -78,7 +78,7 @@ public:
 //    bool Transact();        
 //    bool Apply();
     // Команды, применяемые к компьютерам
-    bool AddRun(MRunTime *Time_);
+    bool AddRun(MTariffRunTimesItem *Time_);
     bool AddFine(char Number_, unsigned FineID_, short Time_);
     bool AddExchange(char From_, char To_);
     bool AddLock(char Number_, bool Apply_);
@@ -88,7 +88,7 @@ public:
     bool AddReboot(char Number_);
     bool AddShutdown(char Number_);
 
-    void SetDefault(const std::string &Dir_, unsigned Code_);
+    void SetDefault(const std::wstring &Dir_, unsigned Code_);
     void Timer(__int64 SystemTime_);
     DWORD gLastErr() const { return Records.gLastErr(); }
 

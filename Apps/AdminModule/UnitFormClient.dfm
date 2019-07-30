@@ -1,10 +1,10 @@
 object FormClient: TFormClient
   Left = 238
   Top = 174
-  Width = 690
-  Height = 437
   BorderIcons = [biSystemMenu, biMaximize]
   Caption = #1053#1072#1089#1090#1088#1086#1081#1082#1072' '#1082#1086#1084#1087#1100#1102#1090#1077#1088#1086#1074
+  ClientHeight = 401
+  ClientWidth = 674
   Color = clBtnFace
   Constraints.MinHeight = 437
   Constraints.MinWidth = 690
@@ -14,12 +14,11 @@ object FormClient: TFormClient
   Font.Name = 'MS Sans Serif'
   Font.Style = []
   OldCreateOrder = False
-  Position = poDefaultPosOnly
   OnClose = FormClose
   OnShow = FormShow
   DesignSize = (
-    682
-    410)
+    674
+    401)
   PixelsPerInch = 96
   TextHeight = 13
   object ListViewComputers: TListView
@@ -45,7 +44,6 @@ object FormClient: TFormClient
     MultiSelect = True
     ReadOnly = True
     RowSelect = True
-    SmallImages = FormMain.ImageListIcons
     TabOrder = 0
     ViewStyle = vsReport
   end
@@ -56,11 +54,14 @@ object FormClient: TFormClient
     Height = 369
     ActivePage = TabSheetGames
     Anchors = [akLeft, akTop, akRight, akBottom]
-    TabIndex = 0
     TabOrder = 1
     OnChange = PageControlChange
     object TabSheetGames: TTabSheet
       Caption = #1055#1088#1086#1075#1088#1072#1084#1084#1099
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       DesignSize = (
         557
         341)
@@ -193,6 +194,10 @@ object FormClient: TFormClient
     object TabSheetOptions: TTabSheet
       Caption = #1055#1086#1074#1077#1076#1077#1085#1080#1077' '#1082#1083#1080#1077#1085#1090#1072
       ImageIndex = 1
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       DesignSize = (
         557
         341)
@@ -290,7 +295,6 @@ object FormClient: TFormClient
         Width = 125
         Height = 21
         Style = csDropDownList
-        ItemHeight = 0
         TabOrder = 1
         OnClick = ComboBoxToEndTimeClick
       end
@@ -300,7 +304,6 @@ object FormClient: TFormClient
         Width = 125
         Height = 21
         Style = csDropDownList
-        ItemHeight = 0
         TabOrder = 2
       end
       object ComboBoxRebootWait: TComboBox
@@ -309,7 +312,6 @@ object FormClient: TFormClient
         Width = 125
         Height = 21
         Style = csDropDownList
-        ItemHeight = 0
         TabOrder = 4
         OnClick = ComboBoxRebootWaitClick
       end
@@ -319,7 +321,6 @@ object FormClient: TFormClient
         Width = 125
         Height = 21
         Style = csDropDownList
-        ItemHeight = 0
         TabOrder = 5
       end
       object CheckBoxTransp: TCheckBox
@@ -336,7 +337,6 @@ object FormClient: TFormClient
         Width = 125
         Height = 21
         Style = csDropDownList
-        ItemHeight = 0
         TabOrder = 3
         OnClick = ComboBoxMsgEndTimeClick
       end

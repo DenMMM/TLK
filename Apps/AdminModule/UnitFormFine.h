@@ -39,8 +39,8 @@ __published:	// IDE-managed Components
 private:	// User declarations
     struct MApplyFine
     {
-        MState *State;
-        MFine *Fine;
+		MStatesItem *State;
+        MFinesItem *Fine;
         int Number;
         bool Wait;
         bool Warn;

@@ -1,10 +1,11 @@
 //---------------------------------------------------------------------------
 #include <vcl.h>
-#include <string.h>
+//#include <string.h>
+#include <cwchar>
 #pragma hdrstop
 //---------------------------------------------------------------------------
+#include "UnitFormMain.h"           /// 'Shared' вынести в отдельный файл
 #include "UnitService.h"
-#include "UnitFormMain.h"
 //---------------------------------------------------------------------------
 USEFORM("UnitFormMain.cpp", FormMain);
 USEFORM("UnitFormGames.cpp", FormGames);
@@ -13,33 +14,33 @@ void ServiceInstall();
 void ServiceUninstall();
 void ServiceStart();
 //---------------------------------------------------------------------------
-WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
+int WINAPI _tWinMain(HINSTANCE, HINSTANCE, LPTSTR lpCmdLine, int)
 {
-    const char cmd_shell[]="/shell:";
-    char *cmd_HEX=NULL;
+	const wchar_t cmd_shell[]=L"/shell:";
+	wchar_t *cmd_HEX=nullptr;
 
     // Инициализируем генератор случайных чисел
     randomize();
 
-    if ( strcmpi(lpCmdLine,"/install")==0 )
-    {
-        ServiceInstall();
-        return 0;
-    } else if ( strcmpi(lpCmdLine,"/uninstall")==0 )
-    {
-        ServiceUninstall();
-        return 0;
-    } else if ( strcmpi(lpCmdLine,"/run")==0 )
-    {
+	if ( wcscmp(lpCmdLine, L"/install")==0 )
+	{
+		ServiceInstall();
+		return 0;
+	} else if ( wcscmp(lpCmdLine, L"/uninstall")==0 )
+	{
+		ServiceUninstall();
+		return 0;
+	} else if ( wcscmp(lpCmdLine, L"/run")==0 )
+	{
         ServiceStart();
         return 0;
-    } else if ( strncmpi(lpCmdLine,cmd_shell,strlen(cmd_shell))==0 )
+    } else if ( wcsncmp(lpCmdLine, cmd_shell, wcslen(cmd_shell))==0 )
     {
-        cmd_HEX=&lpCmdLine[strlen(cmd_shell)];
+        cmd_HEX=&lpCmdLine[wcslen(cmd_shell)];
     } else
     {
         // Выведем подсказку по использованию tlk.exe
-        ResMessageBox(NULL,0,5,MB_APPLMODAL|MB_OK|MB_ICONINFORMATION);
+        ResMessageBox(nullptr,0,5,MB_APPLMODAL|MB_OK|MB_ICONINFORMATION);
         return 0;
     }
 
@@ -55,7 +56,7 @@ WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, in
     ::SetProcessShutdownParameters(1,0);
     {
         // Обновим фон рабочего стола (часть функций shell'а)
-        char wlp[MAX_PATH+1];
+        wchar_t wlp[MAX_PATH+1];
         ::SystemParametersInfo(SPI_GETDESKWALLPAPER,MAX_PATH,wlp,0);
         ::SystemParametersInfo(SPI_SETDESKWALLPAPER,0,wlp,0);   /// ,SPIF_SENDCHANGE);
     }
@@ -63,10 +64,10 @@ WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, in
     try
     {
          Application->Initialize();
-         Application->Title = "TLK - Клиент";
+         Application->Title = L"TLK - Клиент";
          Application->CreateForm(__classid(TFormMain), &FormMain);
-         Application->CreateForm(__classid(TFormGames), &FormGames);
-         Application->Run();
+		Application->CreateForm(__classid(TFormGames), &FormGames);
+		Application->Run();
     }
     catch (Exception &exception)
     {
@@ -80,20 +81,20 @@ WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, in
 //---------------------------------------------------------------------------
 void ServiceInstall()
 {
-    SC_HANDLE sc_manager_handle=NULL;
-    SC_HANDLE service_handle=NULL;
-    const char cmd_run[]=" /run";
-    char file_name[MAX_PATH+1];
+    SC_HANDLE sc_manager_handle=nullptr;
+	SC_HANDLE service_handle=nullptr;
+	const wchar_t cmd_run[]=L" /run";
+	wchar_t file_name[MAX_PATH+1];
 
     // Берем имя файла с путем к нему
-    if ( ::GetModuleFileName(NULL,file_name,
-        MAX_PATH-strlen(cmd_run))==0 ) goto error;
-    // Добавляем к названию файла службы ключ " /run"
-    strcat(file_name,cmd_run);
+	if ( ::GetModuleFileName(nullptr, file_name,
+		MAX_PATH-wcslen(cmd_run))==0 ) goto error;
+	// Добавляем к названию файла службы ключ " /run"
+	wcscat(file_name, cmd_run);
 
     // Открываем менеджер служб
-    sc_manager_handle=::OpenSCManager(NULL,NULL,SC_MANAGER_CREATE_SERVICE);
-    if ( sc_manager_handle==NULL ) goto error;
+    sc_manager_handle=::OpenSCManager(nullptr,nullptr,SC_MANAGER_CREATE_SERVICE);
+    if ( sc_manager_handle==nullptr ) goto error;
     // Регистрируем службу
     service_handle=::CreateService(
         sc_manager_handle,
@@ -104,9 +105,9 @@ void ServiceInstall()
         SERVICE_AUTO_START,
         SERVICE_ERROR_NORMAL,
         file_name,
-        "UIGroup",      /// "Base" ?
-        NULL,NULL,NULL,NULL);
-    if ( service_handle==NULL ) goto error;
+        L"UIGroup",      /// "Base" ?
+        nullptr,nullptr,nullptr,nullptr);
+    if ( service_handle==nullptr ) goto error;
 
 /*
     SERVICE_FAILURE_ACTIONS sfa;
@@ -118,8 +119,8 @@ void ServiceInstall()
     sca[2]=sca[0];
 
     sfa.dwResetPeriod=24*60*60;         // сброс счетчика ошибок через сутки
-    sfa.lpRebootMsg="";
-    sfa.lpCommand="";
+	sfa.lpRebootMsg=L"";
+    sfa.lpCommand=L"";
     sfa.cActions=3;
     sfa.lpsaActions=sca;
 
@@ -134,47 +135,47 @@ void ServiceInstall()
     ::CloseServiceHandle(service_handle);
     ::CloseServiceHandle(sc_manager_handle);
 
-    ResMessageBox(NULL,0,8,MB_APPLMODAL|MB_OK|MB_ICONINFORMATION);
+    ResMessageBox(nullptr,0,8,MB_APPLMODAL|MB_OK|MB_ICONINFORMATION);
     return;
 
 error:
     DWORD LastError=::GetLastError();
-    if ( service_handle!=NULL ) ::CloseServiceHandle(service_handle);
-    if ( sc_manager_handle!=NULL ) ::CloseServiceHandle(sc_manager_handle);
-    ResMessageBox(NULL,1,6,MB_APPLMODAL|MB_OK|MB_ICONERROR,LastError);
+    if ( service_handle!=nullptr ) ::CloseServiceHandle(service_handle);
+    if ( sc_manager_handle!=nullptr ) ::CloseServiceHandle(sc_manager_handle);
+    ResMessageBox(nullptr,1,6,MB_APPLMODAL|MB_OK|MB_ICONERROR,LastError);
     return;
 }
 //---------------------------------------------------------------------------
 void ServiceUninstall()
 {
-    SC_HANDLE sc_manager_handle=NULL;
-    SC_HANDLE service_handle=NULL;
+    SC_HANDLE sc_manager_handle=nullptr;
+    SC_HANDLE service_handle=nullptr;
 
     // Открываем менеджер служб
-    sc_manager_handle=::OpenSCManager(NULL,NULL,SC_MANAGER_CREATE_SERVICE);
-    if ( sc_manager_handle==NULL ) goto error;
+    sc_manager_handle=::OpenSCManager(nullptr,nullptr,SC_MANAGER_CREATE_SERVICE);
+    if ( sc_manager_handle==nullptr ) goto error;
     // Удаляем службу
     service_handle=::OpenService(sc_manager_handle,SVC_Name,DELETE);
-    if ( service_handle==NULL ) goto error;
+    if ( service_handle==nullptr ) goto error;
     if ( !::DeleteService(service_handle) ) goto error;
     //
     ::CloseServiceHandle(service_handle);
     ::CloseServiceHandle(sc_manager_handle);
 
-    ResMessageBox(NULL,0,9,MB_APPLMODAL|MB_OK|MB_ICONINFORMATION);
+    ResMessageBox(nullptr,0,9,MB_APPLMODAL|MB_OK|MB_ICONINFORMATION);
     return;
 
 error:
     DWORD LastError=::GetLastError();
-    if ( service_handle!=NULL ) ::CloseServiceHandle(service_handle);
-    if ( sc_manager_handle!=NULL ) ::CloseServiceHandle(sc_manager_handle);
-    ResMessageBox(NULL,1,7,MB_APPLMODAL|MB_OK|MB_ICONERROR,LastError);
+    if ( service_handle!=nullptr ) ::CloseServiceHandle(service_handle);
+    if ( sc_manager_handle!=nullptr ) ::CloseServiceHandle(sc_manager_handle);
+    ResMessageBox(nullptr,1,7,MB_APPLMODAL|MB_OK|MB_ICONERROR,LastError);
     return;
 }
 //---------------------------------------------------------------------------
 void ServiceStart()
 {
-    SERVICE_TABLE_ENTRY service_table_entry[]={SVC_Name,&ServiceMain,NULL,NULL};
+    SERVICE_TABLE_ENTRY service_table_entry[]={SVC_Name,&ServiceMain,nullptr,nullptr};
     ::StartServiceCtrlDispatcher(service_table_entry);
 }
 //---------------------------------------------------------------------------

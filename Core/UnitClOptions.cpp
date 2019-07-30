@@ -5,37 +5,22 @@
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
 //---------------------------------------------------------------------------
-MClOptions::MClOptions()
+void MClOptions::SetShellUser(const std::wstring &Name_)
 {
-    *ShellUser=0;
-    ToEndTime=2;
-    MessageTime=15;
-    MsgEndTime=10;
-    RebootWait=20;
-    AutoLockTime=15;
-    Flags=0;
-}
+	if ( Name_.length()>MAX_ClUNameLen )
+	{
+		throw std::out_of_range (
+			"MClOptions::SetShellUser()\n"
+			"Длина имени превышет MAX_ClUNameLen."
+			);
+	}
 
-MClOptions::~MClOptions()
-{
-//
-}
-
-void MClOptions::SetShellUser(const char *Name_)
-{
-    if ( strlen(Name_)>MAX_ClUNameLen )
-    {
-        throw std::out_of_range (
-            "MClOptions::SetShellUser()\n"
-            "Длина имени превышет MAX_ClUNameLen."
-            );
-    }
-    strcpy(ShellUser,Name_);
+	ShellUser=Name_;
 }
 
 bool MClOptions::Copy(MClOptions *ClOptions_)
 {
-    strcpy(ShellUser,ClOptions_->ShellUser);
+	ShellUser=ClOptions_->ShellUser;
     ToEndTime=ClOptions_->ToEndTime;
     MessageTime=ClOptions_->MessageTime;
     MsgEndTime=ClOptions_->MsgEndTime;
@@ -48,8 +33,8 @@ bool MClOptions::Copy(MClOptions *ClOptions_)
 unsigned MClOptions::GetDataSize() const
 {
     return
-        strlen(ShellUser)+1+
-        sizeof(ToEndTime)+
+		sizeofLine(ShellUser)+
+		sizeof(ToEndTime)+
         sizeof(MessageTime)+
         sizeof(MsgEndTime)+
         sizeof(RebootWait)+
@@ -57,28 +42,28 @@ unsigned MClOptions::GetDataSize() const
         sizeof(Flags);
 }
 
-char *MClOptions::SetData(char *Data_) const
+void *MClOptions::SetData(void *Data_) const
 {
-    Data_=MemSetCLine(Data_,ShellUser);
-    Data_=MemSet(Data_,ToEndTime);
-    Data_=MemSet(Data_,MessageTime);
-    Data_=MemSet(Data_,MsgEndTime);
-    Data_=MemSet(Data_,RebootWait);
-    Data_=MemSet(Data_,AutoLockTime);
-    Data_=MemSet(Data_,Flags);
-    return Data_;
+	Data_=MemSetLine(Data_,ShellUser);
+	Data_=MemSet(Data_,ToEndTime);
+	Data_=MemSet(Data_,MessageTime);
+	Data_=MemSet(Data_,MsgEndTime);
+	Data_=MemSet(Data_,RebootWait);
+	Data_=MemSet(Data_,AutoLockTime);
+	Data_=MemSet(Data_,Flags);
+	return Data_;
 }
 
-const char *MClOptions::GetData(const char *Data_, const char *Limit_)
+const void *MClOptions::GetData(const void *Data_, const void *Limit_)
 {
-    return
-        (Data_=MemGetCLine(Data_,ShellUser,MAX_ClUNameLen,Limit_))!=NULL &&
-        (Data_=MemGet(Data_,&ToEndTime,Limit_))!=NULL &&
-        (Data_=MemGet(Data_,&MessageTime,Limit_))!=NULL &&
-        (Data_=MemGet(Data_,&MsgEndTime,Limit_))!=NULL &&
-        (Data_=MemGet(Data_,&RebootWait,Limit_))!=NULL &&
-        (Data_=MemGet(Data_,&AutoLockTime,Limit_))!=NULL &&
-        (Data_=MemGet(Data_,&Flags,Limit_))!=NULL
-        ? Data_: NULL;
+	return
+		(Data_=MemGetLine(Data_,ShellUser,MAX_ClUNameLen,Limit_)) &&
+		(Data_=MemGet(Data_,&ToEndTime,Limit_)) &&
+		(Data_=MemGet(Data_,&MessageTime,Limit_)) &&
+		(Data_=MemGet(Data_,&MsgEndTime,Limit_)) &&
+		(Data_=MemGet(Data_,&RebootWait,Limit_)) &&
+		(Data_=MemGet(Data_,&AutoLockTime,Limit_)) &&
+		(Data_=MemGet(Data_,&Flags,Limit_))
+		? Data_: nullptr;
 }
 //---------------------------------------------------------------------------

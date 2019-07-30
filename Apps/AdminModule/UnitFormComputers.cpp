@@ -1,6 +1,7 @@
 //---------------------------------------------------------------------------
 #include <vcl.h>
-#include <stdio.h>
+//#include <stdio.h>
+#include <cwchar>
 #pragma hdrstop
 
 #include "UnitFormComputers.h"
@@ -18,11 +19,11 @@ __fastcall TFormComputers::TFormComputers(TComponent* Owner)
 void __fastcall TFormComputers::FormShow(TObject *Sender)
 {
     // Копируем список компьютеров в буфер
-    TmpComputers.Copy(Computers);
+    TmpComputers.Copy(Computers.get());
 
     // Формируем их список
-    for ( MComputer *comp=(MComputer*)TmpComputers.gFirst();
-        comp; comp=(MComputer*)comp->gNext() )
+	for ( MComputersItem* comp=TmpComputers.gFirst();
+		comp; comp=comp->gNext() )
     {
         TListItem *item;
         item=ListViewComputers->Items->Add();
@@ -44,8 +45,8 @@ void __fastcall TFormComputers::FormClose(TObject *Sender,
 {
     // Чистим интерфейсные элементы
     ListViewComputers->Items->Clear();
-    EditNumber->Text="";
-    EditAddress->Text="";
+	EditNumber->Text=L"";
+    EditAddress->Text=L"";
     // Чистим буфер
     TmpComputers.Clear();
 }
@@ -54,20 +55,21 @@ void __fastcall TFormComputers::ListViewComputersInsert(TObject *Sender,
       TListItem *Item)
 {
     Item->ImageIndex=-1;
-    Item->SubItems->Add("");
-    Item->SubItems->Add("");
+	Item->SubItems->Add(L"");
+    Item->SubItems->Add(L"");
 }
 //---------------------------------------------------------------------------
 void __fastcall TFormComputers::ListViewComputersSelectItem(
       TObject *Sender, TListItem *Item, bool Selected)
 {
-    if ( ((TListView*)Sender)->SelCount!=1 )
+    if ( static_cast<TListView&>(*Sender).SelCount!=1 )
     {
         SetEdit(false);
         return;
     } else SetEdit(true);
 
-    MComputer *comp=(MComputer*)ListViewComputers->Selected->Data;
+	auto comp=reinterpret_cast<MComputersItem*>(
+		ListViewComputers->Selected->Data);
     EditNumber->Text=IntToStr(comp->Number);
     EditAddress->Text=comp->Address.c_str();
 }
@@ -75,8 +77,8 @@ void __fastcall TFormComputers::ListViewComputersSelectItem(
 void __fastcall TFormComputers::ListViewComputersCompare(TObject *Sender,
       TListItem *Item1, TListItem *Item2, int Data, int &Compare)
 {
-    int Number1=((MComputer*)Item1->Data)->Number,
-        Number2=((MComputer*)Item2->Data)->Number;
+	int Number1=reinterpret_cast<MComputersItem*>(Item1->Data)->Number,
+		Number2=reinterpret_cast<MComputersItem*>(Item2->Data)->Number;
     if ( Number1<Number2 ) Compare=-1;
     else if ( Number1>Number2 ) Compare=1;
     else Compare=0;
@@ -84,9 +86,9 @@ void __fastcall TFormComputers::ListViewComputersCompare(TObject *Sender,
 //---------------------------------------------------------------------------
 void __fastcall TFormComputers::EditNumberExit(TObject *Sender)
 {
-    if ( ListViewComputers->Selected==NULL ) return;
+    if ( ListViewComputers->Selected==nullptr ) return;
 
-    MComputer *comp=(MComputer*)ListViewComputers->Selected->Data;
+    auto comp=reinterpret_cast<MComputersItem*>(ListViewComputers->Selected->Data);
 
     // Пытаемся сконвертировать текстовый номер в число
     int Number;
@@ -104,11 +106,11 @@ error:
 //---------------------------------------------------------------------------
 void __fastcall TFormComputers::EditAddressExit(TObject *Sender)
 {
-    if ( ListViewComputers->Selected==NULL ) return;
+    if ( ListViewComputers->Selected==nullptr ) return;
 
     EditAddress->Text=EditAddress->Text.Trim();
-    MComputer *comp=(MComputer*)ListViewComputers->Selected->Data;
-    comp->Address=EditAddress->Text.c_str();
+    auto comp=reinterpret_cast<MComputersItem*>(ListViewComputers->Selected->Data);
+	comp->Address=EditAddress->Text.c_str();
     SetListViewComputersLine(ListViewComputers->Selected);
 }
 //---------------------------------------------------------------------------
@@ -126,7 +128,7 @@ void __fastcall TFormComputers::BitBtnNoneClick(TObject *Sender)
     for ( TListItem *item=ListViewComputers->Selected; item;
         item=ListViewComputers->GetNextItem(item,sdAll,is) )
     {
-        ((MComputer*)item->Data)->Color=color;
+        reinterpret_cast<MComputersItem*>(item->Data)->Color=color;
         SetListViewComputersLine(item);
     }
 }
@@ -138,7 +140,7 @@ void __fastcall TFormComputers::BitBtnUsedClick(TObject *Sender)
     for ( TListItem *item=ListViewComputers->Selected; item;
         item=ListViewComputers->GetNextItem(item,sdAll,is) )
     {
-        ((MComputer*)item->Data)->NotUsed=NotUsed;
+        reinterpret_cast<MComputersItem*>(item->Data)->NotUsed=NotUsed;
         SetListViewComputersLine(item);
     }
 }
@@ -152,13 +154,17 @@ void __fastcall TFormComputers::ButtonAddClick(TObject *Sender)
     }
 
     // Добавляем в буфер компьютер с номером на '1' больше, чем у выбранного
-    MComputer *comp=(MComputer*)TmpComputers.Add();
-    MComputer *selcomp=ListViewComputers->Selected==NULL?
-        NULL: (MComputer*)ListViewComputers->Selected->Data;
-    comp->Number= selcomp ? selcomp->Number+1 : 1;
-    char Address[MAX_CompAddrLen+1];
-    sprintf(Address,"192.168.1.%i",comp->Number);
-    comp->Address=Address;
+	MComputersItem* comp=TmpComputers.Add();
+	MComputersItem *selcomp=
+		ListViewComputers->Selected==nullptr?
+		nullptr:
+		reinterpret_cast<MComputersItem*>(ListViewComputers->Selected->Data);
+	comp->Number= selcomp ? selcomp->Number+1 : 1;
+
+	wchar_t Address[MAX_CompAddrLen+1];
+	swprintf(Address, sizeof(Address), L"192.168.1.%i", comp->Number);
+	comp->Address=Address;
+
     // Добавили строку в список и связали с компьютером
     TListItem *item=ListViewComputers->Items->Add();
     item->Data=comp;
@@ -166,7 +172,7 @@ void __fastcall TFormComputers::ButtonAddClick(TObject *Sender)
     SetListViewComputersLine(item);
     ListViewComputers->AlphaSort();
     ListViewComputers->ItemFocused=item;
-    ListViewComputers->Selected=NULL;
+    ListViewComputers->Selected=nullptr;
     ListViewComputers->Selected=ListViewComputers->ItemFocused;
     ActiveControl=EditNumber;
 }
@@ -179,7 +185,7 @@ void __fastcall TFormComputers::ButtonDelClick(TObject *Sender)
     while(item)
     {
         // Удаляем компьютер из буфера
-        TmpComputers.Del((MComputer*)item->Data);
+        TmpComputers.Del(reinterpret_cast<MComputersItem*>(item->Data));
         // Удаляем строку из списка
         next=ListViewComputers->GetNextItem(item,sdAll,is);
         item->Delete();
@@ -202,10 +208,10 @@ void __fastcall TFormComputers::ButtonSaveClick(TObject *Sender)
     }
     // Останавливаем сетевые операции
     Sync->Stop();
-    if ( States->Update(Computers) )
+    if ( States->Update(Computers.get()) )
     {
         // Запись в логах
-        if ( !Log->AddComputers(States) )
+        if ( !Log->AddComputers(States.get()) )
         {
             // Настройки сохранили, но без отображения их в логе работать не дадим
             ShellState->State|=mssErrorLog|mssErrorConfig; FormMain->SetShell();
@@ -219,7 +225,7 @@ void __fastcall TFormComputers::ButtonSaveClick(TObject *Sender)
         }
     }
     //
-    Sync->Associate(States,Computers);
+    Sync->Associate(States.get(), Computers.get());
     // Обновляем индикатор сетевой активности и список компьютеров в главном окне
     FormMain->ProgressBarNetProcess->Max=Sync->gPCountMax();
     FormMain->UpdateListViewComputers(true);
@@ -241,7 +247,7 @@ void TFormComputers::SetEdit(bool Edit_)
 //---------------------------------------------------------------------------
 void TFormComputers::SetListViewComputersLine(TListItem *Item_)
 {
-    MComputer *comp=(MComputer*)Item_->Data;
+    auto comp=reinterpret_cast<MComputersItem*>(Item_->Data);
     TStrings *SubItems=Item_->SubItems;
 
     Item_->SubItemImages[0]=FormMain->GetCompColorIcon(comp);

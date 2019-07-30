@@ -18,42 +18,42 @@ void __fastcall TFormAuth::FormShow(TObject *Sender)
 {
     Auth->GetKey(TmpKey,sizeof(TmpKey));
     // Переводим BYTE в HEX-строку
-    ByteToHEX(TmpKey,sizeof(TmpKey),HexBuffer,sizeof(HexBuffer),' ');
-    // Подаем на редактирование
+	ByteToHEX(TmpKey, sizeof(TmpKey), HexBuffer, sizeof(HexBuffer), L' ');
+	// Подаем на редактирование
     MemoHEX->Lines->SetText(HexBuffer);
 
     SaveDialog->Filter=
-        TEXT("Файлы реестра Windows(*.reg)|*.reg|")
-        TEXT("Все файлы (*.*)|*.*");
-    SaveDialog->DefaultExt="REG";
+		L"Файлы реестра Windows(*.reg)|*.reg|"
+		L"Все файлы (*.*)|*.*";
+	SaveDialog->DefaultExt=L"REG";
 }
 //---------------------------------------------------------------------------
 void __fastcall TFormAuth::MemoHEXKeyPress(TObject *Sender, char &Key)
 {
-    char ku[]="ABCDEF0123456789";
-    char kl[]="abcdef";
-    char *pos, *text;
-    unsigned curs;
-    TMemo *Memo=(TMemo*)Sender;
+	TMemo *const Memo=&dynamic_cast<TMemo&>(*Sender);
+	const wchar_t ku[]=L"ABCDEF0123456789";
+	const wchar_t kl[]=L"abcdef";
+	wchar_t *pos, *text;
+	unsigned curs;
 
     if ( Memo->SelLength>1 ) goto nokey;
 
-    pos=strchr(kl,Key);
-    if ( pos!=NULL ) Key=ku[pos-kl];
+    pos=wcschr(kl,Key);
+    if ( pos!=nullptr ) Key=ku[pos-kl];
     else
     {
-        pos=strchr(ku,Key);
-        if ( pos==NULL ) goto nokey;
+		pos=wcschr(ku,Key);
+        if ( pos==nullptr ) goto nokey;
     }
     Memo->SelLength=1;
 
     curs=Memo->SelStart;
     text=Memo->Lines->GetText();
-    if ( (text[curs]!=' ')&&
-        (text[curs]!='\r')&&
-        (text[curs]!='\n') ) return;
+	if ( (text[curs]!=L' ')&&
+		(text[curs]!=L'\r')&&
+        (text[curs]!=L'\n') ) return;
 
-    if ( (curs+1)<strlen(text) ) Memo->SelStart++;
+    if ( (curs+1)<wcslen(text) ) Memo->SelStart++;
 
 nokey:
     Key=0;
@@ -102,7 +102,7 @@ void __fastcall TFormAuth::ButtonOKClick(TObject *Sender)
 void __fastcall TFormAuth::ButtonNewClick(TObject *Sender)
 {
     // Генерируем ключ
-    if ( !TimeRand(TmpKey,sizeof(TmpKey)) ) return;
+    if ( !TimeRand(TmpKey, sizeof(TmpKey)) ) return;
     // Переводим BYTE в HEX-строку
     ByteToHEX(TmpKey,sizeof(TmpKey),HexBuffer,sizeof(HexBuffer),' ');
     // Подаем на редактирование
@@ -113,12 +113,14 @@ void __fastcall TFormAuth::ButtonSaveClick(TObject *Sender)
 {
     if ( !SaveDialog->Execute() ) return;
 
-    TmpAuth.SetKey(TmpKey,sizeof(TmpKey));
-    if ( !TmpAuth.SaveAsReg(SaveDialog->FileName.c_str(),
-            HKEY_LOCAL_MACHINE,
-            "Software\\MMM Groups\\TLK\\3.0\\Client",
-            "Auth",ENC_Code) )
-        ResMessageBox(Handle,1,33,MB_APPLMODAL|MB_OK|MB_ICONERROR,Auth->gLastErr());
+	TmpAuth.SetKey(TmpKey, sizeof(TmpKey));
+	if ( !TmpAuth.SaveAsReg(
+			SaveDialog->FileName.c_str(),
+			HKEY_LOCAL_MACHINE,
+			L"Software\\MMM Groups\\TLK\\3.0\\Client",
+			L"Auth",
+			ENC_Code) )
+		ResMessageBox(Handle, 1, 33, MB_APPLMODAL|MB_OK|MB_ICONERROR, Auth->gLastErr());
 }
 //---------------------------------------------------------------------------
 

@@ -1,17 +1,16 @@
 //---------------------------------------------------------------------------
-
 #include <vcl.h>
 #pragma hdrstop
 USEFORM("UnitFormMain.cpp", FormMain);
 USEFORM("UnitFormEvents.cpp", FormEvents);
 USEFORM("UnitFormUsersUpTime.cpp", FormUsersUpTime);
 //---------------------------------------------------------------------------
-WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
+int WINAPI _tWinMain(HINSTANCE, HINSTANCE, LPTSTR lpCmdLine, int)
 {
-    try
-    {
-         Application->Initialize();
-         Application->Title = "TLK - Просмотр логов";
+	try
+	{
+		 Application->Initialize();
+         Application->Title = L"TLK - Просмотр логов";
          Application->CreateForm(__classid(TFormMain), &FormMain);
          Application->Run();
     }

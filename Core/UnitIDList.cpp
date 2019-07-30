@@ -5,15 +5,15 @@
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
 //---------------------------------------------------------------------------
-unsigned MIDList::FirstID()
+unsigned MIDList::FirstUUID()
 {
-    __int64 time;
-    unsigned id;
+	__int64 time;
+	unsigned id;
 
-    if ( !GetLocalTimeInt64(&time) )
-    {
-        throw std::runtime_error (
-            "MIDList::FirstID()"
+	if ( !GetLocalTimeInt64(&time) )
+	{
+		throw std::runtime_error (
+            "MIDList::FirstUUID()"
             "Ќе удалось запросить системное врем€. √енераци€ уникальных ID не возможна."
             );
     }
@@ -26,48 +26,48 @@ unsigned MIDList::FirstID()
     return id;
 }
 
-unsigned MIDList::NextID(unsigned LastID_)
+unsigned MIDList::NextUUID(unsigned LastUUID_)
 {
     // ѕеребираем ID (пропуска€ '0') пока не найдем свободный
-    do { if ( (++LastID_)==0 ) continue; }
-    while ( SrchID(LastID_)!=NULL );
+	do { if ( (++LastUUID_)==0 ) continue; }
+    while ( SrchUUID(LastUUID_)!=nullptr );
 
-    return LastID_;
+    return LastUUID_;
 }
 
-MIDListItem *MIDList::SrchID(unsigned ID_) const
+MIDListItem *MIDList::SrchUUID(unsigned UUID_) const
 {
-    MIDListItem *Item=(MIDListItem*)gFirst();
+	MIDListItem *Item=gFirst();
 
-    while(Item)
-    {
-        if ( Item->ItemID==ID_ ) break;
-        Item=(MIDListItem*)Item->gNext();
-    }
+	while(Item)
+	{
+		if ( Item->UUID==UUID_ ) break;
+		Item=Item->gNext();
+	}
 
-    return Item;
+	return Item;
 }
 
-void MIDList::SetIDs()
+void MIDList::SetUUIDs()
 {
-    unsigned id;
+	unsigned uuid;
 
-    // ≈сли еще не задавали ID, генерируем начальное значенение
-    id=(LastID!=0)? LastID: FirstID();
+	// ≈сли еще не задавали ID, генерируем начальное значенение
+	uuid=(LastUUID!=0)? LastUUID: FirstUUID();
 
-    // ѕроходим список и задаем ID где их нет
-    MIDListItem *Item=(MIDListItem*)gFirst();
-    while(Item)
-    {
-        if ( Item->ItemID==0 )
-        {
-            id=NextID(id);
-            Item->ItemID=id;
-        }
-        Item=(MIDListItem*)Item->gNext();
-    }
+	// ѕроходим список и задаем ID где их нет
+	MIDListItem *Item=gFirst();
+	while(Item)
+	{
+		if ( Item->UUID==0 )
+		{
+			uuid=NextUUID(uuid);
+			Item->UUID=uuid;
+		}
+		Item=Item->gNext();
+	}
 
-    LastID=id;
+	LastUUID=uuid;
 }
 //---------------------------------------------------------------------------
 

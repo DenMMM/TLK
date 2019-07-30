@@ -2,20 +2,20 @@
 #ifndef UnitTariffsH
 #define UnitTariffsH
 //---------------------------------------------------------------------------
-class MRunTime;
-class MRunTimes;
-class MTariffTime;
-class MTariffTimes;
-class MTariff;
-class MTariffs;
-class MTariffInfo;          /// только для TFormRun
-class MTariffsInfo;         /// больше нигде не используются
-//---------------------------------------------------------------------------
 #include <string>
-//---------------------------------------------------------------------------
+
 #include "UnitComputers.h"
 #include "UnitIDList.h"
 #include "UnitCommon.h"
+//---------------------------------------------------------------------------
+class MTariffRunTimesItem;
+class MTariffRunTimes;
+class MTariffTimesItem;
+class MTariffTimes;
+class MTariffsInfoItem;
+class MTariffsInfo;
+class MTariffsItem;
+class MTariffs;
 //---------------------------------------------------------------------------
 #define MAX_Tariffs             30
 #define MAX_TariffTimes         20
@@ -42,166 +42,198 @@ class MTariffsInfo;         /// больше нигде не используются
 //---------------------------------------------------------------------------
 //#define Cost_Precision  0.50
 //---------------------------------------------------------------------------
-class MRunTime:public MListItem
+class MTariffRunTimesItem:
+	public MListItem::Simple <
+		MListItem::Proxy <MListItem, MTariffRunTimesItem>,
+		MTariffRunTimesItem>
 {
 public:
-    unsigned TariffID;      // ID-номер тарифа
-    char Number;            // Номер компьютера
-    __int64 StartTime;      // Время начала работы
-    char Type;              // =
-    short BeginTime;        // =    Информация о пакете
-    short EndTime;          // =    и время почасовой работы
-    short SizeTime;         // =
-    short WorkTime;         // Сколько времени реально возможно работать по тарифу и его пакету
-    short MaxTime;          // Ограничение на максимальное время работы (задается перед расчетом)
-    double Cost;            // Стоимость работы на компьютере в течение 'WorkTime'
+	unsigned TariffID;      // ID-номер тарифа
+	char Number;            // Номер компьютера
+	__int64 StartTime;      // Время начала работы
+	char Type;              // =
+	short BeginTime;        // =    Информация о пакете
+	short EndTime;          // =    и время почасовой работы
+	short SizeTime;         // =
+	short WorkTime;         // Сколько времени реально возможно работать по тарифу и его пакету
+	short MaxTime;          // Ограничение на максимальное время работы (задается перед расчетом)
+	double Cost;            // Стоимость работы на компьютере в течение 'WorkTime'
 
-    void Copy(const MListItem *SrcItem_);
+	virtual void Copy(const MListItem *SrcItem_) override;
 
-    MRunTime();
-    ~MRunTime();
+	MTariffRunTimesItem():
+		TariffID(0),
+		Number(0),
+		StartTime(0),
+		Type(mttUndefined),
+		BeginTime(0),
+		EndTime(0),
+		SizeTime(0),
+		WorkTime(0),
+			MaxTime(0),
+			Cost(0.)
+	{
+	}
+
+	virtual ~MTariffRunTimesItem()
+	{
+	}
+};
+
+class MTariffRunTimes:
+	public MList::Simple <MList, MTariffRunTimes, MTariffRunTimesItem>
+{
+public:
+	MTariffRunTimes() {}
+	~MTariffRunTimes() {}
 };
 //---------------------------------------------------------------------------
-class MRunTimes:public MList
+class MTariffTimesItem:
+	public MSLListItem::Simple <
+		MSLListItem::Proxy <MSLListItem, MTariffTimesItem>,
+		MTariffTimesItem>
 {
 private:
-    MListItem *item_new(unsigned char TypeID_) const { return (MListItem*)new MRunTime; }
-    void item_del(MListItem *Item_) const { delete (MRunTime*)Item_; }
+	// Функции механизма сохранения/загрузки данных
+	virtual unsigned GetDataSize() const override;
+	virtual void *SetData(void *Data_) const override;
+	virtual const void *GetData(const void *Data_, const void *Limit_) override;
 
 public:
-    MRunTimes() {}
-    ~MRunTimes() { Clear(); }
+	char Type;              // Тип записи: почасовой, пакет, "плавающий" пакет
+	short BeginTime;        // Время начала действия тарифа в минутах с начала суток
+	short EndTime;          // Время окончания действия тарифа в минутах с начала суток
+	short SizeTime;         // Длительность по времени тарифа в минутах
+	double Cost;            // Стоимость
+
+	int MaxWorkTime(int Time_) const;
+	virtual void Copy(const MListItem *SrcItem_) override;
+
+	MTariffTimesItem():
+		Type(mttHours),
+		BeginTime(0),
+		EndTime(24*60),
+		SizeTime(0),
+		Cost(0.)
+	{
+	}
+
+	virtual ~MTariffTimesItem()
+	{
+	}
+};
+
+class MTariffTimes:
+	public MSLList::Simple <MSLList, MTariffTimes, MTariffTimesItem>
+{
+public:
+	MTariffTimes() {}
+	~MTariffTimes() {}
 };
 //---------------------------------------------------------------------------
-class MTariffTime:public MSLListItem
+class MTariffsInfoItem:
+	public MListItem::Simple <
+		MListItem::Proxy <MListItem, MTariffsInfoItem>,
+		MTariffsInfoItem>
+{
+public:
+	unsigned ID;
+	std::wstring Name;
+
+	virtual void Copy(const MListItem *SrcItem_) override;
+
+	MTariffsInfoItem(): ID(0) {}
+	virtual ~MTariffsInfoItem() {}
+};
+
+class MTariffsInfo:
+	public MList::Simple <MList, MTariffsInfo, MTariffsInfoItem>
+{
+public:
+	bool Copy(MListItem *SrcItem_);
+	MTariffsInfoItem *Search(unsigned ID_) const;
+
+	MTariffsInfo() {}
+	~MTariffsInfo() {}
+};
+//---------------------------------------------------------------------------
+class MTariffsItem:
+	public MIDListItem::Simple <
+		MIDListItem::Proxy <MIDListItem, MTariffsItem>,
+		MTariffsItem>
 {
 private:
-    // Функции механизма сохранения/загрузки данных
-    unsigned GetDataSize() const;
-    char *SetData(char *Data_) const;
-    const char *GetData(const char *Data_, const char *Limit_);
+	// Функции механизма сохранения/загрузки данных
+	unsigned GetDataSize() const override;
+	void *SetData(void *Data_) const override;
+	const void *GetData(const void *Data_, const void *Limit_) override;
+
+	void CostPacket(MTariffRunTimesItem *RunTime_) const;
+	void CostFlyPacket(MTariffRunTimesItem *RunTime_) const;
+	void CostHours(MTariffRunTimesItem *RunTime_) const;
+
+	char CompsCnt;                      // Число компьютеров, к которым применим тариф
+	char Comps[MAX_Comps];              // Их номера
 
 public:
-    char Type;              // Тип записи: почасовой, пакет, "плавающий" пакет
-    short BeginTime;        // Время начала действия тарифа в минутах с начала суток
-    short EndTime;          // Время окончания действия тарифа в минутах с начала суток
-    short SizeTime;         // Длительность по времени тарифа в минутах
-    double Cost;            // Стоимость
+	std::wstring Name;        			// Название тарифа
+	unsigned Programs;                  // Группы программ для запуска
+	bool Reboot;                        // Пререзагружать компьютер после запуска
+	MTariffTimes Times;					// Типы тарифа по времени
 
-    int MaxWorkTime(int Time_) const;
-    void Copy(const MListItem *SrcItem_);
+	bool SetComps(char *Comps_, int Count_);
+	// Проверяет есть ли для заданного времени пакеты по тарифу
+	bool CheckForTime(__int64 &Time_) const;
+	// Проверяет применим ли тариф к компьютеру
+	bool CheckForComp(char Num_) const;
+	//
+	void Cost(MTariffRunTimesItem *RunTime_, double Prec_) const;
+	void GetInfo(MTariffsInfoItem *Info_) const;
+	void GetRunTimes(__int64 &Time_, MTariffRunTimes *RunTimes_) const;
 
-    MTariffTime();
-    ~MTariffTime();
+	void Copy(const MListItem *SrcItem_) override;
+
+	// Поддержка логов
+	struct LogData
+	{
+		unsigned UUID;            		// ID-номер тарифа
+		std::wstring Name;       		// Название тарифа
+
+		LogData &operator=(const MTariffsItem &Tariff_)
+		{
+			UUID=Tariff_.UUID;
+			Name=Tariff_.Name;
+			return *this;
+		}
+	};
+
+	MTariffsItem &operator=(const LogData &Data_)
+	{
+		UUID=Data_.UUID;
+		Name=Data_.Name;
+		return *this;
+	}
+
+	MTariffsItem():
+		Programs(0),
+		Reboot(false),
+		CompsCnt(0)
+	{
+	}
+
+	virtual ~MTariffsItem()
+	{
+	}
 };
-//---------------------------------------------------------------------------
-class MTariffTimes:public MSLList
-{
-private:
-    MListItem *item_new(unsigned char TypeID_) const { return (MListItem*)new MTariffTime; }
-    void item_del(MListItem *Item_) const { delete (MTariffTime*)Item_; }
 
-public:
-    MTariffTimes() {}
-    ~MTariffTimes() { Clear(); }
-};
-//---------------------------------------------------------------------------
-class MTariffInfo:public MListItem
+class MTariffs:
+	public MIDList::Simple <MIDList, MTariffs, MTariffsItem>
 {
 public:
-    unsigned ID;
-    std::string Name;
+	void GetForTime(__int64 &Time_, MTariffsInfo *TariffsInfo_) const;
 
-    void Copy(const MListItem *SrcItem_);
-
-    MTariffInfo();
-    ~MTariffInfo();
-};
-//---------------------------------------------------------------------------
-class MTariffsInfo:public MList
-{
-private:
-    MListItem *item_new(unsigned char TypeID_) const { return (MListItem*)new MTariffInfo; }
-    void item_del(MListItem *Item_) const { delete (MTariffInfo*)Item_; }
-
-public:
-    bool Copy(MListItem *SrcItem_);
-    MTariffInfo *Search(unsigned ID_) const;
-
-    MTariffsInfo() {}
-    ~MTariffsInfo() { Clear(); }
-};
-//---------------------------------------------------------------------------
-class MTariff:public MIDListItem
-{
-private:
-    // Функции механизма сохранения/загрузки данных
-    unsigned GetDataSize() const;
-    char *SetData(char *Data_) const;
-    const char *GetData(const char *Data_, const char *Limit_);
-
-    void CostPacket(MRunTime *RunTime_) const;
-    void CostFlyPacket(MRunTime *RunTime_) const;
-    void CostHours(MRunTime *RunTime_) const;
-
-    char CompsCnt;                      // Число компьютеров, к которым применим тариф
-    char Comps[MAX_Comps];              // Их номера
-
-public:
-    std::string Name;                   // Название тарифа
-    unsigned Programs;                  // Группы программ для запуска
-    bool Reboot;                        // Пререзагружать компьютер после запуска
-    MTariffTimes Times;                 // Типы тарифа по времени
-
-    bool SetComps(char *Comps_, int Count_);
-    // Проверяет есть ли для заданного времени пакеты по тарифу
-    bool CheckForTime(__int64 &Time_) const;
-    // Проверяет применим ли тариф к компьютеру
-    bool CheckForComp(char Num_) const;
-    //
-    bool GetRunTimes(__int64 &Time_, MRunTimes *RunTimes_) const;
-    void Cost(MRunTime *RunTime_, double Prec_) const;
-    bool GetInfo(MTariffInfo *Info_) const;
-
-    void Copy(const MListItem *SrcItem_);
-
-    // Поддержка логов
-    struct LogData
-    {
-        unsigned ID;            // ID-номер тарифа
-        std::string Name;       // Название тарифа
-
-        LogData &operator=(const MTariff &Tariff_)
-        {
-            ID=Tariff_.ItemID;
-            Name=Tariff_.Name;
-            return *this;
-        }
-    };
-    friend LogData;             // Нужен доступ к ItemID
-
-    MTariff &operator=(const LogData &Data_)
-    {
-        ItemID=Data_.ID;
-        Name=Data_.Name;
-        return *this;
-    }
-
-    MTariff();
-    ~MTariff();
-};
-//---------------------------------------------------------------------------
-class MTariffs:public MIDList
-{
-private:
-    MListItem *item_new(unsigned char TypeID_) const { return (MListItem*)new MTariff; }
-    void item_del(MListItem *Item_) const { delete (MTariff*)Item_; }
-
-public:
-    void GetForTime(__int64 &Time_, MTariffsInfo *TariffsInfo_) const;
-
-    MTariffs() {}
-    ~MTariffs() { Clear(); }
+	MTariffs() {}
+	~MTariffs() {}
 };
 //---------------------------------------------------------------------------
 #endif

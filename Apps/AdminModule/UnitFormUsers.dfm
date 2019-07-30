@@ -73,7 +73,6 @@ object FormUsers: TFormUsers
     MultiSelect = True
     ReadOnly = True
     RowSelect = True
-    SmallImages = FormMain.ImageListIcons
     SortType = stText
     TabOrder = 0
     ViewStyle = vsReport
@@ -148,8 +147,6 @@ object FormUsers: TFormUsers
     Width = 57
     Height = 21
     Caption = #1044#1072
-    TabOrder = 2
-    OnClick = BitBtnActiveClick
     Glyph.Data = {
       42020000424D4202000000000000420000002800000010000000100000000100
       1000030000000002000000000000000000000000000000000000007C0000E003
@@ -170,6 +167,8 @@ object FormUsers: TFormUsers
       1F7C1F7C1F7C1F7C1F7C1F7C1F7CEC4F883A473267372633A4211F7C1F7C1F7C
       1F7C1F7C1F7C1F7C1F7C1F7C1F7C1F7CEB4BE943262EE5251F7C1F7C1F7C1F7C
       1F7C1F7C1F7C}
+    TabOrder = 2
+    OnClick = BitBtnActiveClick
   end
   object BitBtnInactive: TBitBtn
     Left = 358
@@ -177,8 +176,6 @@ object FormUsers: TFormUsers
     Width = 57
     Height = 21
     Caption = #1053#1077#1090
-    TabOrder = 3
-    OnClick = BitBtnActiveClick
     Glyph.Data = {
       42020000424D4202000000000000420000002800000010000000100000000100
       1000030000000002000000000000000000000000000000000000007C0000E003
@@ -199,6 +196,8 @@ object FormUsers: TFormUsers
       1F7C1F7C1F7C1F7C1F7C1F7C1F7C1F7C1F7C117EAE6D0839C7301F7C1F7C1F7C
       1F7C1F7C1F7C1F7C1F7C1F7C1F7C1F7C1F7C1F7C1F7C1F7C1F7C1F7C1F7C1F7C
       1F7C1F7C1F7C}
+    TabOrder = 3
+    OnClick = BitBtnActiveClick
   end
   object ButtonPassword: TButton
     Left = 430

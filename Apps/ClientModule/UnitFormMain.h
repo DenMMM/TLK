@@ -59,7 +59,7 @@ private:	// User declarations
     unsigned TranspVer;
     bool ConfigMode;
     unsigned ConfigModeVer;
-    AnsiString ExePath;
+    UnicodeString ExePath;
 
     void SetTransp(bool Transp_);
     void SharedProcess();

@@ -6,163 +6,210 @@
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
 //---------------------------------------------------------------------------
-bool ProcessComputersState(MLogRecord *Position_,
-    MStates *States_, MTariffs *Tariffs_)
+bool ProcessComputersState(MLogRecordsItem *Position_,
+	MStates *States_, MTariffs *Tariffs_)
 {
-    MLogRecord *Record;
-    MLogRecordDataStates *rcdds;
-    MLogRecordRun *rcdr;
-    MLogRecordFine *rcdf;
-    MLogRecordExchange *rcde;
-    MLogRecordLock *rcdl;
-    MLogRecordPause *rcdp;
-    MLogRecordOpen *rcdo;
-    MLogRecordDataTariffs *rcddtrf;
-    MLogRecordDataFines *rcddfn;
-    MLogRecordDataUsers *rcddusr;
-    MState *state, *state2;
-    MTariff *tariff;
-    MFine *fine;
-    MRunTime runtime;
+	MLogRecordsItem *Record;
+	MLogRecords::DataStates *rcdds;
+	MLogRecords::CompRun *rcdr;
+	MLogRecords::CompFine *rcdf;
+	MLogRecords::CompExchange *rcde;
+	MLogRecords::ModeLock *rcdl;
+	MLogRecords::ModePause *rcdp;
+	MLogRecords::ModeOpen *rcdo;
+	MLogRecords::DataTariffs *rcddtrf;
+	MLogRecords::DataFines *rcddfn;
+	MLogRecords::DataUsers *rcddusr;
+	MStatesItem *state, *state2;
+	MTariffsItem *tariff;
+	MFinesItem *fine;
+    MTariffRunTimesItem runtime;
 
     States_->Clear();
     Tariffs_->Clear();
     // Ищем назад по логу ближайшие данные по состоянию компьютеров
     Record=Position_;
-    while(Record&&(Record->gTypeID()!=mlrDataStates))
-        Record=(MLogRecord*)Record->gPrev();
-    if ( Record==NULL ) goto error;
+	while(
+		Record &&
+		(Record->gTypeID()!=MLogRecords::DataStates::TypeID)
+		) Record=Record->gPrev();
+    if ( Record==nullptr ) goto error;
     // Заполняем таблицу состояний начальными данными
-    rcdds=(MLogRecordDataStates*)Record;
-    for ( unsigned i=0; i<rcdds->States.Count(); i++ )
-    {
-        if ( (state=(MState*)States_->Add())==NULL ) goto error;
-        *state=rcdds->States[i];
-    }
-    // Начинаем сбор данных за прошедшее время
-    while(Record!=Position_)
-    {
-        Record=(MLogRecord*)Record->gNext();
+	rcdds=dynamic_cast<MLogRecords::DataStates*>(Record);
+	for ( size_t i=0; i<rcdds->States.Count(); i++ )
+	{
+		if ( (state=States_->Add())==nullptr ) goto error;
+		*state=rcdds->States[i];
+	}
+	// Начинаем сбор данных за прошедшее время
+	while(Record!=Position_)
+	{
+		Record=Record->gNext();
 
-        switch(Record->gTypeID())
-        {
-            case mlrRun:
-                rcdr=(MLogRecordRun*)Record;
-                if ( (state=States_->Search(rcdr->Number))==NULL ) goto error;
-                if ( (tariff=(MTariff*)Tariffs_->SrchID(rcdr->Tariff))==NULL ) goto error;
-                memset(&runtime,0,sizeof(runtime));
-                runtime.WorkTime=rcdr->WorkTime;
-                state->Timer(rcdr->SystemTime);
-                if ( !state->CmdRun(tariff,&runtime,false) ) goto error;
-                break;
-            case mlrFine:
-                rcdf=(MLogRecordFine*)Record;
-                if ( (state=States_->Search(rcdf->Number))==NULL ) goto error;
-//                if ( (fine=Fines->Search(rcdf->Fine))==NULL ) goto error;
-                state->Timer(rcdf->SystemTime);
-                if ( !state->CmdFine(rcdf->Time,false) ) goto error;
-                break;
-            case mlrExchange:
-                rcde=(MLogRecordExchange*)Record;
-                if ( (state=States_->Search(rcde->From))==NULL ) goto error;
-                if ( (state2=States_->Search(rcde->To))==NULL ) goto error;
-                state->Timer(rcde->SystemTime);
-                state2->Timer(rcde->SystemTime);
-                if ( !state->CmdExchange(state2,false) ) goto error;
-                break;
-            case mlrLock:
-                rcdl=(MLogRecordLock*)Record;
-                if ( (state=States_->Search(rcdl->Number))==NULL ) goto error;
-                state->Timer(rcdl->SystemTime);
-                state->CmdLock(rcdl->Apply,false);
-                break;
-            case mlrPause:
-                rcdp=(MLogRecordPause*)Record;
-                if ( (state=States_->Search(rcdp->Number))==NULL ) goto error;
-                state->Timer(rcdp->SystemTime);
-                state->CmdPause(rcdp->Apply,false);
-                break;
-            case mlrOpen:
-                rcdo=(MLogRecordOpen*)Record;
-                if ( (state=States_->Search(rcdo->Number))==NULL ) goto error;
-                state->Timer(rcdo->SystemTime);
-                state->CmdOpen(rcdo->Apply,false);
-                break;
-            case mlrDataTariffs:
-                rcddtrf=(MLogRecordDataTariffs*)Record;
-                Tariffs_->Clear();
-                for ( unsigned i=0; i<rcddtrf->Tariffs.Count(); i++ )
-                {
-                    tariff=(MTariff*)Tariffs_->Add();
-                    *tariff=rcddtrf->Tariffs[i];
-                }
-                break;
-            default: break;
+		switch(Record->gTypeID())
+		{
+			case MLogRecords::CompRun::TypeID:
+				rcdr=static_cast<MLogRecords::CompRun*>(Record);
+
+				state=States_->Search(rcdr->Number); if ( state==nullptr ) goto error;
+				tariff=Tariffs_->SrchUUID(rcdr->Tariff); if ( tariff==nullptr ) goto error;
+
+///				memset(&runtime,0,sizeof(runtime));
+				runtime.TariffID=0;
+				runtime.Number=0;
+				runtime.StartTime=0;
+				runtime.Type=0;
+				runtime.BeginTime=0;
+				runtime.EndTime=0;
+				runtime.SizeTime=0;
+				runtime.WorkTime=0;
+				runtime.MaxTime=0;
+				runtime.Cost=0.;
+
+				runtime.WorkTime=rcdr->WorkTime;
+
+				state->Timer(rcdr->SystemTime);
+				if ( !state->CmdRun(tariff,&runtime,false) ) goto error;
+				break;
+
+			case MLogRecords::CompFine::TypeID:
+				rcdf=static_cast<MLogRecords::CompFine*>(Record);
+
+				state=States_->Search(rcdf->Number); if ( state==nullptr ) goto error;
+//                if ( (fine=Fines->Search(rcdf->Fine))==nullptr ) goto error;
+				state->Timer(rcdf->SystemTime);
+				if ( !state->CmdFine(rcdf->Time,false) ) goto error;
+				break;
+
+			case MLogRecords::CompExchange::TypeID:
+				rcde=static_cast<MLogRecords::CompExchange*>(Record);
+
+				state=States_->Search(rcde->From); if ( state==nullptr ) goto error;
+				state2=States_->Search(rcde->To); if ( state2==nullptr ) goto error;
+
+				state->Timer(rcde->SystemTime);
+				state2->Timer(rcde->SystemTime);
+				if ( !state->CmdExchange(state2,false) ) goto error;
+				break;
+
+			case MLogRecords::ModeLock::TypeID:
+				rcdl=static_cast<MLogRecords::ModeLock*>(Record);
+
+				state=States_->Search(rcdl->Number); if ( state==nullptr ) goto error;
+
+				state->Timer(rcdl->SystemTime);
+				state->CmdLock(rcdl->Apply,false);
+				break;
+
+			case MLogRecords::ModePause::TypeID:
+				rcdp=static_cast<MLogRecords::ModePause*>(Record);
+
+				state=States_->Search(rcdp->Number); if ( state==nullptr ) goto error;
+
+				state->Timer(rcdp->SystemTime);
+				state->CmdPause(rcdp->Apply,false);
+				break;
+
+			case MLogRecords::ModeOpen::TypeID:
+				rcdo=static_cast<MLogRecords::ModeOpen*>(Record);
+
+				state=States_->Search(rcdo->Number); if ( state==nullptr ) goto error;
+
+				state->Timer(rcdo->SystemTime);
+				state->CmdOpen(rcdo->Apply,false);
+				break;
+
+			case MLogRecords::DataTariffs::TypeID:
+				rcddtrf=static_cast<MLogRecords::DataTariffs*>(Record);
+
+				Tariffs_->Clear();
+				for ( size_t i=0; i<rcddtrf->Items.Count(); i++ )
+				{
+					tariff=Tariffs_->Add();
+					*tariff=rcddtrf->Items[i];
+				}
+				break;
+
+			default: break;
         }
     }
     // Обновляем состояния
-    States_->Timer(((MLogRecordEvent*)Record)->SystemTime);
+	States_->Timer(Record->SystemTime);
 
     return true;
 error:
     return false;
 }
 //---------------------------------------------------------------------------
-bool ProcessUsersUpTime(MLogRecord *Begin_, MLogRecord *End_,
+bool ProcessUsersUpTime(MLogRecordsItem *Begin_, MLogRecordsItem *End_,
     MUsers *Users_, MUsersUpTime *UpTimes_)
 {
-    MLogRecordDataUsers *rcddusr;
-    MUser *usr;
+    MLogRecords::DataUsers *rcddusr;
+    MUsersItem *usr;
     MUserUpTime *uptime;
 
     Users_->Clear();
     UpTimes_->Clear();
-    if ( Begin_==NULL ) goto exit;
-    uptime=NULL;
-    for ( ; Begin_!=End_->gNext(); Begin_=(MLogRecord*)Begin_->gNext() )
+    if ( Begin_==nullptr ) goto exit;
+    uptime=nullptr;
+    for ( ; Begin_!=End_->gNext(); Begin_=Begin_->gNext() )
     {
         switch(Begin_->gTypeID())
         {
-            case mlrConfig: break;
-            case mlrLogIn:
-                if ( uptime!=NULL ) goto error;
-                uptime=(MUserUpTime*)UpTimes_->Add();
-                uptime->User=((MLogRecordLogIn*)Begin_)->User;
-                uptime->BeginTime=((MLogRecordLogIn*)Begin_)->SystemTime;
-                break;
-            case mlrLogOut:
-                if ( uptime==NULL ) goto error;
-                uptime->EndTime=((MLogRecordLogIn*)Begin_)->SystemTime;
-                uptime=NULL;
-                break;
-            case mlrRun:
-                if ( uptime==NULL ) continue;
-                uptime->Gains+=((MLogRecordRun*)Begin_)->Cost;
-                break;
-            case mlrFine: break;
-            case mlrExchange: break;
-            case mlrDataUsers:
-                // Добавляем новых пользователей в список
-                rcddusr=(MLogRecordDataUsers*)Begin_;
-                for ( unsigned i=0; i<rcddusr->Users.Count(); i++ )
-                {
-                    if ( (usr=(MUser*)Users_->SrchID(rcddusr->Users[i].ID))!=NULL )
-                        usr->Name=rcddusr->Users[i].Name;
-                    else
-                    {
-                        usr=(MUser*)Users_->Add();
-                        *usr=rcddusr->Users[i];
-                    }
-                }
-                break;
-            default: break;
-        }
-    }
+			case MLogRecords::AppConfig::TypeID:
+				break;
+
+			case MLogRecords::AppLogIn::TypeID:
+				if ( uptime!=nullptr ) goto error;
+				uptime=UpTimes_->Add();
+				uptime->User=static_cast<MLogRecords::AppLogIn*>(Begin_)->User;
+				uptime->BeginTime=static_cast<MLogRecords::AppLogIn*>(Begin_)->SystemTime;
+				break;
+
+			case MLogRecords::AppLogOut::TypeID:
+				if ( uptime==nullptr ) goto error;
+				uptime->EndTime=static_cast<MLogRecords::AppLogOut*>(Begin_)->SystemTime;
+				uptime=nullptr;
+				break;
+
+			case MLogRecords::CompRun::TypeID:
+				if ( uptime==nullptr ) continue;
+				uptime->Gains+=static_cast<MLogRecords::CompRun*>(Begin_)->Cost;
+				break;
+
+			case MLogRecords::CompFine::TypeID:
+				break;
+
+			case MLogRecords::CompExchange::TypeID:
+				break;
+
+			case MLogRecords::DataUsers::TypeID:
+				rcddusr=static_cast<MLogRecords::DataUsers*>(Begin_);
+
+				// Добавляем новых пользователей в список
+				for ( size_t i=0; i<rcddusr->Items.Count(); i++ )
+				{
+					usr=Users_->SrchUUID(rcddusr->Items[i].UUID);
+					if ( usr!=nullptr )
+					{
+						usr->Name=rcddusr->Items[i].Name;
+					} else
+					{
+						usr=Users_->Add();
+						*usr=rcddusr->Items[i];
+					}
+				}
+				break;
+
+			default:
+				break;
+		}
+	}
 
 exit:
-    return true;
+	return true;
 error:
-    return false;
+	return false;
 }
 //---------------------------------------------------------------------------
 

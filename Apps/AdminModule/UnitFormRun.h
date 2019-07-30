@@ -52,10 +52,10 @@ __published:	// IDE-managed Components
           TListItem *Item, bool Selected);
 private:	// User declarations
     __int64 OpenDialogTime;
-    MTariffsInfo UseTariffs;    // Список тарифов, доступных на время открытия диалога
-    MRunTimes UseTimes;         // Список пакетов для выбранного тарифа
-    MRunTimes CompTimes;        // Буфер для хранения времени и стоимости по каждому компьютеру
-    unsigned SelTariffID;
+	MTariffsInfo UseTariffs;		// Список тарифов, доступных на время открытия диалога
+	MTariffRunTimes UseTimes;	// Список пакетов для выбранного тарифа
+	MTariffRunTimes CompTimes;	// Буфер для хранения времени и стоимости по каждому компьютеру
+	unsigned SelTariffID;
     void SetListViewComputersLine(TListItem *Item_);
     void UpdateFullCost();
 public:		// User declarations

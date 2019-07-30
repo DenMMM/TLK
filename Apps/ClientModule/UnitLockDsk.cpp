@@ -8,10 +8,10 @@
 //---------------------------------------------------------------------------
 MLockDsk::MLockDsk()
 {
-    hThread=NULL;
+    hThread=nullptr;
     ThreadID=0;
-    hPrevDsk=NULL;
-    hMainDsk=NULL;
+    hPrevDsk=nullptr;
+    hMainDsk=nullptr;
     Transp=false;
     SysTime=0;
     CompNum=0;
@@ -29,9 +29,9 @@ DWORD WINAPI MLockDsk::ThreadF(LPVOID Data_)
     DWORD ExitCode;
 
     // Создаем очередь сообщений для потока
-    ::PeekMessage(NULL,(HWND)-1,0,0,PM_NOREMOVE);
+    ::PeekMessage(nullptr,(HWND)-1,0,0,PM_NOREMOVE);
     // Обработка тела
-    ExitCode=((MLockDsk*)Data_)->ThreadP();
+    ExitCode=reinterpret_cast<MLockDsk*>(Data_)->ThreadP();
     // Завершаем работу
     ::ExitThread(ExitCode);
 
@@ -45,40 +45,40 @@ DWORD MLockDsk::ThreadP()
     // Запомним текущие параметры экрана
     dmPrev.dmSize=sizeof(dmPrev);
     dmPrev.dmDriverExtra=0;
-    ::EnumDisplaySettings(NULL,ENUM_CURRENT_SETTINGS,&dmPrev);
+    ::EnumDisplaySettings(nullptr,ENUM_CURRENT_SETTINGS,&dmPrev);
     // Запомним текущий рабочий стол и создадим новый
     hPrevDsk=::GetThreadDesktop(::GetCurrentThreadId());
-    if ( hPrevDsk==NULL ) goto api_error;
-    hMainDsk=::CreateDesktop(LOCKDSK_Name,NULL,NULL,0,GENERIC_ALL,NULL);
-    if ( hMainDsk==NULL ) goto api_error;
+    if ( hPrevDsk==nullptr ) goto api_error;
+    hMainDsk=::CreateDesktop(LOCKDSK_Name,nullptr,nullptr,0,GENERIC_ALL,nullptr);
+    if ( hMainDsk==nullptr ) goto api_error;
 #ifndef _DEBUG
     // Выберем его для потока и переключимся
     if ( !::SetThreadDesktop(hMainDsk) ) goto api_error;
     ::SwitchDesktop(hMainDsk);
 //    if ( !::SwitchDesktop(hMainDsk) ) goto api_error;
     // Зададим режим экрана по-умолчанию (как при входе пользователя)
-    ::ChangeDisplaySettings(NULL,0);
+    ::ChangeDisplaySettings(nullptr,0);
 #endif
 
 
 {
-    char szClassName[]="TLK_LockWnd";
-    WNDCLASSEX wincl;
+    wchar_t szClassName[]=L"TLK_LockWnd";
+    WNDCLASSEXW wincl;
 
-    hInst=::GetModuleHandle(NULL);
+    hInst=::GetModuleHandle(nullptr);
 
     hbTransp=::CreateSolidBrush(TCOLOR_TRANSPARENT);
-//    if ( hbTransp==NULL ) goto error;
-    hfCompNum=::CreateFont(
-        -32,0,0,0,FW_NORMAL,
-        FALSE,FALSE,FALSE,
-        DEFAULT_CHARSET,
-        OUT_DEFAULT_PRECIS,
-        CLIP_DEFAULT_PRECIS,
-        DEFAULT_QUALITY,
-        FIXED_PITCH,
-        "BankGothic Md BT");
-//    if ( hfCompNum==NULL ) goto error;
+//    if ( hbTransp==nullptr ) goto error;
+	hfCompNum=::CreateFont(
+		-32,0,0,0,FW_NORMAL,
+		FALSE,FALSE,FALSE,
+		DEFAULT_CHARSET,
+		OUT_DEFAULT_PRECIS,
+		CLIP_DEFAULT_PRECIS,
+		DEFAULT_QUALITY,
+		FIXED_PITCH,
+		L"BankGothic Md BT");
+//    if ( hfCompNum==nullptr ) goto error;
 
     hfSysTime=::CreateFont(
         -13,0,0,0,FW_NORMAL,
@@ -88,7 +88,7 @@ DWORD MLockDsk::ThreadP()
         CLIP_DEFAULT_PRECIS,
         DEFAULT_QUALITY,
         FIXED_PITCH,
-        "Lucida Console");
+        L"Lucida Console");
 
     hfFineTime=::CreateFont(
         -24,0,0,0,FW_BOLD,
@@ -98,7 +98,7 @@ DWORD MLockDsk::ThreadP()
         CLIP_DEFAULT_PRECIS,
         DEFAULT_QUALITY,
         FIXED_PITCH,
-        "BankGothic Md BT");
+        L"BankGothic Md BT");
 
     // Зарегистрируем класс основного окна
     wincl.hInstance = hInst;
@@ -106,10 +106,10 @@ DWORD MLockDsk::ThreadP()
     wincl.lpfnWndProc = &WndProc;
     wincl.style = CS_HREDRAW|CS_VREDRAW;
     wincl.cbSize = sizeof (WNDCLASSEX);
-    wincl.hIcon = ::LoadIcon (NULL, IDI_APPLICATION);
-    wincl.hIconSm = ::LoadIcon (NULL, IDI_APPLICATION);
-    wincl.hCursor = ::LoadCursor (NULL, IDC_ARROW);
-    wincl.lpszMenuName = NULL;
+    wincl.hIcon = ::LoadIcon (nullptr, IDI_APPLICATION);
+    wincl.hIconSm = ::LoadIcon (nullptr, IDI_APPLICATION);
+    wincl.hCursor = ::LoadCursor (nullptr, IDC_ARROW);
+    wincl.lpszMenuName = nullptr;
     wincl.cbClsExtra = 0;
     wincl.cbWndExtra = 0;
     wincl.hbrBackground=hbTransp;
@@ -117,56 +117,54 @@ DWORD MLockDsk::ThreadP()
 //    if ( ::RegisterClassEx(&wincl)==0 ) goto error;
 
     // Узнаем размеры экрана
-    HDC hDCScreen = ::GetDC(NULL);
+    HDC hDCScreen = ::GetDC(nullptr);
     int ScrWidth = ::GetDeviceCaps(hDCScreen, HORZRES);
     int ScrHeight = ::GetDeviceCaps(hDCScreen, VERTRES);
-    ::ReleaseDC(NULL, hDCScreen);
+    ::ReleaseDC(nullptr, hDCScreen);
 
     // Создадим основное окно
-    hwMain=::CreateWindowEx(
-        0x02000000,  // WS_EX_COMPOSITED
-        szClassName,NULL,
-        WS_POPUP,
-        0,0,
-        ScrWidth,
-        ScrHeight,
-        NULL,NULL,wincl.hInstance,NULL);
+	hwMain=::CreateWindowEx(
+		0x02000000,  // WS_EX_COMPOSITED
+		szClassName, nullptr,
+		WS_POPUP,
+		0, 0, ScrWidth,	ScrHeight,
+		nullptr, nullptr, wincl.hInstance, nullptr);
 
     // Создадим элемент с для картинки-сообщения
-    hwMsgImg=::CreateWindowEx(
-            0,"STATIC",NULL,
-            SS_BITMAP|SS_CENTERIMAGE|WS_CHILD|WS_VISIBLE,
-            0,0,ScrWidth,ScrHeight,
-            hwMain,(HMENU)IDC_MSGIMG,hInst,NULL);
+	hwMsgImg=::CreateWindowEx(
+			0, L"STATIC", nullptr,
+			SS_BITMAP|SS_CENTERIMAGE|WS_CHILD|WS_VISIBLE,
+			0, 0, ScrWidth, ScrHeight,
+			hwMain, (HMENU)IDC_MSGIMG, hInst, nullptr);
 
     // Создадим элемент для картинки-подложки меню
-    hwMenuImg=::CreateWindowEx(
-            0,"STATIC","LOCKDESKMENU",
-            SS_BITMAP|WS_CHILD|WS_VISIBLE,
-            0,0,0,0,
-            hwMain,(HMENU)IDC_MENUIMG,hInst,NULL);
+	hwMenuImg=::CreateWindowEx(
+			0, L"STATIC", L"LOCKDESKMENU",
+			SS_BITMAP|WS_CHILD|WS_VISIBLE,
+			0, 0, 0, 0,
+			hwMain,(HMENU)IDC_MENUIMG,hInst,nullptr);
 
-    // Создадим элемент-номер компьютера и его тень
-    hwCompNumSh=CreateText("99",0,0,0,0,hwMain,IDC_COMPNUMSH);
-    hwCompNum=CreateText("99",0,0,0,0,hwMain,IDC_COMPNUM);
+	// Создадим элемент-номер компьютера и его тень
+	hwCompNumSh=CreateText(L"99", 0, 0, 0, 0, hwMain, IDC_COMPNUMSH);
+	hwCompNum=CreateText(L"99",0,0,0,0,hwMain,IDC_COMPNUM);
     ::SendMessage(hwCompNumSh,WM_SETFONT,(WPARAM)hfCompNum,0);
     ::SendMessage(hwCompNum,WM_SETFONT,(WPARAM)hfCompNum,0);
 
     // Создадим элемент "Текущее время 00:00"
-    hwSysTimeTxt=CreateText(TEXT("Текущее время"),0,0,0,0,hwMain,IDC_SYSTIMETXT);
+    hwSysTimeTxt=CreateText(L"Текущее время",0,0,0,0,hwMain,IDC_SYSTIMETXT);
     ::SendMessage(hwSysTimeTxt,WM_SETFONT,(WPARAM)hfSysTime,0);
-    hwSysTime=CreateText("00:00",0,0,0,0,hwMain,IDC_SYSTIME);
+    hwSysTime=CreateText(L"00:00",0,0,0,0,hwMain,IDC_SYSTIME);
     ::SendMessage(hwSysTime,WM_SETFONT,(WPARAM)hfSysTime,0);
 
     // Создадим элемент "Осталось 00:00"
-    hwWorkTimeTxt=CreateText(TEXT("Осталось"),0,0,0,0,hwMain,IDC_WORKTIMETXT);
-    ::SendMessage(hwWorkTimeTxt,WM_SETFONT,(WPARAM)hfSysTime,0);
-    hwWorkTime=CreateText("00:00",0,0,0,0,hwMain,IDC_WORKTIME);
+	hwWorkTimeTxt=CreateText(L"Осталось",0,0,0,0,hwMain,IDC_WORKTIMETXT);
+	::SendMessage(hwWorkTimeTxt,WM_SETFONT,(WPARAM)hfSysTime,0);
+    hwWorkTime=CreateText(L"00:00",0,0,0,0,hwMain,IDC_WORKTIME);
     ::SendMessage(hwWorkTime,WM_SETFONT,(WPARAM)hfSysTime,0);
 
 /*
-    hwFineTimeSh=CreateText("00:00",0,0,0,0,hwMain,IDC_FINETIMESH);
-    hwFineTime=CreateText("00:00",0,0,0,0,hwMain,IDC_FINETIME);
+	hwFineTimeSh=CreateText(L"00:00",0,0,0,0,hwMain,IDC_FINETIMESH);
+    hwFineTime=CreateText(L"00:00",0,0,0,0,hwMain,IDC_FINETIME);
     ::SendMessage(hwFineTimeSh,WM_SETFONT,(WPARAM)hfFineTime,0);
     ::SendMessage(hwFineTime,WM_SETFONT,(WPARAM)hfFineTime,0);
 */
@@ -194,13 +192,13 @@ DWORD MLockDsk::ThreadP()
     ::UpdateWindow(hwMain);
 }
 
-    uTimer=::SetTimer(NULL,0,1000,NULL);
+    uTimer=::SetTimer(nullptr,0,1000,nullptr);
 
     MSG Msg;
-    while(::GetMessage(&Msg,NULL,0,0))
+    while(::GetMessage(&Msg,nullptr,0,0))
     {
         // Обработаем сообщения GUI
-        if ( Msg.hwnd!=NULL )
+        if ( Msg.hwnd!=nullptr )
         {
             ::DispatchMessage(&Msg);
             continue;
@@ -234,7 +232,7 @@ DWORD MLockDsk::ThreadP()
         }
     }
 
-    ::KillTimer(NULL,uTimer);
+    ::KillTimer(nullptr,uTimer);
 
     // Уничтожим основное окно и все что в нем создано
     ::DestroyWindow(hwMain);
@@ -247,9 +245,9 @@ DWORD MLockDsk::ThreadP()
     return 0;
 api_error:
     LastError=::GetLastError();
-    if ( hMainDsk!=NULL ) { ::CloseDesktop(hMainDsk); hMainDsk=NULL; }
+    if ( hMainDsk!=nullptr ) { ::CloseDesktop(hMainDsk); hMainDsk=nullptr; }
 #ifdef _DEBUG
-    ResMessageBox(NULL,1,1,MB_APPLMODAL|MB_OK|MB_ICONERROR,LastError);
+    ResMessageBox(nullptr,1,1,MB_APPLMODAL|MB_OK|MB_ICONERROR,LastError);
 #endif
     return LastError;
 }
@@ -269,7 +267,7 @@ void MLockDsk::UpdBkg(HWND hBkg_, HWND hText_)
     rect.right-=point.x;
     rect.bottom-=point.y;
     // Обновим картинку под STATIC'ом
-//    ::RedrawWindow(hBkg_,&rect,NULL,
+//    ::RedrawWindow(hBkg_,&rect,nullptr,
 //        RDW_INVALIDATE|RDW_NOCHILDREN|RDW_UPDATENOW);   /// что лучше ?
     ::InvalidateRect(hBkg_,&rect,FALSE);
     ::UpdateWindow(hBkg_);
@@ -287,17 +285,17 @@ void MLockDsk::UpdTransp() const
     } else
         ::SetWindowLong(hwMain,GWL_EXSTYLE,0);
     // Обновим содержимое
-    ::InvalidateRect(hwMain,NULL,TRUE);
+    ::InvalidateRect(hwMain,nullptr,TRUE);
     ::UpdateWindow(hwMain);
 }
 //---------------------------------------------------------------------------
 bool MLockDsk::LoadImg()
 {
     CS_Param.Enter();
-    hMsgImg=::LoadImage(NULL,MsgFile.c_str(),IMAGE_BITMAP,0,0,LR_LOADFROMFILE);
-    CS_Param.Leafe();
+	hMsgImg=::LoadImage(nullptr, MsgFile.c_str(), IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+	CS_Param.Leafe();
 
-    if ( hMsgImg==NULL ) return false;
+    if ( hMsgImg==nullptr ) return false;
     ::SendMessage(hwMsgImg,STM_SETIMAGE,(WPARAM)IMAGE_BITMAP,(LPARAM)hMsgImg);
     return true;
 }
@@ -305,37 +303,51 @@ bool MLockDsk::LoadImg()
 void MLockDsk::UpdCompNum() const
 {
     MWAPI::CRITICAL_SECTION::Lock lckObj(CS_Param);
-    char line[]="99";
+	wchar_t line[]=L"99";
 
-    // Номер компьютера
-    sprintf(line,"%2i",CompNum);
-    ::SetWindowText(hwCompNumSh,line);
-    ::SetWindowText(hwCompNum,line);
+	// Номер компьютера
+	swprintf(
+		line, sizeof(line),
+		L"%2i",
+		CompNum);
+
+	::SetWindowText(hwCompNumSh, line);
+	::SetWindowText(hwCompNum, line);
 }
 //---------------------------------------------------------------------------
 void MLockDsk::UpdSysTime() const
 {
     MWAPI::CRITICAL_SECTION::Lock lckObj(CS_Param);
-    char line[]="--:--";
+    wchar_t line[]=L"--:--";
     SYSTEMTIME st;
 
     // Текущее время
     if ( Int64ToSystemTime(&SysTime,&st) )
     {
-        sprintf(line,"%.2i:%.2i",st.wHour,st.wMinute);
-        ::SetWindowText(hwSysTime,line);
+		swprintf(
+			line, sizeof(line),
+			L"%.2i:%.2i",
+			st.wHour, st.wMinute);
+
+		::SetWindowText(hwSysTime, line);
     }
 }
 //---------------------------------------------------------------------------
 void MLockDsk::UpdWorkTime() const
 {
     MWAPI::CRITICAL_SECTION::Lock lckObj(CS_Param);
-    char line[]="--:--";
+	wchar_t line[]=L"--:--";
 
     // Сколько осталось работать
-    if ( WorkTime==0 ) sprintf(line,"--:--");
-    else sprintf(line,"%.2i:%.2i",WorkTime/60,WorkTime%60);
-    ::SetWindowText(hwWorkTime,line);
+	if ( WorkTime==0 ) swprintf(
+		line,  sizeof(line),
+		L"--:--");
+	else swprintf(
+		line, sizeof(line),
+		L"%.2i:%.2i",
+		WorkTime/60, WorkTime%60);
+
+	::SetWindowText(hwWorkTime, line);
 }
 //---------------------------------------------------------------------------
 bool MLockDsk::ThreadMsg(UINT Msg_) const
@@ -343,7 +355,7 @@ bool MLockDsk::ThreadMsg(UINT Msg_) const
     DWORD ExitCode;
 
     // Убедимся что поток создан и работает перед отправкой ему сообщения
-    if ( (hThread!=NULL)&&
+    if ( (hThread!=nullptr)&&
         ::GetExitCodeThread(hThread,&ExitCode)&&
         (ExitCode==STILL_ACTIVE) ) return ::PostThreadMessage(ThreadID,Msg_,0,0);
 
@@ -362,22 +374,22 @@ bool MLockDsk::SetTransp(bool Transp_)
 */
 }
 //---------------------------------------------------------------------------
-bool MLockDsk::Show(const char *File_)
+bool MLockDsk::Show(const wchar_t *File_)
 {
     // Скопируем параметры в буфер потока
     CS_Param.Enter();
-    if ( strlen(File_)>MAX_PATH ) MsgFile.clear();
+	if ( wcslen(File_)>MAX_PATH ) MsgFile.clear();
     else MsgFile=File_;     /// проверить bad_alloc или выделить память заранее
     CS_Param.Leafe();
 
     // Отправим сообщение работающему потоку
-    if ( hThread!=NULL ) return ThreadMsg(MSG_UpdMsg);
+    if ( hThread!=nullptr ) return ThreadMsg(MSG_UpdMsg);
     // Или создадим его и рабочий стол блокировки
-    hThread=::CreateThread(NULL,0,
+    hThread=::CreateThread(nullptr,0,
         &MLockDsk::ThreadF,
         (LPVOID)this,0,&ThreadID);
 
-    return hThread!=NULL;
+    return hThread!=nullptr;
 }
 //---------------------------------------------------------------------------
 bool MLockDsk::UpdateCompNum(int Num_)
@@ -412,7 +424,7 @@ void MLockDsk::Hide(bool UnLock_)
    DWORD ExitCode;
 
     // Проверяем работает ли поток
-    if ( hThread==NULL ) return;
+    if ( hThread==nullptr ) return;
 
     if ( ::GetExitCodeThread(hThread,&ExitCode)&&(ExitCode==STILL_ACTIVE) )
     {
@@ -426,7 +438,7 @@ void MLockDsk::Hide(bool UnLock_)
     // Удаляем объект потока
     ::CloseHandle(hThread);
 
-    hThread=NULL;
+    hThread=nullptr;
     ThreadID=0;
 }
 //---------------------------------------------------------------------------

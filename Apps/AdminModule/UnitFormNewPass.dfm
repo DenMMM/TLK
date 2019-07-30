@@ -74,7 +74,6 @@ object FormNewPass: TFormNewPass
     Width = 73
     Height = 21
     Style = csDropDownList
-    ItemHeight = 13
     TabOrder = 1
   end
   object CheckBoxCapital: TCheckBox

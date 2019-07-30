@@ -19,14 +19,10 @@ class MOptions;
 class MOptions:public MSLList
 {
 private:
-    // Заглушки, т.к. списка на самом деле нет - только "заголовок"
-    MListItem *item_new(unsigned char TypeID_) const { return NULL; }
-    void item_del(MListItem *Item_) const {}
-
     // Функции механизма сохранения/загрузки данных
-    unsigned GetDataSize() const;
-    char *SetData(char *Data_) const;
-    const char *GetData(const char *Data_, const char *Limit_);
+	unsigned GetDataSize() const override;
+	void *SetData(void *Data_) const override;
+	const void *GetData(const void *Data_, const void *Limit_) override;
 
 public:
     char LogPeriod;             // Период ведения файла лога
@@ -38,8 +34,18 @@ public:
 
     bool Copy(MOptions *Opt_);
 
-    MOptions();
-    ~MOptions();
+	MOptions():
+		LogPeriod(mlpDay),
+		FilterFreeTime(2),
+		CostDialogTime(15),
+		CostPrecision(0.50),
+		UsersRights(murPause)
+	{
+	}
+
+	~MOptions()
+	{
+	}
 };
 //---------------------------------------------------------------------------
 #endif

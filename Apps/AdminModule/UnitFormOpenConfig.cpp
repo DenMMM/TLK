@@ -45,7 +45,7 @@ void __fastcall TFormOpenConfig::FormCloseQuery(TObject *Sender,
 void __fastcall TFormOpenConfig::FormClose(TObject *Sender,
       TCloseAction &Action)
 {
-    EditPassword->Text=""; EditPassword->ClearUndo();
+    EditPassword->Text=L""; EditPassword->ClearUndo();
 }
 //---------------------------------------------------------------------------
 

@@ -67,7 +67,6 @@ object FormLogIn: TFormLogIn
     Width = 185
     Height = 21
     Style = csDropDownList
-    ItemHeight = 13
     TabOrder = 0
     OnClick = ComboBoxLoginClick
   end

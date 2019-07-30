@@ -2,11 +2,12 @@
 #ifndef UnitComputersH
 #define UnitComputersH
 //---------------------------------------------------------------------------
-class MComputer;
-class MComputers;
-//---------------------------------------------------------------------------
 #include <string>
+
 #include "UnitSLList.h"
+//---------------------------------------------------------------------------
+class MComputersItem;
+class MComputers;
 //---------------------------------------------------------------------------
 #define MAX_Comps                   50      // Сколько компьютеров разрешено обслуживать TLK
 #define MAX_CompAddrLen             15      // Длина IP-адреса
@@ -17,38 +18,46 @@ class MComputers;
 #define mgcRed                      3       // Красный
 #define mgcYellow                   4       // Желтый
 //---------------------------------------------------------------------------
-class MComputer:public MSLListItem
+class MComputersItem:
+	public MSLListItem::Simple <
+		MSLListItem::Proxy <MSLListItem, MComputersItem>,
+		MComputersItem>
 {
-private:
-    // Функции механизма сохранения/загрузки данных
-    unsigned GetDataSize() const;
-    char *SetData(char *Data_) const;
-    const char *GetData(const char *Data_, const char *Limit_);
+public:
+	// Функции механизма сохранения/загрузки данных
+	unsigned GetDataSize() const override;
+	void *SetData(void *Data_) const override;
+	const void *GetData(const void *Data_, const void *Limit_) override;
 
 public:
-    char Number;                                // Номер компьютера
-    char Color;                                 // Цвет группы
-    std::string Address;                        // IP-адрес компьютера
-    bool NotUsed;                               // Игнорировать компьютер
+	char Number;						// Номер компьютера
+	char Color;							// Цвет группы
+	std::wstring Address;				// IP-адрес компьютера
+	bool NotUsed;						// Игнорировать компьютер
 
-    void Copy(const MListItem *SrcItem_);
+	void Copy(const MListItem *SrcItem_) override;
 
-    MComputer();
-    ~MComputer();
+	MComputersItem():
+		Number(0),
+		Color(mgcNone),
+		NotUsed(false)
+	{
+	}
+
+	virtual ~MComputersItem()
+	{
+	}
 };
 //---------------------------------------------------------------------------
-class MComputers:public MSLList
+class MComputers:
+	public MSLList::Simple <MSLList, MComputers, MComputersItem>
 {
-private:
-    MListItem *item_new(unsigned char TypeID_) const { return (MListItem*)new MComputer; }
-    void item_del(MListItem *Item_) const { delete (MComputer*)Item_; }
-
 public:
-    MComputer *Search(char Number_) const;
-    void Sort();
+	MComputersItem *Search(char Number_) const;
+	void Sort();
 
-    MComputers() {}
-    ~MComputers() { Clear(); }
+	MComputers() {}
+	~MComputers() {}
 };
 //---------------------------------------------------------------------------
 #endif

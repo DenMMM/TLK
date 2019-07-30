@@ -4,30 +4,32 @@
 //---------------------------------------------------------------------------
 #include "UnitCommon.h"
 //---------------------------------------------------------------------------
-USEFORM("UnitFormMain.cpp", FormMain);
-USEFORM("UnitFormComputers.cpp", FormComputers);
-USEFORM("UnitFormTariffs.cpp", FormTariffs);
-USEFORM("UnitFormTariffTimes.cpp", FormTariffTimes);
-USEFORM("UnitFormFines.cpp", FormFines);
-USEFORM("UnitFormUsers.cpp", FormUsers);
-USEFORM("UnitFormRun.cpp", FormRun);
 USEFORM("UnitFormFine.cpp", FormFine);
-USEFORM("UnitFormUserPass.cpp", FormUserPass);
-USEFORM("UnitFormNewPass.cpp", FormNewPass);
-USEFORM("UnitFormOptions.cpp", FormOptions);
+USEFORM("UnitFormFines.cpp", FormFines);
 USEFORM("UnitFormLogIn.cpp", FormLogIn);
-USEFORM("UnitFormClient.cpp", FormClient);
-USEFORM("UnitFormOptionsPass.cpp", FormOptionsPass);
-USEFORM("UnitFormOpenConfig.cpp", FormOpenConfig);
+USEFORM("UnitFormMain.cpp", FormMain);
+USEFORM("UnitFormNewPass.cpp", FormNewPass);
+USEFORM("UnitFormComputers.cpp", FormComputers);
 USEFORM("UnitFormAuth.cpp", FormAuth);
+USEFORM("UnitFormClient.cpp", FormClient);
+USEFORM("UnitFormUserPass.cpp", FormUserPass);
+USEFORM("UnitFormUsers.cpp", FormUsers);
+USEFORM("UnitFormTariffTimes.cpp", FormTariffTimes);
+USEFORM("UnitFormOpenConfig.cpp", FormOpenConfig);
+USEFORM("UnitFormOptions.cpp", FormOptions);
+USEFORM("UnitFormOptionsPass.cpp", FormOptionsPass);
+USEFORM("UnitFormRun.cpp", FormRun);
+USEFORM("UnitFormTariffs.cpp", FormTariffs);
 //---------------------------------------------------------------------------
-WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
+int WINAPI _tWinMain(HINSTANCE, HINSTANCE, LPTSTR lpCmdLine, int)
 {
-    HANDLE mutex=::CreateMutex(NULL,true,"TLK31RunMutex");
-    if ( (mutex==NULL)||(::GetLastError()==ERROR_ALREADY_EXISTS) )
-    {            
+    HANDLE mutex=::CreateMutex(nullptr, true, L"TLK31RunMutex");
+	if (
+		(mutex==nullptr)||
+		(::GetLastError()==ERROR_ALREADY_EXISTS) )
+	{
         ::CloseHandle(mutex);
-        ResMessageBox(NULL,1,24,MB_APPLMODAL|MB_OK|MB_ICONERROR);
+        ResMessageBox(nullptr,1,24,MB_APPLMODAL|MB_OK|MB_ICONERROR);
         return 0;
     }
     // Инициализируем генератор случайных чисел
@@ -36,9 +38,9 @@ WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
         try
         {
          Application->Initialize();
-         Application->Title = "TLK - Модуль управления";
+         Application->Title = L"TLK - Модуль управления";
          Application->CreateForm(__classid(TFormMain), &FormMain);
-         Application->Run();
+		Application->Run();
         }
         catch (Exception &exception)
         {

@@ -18,11 +18,11 @@ __fastcall TFormUsers::TFormUsers(TComponent* Owner)
 void __fastcall TFormUsers::FormShow(TObject *Sender)
 {
     // Копируем пользователей в буфер
-    TmpUsers.Copy(Users);
+    TmpUsers.Copy(Users.get());
 
     // Формируем их список
-    for ( MUser *user=(MUser*)TmpUsers.gFirst();
-        user; user=(MUser*)user->gNext() )
+	for ( MUsersItem* user=TmpUsers.gFirst();
+        user; user=user->gNext() )
     {
         TListItem *item;
         item=ListViewUsers->Items->Add();
@@ -44,8 +44,8 @@ void __fastcall TFormUsers::FormClose(TObject *Sender,
 {
     // Чистим интерфейсные элементы
     ListViewUsers->Items->Clear();
-    EditLogin->Text="";
-    EditName->Text="";
+	EditLogin->Text=L"";
+    EditName->Text=L"";
     // Чистим буфер
     TmpUsers.Clear();
 }
@@ -54,31 +54,33 @@ void __fastcall TFormUsers::ListViewUsersInsert(TObject *Sender,
       TListItem *Item)
 {
     Item->ImageIndex=-1;
-    Item->SubItems->Add("");
-    Item->SubItems->Add("");
+	Item->SubItems->Add(L"");
+    Item->SubItems->Add(L"");
 }
 //---------------------------------------------------------------------------
 void __fastcall TFormUsers::ListViewUsersSelectItem(TObject *Sender,
       TListItem *Item, bool Selected)
 {
-    if ( ((TListView*)Sender)->SelCount!=1 )
+    if ( dynamic_cast<TListView&>(*Sender).SelCount!=1 )
     {
         SetEdit(false);
         return;
     } else
         SetEdit(true);
 
-    MUser *user=(MUser*)ListViewUsers->Selected->Data;
+	auto user=reinterpret_cast<MUsersItem*>(
+		ListViewUsers->Selected->Data);
     EditLogin->Text=user->Login.c_str();
     EditName->Text=user->Name.c_str();
 }
 //---------------------------------------------------------------------------
 void __fastcall TFormUsers::EditLoginExit(TObject *Sender)
 {
-    if ( ListViewUsers->Selected==NULL ) return;
+    if ( ListViewUsers->Selected==nullptr ) return;
 
     EditLogin->Text=EditLogin->Text.Trim();
-    MUser *user=(MUser*)ListViewUsers->Selected->Data;
+	auto user=reinterpret_cast<MUsersItem*>(
+		ListViewUsers->Selected->Data);
     user->Login=EditLogin->Text.c_str();
     SetListViewUsersLine(ListViewUsers->Selected);
 }
@@ -90,24 +92,26 @@ void __fastcall TFormUsers::BitBtnActiveClick(TObject *Sender)
     for ( TListItem *item=ListViewUsers->Selected; item;
         item=ListViewUsers->GetNextItem(item,sdAll,is) )
     {
-        ((MUser*)item->Data)->Active=Active;
+        reinterpret_cast<MUsersItem*>(item->Data)->Active=Active;
         SetListViewUsersLine(item);
     }
 }
 //---------------------------------------------------------------------------
 void __fastcall TFormUsers::EditNameExit(TObject *Sender)
 {
-    if ( ListViewUsers->Selected==NULL ) return;
+    if ( ListViewUsers->Selected==nullptr ) return;
 
     EditName->Text=EditName->Text.Trim();
-    MUser *user=(MUser*)ListViewUsers->Selected->Data;
+	auto user=reinterpret_cast<MUsersItem*>(
+		ListViewUsers->Selected->Data);
     user->Name=EditName->Text.c_str();
     SetListViewUsersLine(ListViewUsers->Selected);
 }
 //---------------------------------------------------------------------------
 void __fastcall TFormUsers::ButtonPasswordClick(TObject *Sender)
 {
-    MUser *user=(MUser*)ListViewUsers->Selected->Data;
+	auto user=reinterpret_cast<MUsersItem*>(
+		ListViewUsers->Selected->Data);
     // Подготавливаем координаты
     TPoint dialog_coord;
     dialog_coord.x=ButtonPassword->Left+10;
@@ -116,8 +120,8 @@ void __fastcall TFormUsers::ButtonPasswordClick(TObject *Sender)
     // Открываем окно смены пароля
     try
     {
-        Mptr <TFormUserPass> form;
-        form(new TFormUserPass(0));
+		std::unique_ptr <TFormUserPass> form;
+		form.reset(new TFormUserPass(0));
         form->Execute(user,dialog_coord.x,dialog_coord.y,false);
     }
     catch (Exception &ex)
@@ -135,16 +139,16 @@ void __fastcall TFormUsers::ButtonAddClick(TObject *Sender)
     }
 
     // Добавили в буфер нового пользователя
-    MUser *user=(MUser*)TmpUsers.Add();
-    user->Login="NewUser";
-    user->Name="Новый пользователь";
+	MUsersItem* user=TmpUsers.Add();
+	user->Login=L"NewUser";
+    user->Name=L"Новый пользователь";
     // Добавили строку в список и связали с ним
     TListItem *item=ListViewUsers->Items->Add();
     item->Data=user;
     SetListViewUsersLine(item);
     // Обновили интерфейс
     ListViewUsers->ItemFocused=item;
-    ListViewUsers->Selected=NULL;
+    ListViewUsers->Selected=nullptr;
     ListViewUsers->Selected=item;
     ActiveControl=EditLogin;
 }
@@ -157,7 +161,7 @@ void __fastcall TFormUsers::ButtonDelClick(TObject *Sender)
     while(item)
     {
         // Удаляем пользователя из буфера
-        TmpUsers.Del((MUser*)item->Data);
+        TmpUsers.Del(reinterpret_cast<MUsersItem*>(item->Data));
         // Удаляем строку из списка
         next=ListViewUsers->GetNextItem(item,sdAll,is);
         item->Delete();
@@ -172,7 +176,7 @@ void __fastcall TFormUsers::ButtonSaveClick(TObject *Sender)
     // Замещаем актуальных пользователями из буфера
     Users->Move(&TmpUsers);
     // Задаем ID-номера для новых
-    Users->SetIDs();                        /// проверить чья смена открыта
+    Users->SetUUIDs();                      /// проверить чья смена открыта
     // Сохраняем в файле
     if ( !Users->Save() )
     {
@@ -181,7 +185,7 @@ void __fastcall TFormUsers::ButtonSaveClick(TObject *Sender)
         return;
     }
     // Запись в логах
-    if ( !Log->AddUsers(Users) )
+    if ( !Log->AddUsers(Users.get()) )
     {
         // Настройки сохранили, но без отображения их в логе работать не дадим
         ShellState->State|=mssErrorLog|mssErrorConfig; FormMain->SetShell();
@@ -204,7 +208,7 @@ void TFormUsers::SetEdit(bool Edit_)
 //---------------------------------------------------------------------------
 void TFormUsers::SetListViewUsersLine(TListItem *Item_)
 {
-    MUser *user=(MUser*)Item_->Data;
+    auto user=reinterpret_cast<MUsersItem*>(Item_->Data);
 //    Item_->ImageIndex=user->Active?15:16;
     Item_->ImageIndex=user->Active?-1:16;
     Item_->Caption=user->Login.c_str();

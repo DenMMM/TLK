@@ -36,7 +36,7 @@ void __fastcall TFormMain::FormCreate(TObject *Sender)
 
     // Настраиваем пути для файлов
     ExePath=ExtractFilePath(Application->ExeName);
-    AnsiString MsgFile=ExePath+"\\MSGTIMEWARN.BMP";
+    UnicodeString MsgFile=ExePath+L"\\MSGTIMEWARN.BMP";
     WarnMessage.File=MsgFile.c_str();
 }
 //---------------------------------------------------------------------------
@@ -46,7 +46,7 @@ void __fastcall TFormMain::FormShow(TObject *Sender)
     ::ShowWindow(Application->Handle,SW_HIDE);
 
     Timer->Interval=250;
-    TimerTimer(NULL);
+    TimerTimer(nullptr);
     Timer->Enabled=true;
 }
 //---------------------------------------------------------------------------
@@ -107,7 +107,7 @@ void __fastcall TFormMain::TimerTimer(TObject *Sender)
     {
         if ( Left!=(Screen->Width-Width) ) Left=Screen->Width-Width;
         if ( Top!=0 ) Top=0;
-        OnResize(NULL);
+        OnResize(nullptr);
     } else
     {
         if ( Width!=Screen->Width ) { Left=0; Width=Screen->Width; }
@@ -172,7 +172,7 @@ void TFormMain::SetTransp(bool Transp_)
     FormMain->AutoSize=Transp_;
     if ( Transp_ )      /// прозрачность глючит
     {
-        FormGames->Parent=NULL;
+		FormGames->Parent=nullptr;
 //        FormGames->TransparentColor=true;
 //        FormGames->TransparentColorValue=clFuchsia;
 //        FormGames->Color=clFuchsia;
@@ -203,12 +203,15 @@ void TFormMain::SharedProcess()
     __int64 SysTime;
     if ( Shared.CheckSysTime(&SysTime,&SysTimeVer) )
     {
-        char line[]="--:--";
+        wchar_t line[]=L"--:--";
         SYSTEMTIME st;
 
         if ( Int64ToSystemTime(&SysTime,&st) )
         {
-            sprintf(line,"%.2i:%.2i",st.wHour,st.wMinute);
+			swprintf(
+				line, sizeof(line),
+				L"%.2i:%.2i",
+				st.wHour, st.wMinute);
             LabelSysTime->Caption=line;
         }
         LockDsk.UpdateSysTime(SysTime);
@@ -217,16 +220,19 @@ void TFormMain::SharedProcess()
     int WorkTime;
     if ( Shared.CheckWorkTime(&WorkTime,&WorkTimeVer) )
     {
-        char line[]="--:--";
+		wchar_t line[]=L"--:--";
 
-        if ( WorkTime!=0 ) sprintf(line,"%.2i:%.2i",WorkTime/60,WorkTime%60);
-        LabelWorkTime->Caption=line;
-        LockDsk.UpdateWorkTime(WorkTime);
-    }
-    // Запускаем показ предупреждения об окончании времени
-    bool WarnMsg;
-    if ( Shared.CheckWarnMsg(&WarnMsg,&WarnMsgVer) )
-    {
+		if ( WorkTime!=0 ) swprintf(
+			line, sizeof(line),
+			L"%.2i:%.2i",
+			WorkTime/60, WorkTime%60);
+		LabelWorkTime->Caption=line;
+		LockDsk.UpdateWorkTime(WorkTime);
+	}
+	// Запускаем показ предупреждения об окончании времени
+	bool WarnMsg;
+	if ( Shared.CheckWarnMsg(&WarnMsg,&WarnMsgVer) )
+	{
         if ( WarnMsg ) WarnMessage.Show();
         else WarnMessage.Stop();
     }
@@ -237,17 +243,17 @@ void TFormMain::SharedProcess()
         if ( ImageMsg==mimNone ) LockDsk.Hide();
         else
         {
-            AnsiString FileName=ExePath;
+			UnicodeString FileName=ExePath;
             switch(ImageMsg)
             {
-                case mimEndTime: FileName+="\\MSGTIMEOUT.BMP"; break;
-                case mimLocked: FileName+="\\MSGLOCK.BMP"; break;
-                case mimPaused: FileName+="\\MSGADMNLOCK.BMP"; break;
-                case mimFine: FileName+="\\MSGFINE.BMP"; break;
-                case mimTimePaused: FileName+="\\MSGPAUSE.BMP"; break;
-                default: FileName=""; break;
+				case mimEndTime: FileName+=L"\\MSGTIMEOUT.BMP"; break;
+				case mimLocked: FileName+=L"\\MSGLOCK.BMP"; break;
+				case mimPaused: FileName+=L"\\MSGADMNLOCK.BMP"; break;
+				case mimFine: FileName+=L"\\MSGFINE.BMP"; break;
+				case mimTimePaused: FileName+=L"\\MSGPAUSE.BMP"; break;
+                default: FileName=L""; break;
             }
-            if ( FileName!="" ) LockDsk.Show(FileName.c_str());
+            if ( FileName!=L"" ) LockDsk.Show(FileName.c_str());
         }
     }
     // Обновляем список программ

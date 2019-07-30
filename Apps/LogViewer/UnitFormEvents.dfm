@@ -1,9 +1,9 @@
 object FormEvents: TFormEvents
   Left = 248
   Top = 167
-  Width = 741
-  Height = 491
   Caption = #1057#1086#1073#1099#1090#1080#1103
+  ClientHeight = 455
+  ClientWidth = 725
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -12,13 +12,12 @@ object FormEvents: TFormEvents
   Font.Style = []
   FormStyle = fsMDIChild
   OldCreateOrder = False
-  Position = poDefaultPosOnly
   Visible = True
   OnClose = FormClose
   OnCreate = FormCreate
   DesignSize = (
-    733
-    464)
+    725
+    455)
   PixelsPerInch = 96
   TextHeight = 13
   object Bevel2: TBevel
@@ -141,7 +140,6 @@ object FormEvents: TFormEvents
         ReadOnly = True
         RowSelect = True
         ParentBiDiMode = False
-        SmallImages = FormMain.ImageList
         SortType = stData
         TabOrder = 0
         ViewStyle = vsReport

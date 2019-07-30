@@ -2,20 +2,21 @@
 #ifndef UnitSendH
 #define UnitSendH
 //---------------------------------------------------------------------------
+#include <winsock2.h>
+
+#include "UnitSLList.h"
+#include "UnitStates.h"
+#include "UnitComputers.h"
+#include "UnitGames.h"
+#include "UnitClOptions.h"
+#include "UnitAuth.h"
+//---------------------------------------------------------------------------
 struct MSendHello;
 struct MSendRequest;
 
 class MSend;
 class MSendSrv;
 class MSendCl;
-//---------------------------------------------------------------------------
-#include <winsock2.h>
-#include "UnitStates.h"
-#include "UnitComputers.h"
-#include "UnitGames.h"
-#include "UnitClOptions.h"
-#include "UnitAuth.h"
-#include "UnitSLList.h"
 //---------------------------------------------------------------------------
 #define SEND_Version        0x31    // Версия сетевого интерфейса
 #define SEND_Port           7005    // Номер порта клиента
@@ -203,7 +204,7 @@ protected:
     bool Create(bool Srv_);
     bool Listen();      // Ожидать входящее соединения
     bool Accept();      // Принять входящее соединение
-    bool Connect(const char *IP_, unsigned Time_);    // Создать исходящее соединение
+    bool Connect(const wchar_t *IP_, unsigned Time_);    // Создать исходящее соединение
     bool Snd(char *Data_, unsigned Size_, unsigned Time_);
     bool Rcv(char *Data_, unsigned Size_, unsigned Time_);
     bool Disconnect(unsigned Time_);            // Закрыть исходящее соединение
@@ -226,35 +227,58 @@ protected:
     void Stop();
 
 public:
-    MSend();
-    ~MSend();
+	MSend():
+		lSocket(INVALID_SOCKET),
+		rSocket(INVALID_SOCKET),
+		Thread(nullptr),
+		ThreadID(0),
+		Break(false),
+		NetCode(0),
+		NetMAC(nullptr),
+		Init(false)
+	{
+	}
+
+	~MSend()
+	{
+	}
 };
 //---------------------------------------------------------------------------
 class MSendSrv:public MSend
 {
 private:
-    HWND Window;                // Окно для обработки сообщений о процессе отправки
-    UINT MinMsg;                //
+	HWND Window;                // Окно для обработки сообщений о процессе отправки
+	UINT MinMsg;                //
 
-    int Mode;                   // Режим (что отправляем/запрашиваем)
-    Marray <MComputer*> *Comps; // Массив со списком компьютеров для рассылки
-    MComputer *Comp;            // Указатель на компьютер, для загрузки
-    MSLList *DataObject;        // Объект для отправки/приема
+	int Mode;                   		// Режим (что отправляем/запрашиваем)
+	Marray <MComputersItem*> *Comps;	// Массив со списком компьютеров для рассылки
+	MComputersItem *Comp;				// Указатель на компьютер, для загрузки
+	MSLList *DataObject;				// Объект для отправки/приема
 
     void ThreadP();
     void ThreadSend();
     void ThreadGet();
-    void Event(MComputer *Computer_, int Event_);
+	void Event(MComputersItem *Computer_, int Event_);
 
 public:
-    bool NetInit(HWND Window_, UINT MinMsg_, unsigned Code_, MAuth *MAC_);
-    bool NetFree();
-    bool Send(Marray <MComputer*> *Computers_, MGames *Games_, MClOptions *Options_);
-    bool Get(MComputer *Computer_, MGames *Games_, MClOptions *Options_);
+	bool NetInit(HWND Window_, UINT MinMsg_, unsigned Code_, MAuth *MAC_);
+	bool NetFree();
+	bool Send(Marray <MComputersItem*> *Computers_, MGames *Games_, MClOptions *Options_);
+    bool Get(MComputersItem *Computer_, MGames *Games_, MClOptions *Options_);
     void Stop();
 
-    MSendSrv();
-    ~MSendSrv();
+	MSendSrv():
+		Window(nullptr),
+		Mode(mssNone),
+		Comps(nullptr),
+		Comp(nullptr),
+		DataObject(nullptr)
+	{
+	}
+
+	~MSendSrv()
+	{
+	}
 };
 //---------------------------------------------------------------------------
 class MSendCl:public MSend
@@ -272,8 +296,14 @@ public:
     bool Start();
     void Stop();
 
-    MSendCl();
-    ~MSendCl();
+	MSendCl():
+		State(nullptr)
+	{
+	}
+
+	~MSendCl()
+	{
+	}
 };
 //---------------------------------------------------------------------------
 #endif

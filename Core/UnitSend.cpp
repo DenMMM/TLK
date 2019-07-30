@@ -1,27 +1,13 @@
 //---------------------------------------------------------------------------
 #include <winsock2.h>
+#include <ip2string.h>
+#include <ntstatus.h>
 #pragma hdrstop
 
 #include "UnitSend.h"
 #include "UnitCommon.h"
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
-//---------------------------------------------------------------------------
-MSend::MSend()
-{
-    lSocket=INVALID_SOCKET;
-    rSocket=INVALID_SOCKET;
-    Thread=NULL;
-    ThreadID=0;
-    Break=false;
-    NetCode=0;
-    NetMAC=NULL;
-    Init=false;
-}
-//---------------------------------------------------------------------------
-MSend::~MSend()
-{
-}
 //---------------------------------------------------------------------------
 bool MSend::NetInit(unsigned Code_, MAuth *MAC_)
 {
@@ -88,7 +74,7 @@ bool MSend::Listen()
             goto exit;
         }
         FD_ZERO(&fds); FD_SET(lSocket,&fds);
-        if ( (result=::select(0,&fds,NULL,NULL,&timeout))==SOCKET_ERROR ) goto exit;
+        if ( (result=::select(0,&fds,nullptr,nullptr,&timeout))==SOCKET_ERROR ) goto exit;
     } while((result!=1)||(!FD_ISSET(lSocket,&fds)));
 
     return true;
@@ -99,11 +85,11 @@ exit:
 bool MSend::Accept()
 {
     // Принимаем соединение
-    rSocket=::accept(lSocket,NULL,NULL);
+    rSocket=::accept(lSocket,nullptr,nullptr);
     return rSocket!=INVALID_SOCKET;
 }
 //---------------------------------------------------------------------------
-bool MSend::Connect(const char *IP_, unsigned Time_)
+bool MSend::Connect(const wchar_t *IP_, unsigned Time_)
 {
     MSG Msg;
     sockaddr_in Address;
@@ -115,13 +101,21 @@ bool MSend::Connect(const char *IP_, unsigned Time_)
     // Задаем адрес компьютера
     memset(&Address,0,sizeof(Address));
     Address.sin_family=AF_INET;
-    Address.sin_port=::htons(SEND_Port);
-    Address.sin_addr.s_addr=::inet_addr(IP_);
-    if ( Address.sin_addr.s_addr==INADDR_NONE ) goto exit;
-    // Запускаем установление соединения
+	Address.sin_port=::htons(SEND_Port);
+//	Address.sin_addr.s_addr=::inet_addr(IP_);
+//	if ( Address.sin_addr.s_addr==INADDR_NONE ) goto exit;
+	const wchar_t *term;
+	if ( ::RtlIpv4StringToAddressW(
+		IP_,
+		TRUE,
+		&term,                              /// nullptr allowed ?
+		&Address.sin_addr
+		) != STATUS_SUCCESS ) goto exit;
+
+	// Запускаем установление соединения
 //    if ( ::connect(rSocket,(sockaddr*)&Address,sizeof(sockaddr_in))==SOCKET_ERROR ) goto exit;
-    ::connect(rSocket,(sockaddr*)&Address,sizeof(sockaddr_in));
-    // Ожидаем установления соединения
+	::connect(rSocket,(sockaddr*)&Address,sizeof(sockaddr_in));
+	// Ожидаем установления соединения
     Time_*=1000; stime=::GetTickCount();
     timeout.tv_sec=0; timeout.tv_usec=100*1000;
     do
@@ -134,7 +128,7 @@ bool MSend::Connect(const char *IP_, unsigned Time_)
         // Ожидаем возможности передать еще данные
         FD_ZERO(&w_fds); FD_SET(rSocket,&w_fds);
         FD_ZERO(&e_fds); FD_SET(rSocket,&e_fds);
-        if ( (result=::select(0,NULL,&w_fds,&e_fds,&timeout))==0 ) continue;
+        if ( (result=::select(0,nullptr,&w_fds,&e_fds,&timeout))==0 ) continue;
         if ( (result==SOCKET_ERROR)||FD_ISSET(rSocket,&e_fds) ) goto exit;
         if ( FD_ISSET(rSocket,&w_fds) ) return true;
     } while((::GetTickCount()-stime)<Time_);
@@ -163,7 +157,7 @@ bool MSend::Snd(char *Data_, unsigned Size_, unsigned Time_)
         // Ожидаем возможности передать еще данные
         FD_ZERO(&w_fds); FD_SET(rSocket,&w_fds);
         FD_ZERO(&e_fds); FD_SET(rSocket,&e_fds);
-        if ( (result=::select(0,NULL,&w_fds,&e_fds,&timeout))==0 ) continue;
+        if ( (result=::select(0,nullptr,&w_fds,&e_fds,&timeout))==0 ) continue;
         if ( (result==SOCKET_ERROR)||FD_ISSET(rSocket,&e_fds) ) goto exit;
         // Предаем очередную порцию данных
         if ( (result=::send(rSocket,Data_,Size_,0))==SOCKET_ERROR ) goto exit;
@@ -195,7 +189,7 @@ bool MSend::Rcv(char *Data_, unsigned Size_, unsigned Time_)
         // Ожидаем возможности принять еще данные
         FD_ZERO(&r_fds); FD_SET(rSocket,&r_fds);
         FD_ZERO(&e_fds); FD_SET(rSocket,&e_fds);
-        if ( (result=::select(0,&r_fds,NULL,&e_fds,&timeout))==0 ) continue;
+        if ( (result=::select(0,&r_fds,nullptr,&e_fds,&timeout))==0 ) continue;
         if ( (result==SOCKET_ERROR)||FD_ISSET(rSocket,&e_fds) ) goto exit;
         // Принимаем очередную порцию данных
         result=::recv(rSocket,Data_,Size_,0);
@@ -232,7 +226,7 @@ bool MSend::Disconnect(unsigned Time_)
         // Ожидаем возможности принять еще данные
         FD_ZERO(&r_fds); FD_SET(rSocket,&r_fds);
         FD_ZERO(&e_fds); FD_SET(rSocket,&e_fds);
-        if ( (result=::select(0,&r_fds,NULL,&e_fds,&timeout))==0 ) continue;
+        if ( (result=::select(0,&r_fds,nullptr,&e_fds,&timeout))==0 ) continue;
         if ( (result==SOCKET_ERROR)||FD_ISSET(rSocket,&e_fds) ) goto exit;
         // Проверяем пришел ли маркер конца файла
         result=::recv(rSocket,buffer,sizeof(buffer),0);
@@ -332,17 +326,17 @@ error:
 bool MSend::SndObject(MSLList *Obj_, unsigned Type_, unsigned Seed_)
 {
     Marray <char> Data;
-    char *pt;
-    unsigned Size;
+	char *pt;
+	unsigned Size;
 
-    try
-    {
-        // Определяем размер данных и выделяем память под буффер (+ seed,MAC)
-        Size=Obj_->GetAllDataSize()+sizeof(unsigned)+MAC_Size;
-        Data.Alloc(Size);
-        // Заполняем его
-        pt=MemSet(&Data[0],(unsigned)Seed_);
-        pt=Obj_->SetAllData(pt);
+	try
+	{
+		// Определяем размер данных и выделяем память под буффер (+ seed,MAC)
+		Size=Obj_->GetAllDataSize()+sizeof(unsigned)+MAC_Size;
+		Data.Alloc(Size);
+		// Заполняем его
+		pt=static_cast<char*>(MemSet(&Data[0],(unsigned)Seed_));
+		pt=static_cast<char*>(Obj_->SetAllData(pt));
         // Добавляем MAC и шифруем
         NetMAC->Calc(&Data[0],pt-&Data[0],pt,&Data[0]+Size-pt);
         BasicEncode(&Data[0],Size,NetCode);
@@ -395,8 +389,8 @@ DWORD WINAPI MSend::ThreadF(LPVOID Data)
     MSG msg;
     
     // Создаем очередь сообщений для потока
-///    ::PeekMessage(NULL,(HWND)-1,0,0,PM_NOREMOVE);
-    ::PeekMessage(&msg,NULL,WM_USER,WM_USER,PM_NOREMOVE);
+///    ::PeekMessage(nullptr,(HWND)-1,0,0,PM_NOREMOVE);
+    ::PeekMessage(&msg,nullptr,WM_USER,WM_USER,PM_NOREMOVE);
     ((MSend*)Data)->Break=false;
     // Обработка тела потока
     ((MSend*)Data)->ThreadP();
@@ -409,15 +403,15 @@ bool MSend::Start()
 {
     if ( !Init ) return false;
     // Создаем поток для выполнения отправки и приема данных
-    return (Thread=::CreateThread(NULL,0,&ThreadF,
-        (LPVOID)this,0,&ThreadID))!=NULL;
+    return (Thread=::CreateThread(nullptr,0,&ThreadF,
+        (LPVOID)this,0,&ThreadID))!=nullptr;
 }
 //---------------------------------------------------------------------------
 void MSend::Stop()
 {
     DWORD ExitCode;
     // Проверяем работает ли поток
-    if ( Thread==NULL ) return;
+    if ( Thread==nullptr ) return;
     if ( ::GetExitCodeThread(Thread,&ExitCode)&&(ExitCode==STILL_ACTIVE) )
     {
         // Посылаем потоку сообщение и ждем завершения его работы
@@ -426,29 +420,16 @@ void MSend::Stop()
     }
     // Закрываем описатель потока
     ::CloseHandle(Thread);
-    Thread=NULL;
+    Thread=nullptr;
     ThreadID=0;
 }
 //---------------------------------------------------------------------------
-MSendSrv::MSendSrv()
-{
-    Window=NULL;
-    Mode=mssNone;
-    Comps=NULL;
-    Comp=NULL;
-    DataObject=NULL;
-}
-//---------------------------------------------------------------------------
-MSendSrv::~MSendSrv()
-{
-}
-//---------------------------------------------------------------------------
-void MSendSrv::Event(MComputer *Computer_, int Event_)
+void MSendSrv::Event(MComputersItem *Computer_, int Event_)
 {
 //    ::Sleep(1000);  /// для визуальной отладки событий
-    if ( Window==NULL ) return;
-    ::PostMessage(Window,MinMsg+Event_,(WPARAM)Computer_,NULL);     // асинхронно
-//    ::SendMessage(Window,MinMsg+Event_,(WPARAM)Computer_,NULL);     // возможна блокировка потоков
+    if ( Window==nullptr ) return;
+	::PostMessage(Window, MinMsg+Event_, (WPARAM)Computer_, 0);			// асинхронно
+//    ::SendMessage(Window, MinMsg+Event_, (WPARAM)Computer_, nullptr);	// возможна блокировка потоков
 }
 //---------------------------------------------------------------------------
 void MSendSrv::ThreadP()
@@ -469,14 +450,14 @@ void MSendSrv::ThreadP()
     }
     //
     Mode=mssNone;
-    Event(NULL,mseFreeParam);
+    Event(nullptr,mseFreeParam);
 }
 //---------------------------------------------------------------------------
 void MSendSrv::ThreadSend()
 {
     unsigned Seed, RmtSeed, Size;
     unsigned char Type;
-    MComputer *pComp;
+    MComputersItem *pComp;
 
     for ( unsigned i=0; i<Comps->Count(); i++ )
     {
@@ -570,19 +551,19 @@ bool MSendSrv::NetFree()
     return MSend::NetFree();
 }
 //---------------------------------------------------------------------------
-bool MSendSrv::Send(Marray <MComputer*> *Computers_, MGames *Games_, MClOptions *Options_)
+bool MSendSrv::Send(Marray <MComputersItem*> *Computers_, MGames *Games_, MClOptions *Options_)
 {
     if ( Mode!=mssNone ) goto error;
 //    // Прерываем текущие сетевые операции
 //    Stop();
 
-    if ( Computers_==NULL ) goto error; /// throw ?
+    if ( Computers_==nullptr ) goto error; /// throw ?
     Comps=Computers_;
-    if ( Games_!=NULL )
+    if ( Games_!=nullptr )
     {
         DataObject=Games_;
         Mode=mssSendGames;
-    } else if ( Options_!=NULL )
+    } else if ( Options_!=nullptr )
     {
         DataObject=Options_;
         Mode=mssSendConfig;
@@ -594,19 +575,19 @@ error:
     return false;
 }
 //---------------------------------------------------------------------------
-bool MSendSrv::Get(MComputer *Computer_, MGames *Games_, MClOptions *Options_)
+bool MSendSrv::Get(MComputersItem *Computer_, MGames *Games_, MClOptions *Options_)
 {
     if ( Mode!=mssNone ) goto error;
 //    // Прерываем текущие сетевые операции
 //    Stop();
 
-    if ( Computer_==NULL ) goto error;  /// throw ?
+    if ( Computer_==nullptr ) goto error;  /// throw ?
     Comp=Computer_;
-    if ( Games_!=NULL )
+    if ( Games_!=nullptr )
     {
         DataObject=Games_;
         Mode=mssGetGames;
-    } else if ( Options_!=NULL )
+    } else if ( Options_!=nullptr )
     {
         DataObject=Options_;
         Mode=mssGetConfig;
@@ -621,15 +602,6 @@ error:
 void MSendSrv::Stop()
 {
     MSend::Stop();
-}
-//---------------------------------------------------------------------------
-MSendCl::MSendCl()
-{
-    State=NULL;
-}
-//---------------------------------------------------------------------------
-MSendCl::~MSendCl()
-{
 }
 //---------------------------------------------------------------------------
 void MSendCl::ThreadP()

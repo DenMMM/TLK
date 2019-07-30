@@ -14,96 +14,87 @@ MLog::MLog()
     User=0;
 }
 //---------------------------------------------------------------------------
-void MLog::AddSimpleEvent(unsigned char Type_)
+void MLog::AddSimpleEvent(MLogRecords::ItemType Type_)
 {
-    MLogRecordEvent *record;
-
-    // Добавляем запись в буфер и заполняем атрибуты
-    record=(MLogRecordEvent*)Records.Add(Type_);
+	// Добавляем запись в буфер и заполняем атрибуты
+	auto record=&dynamic_cast<MLogRecords::Event&>(
+		*Records.Add(Type_));
     record->SystemTime=SystemTime;
 }
 //---------------------------------------------------------------------------
 void MLog::AddStatesData(MStates *States_)
 {
-    MLogRecordDataStates *record;
-    unsigned i;
-
-    // Добавляем запись в буфер и заполняем атрибуты
-    record=(MLogRecordDataStates*)Records.Add(mlrDataStates);
-    record->SystemTime=SystemTime;
-    // Создаем массив состояний компьютеров и заполняем его
-    record->States.Alloc(States_->gCount());
-    i=0;
-    for ( MState *state=(MState*)States_->gFirst(); state;
-        state=(MState*)state->gNext(), i++ )
-    {
-        record->States[i]=*state;
-    }
+	// Добавляем запись в буфер и заполняем атрибуты
+	auto record=&dynamic_cast<MLogRecords::DataStates&>(
+		*Records.Add(MLogRecords::mlrDataStates));
+	record->SystemTime=SystemTime;
+	// Создаем массив состояний компьютеров и заполняем его
+	record->States.Alloc(States_->gCount());
+	size_t i=0;
+	for ( MStatesItem* state=States_->gFirst();
+		state; state=state->gNext(), i++ )
+	{
+		record->States[i]=*state;
+	}
 }
 //---------------------------------------------------------------------------
 void MLog::AddTariffsData(MTariffs *Tariffs_)
 {
-    MLogRecordDataTariffs *record;
-    unsigned i;
-
-    // Добавляем запись в буфер и заполняем атрибуты
-    record=(MLogRecordDataTariffs*)Records.Add(mlrDataTariffs);
-    record->SystemTime=SystemTime;
-    // Создаем массив тарифов и заполняем его
-    record->Tariffs.Alloc(Tariffs_->gCount());
-    i=0;
-    for ( MTariff *tariff=(MTariff*)Tariffs_->gFirst(); tariff;
-        tariff=(MTariff*)tariff->gNext(), i++ )
-    {
-        record->Tariffs[i]=*tariff;
-    }
+	// Добавляем запись в буфер и заполняем атрибуты
+	auto record=&dynamic_cast<MLogRecords::DataTariffs&>(
+		*Records.Add(MLogRecords::mlrDataTariffs));
+	record->SystemTime=SystemTime;
+	// Создаем массив тарифов и заполняем его
+	record->Items.Alloc(Tariffs_->gCount());
+	size_t i=0;
+	for ( MTariffsItem* tariff=Tariffs_->gFirst();
+		tariff; tariff=tariff->gNext(), i++ )
+	{
+		record->Items[i]=*tariff;
+	}
 }
 //---------------------------------------------------------------------------
 void MLog::AddFinesData(MFines *Fines_)
 {
-    MLogRecordDataFines *record;
-    unsigned i;
-
-    // Добавляем запись в буфер и заполняем атрибуты
-    record=(MLogRecordDataFines*)Records.Add(mlrDataFines);
-    record->SystemTime=SystemTime;
-    // Создаем массив штрафов и заполняем его
-    record->Fines.Alloc(Fines_->gCount());
-    i=0;
-    for ( MFine *fine=(MFine*)Fines_->gFirst();
-        fine; fine=(MFine*)fine->gNext(), i++ )
-    {
-        record->Fines[i]=*fine;
+	// Добавляем запись в буфер и заполняем атрибуты
+	auto record=&dynamic_cast<MLogRecords::DataFines&>(
+		*Records.Add(MLogRecords::mlrDataFines));
+	record->SystemTime=SystemTime;
+	// Создаем массив штрафов и заполняем его
+	record->Items.Alloc(Fines_->gCount());
+	size_t i=0;
+	for ( MFinesItem* fine=Fines_->gFirst();
+		fine; fine=fine->gNext(), i++ )
+	{
+		record->Items[i]=*fine;
     }
 }
 //---------------------------------------------------------------------------
 void MLog::AddUsersData(MUsers *Users_)
 {
-    MLogRecordDataUsers *record;
-    unsigned i;
-
-    // Добавляем запись в буфер и заполняем атрибуты
-    record=(MLogRecordDataUsers*)Records.Add(mlrDataUsers);
-    record->SystemTime=SystemTime;
-    // Создаем массив пользователей и заполняем его
-    record->Users.Alloc(Users_->ActiveCount());
-    i=0;
-    for ( MUser *user=(MUser*)Users_->gFirst(); user;
-        user=(MUser*)user->gNext(), i++ )
-    {
-        if ( !user->Active ) continue;
-        record->Users[i]=*user;
+	// Добавляем запись в буфер и заполняем атрибуты
+	auto record=&dynamic_cast<MLogRecords::DataUsers&>(
+		*Records.Add(MLogRecords::mlrDataUsers));
+	record->SystemTime=SystemTime;
+	// Создаем массив пользователей и заполняем его
+	record->Items.Alloc(Users_->ActiveCount());
+	size_t i=0;
+	for ( MUsersItem* user=Users_->gFirst();
+		user; user=user->gNext(), i++ )
+	{
+		if ( !user->Active ) continue;
+		record->Items[i]=*user;
     }
 }
 //---------------------------------------------------------------------------
-bool MLog::AddEvent(unsigned char Type_)
+bool MLog::AddEvent(MLogRecords::ItemType Type_)
 {
-    bool result;
+	bool result;
 
-    if ( !Opened ) return false;
+	if ( !Opened ) return false;
 
-    Records.Clear();
-    // Добавляем запись в буфер и дописываем к файлу лога безопасно
+	Records.Clear();
+	// Добавляем запись в буфер и дописываем к файлу лога безопасно
     AddSimpleEvent(Type_);
     result=Records.Attach(true);
     // Очищаем буфер
@@ -112,16 +103,16 @@ bool MLog::AddEvent(unsigned char Type_)
     return result;
 }
 //---------------------------------------------------------------------------
-bool MLog::AddMode(unsigned char Type_, char Number_, bool Apply_)
+bool MLog::AddMode(MLogRecords::ItemType Type_, char Number_, bool Apply_)
 {
     bool result=false;
-    MLogRecordMode *record;
+    MLogRecords::Mode *record;
 
     if ( !Opened ) return false;
 
     Records.Clear();
     // Добавляем запись в буфер и заполняем атрибуты
-    record=(MLogRecordMode*)Records.Add(Type_);
+	record=&dynamic_cast<MLogRecords::Mode&>(*Records.Add(Type_));
     record->SystemTime=SystemTime;
     record->Number=Number_;
     record->Apply=Apply_;
@@ -133,21 +124,21 @@ bool MLog::AddMode(unsigned char Type_, char Number_, bool Apply_)
     return result;
 }
 //---------------------------------------------------------------------------
-bool MLog::AddCmd(unsigned char Type_, char Number_)
+bool MLog::AddCmd(MLogRecords::ItemType Type_, char Number_)
 {
     bool result=false;
-    MLogRecordCmd *RecordCmd;
+	MLogRecords::Cmd *record;
 
-    if ( !Opened ) return false;
+	if ( !Opened ) return false;
 
-    Records.Clear();
-    // Добавляем запись в буфер и заполняем атрибуты
-    RecordCmd=(MLogRecordCmd*)Records.Add(Type_);
-    RecordCmd->SystemTime=SystemTime;
-    RecordCmd->Number=Number_;
-    // Добавляем к файлу безопасно
-    result=Records.Attach(true);
-    // Очищаем буфер
+	Records.Clear();
+	// Добавляем запись в буфер и заполняем атрибуты
+	record=&dynamic_cast<MLogRecords::Cmd&>(*Records.Add(Type_));
+	record->SystemTime=SystemTime;
+	record->Number=Number_;
+	// Добавляем к файлу безопасно
+	result=Records.Attach(true);
+	// Очищаем буфер
     Records.Clear();
 
     return result;
@@ -156,7 +147,7 @@ bool MLog::AddCmd(unsigned char Type_, char Number_)
 bool MLog::Rename() const
 {
     SYSTEMTIME begin_time, end_time;
-    char file_name[MAX_PATH];
+    wchar_t file_name[MAX_PATH];
     int name_length;
 
     // Конвертируем время начала и окончания (текущее) лога
@@ -164,29 +155,37 @@ bool MLog::Rename() const
         Int64ToSystemTime(&SystemTime,&end_time)) ) goto error;
 
     // Путь к файлу
-    name_length=sprintf(file_name,"%s\\",Directory);
-    // Полная дата создания файла
-    name_length+=sprintf(file_name+name_length,"%4d.%02d.%02d - ",
-        begin_time.wYear,begin_time.wMonth,begin_time.wDay);
+	name_length=swprintf(
+		file_name, sizeof(file_name),
+		L"%s\\", Directory.c_str());
+	// Полная дата создания файла
+	name_length+=swprintf(
+		file_name+name_length, sizeof(file_name)-name_length,
+		L"%4d.%02d.%02d - ", begin_time.wYear, begin_time.wMonth, begin_time.wDay);
     // Если года отличаются, то добавляем год закрытия файла
     if ( begin_time.wYear!=end_time.wYear )
-        name_length+=sprintf(file_name+name_length,
-            "%4d.",end_time.wYear);
+		name_length+=swprintf(
+			file_name+name_length, sizeof(file_name)-name_length,
+			L"%4d.", end_time.wYear);
     // Месяц и число закрытия файла
-    name_length+=sprintf(file_name+name_length,
-        "%02d.%02d",end_time.wMonth,end_time.wDay);
+	name_length+=swprintf(
+		file_name+name_length, sizeof(file_name)-name_length,
+		L"%02d.%02d", end_time.wMonth, end_time.wDay);
     // Если файл открыт и закрыт в один день, добавляем метку уникальности
     if ( (begin_time.wYear==end_time.wYear)&&
         (begin_time.wMonth==end_time.wMonth)&&
         (begin_time.wDay==end_time.wDay) )
     {
-        name_length+=sprintf(file_name+name_length,
-            " (%03x)",end_time.wMilliseconds);
+		name_length+=swprintf(
+			file_name+name_length, sizeof(file_name)-name_length,
+			L" (%03x)", end_time.wMilliseconds);
     }
     // Окончание имени файла
-    sprintf(file_name+name_length,".TLG");
+	swprintf(
+		file_name+name_length, sizeof(file_name)-name_length,
+		L".TLG");
     // Переименовываем файл
-    if ( !::MoveFile(Records.DefaultFile.c_str(),file_name) ) goto error;
+	if ( !::MoveFile(Records.DefaultFile.c_str(), file_name) ) goto error;
 
     return true;
 error:
@@ -207,8 +206,9 @@ bool MLog::Begin(
     BeginTime=SystemTime;
     Rename();
     // Сохраняем обязательные данные _без перезаписи_ файла
-    AddSimpleEvent(mlrBegin);           // Время начала нового лога
-    AddStatesData(States_);             // Состояния компьютеров
+	AddSimpleEvent(
+		MLogRecords::mlrBegin);			// Время начала нового лога
+	AddStatesData(States_);             // Состояния компьютеров
     AddTariffsData(Tariffs_);           // Описания тарифов
     AddFinesData(Fines_);               // Описания штрафов
     AddUsersData(Users_);               // Данные о пользователях
@@ -221,7 +221,7 @@ bool MLog::Begin(
 //---------------------------------------------------------------------------
 bool MLog::Open()
 {
-    MLogRecord *record;
+    MLogRecordsItem *record;
 
     Opened=false;
     Records.Clear();
@@ -229,32 +229,42 @@ bool MLog::Open()
     if ( !Records.Load() ) goto error;
 
     // Производим простейшую проверку
-    record=(MLogRecord*)Records.gFirst();
-    if ( (record==NULL)||(record->gTypeID()!=mlrBegin) ) goto error;
-    // Запоминаем время, когда лог был начат
-    BeginTime=((MLogRecordBegin*)record)->SystemTime;
-    //
-    record=(MLogRecord*)record->gNext();
-    if ( (record==NULL)||(record->gTypeID()!=mlrDataStates) ) goto error;
-    record=(MLogRecord*)record->gNext();
-    if ( (record==NULL)||(record->gTypeID()!=mlrDataTariffs) ) goto error;
-    record=(MLogRecord*)record->gNext();
-    if ( (record==NULL)||(record->gTypeID()!=mlrDataFines) ) goto error;
-    record=(MLogRecord*)record->gNext();
-    if ( (record==NULL)||(record->gTypeID()!=mlrDataUsers) ) goto error;
-    if ( Records.gLast()->gTypeID()==mlrEnd ) goto error;
-    Opened=true;
+	record=Records.gFirst();
+	if ( (record==nullptr)||
+		(record->gTypeID() != MLogRecords::LogBegin::TypeID) ) goto error;
+	// Запоминаем время, когда лог был начат
+	BeginTime=dynamic_cast<MLogRecords::LogBegin&>(*record).SystemTime;
+	//
+	record=record->gNext();
+	if ( (record==nullptr)||
+		(record->gTypeID() != MLogRecords::DataStates::TypeID) ) goto error;
+
+	record=record->gNext();
+	if ( (record==nullptr)||
+		(record->gTypeID() != MLogRecords::DataTariffs::TypeID) ) goto error;
+
+	record=record->gNext();
+	if ( (record==nullptr)||
+		(record->gTypeID() != MLogRecords::DataFines::TypeID) ) goto error;
+
+	record=record->gNext();
+	if ( (record==nullptr)||
+		(record->gTypeID() != MLogRecords::DataUsers::TypeID) ) goto error;
+
+	record=Records.gLast();
+	if ( record->gTypeID() == MLogRecords::LogEnd::TypeID ) goto error;
+//	if ( Records.gLast()->gTypeID() == MLogRecords::LogEnd::TypeID ) goto error;
+	Opened=true;
 
     // Определяем какой пользователь последним открыл смену
     User=0;
-    for ( record=(MLogRecord*)Records.gLast(); record;
-        record=(MLogRecord*)record->gPrev() )
+	for ( record=Records.gLast(); record; record=record->gPrev() )
     {
-        unsigned char type=record->gTypeID();
-        if ( type==mlrLogOut ) break;
-        else if ( type==mlrLogIn )
+		unsigned char type=record->gTypeID();
+		if ( type == MLogRecords::AppLogOut::TypeID ) break;
+		else if ( type == MLogRecords::AppLogIn::TypeID )
         {
-            User=((MLogRecordLogIn*)record)->User;
+			User=dynamic_cast<MLogRecords::AppLogIn&>(*record).User;
             break;
         }
     }
@@ -270,7 +280,7 @@ bool MLog::End()
     if ( !Opened ) return false;
     
     // Добавляем запись о закрытии файла лога
-    Opened=!AddEvent(mlrEnd);
+	Opened=!AddEvent(MLogRecords::mlrEnd);
     // Если добавилась, пытаемся переименовать файл лога
     return (!Opened)&&Rename();
 }
@@ -324,12 +334,13 @@ bool MLog::AddStart(
 
     Records.Clear();
     // Добавляем записи в список и дописываем данные к файлу лога
-    AddSimpleEvent(mlrStart);       // Запуск админского модуля
-    AddStatesData(States_);         // Состояния компьютеров
-    AddTariffsData(Tariffs_);       // Описания тарифов
-    AddFinesData(Fines_);           // Описания штрафов
-    AddUsersData(Users_);           // Данные о пользователях
-    result=Records.Attach(true);    // Сохраняем новые записи в файле
+	AddSimpleEvent(
+		MLogRecords::mlrStart);				// Запуск админского модуля
+	AddStatesData(States_);         		// Состояния компьютеров
+	AddTariffsData(Tariffs_);       		// Описания тарифов
+	AddFinesData(Fines_);           		// Описания штрафов
+	AddUsersData(Users_);           		// Данные о пользователях
+	result=Records.Attach(true);    		// Сохраняем новые записи в файле
     // Очищаем буфер
     Records.Clear();
     
@@ -338,23 +349,23 @@ bool MLog::AddStart(
 //---------------------------------------------------------------------------
 bool MLog::AddStop()
 {
-    return AddEvent(mlrStop);
+    return AddEvent(MLogRecords::mlrStop);
 }
 //---------------------------------------------------------------------------
 bool MLog::AddConfig(bool Open_)
 {
     bool result=false;
-    MLogRecordConfig *record;
+    MLogRecords::AppConfig *record;
 
     if ( !Opened ) return false;
     
     Records.Clear();
     // Добавляем запись в буфер
-    record=(MLogRecordConfig*)Records.Add(mlrConfig);
-    if ( record==NULL ) goto error;
+	record=&dynamic_cast<MLogRecords::AppConfig&>(
+		*Records.Add(MLogRecords::mlrConfig));
     // Заполняем атрибуты
     record->SystemTime=SystemTime;
-    record->Open=Open_;
+    record->Opened=Open_;
     // Добавляем к файлу безопасно
     result=Records.Attach(true);
     // Очищаем буфер
@@ -372,7 +383,8 @@ bool MLog::AddComputers(MStates *States_)
 
     Records.Clear();
     // Добавляем записи в список и дописываем данные к файлу лога
-    AddSimpleEvent(mlrComputers);       // Изменен список компьютеров
+	AddSimpleEvent(
+		MLogRecords::mlrComputers);		// Изменен список компьютеров
     AddStatesData(States_);             // Данные состояний компьютеров
     result=Records.Attach(true);        // Сохраняем новые записи в файле
     // Очищаем буфер
@@ -389,7 +401,8 @@ bool MLog::AddTariffs(MTariffs *Tariffs_)
 
     Records.Clear();
     // Добавляем записи в список и дописываем данные к файлу лога
-    AddSimpleEvent(mlrTariffs);         // Изменен список тарифов
+	AddSimpleEvent(
+		MLogRecords::mlrTariffs);		// Изменен список тарифов
     AddTariffsData(Tariffs_);           // Данные тарифов
     result=Records.Attach(true);        // Сохраняем новые записи в файле
     // Очищаем буфер
@@ -406,7 +419,8 @@ bool MLog::AddFines(MFines *Fines_)
 
     Records.Clear();
     // Добавляем записи в список и дописываем данные к файлу лога
-    AddSimpleEvent(mlrFines);           // Изменен список штрафов
+	AddSimpleEvent(
+		MLogRecords::mlrFines);			// Изменен список штрафов
     AddFinesData(Fines_);               // Данные штрафов
     result=Records.Attach(true);        // Сохраняем новые записи в файле
     // Очищаем буфер
@@ -423,7 +437,8 @@ bool MLog::AddUsers(MUsers *Users_)
 
     Records.Clear();
     // Добавляем записи в список и дописываем данные к файлу лога
-    AddSimpleEvent(mlrUsers);           // Изменен список пользователей
+	AddSimpleEvent(
+		MLogRecords::mlrUsers);			// Изменен список пользователей
     AddUsersData(Users_);               // Данные пользователей
     result=Records.Attach(true);        // Сохраняем новые записи в файле
     // Очищаем буфер
@@ -434,20 +449,21 @@ bool MLog::AddUsers(MUsers *Users_)
 //---------------------------------------------------------------------------
 bool MLog::AddOptions()
 {
-    return AddEvent(mlrOptions);
+    return AddEvent(MLogRecords::mlrOptions);
 }
 //---------------------------------------------------------------------------
 bool MLog::AddLogIn(unsigned UserID_)
 {
     bool result=false;
-    MLogRecordLogIn *record;
+    MLogRecords::AppLogIn *record;
 
     if ( !Opened ) return false;
 
     Records.Clear();
     // Добавляем запись в буфер и заполняем атрибуты
-    record=(MLogRecordLogIn*)Records.Add(mlrLogIn);
-    record->SystemTime=SystemTime;
+	record=&dynamic_cast<MLogRecords::AppLogIn&>(
+		*Records.Add(MLogRecords::mlrLogIn));
+	record->SystemTime=SystemTime;
     record->User=UserID_;
     // Добавляем к файлу безопасно
     result=Records.Attach(true);
@@ -462,22 +478,22 @@ error:
 //---------------------------------------------------------------------------
 bool MLog::AddLogOut()
 {
-    bool result=AddEvent(mlrLogOut);
+    bool result=AddEvent(MLogRecords::mlrLogOut);
     if ( result ) User=0;
     return result;
 }
 //---------------------------------------------------------------------------
-bool MLog::AddRun(MRunTime *Time_)
+bool MLog::AddRun(MTariffRunTimesItem *Time_)
 {
     bool result=false;
-    MLogRecordRun *record;
+    MLogRecords::CompRun *record;
 
     if ( !Opened ) return false;
 
     Records.Clear();
     // Добавляем запись в буфер
-    record=(MLogRecordRun*)Records.Add(mlrRun);
-    if ( record==NULL ) goto error;
+	record=&dynamic_cast<MLogRecords::CompRun&>(
+		*Records.Add(MLogRecords::mlrRun));
     // Заполняем атрибуты
     record->SystemTime=SystemTime;
     record->Number=Time_->Number;
@@ -501,14 +517,14 @@ error:
 bool MLog::AddFine(char Number_, unsigned FineID_, short Time_)
 {
     bool result=false;
-    MLogRecordFine *record;
+    MLogRecords::CompFine *record;
 
     if ( !Opened ) return false;
 
     Records.Clear();
     // Добавляем запись
-    record=(MLogRecordFine*)Records.Add(mlrFine);
-    if ( record==NULL ) goto error;
+	record=&dynamic_cast<MLogRecords::CompFine&>(
+		*Records.Add(MLogRecords::mlrFine));
     // Заполняем атрибуты
     record->SystemTime=SystemTime;
     record->Number=Number_;
@@ -526,14 +542,14 @@ error:
 bool MLog::AddExchange(char From_, char To_)
 {
     bool result=false;
-    MLogRecordExchange *record;
+    MLogRecords::CompExchange *record;
 
     if ( !Opened ) return false;
 
     Records.Clear();
     // Добавляем запись
-    record=(MLogRecordExchange*)Records.Add(mlrExchange);
-    if ( record==NULL ) goto error;
+	record=&dynamic_cast<MLogRecords::CompExchange&>(
+		*Records.Add(MLogRecords::mlrExchange));
     // Заполняем атрибуты
     record->SystemTime=SystemTime;
     record->From=From_;
@@ -549,41 +565,41 @@ error:
 //---------------------------------------------------------------------------
 bool MLog::AddLock(char Number_, bool Apply_)
 {
-    return AddMode(mlrLock,Number_,Apply_);
+	return AddMode(MLogRecords::mlrLock, Number_, Apply_);
 }
 //---------------------------------------------------------------------------
 bool MLog::AddPause(char Number_, bool Apply_)
 {
-    return AddMode(mlrPause,Number_,Apply_);
+	return AddMode(MLogRecords::mlrPause, Number_, Apply_);
 }
 //---------------------------------------------------------------------------
 bool MLog::AddOpen(char Number_, bool Apply_)
 {
-    return AddMode(mlrOpen,Number_,Apply_);
+    return AddMode(MLogRecords::mlrOpen, Number_, Apply_);
 }
 //---------------------------------------------------------------------------
 bool MLog::AddPowerOn(char Number_)
 {
     return true;
-//    return AddCmd(mlrPowerOn,Number_);   /// отключил, чтобы не засорять лог
+//    return AddCmd(MLogRecords::mlrPowerOn, Number_);   /// отключил, чтобы не засорять лог
 }
 //---------------------------------------------------------------------------
 bool MLog::AddReboot(char Number_)
 {
     return true;
-//    return AddCmd(mlrReboot,Number_);
+//    return AddCmd(MLogRecords::mlrReboot, Number_);
 }
 //---------------------------------------------------------------------------
 bool MLog::AddShutdown(char Number_)
 {
-    return true;
-//    return AddCmd(mlrShutdown,Number_);
+	return true;
+//    return AddCmd(MLogRecords::mlrShutdown, Number_);
 }
 //---------------------------------------------------------------------------
-void MLog::SetDefault(const std::string &Dir_, unsigned Code_)
+void MLog::SetDefault(const std::wstring &Dir_, unsigned Code_)
 {
     Directory=Dir_;
-    Records.SetDefaultFile(Dir_+"\\CURRENT.TLG",Code_);
+    Records.SetDefaultFile(Dir_+L"\\CURRENT.TLG",Code_);
 }
 //---------------------------------------------------------------------------
 void MLog::Timer(__int64 SystemTime_)

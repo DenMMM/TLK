@@ -16,7 +16,7 @@ __fastcall TFormOptions::TFormOptions(TComponent* Owner)
 void __fastcall TFormOptions::FormShow(TObject *Sender)
 {
     // Копируем настройки в буфер
-    TmpOptions.Copy(Options);
+	TmpOptions.Copy(Options.get());
 
     {
         int Index;
@@ -43,15 +43,15 @@ void __fastcall TFormOptions::FormShow(TObject *Sender)
 void __fastcall TFormOptions::FormClose(TObject *Sender,
       TCloseAction &Action)
 {
-    EditCostDialogTime->Text="";
-    EditCostPrecision->Text="";
-    EditFilterFreeTime->Text="";
+	EditCostDialogTime->Text=L"";
+	EditCostPrecision->Text=L"";
+	EditFilterFreeTime->Text=L"";
 }
 //---------------------------------------------------------------------------
 void __fastcall TFormOptions::ComboBoxLogPeriodExit(TObject *Sender)
 {
-    switch ( ((TComboBox*)Sender)->ItemIndex )
-    {
+	switch ( dynamic_cast<TComboBox&>(*Sender).ItemIndex )
+	{
         case 0: TmpOptions.LogPeriod=mlpDay; break;
         case 1: TmpOptions.LogPeriod=mlpWeek; break;
         case 2: TmpOptions.LogPeriod=mlpMonth; break;
@@ -95,8 +95,10 @@ error:
 //---------------------------------------------------------------------------
 void __fastcall TFormOptions::CheckBoxRightPauseExit(TObject *Sender)
 {
-    if ( ((TCheckBox*)Sender)->Checked ) TmpOptions.UsersRights|=murPause;
-    else TmpOptions.UsersRights&=~murPause;
+	if ( dynamic_cast<TCheckBox&>(*Sender).Checked )
+		TmpOptions.UsersRights|=murPause;
+	else
+		TmpOptions.UsersRights&=~murPause;
 }
 //---------------------------------------------------------------------------
 void __fastcall TFormOptions::ButtonSaveClick(TObject *Sender)

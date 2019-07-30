@@ -1,9 +1,9 @@
 object FormUsersUpTime: TFormUsersUpTime
   Left = 214
   Top = 187
-  Width = 743
-  Height = 472
   Caption = #1057#1084#1077#1085#1099
+  ClientHeight = 436
+  ClientWidth = 727
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -12,12 +12,11 @@ object FormUsersUpTime: TFormUsersUpTime
   Font.Style = []
   FormStyle = fsMDIChild
   OldCreateOrder = False
-  Position = poDefaultPosOnly
   Visible = True
   OnClose = FormClose
   DesignSize = (
-    735
-    445)
+    727
+    436)
   PixelsPerInch = 96
   TextHeight = 13
   object Bevel2: TBevel

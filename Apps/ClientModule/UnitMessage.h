@@ -17,7 +17,7 @@ private:
     static DWORD WINAPI ThreadFunc(LPVOID Data);
     void ThreadProc();
 public:
-    std::string File;
+    std::wstring File;
 
     bool Show();
     void Stop();

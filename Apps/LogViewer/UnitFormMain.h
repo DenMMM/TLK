@@ -10,12 +10,13 @@
 #include <ComCtrls.hpp>
 #include <Dialogs.hpp>
 #include <ImgList.hpp>
+#include <System.ImageList.hpp>
 //---------------------------------------------------------------------------
 #include "UnitLogRecords.h"
 //---------------------------------------------------------------------------
 struct MLogFile
 {
-    char Name[MAX_PATH+1];
+    std::wstring Name;
     MLogRecords Records;
 };
 //---------------------------------------------------------------------------

@@ -1,5 +1,6 @@
 //---------------------------------------------------------------------------
 #include <vcl.h>
+#include <memory>
 #pragma hdrstop
 
 #include "UnitFormOptionsPass.h"
@@ -59,30 +60,29 @@ error:
 void __fastcall TFormOptionsPass::FormClose(TObject *Sender,
       TCloseAction &Action)
 {
-    EditPassword->Text=""; EditPassword->ClearUndo();
-    EditNew->Text=""; EditNew->ClearUndo();
-    EditConfirm->Text=""; EditConfirm->ClearUndo();
+	EditPassword->Text=L""; EditPassword->ClearUndo();
+	EditNew->Text=L""; EditNew->ClearUndo();
+    EditConfirm->Text=L""; EditConfirm->ClearUndo();
 }
 //---------------------------------------------------------------------------
 void __fastcall TFormOptionsPass::ButtonGenerateClick(TObject *Sender)
 {
-    Mptr <TFormNewPass> form;
+	std::unique_ptr <TFormNewPass> form;
     char buffer[MAX_OptPassLen+1];
 
     try
     {
-        form(new TFormNewPass(0));
-        if ( !form->Execute(buffer,5,MAX_OptPassLen,
-            Left+20,Top+30,true) ) return;
-        EditNew->Text=buffer;
-        EditConfirm->Text=""; EditConfirm->ClearUndo();
-        ActiveControl=EditConfirm;
-    }
-    catch (Exception &ex)
-    {
-        Application->ShowException(&ex);
-        return;
-    }
+		form.reset(new TFormNewPass(0));
+		if ( !form->Execute(buffer,5,MAX_OptPassLen,
+			Left+20,Top+30,true) ) return;
+		EditNew->Text=buffer;
+		EditConfirm->Text=L""; EditConfirm->ClearUndo();
+		ActiveControl=EditConfirm;
+	}
+	catch (Exception &ex)
+	{
+		Application->ShowException(&ex);
+	}
 }
 //---------------------------------------------------------------------------
 

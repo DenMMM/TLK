@@ -104,7 +104,6 @@ object FormTariffTimes: TFormTariffTimes
     Width = 149
     Height = 21
     Style = csDropDownList
-    ItemHeight = 13
     TabOrder = 1
     OnClick = ComboBoxTypeClick
     Items.Strings = (
@@ -126,7 +125,6 @@ object FormTariffTimes: TFormTariffTimes
     Width = 41
     Height = 21
     Style = csDropDownList
-    ItemHeight = 13
     TabOrder = 2
     OnClick = ComboBoxBeginHClick
   end
@@ -136,7 +134,6 @@ object FormTariffTimes: TFormTariffTimes
     Width = 41
     Height = 21
     Style = csDropDownList
-    ItemHeight = 13
     TabOrder = 3
     OnClick = ComboBoxBeginHClick
   end
@@ -146,7 +143,6 @@ object FormTariffTimes: TFormTariffTimes
     Width = 41
     Height = 21
     Style = csDropDownList
-    ItemHeight = 13
     TabOrder = 4
     OnClick = ComboBoxEndHClick
   end
@@ -156,7 +152,6 @@ object FormTariffTimes: TFormTariffTimes
     Width = 41
     Height = 21
     Style = csDropDownList
-    ItemHeight = 13
     TabOrder = 5
     OnClick = ComboBoxEndHClick
   end
@@ -166,7 +161,6 @@ object FormTariffTimes: TFormTariffTimes
     Width = 41
     Height = 21
     Style = csDropDownList
-    ItemHeight = 13
     TabOrder = 6
     OnClick = ComboBoxSizeHClick
   end
@@ -176,7 +170,6 @@ object FormTariffTimes: TFormTariffTimes
     Width = 41
     Height = 21
     Style = csDropDownList
-    ItemHeight = 13
     TabOrder = 7
     OnClick = ComboBoxSizeHClick
   end

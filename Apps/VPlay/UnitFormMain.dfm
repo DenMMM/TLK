@@ -1,10 +1,10 @@
 object FormMain: TFormMain
   Left = 287
   Top = 209
-  Width = 520
-  Height = 411
   ActiveControl = TrackBarVolume
   Caption = 'VPlay'
+  ClientHeight = 375
+  ClientWidth = 504
   Color = clBlack
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -16,6 +16,9 @@ object FormMain: TFormMain
   OnClose = FormClose
   OnResize = FormResize
   OnShow = FormShow
+  DesignSize = (
+    504
+    375)
   PixelsPerInch = 96
   TextHeight = 13
   object PanelControl: TPanel
@@ -25,6 +28,9 @@ object FormMain: TFormMain
     Height = 56
     Anchors = [akLeft, akRight, akBottom]
     TabOrder = 0
+    DesignSize = (
+      512
+      56)
     object BevelState: TBevel
       Left = 2
       Top = 32
@@ -228,12 +234,7 @@ object FormMain: TFormMain
       Height = 12
       Anchors = [akTop, akRight]
       Max = 100
-      Orientation = trHorizontal
       PageSize = 0
-      Frequency = 1
-      Position = 0
-      SelEnd = 0
-      SelStart = 0
       TabOrder = 0
       ThumbLength = 9
       TickMarks = tmBoth

@@ -1,11 +1,11 @@
 object FormRun: TFormRun
   Left = 338
   Top = 236
-  Width = 474
-  Height = 316
   BorderIcons = []
   BorderStyle = bsSizeToolWin
   Caption = #1047#1072#1087#1091#1089#1082' '#1082#1086#1084#1087#1100#1102#1090#1077#1088#1086#1074
+  ClientHeight = 280
+  ClientWidth = 458
   Color = clBtnFace
   Constraints.MaxHeight = 500
   Constraints.MaxWidth = 474
@@ -20,8 +20,8 @@ object FormRun: TFormRun
   OnClose = FormClose
   OnShow = FormShow
   DesignSize = (
-    466
-    289)
+    458
+    280)
   PixelsPerInch = 96
   TextHeight = 13
   object Bevel1: TBevel
@@ -156,7 +156,6 @@ object FormRun: TFormRun
     Height = 21
     Style = csDropDownList
     Anchors = [akLeft, akBottom]
-    ItemHeight = 13
     TabOrder = 1
     OnClick = ComboBoxTariffClick
   end
@@ -167,7 +166,6 @@ object FormRun: TFormRun
     Height = 21
     Style = csDropDownList
     Anchors = [akLeft, akBottom]
-    ItemHeight = 13
     MaxLength = 6
     TabOrder = 2
     OnChange = ComboBoxTimeChange
@@ -180,8 +178,9 @@ object FormRun: TFormRun
     Height = 25
     Anchors = [akLeft, akBottom]
     Caption = #1047#1072#1082#1088#1099#1090#1100
-    TabOrder = 9
     Kind = bkCancel
+    NumGlyphs = 2
+    TabOrder = 9
   end
   object RadioButtonCash: TRadioButton
     Left = 20
@@ -213,7 +212,6 @@ object FormRun: TFormRun
     Anchors = [akLeft, akBottom]
     Color = clBtnFace
     Enabled = False
-    ItemHeight = 13
     TabOrder = 6
   end
   object RadioButtonSubs: TRadioButton
@@ -234,7 +232,6 @@ object FormRun: TFormRun
     Anchors = [akLeft, akBottom]
     Color = clBtnFace
     Enabled = False
-    ItemHeight = 13
     TabOrder = 7
   end
   object ProgressBarTime: TProgressBar
@@ -243,7 +240,6 @@ object FormRun: TFormRun
     Width = 99
     Height = 10
     Anchors = [akLeft, akBottom]
-    Min = 0
     Max = 180
     Smooth = True
     TabOrder = 10
@@ -255,8 +251,6 @@ object FormRun: TFormRun
     Height = 25
     Anchors = [akLeft, akBottom]
     Caption = #1047#1072#1087#1091#1089#1090#1080#1090#1100
-    TabOrder = 8
-    OnClick = BitBtnRunClick
     Glyph.Data = {
       F2010000424DF201000000000000760000002800000024000000130000000100
       0400000000007C01000000000000000000001000000000000000000000000000
@@ -275,6 +269,8 @@ object FormRun: TFormRun
       A224333333333333338F38F300003333333333333A223333333333333338F8F3
       000033333333333333A3333333333333333383330000}
     NumGlyphs = 2
+    TabOrder = 8
+    OnClick = BitBtnRunClick
   end
   object TimerDialogLock: TTimer
     Enabled = False

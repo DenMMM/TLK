@@ -2,8 +2,6 @@
 #ifndef UnitServiceH
 #define UnitServiceH
 //---------------------------------------------------------------------------
-class MSvcProcess;
-//---------------------------------------------------------------------------
 #ifndef _WIN32_WINNT
 #define _WIN32_WINNT 0x0501
 #endif
@@ -21,8 +19,10 @@ class MSvcProcess;
 #include "UnitAuth.h"
 #include "UnitShared.h"
 //---------------------------------------------------------------------------
-#define SVC_Name            "TLKClient"
-#define SVC_Desc            "TLK Client"
+class MSvcProcess;
+//---------------------------------------------------------------------------
+#define SVC_Name            L"TLKClient"
+#define SVC_Desc            L"TLK Client"
 //---------------------------------------------------------------------------
 #define scmSTOP             WM_USER+1
 #define scmLOGON            WM_USER+2
@@ -47,7 +47,7 @@ private:
     MSendCl Send;
     MShared Shared;
 
-    char ExeName[MAX_PATH+1];
+    wchar_t ExeName[MAX_PATH+1];
     HANDLE hUserToken;
     HANDLE hProcessShell;
     UINT uTimer;
@@ -56,9 +56,9 @@ private:
     int TimeMsgEndTime;
     int TimeToReboot;
 
-    static bool CheckUser(HANDLE hUser_, const char *Login_);
-    HANDLE StartChild(HANDLE hProcess_, const char *Cmd_);
-    void StartShell() { hProcessShell=StartChild(hProcessShell,"/shell"); }
+	static bool CheckUser(HANDLE hUser_, const wchar_t *Login_);
+    HANDLE StartChild(HANDLE hProcess_, const wchar_t *Cmd_);
+    void StartShell() { hProcessShell=StartChild(hProcessShell, L"/shell"); }
     void Route(bool Enable_);
 
     void OnTimer();
@@ -70,16 +70,20 @@ public:
     void OnExecute();
     void OnStop();
 
-    MSvcProcess()
-    {
-        hUserToken=INVALID_HANDLE_VALUE;
-        hProcessShell=INVALID_HANDLE_VALUE;
-        uTimer=0;
-        TimeMsgWarn=0;
-        MsgWarnShowed=false;
-        TimeMsgEndTime=0;
-        TimeToReboot=0;
-    }
+	MSvcProcess():
+		hUserToken(INVALID_HANDLE_VALUE),
+		hProcessShell(INVALID_HANDLE_VALUE),
+		uTimer(0),
+		TimeMsgWarn(0),
+		MsgWarnShowed(false),
+		TimeMsgEndTime(0),
+		TimeToReboot(0)
+	{
+	}
+
+	~MSvcProcess()
+	{
+	}
 };
 //---------------------------------------------------------------------------
 #endif

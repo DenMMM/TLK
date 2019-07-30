@@ -23,21 +23,20 @@ unsigned MAuth::GetDataSize() const
         sizeof(Key);
 }
 
-char *MAuth::SetData(char *Data_) const
+void *MAuth::SetData(void *Data_) const
 {
-    Data_=MemSetBLine(Data_,Key,sizeof(Key));
+    Data_=MemSetBin(Data_,Key,sizeof(Key));
     return Data_;
 }
 
-const char *MAuth::GetData(const char *Data_, const char *Limit_)
+const void *MAuth::GetData(const void *Data_, const void *Limit_)
 {
-    if ( (Data_=MemGetBLine(Data_,Key,sizeof(Key),Limit_))==NULL ) goto error;
-    return Data_;
-error:
-    return NULL;
+	return
+		(Data_=MemGetBin(Data_,Key,sizeof(Key),Limit_))
+		? Data_: nullptr;
 }
 
-void MAuth::SetKey(const char *Key_, int Size_)
+void MAuth::SetKey(const void *Key_, size_t Size_)
 {
     if ( Size_!=sizeof(Key) )
     {
@@ -46,10 +45,10 @@ void MAuth::SetKey(const char *Key_, int Size_)
             "Не допустимый размер ключа."
             );
     }
-    memcpy(Key,Key_,sizeof(Key));
+	memcpy(Key,Key_,sizeof(Key));
 }
 
-void MAuth::GetKey(char *Buff_, int Size_) const 
+void MAuth::GetKey(void *Buff_, size_t Size_) const
 {
     if ( Size_!=sizeof(Key) )
     {
@@ -61,27 +60,29 @@ void MAuth::GetKey(char *Buff_, int Size_) const
     memcpy(Buff_,Key,sizeof(Key));
 }
 
-void MAuth::Calc(const char *Data_, int DataSize_, char *MAC_, int MACSize_) const 
+void MAuth::Calc(const void *Data_, size_t DataSize_, void *MAC_, size_t MACSize_) const
 {
-    hmac_sha(MAC_Alg,
-        Key,sizeof(Key),
-        Data_,DataSize_,
-        MAC_,MACSize_);
+	hmac_sha(
+		MAC_Alg,
+		Key, sizeof(Key),
+		static_cast<const unsigned char*>(Data_), DataSize_,
+		static_cast<unsigned char*>(MAC_), MACSize_);
 }
 
-bool MAuth::Check(const char *Data_, int DataSize_, const char *MAC_, int MACSize_) const
+bool MAuth::Check(const void *Data_, size_t DataSize_, const void *MAC_, size_t MACSize_) const
 {
     unsigned char mac[MAC_Size];
 
     // Если длины MAC отличаются, то и сравнивать нечего
     if ( MACSize_!=sizeof(mac) ) return false;
-    // Вычисляем MAC для поданных данных с известным нам ключем
-    hmac_sha(MAC_Alg,
-        Key,sizeof(Key),
-        Data_,DataSize_,
-        mac,sizeof(mac));
+	// Вычисляем MAC для данных с известным нам ключем
+	hmac_sha(
+		MAC_Alg,
+		Key, sizeof(Key),
+		static_cast<const unsigned char*>(Data_), DataSize_,
+		static_cast<unsigned char*>(mac), sizeof(mac));
     // Сравниваем MAC
-    return MemSlowCmp(MAC_,mac,sizeof(mac));
-//    return memcmp(MAC_,mac,sizeof(mac))==0;
+	return MemSlowCmp(MAC_, mac, sizeof(mac));
+//    return memcmp(MAC_, mac, sizeof(mac)) == 0;
 }
 //---------------------------------------------------------------------------

@@ -27,12 +27,12 @@ void __fastcall TFormFine::FormShow(TObject *Sender)
         item=FormMain->ListViewComputers->GetNextItem(item,sdAll,is) )
     {
         // Проверим применим ли к компьютеру штраф
-        MState *state=(MState*)item->Data;
+        auto state=reinterpret_cast<MStatesItem*>(item->Data);
         if ( !state->CmdFine(0,true) ) continue;
         // Заполним доп. атрибуты
         ApplyFines[i].State=state;
         ApplyFines[i].Number=state->Associated();
-        ApplyFines[i].Fine=NULL;
+        ApplyFines[i].Fine=nullptr;
         ApplyFines[i].Wait=false;
         ApplyFines[i].Warn=false;
         // Добавим строку в список компьютеров и свяжем с атрибутами
@@ -45,20 +45,26 @@ void __fastcall TFormFine::FormShow(TObject *Sender)
     }
 
     // Заполняем список времен штрафов
-    for ( MFine *fine=(MFine*)Fines->gFirst(); fine;
-        fine=(MFine*)fine->gNext() )
-    {
-        char line[MAX_FineDescrLen+13+1]; *line=0;
-        strcat(line,fine->Descr.c_str());
-        strcat(line,"  (");
-        if ( fine->Time==(24*60) ) strcat(line,"все время)");
-        else sprintf(line+strlen(line),"%.2i мин.)",fine->Time);
-        ComboBoxTime->Items->Add(line);
-    }
+	for ( MFinesItem* fine=Fines->gFirst();
+		fine; fine=fine->gNext() )
+	{
+		UnicodeString line=fine->Descr.c_str();
+		line+=L"  (";
 
-    CheckBoxWait->Enabled=false; CheckBoxWait->Checked=true;
-    CheckBoxWarn->Enabled=false; CheckBoxWarn->Checked=false;
-    ActiveControl=ComboBoxTime;
+		if ( fine->Time==(24*60) ) line+=L"все время)";
+		else
+		{
+			wchar_t time[8+1];
+			swprintf(time, sizeof(time), L"%.2i мин.)", fine->Time);
+			line+=time;
+		}
+
+		ComboBoxTime->Items->Add(line);
+	}
+
+	CheckBoxWait->Enabled=false; CheckBoxWait->Checked=true;
+	CheckBoxWarn->Enabled=false; CheckBoxWarn->Checked=false;
+	ActiveControl=ComboBoxTime;
 }
 //---------------------------------------------------------------------------
 void __fastcall TFormFine::FormClose(TObject *Sender, TCloseAction &Action)
@@ -74,20 +80,20 @@ void __fastcall TFormFine::ListViewFinesInsert(TObject *Sender,
       TListItem *Item)
 {
     Item->ImageIndex=-1;  // Устранение ошибки VCL
-    Item->SubItems->Add("");
-    Item->SubItems->Add("");
-    Item->SubItems->Add("");
-    Item->SubItems->Add("");
-    Item->SubItems->Add("");
+	Item->SubItems->Add(L"");
+	Item->SubItems->Add(L"");
+	Item->SubItems->Add(L"");
+	Item->SubItems->Add(L"");
+    Item->SubItems->Add(L"");
 }
 //---------------------------------------------------------------------------
 void __fastcall TFormFine::ComboBoxTimeClick(TObject *Sender)
 {
-    MFine *SelFine;
-    bool Wait, Warn;
+	bool Wait, Warn;
 
-    SelFine=(MFine*)Fines->Item(ComboBoxTime->ItemIndex);
-    if ( SelFine==NULL ) return;
+    if ( ComboBoxTime->ItemIndex<0 ) return;
+	MFinesItem *SelFine=Fines->GetItem(ComboBoxTime->ItemIndex);
+//	if ( SelFine==nullptr ) return;         /// теперь выше throw
 
 //    CheckBoxWarn->Enabled=true;
     Warn=CheckBoxWarn->Checked;
@@ -107,7 +113,7 @@ void __fastcall TFormFine::ComboBoxTimeClick(TObject *Sender)
         Item=ListViewFines->GetNextItem(Item,sdAll,is) )
     {
         MApplyFine *ApplyFine;
-        ApplyFine=(MApplyFine*)Item->Data;
+        ApplyFine=reinterpret_cast<MApplyFine*>(Item->Data);
         ApplyFine->Fine=SelFine;
         ApplyFine->Wait=Wait;
         ApplyFine->Warn=Warn;
@@ -123,10 +129,10 @@ void __fastcall TFormFine::BitBtnFineClick(TObject *Sender)
     while(item)
     {
         next=ListViewFines->GetNextItem(item,sdAll,is);
-        MApplyFine *appfine=(MApplyFine*)item->Data;
-        if ( appfine->Fine!=NULL )
+        auto appfine=reinterpret_cast<MApplyFine*>(item->Data);
+        if ( appfine->Fine!=nullptr )
         {
-            MState *state=appfine->State;
+            MStatesItem *state=appfine->State;
             // Проверяем возможно ли применить команду
             if ( state->CmdFine(0,true) )
             {
@@ -136,7 +142,7 @@ void __fastcall TFormFine::BitBtnFineClick(TObject *Sender)
                         appfine->Fine->Time:
                        -appfine->Fine->Time;
                 // Добавляем запись в лог
-                if ( !Log->AddFine(appfine->Number,appfine->Fine->gItemID(),time) )
+                if ( !Log->AddFine(appfine->Number,appfine->Fine->gUUID(),time) )
                 {
                     ShellState->State|=mssErrorLog; FormMain->SetShell();
                     ResMessageBox(Handle,1,5,MB_APPLMODAL|MB_OK|MB_ICONERROR,Log->gLastErr());
@@ -162,29 +168,29 @@ void __fastcall TFormFine::BitBtnFineClick(TObject *Sender)
 //---------------------------------------------------------------------------
 void __fastcall TFormFine::SetListViewFinesLine(TListItem *Item_)
 {
-    MApplyFine *selfine=(MApplyFine*)Item_->Data;
-    MComputer *comp=Computers->Search(selfine->Number);
+    auto selfine=reinterpret_cast<MApplyFine*>(Item_->Data);
+    MComputersItem *comp=Computers->Search(selfine->Number);
 
     // Номер компьютера и цвет его группы
     Item_->SubItemImages[0]=FormMain->GetCompColorIcon(comp);
     Item_->SubItems->Strings[0]=IntToStr(selfine->Number);
 
-    if ( selfine->Fine==NULL ) return;
+    if ( selfine->Fine==nullptr ) return;
 
     // Описание штрафа
     Item_->SubItems->Strings[1]=selfine->Fine->Descr.c_str();
     // Время штрафа
-    if ( selfine->Warn ) Item_->SubItems->Strings[2]="";
-    else
-    {
-        int Time=selfine->Fine->Time;
-        if ( Time==(24*60) ) Item_->SubItems->Strings[2]="Все время";
-        else Item_->SubItems->Strings[2]=IntToStr(Time);
-    }
-    // Ожидание
-    if ( (selfine->Fine->Time==(24*60))||selfine->Warn||
-        (!selfine->Wait) ) Item_->SubItems->Strings[3]="";
-    else Item_->SubItems->Strings[3]="Да";
+	if ( selfine->Warn ) Item_->SubItems->Strings[2]=L"";
+	else
+	{
+		int Time=selfine->Fine->Time;
+		if ( Time==(24*60) ) Item_->SubItems->Strings[2]=L"Все время";
+		else Item_->SubItems->Strings[2]=IntToStr(Time);
+	}
+	// Ожидание
+	if ( (selfine->Fine->Time==(24*60))||selfine->Warn||
+        (!selfine->Wait) ) Item_->SubItems->Strings[3]=L"";
+	else Item_->SubItems->Strings[3]=L"Да";
 }
 //---------------------------------------------------------------------------
 

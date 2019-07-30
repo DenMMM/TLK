@@ -17,11 +17,13 @@ unsigned TFormLogIn::Execute(MUsers *Users_)
     ID=0;
 
     // Заносим в список активные логины
-    for ( MUser *User=(MUser*)Users_->gFirst();
-        User; User=(MUser*)User->gNext() )
+	for ( MUsersItem* User=Users_->gFirst();
+        User; User=User->gNext() )
     {
         if ( !User->Active ) continue;
-        ComboBoxLogin->Items->AddObject(User->Login.c_str(),(TObject*)User);
+		ComboBoxLogin->Items->AddObject(
+			User->Login.c_str(),
+			reinterpret_cast<TObject*>(User));
     }
 
     return ShowModal()==mrOk? ID: 0;
@@ -48,30 +50,30 @@ void __fastcall TFormLogIn::ComboBoxLoginClick(TObject *Sender)
 void __fastcall TFormLogIn::FormCloseQuery(TObject *Sender, bool &CanClose)
 {
     int Index;
-    MUser *User;
+    MUsersItem *User;
 
-    if ( ModalResult!=mrOk ) return;
-    // Определяем какой пользователь был выбран
-    if ( (Index=ComboBoxLogin->ItemIndex)<0 )
-        { ActiveControl=ComboBoxLogin; goto error; }
-    User=(MUser*)ComboBoxLogin->Items->Objects[Index];
-    // Проверяем пароль
-    if ( !User->Pass.Check(EditPassword->Text.c_str()) )
-        { ActiveControl=EditPassword; goto error; }
-    //
-    ID=User->gItemID();
+	if ( ModalResult!=mrOk ) return;
+	// Определяем какой пользователь был выбран
+	if ( (Index=ComboBoxLogin->ItemIndex)<0 )
+		{ ActiveControl=ComboBoxLogin; goto error; }
+	User=reinterpret_cast<MUsersItem*>(ComboBoxLogin->Items->Objects[Index]);
+	// Проверяем пароль
+	if ( !User->Pass.Check(EditPassword->Text.c_str()) )
+		{ ActiveControl=EditPassword; goto error; }
+	//
+	ID=User->gUUID();
 
-    return;
+	return;
 error:
-    CanClose=false;
-    return;
+	CanClose=false;
+	return;
 }
 //---------------------------------------------------------------------------
 void __fastcall TFormLogIn::FormClose(TObject *Sender,
       TCloseAction &Action)
 {
     ComboBoxLogin->Clear();
-    EditPassword->Text=""; EditPassword->ClearUndo();
+    EditPassword->Text=L""; EditPassword->ClearUndo();
 }
 //---------------------------------------------------------------------------
 

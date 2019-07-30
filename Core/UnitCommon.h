@@ -7,38 +7,38 @@
 //#include <windows.h>
 #include <userenv.h>
 #include <mem.h>
-#include <stdexcept.h>
+#include <stdexcept>
 //---------------------------------------------------------------------------
 #define ENC_Code        0x5BC935CF  // Код шифрования файлов
 #define ENC_Net         0x9ABD5BAE  // Код шифрования сетевых данных
 //---------------------------------------------------------------------------
-template <typename type>
+/*template <typename type>
 class Mptr
 {
 private:
-    type *ptr;
+	type *ptr;
 
 public:
-    void operator()(type *ptr_)
-    {
-        if ( ptr!=NULL )
-        {
-            // Удалим объект, чтобы не потерялся
-            delete ptr_;
-            // Кинем исплючение
-            throw std::runtime_error (
-                "Munique_ptr::()\n"
-                "Попытка присвоения не пустому указателю."
-                );
-        }
-        ptr=ptr_;
-    }
-    type* operator->() { return ptr; }
-    operator type*() { return ptr; }
+	void operator()(type *ptr_)
+	{
+		if ( ptr!=nullptr )
+		{
+			// Удалим объект, чтобы не потерялся
+			delete ptr_;
+			// Кинем исплючение
+			throw std::runtime_error (
+				"Munique_ptr::()\n"
+				"Попытка присвоения не пустому указателю."
+				);
+		}
+		ptr=ptr_;
+	}
+	type* operator->() { return ptr; }
+	operator type*() { return ptr; }
 
-    Mptr() { ptr=NULL; }
-    ~Mptr() { delete ptr; }
-};
+	Mptr() { ptr=nullptr; }
+	~Mptr() { delete ptr; }
+};*/
 //---------------------------------------------------------------------------
 template <typename titem>
 class Marray
@@ -53,7 +53,7 @@ public:
         if ( Count_==0 || Count_!=ICount  )
         {
             delete[] Items;
-            Items=NULL;
+            Items=nullptr;
         }
         if ( Count_!=0 )
         {
@@ -95,7 +95,7 @@ public:
     Marray()
     {
         ICount=0;
-        Items=NULL;
+        Items=nullptr;
     }
 
     ~Marray()
@@ -106,9 +106,10 @@ public:
 //---------------------------------------------------------------------------
 // Сравнение двух чисел: "0" - равны, "-1" - первое меньше второго, "+1" - наоборот
 template <typename type>
-inline int DComp(type &D1_, type &D2_)
+//inline int DComp(type &D1_, type &D2_)
+inline int DComp(type D1_, type D2_)
 {
-    return D1_==D2_? 0: (D1_<D2_? -1: 1);
+	return D1_==D2_? 0: (D1_<D2_? -1: 1);
 }
 
 // Побитовый циклический сдвиг влево
@@ -125,62 +126,83 @@ inline type BitsRight(type Bits_)
     return (Bits_>>1)|(Bits_<<(sizeof(type)*8-1));
 }
 //---------------------------------------------------------------------------
+size_t sizeofLine(const std::wstring &Line_)
+{
+	return (Line_.length()+1)*sizeof(wchar_t);
+}
+
+size_t sizeofLine(const std::string &Line_)
+{
+	return (Line_.length()+1)*sizeof(char);
+}
+
 // Сохранение переменной в области памяти со сдвигом указателя
 template <typename type>
-inline char *MemSet(char *Mem_, const type Data_)
+inline void *MemSet(void *Mem_, const type Data_)
 {
-    *((type*)Mem_)=Data_;
-    return Mem_+sizeof(type);
+	*static_cast<type*>(Mem_)=Data_;
+	return static_cast<char*>(Mem_)+sizeof(type);
 }
 
 // Чтение переменной из области памяти со сдвигом указателя
 // и контролем выхода за границу области
 template <typename type>
-inline const char *MemGet(const char *Mem_, type *Data_, const char *Limit_)
+inline const void *MemGet(const void *Mem_, type *Data_, const void *Limit_)
 {
-    if ( (Mem_+sizeof(type))>Limit_ ) return NULL;
-    *Data_=*((type*)Mem_);
-    return Mem_+sizeof(type);
+	const void *new_limit=
+		static_cast<const char*>(Mem_)+sizeof(type);
+
+	if ( new_limit>Limit_ ) return nullptr;     /// throw ?
+	*Data_=*static_cast<const type*>(Mem_);
+
+	return new_limit;
 }
 
 // Поиск значения в области памяти с контролем выхода за границу
 template <typename type>
 type *MemSrch(type *Mem_, const type *Limit_, type Data_)
 {
-    do { if ( Mem_>=Limit_ ) return NULL; }
+    do { if ( Mem_>=Limit_ ) return nullptr; }
     while( *(Mem_++)!=Data_ );
     return Mem_;
 }
 
-// Копирование ANSI-строк со сдвигом указателя, контролем длины и выхода за границу
-char *MemSetCLine(char *Mem_, const char *Line_);
-const char *MemGetCLine(const char *Mem_, char *Line_,
-    unsigned MaxLength_, const char *Limit_);       /// для совместимости, на время рефакторинга
-const char *MemGetCLine(const char *Mem_, std::string &Line_,
-    unsigned MaxLength_, const char *Limit_);
+// Копирование строк со сдвигом указателя, контролем длины и выхода за границу
+void *MemSetLine(void *Mem_, const std::string &Line__);
+void *MemSetLine(void *Mem__, const std::wstring &Line__);
+const void *MemGetLine(const void *Mem__, std::string &Line_,
+	size_t MaxLength_, const void *Limit__);
+const void *MemGetLine(const void *Mem__, std::wstring &Line_,
+	size_t MaxLength_, const void *Limit_);
 
-inline char *MemSetBLine(char *Mem_, const char *Line_, unsigned Size_)
+inline void *MemSetBin(void *Mem_, const void *Line_, unsigned Size_)
 {
     memcpy(Mem_,Line_,Size_);
-    return Mem_+Size_;
+	return static_cast<char*>(Mem_)+Size_;
 }
 
-inline const char *MemGetBLine(const char *Mem_, char *Line_, unsigned Size_, const char *Limit_)
+inline const void *MemGetBin(const void *Mem_, void *Line_, unsigned Size_, const void *Limit_)
 {
-    if ( (Mem_+Size_)>Limit_) return NULL;
-    memcpy(Line_,Mem_,Size_);
-    return Mem_+Size_;
+	const void *new_limit=
+		static_cast<const char*>(Mem_)+Size_;
+
+	if ( new_limit>Limit_) return nullptr;      /// throw ?
+	memcpy(Line_,Mem_,Size_);
+
+	return new_limit;
 }
 
-inline bool MemSlowCmp(const char *Mem1_, const char *Mem2_, unsigned Size_)
+inline bool MemSlowCmp(const void *Mem1__, const void *Mem2__, size_t Size_)
 {
-    unsigned diff_cnt=0;
+	const char *Mem1_=static_cast<const char*>(Mem1__);
+	const char *Mem2_=static_cast<const char*>(Mem2__);
+	size_t diff_cnt=0;
 
-    while(Size_)
-    {
-        diff_cnt+=*(Mem1_++)!=*(Mem2_++);
-        --Size_;
-    }
+	while(Size_)
+	{
+		diff_cnt += (size_t)(*Mem1_ != *Mem2_);
+		Mem1_++; Mem2_++; Size_--;
+	}
 
     return diff_cnt==0;
 }
@@ -250,15 +272,15 @@ inline type BasicDecodeRound(type Blk_, type Code_)
 }
 
 // Простейшее блочно-потоковое шифрование/дешифрование
-void BasicEncode(unsigned char *Data_, unsigned DataSize_, unsigned Code_, int Round_=8);
-void BasicDecode(unsigned char *Data_, unsigned DataSize_, unsigned Code_, int Round_=8);
+void BasicEncode(void *Data__, size_t DataSize_, unsigned Code_, int Round_=8);
+void BasicDecode(void *Data__, size_t DataSize_, unsigned Code_, int Round_=8);
 unsigned BasicMix(unsigned Key1_, unsigned Key2_);
 unsigned BasicRand();
-bool TimeRand(char *Buff_, unsigned Size_);
+bool TimeRand(void *Buff__, size_t Size_);
 //---------------------------------------------------------------------------
-int ByteToHEX(const unsigned char *Bytes_, int BytesCount_,
-    char *Line_, int LineSize_, char Delim_);
-int HEXToByte(const char *Line_, unsigned char *Buff_, int BuffSize_);
+size_t ByteToHEX(const void *Bytes__, size_t BytesCount_,
+	wchar_t *Line_, size_t LineSize_, wchar_t Delim_='\0');
+size_t HEXToByte(const wchar_t *Line_, void *Buff__, size_t BuffSize_);
 //---------------------------------------------------------------------------
 bool GeneratePassword(char *Line_, unsigned Len_,
     bool Cap_, bool Low_, bool Num_);
@@ -269,7 +291,7 @@ int ResMessageBox(HWND Owner_, UINT uCaption, UINT uMessage, UINT Type_, DWORD L
 bool WinExit(UINT uFlags);
 //---------------------------------------------------------------------------
 // Запуск программ по списку из реестра
-void RegExecList(HKEY hKey_, LPCTSTR SubKey_, HANDLE hToken_=INVALID_HANDLE_VALUE);
+void RegExecList(HKEY hKey_, LPCWSTR SubKey_, HANDLE hToken_=INVALID_HANDLE_VALUE);
 //---------------------------------------------------------------------------
 #endif
 

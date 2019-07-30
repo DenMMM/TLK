@@ -7,94 +7,60 @@
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
 //---------------------------------------------------------------------------
-MUser::MUser()
+void MUsersItem::Copy(const MListItem *SrcItem_)
 {
-    Active=true;
-}
+	const MUsersItem *usr=
+		dynamic_cast<const MUsersItem*>(SrcItem_);
 
-MUser::~MUser()
-{
-//
-}
-
-void MUser::Copy(const MListItem *SrcItem_)
-{
-    const MUser *usr=
-        dynamic_cast<const MUser*>(SrcItem_);
-
-    Login=usr->Login;
+	Login=usr->Login;
     Name=usr->Name;
     Active=usr->Active;
-    Pass.Copy(&usr->Pass);
+	Pass.Copy(&usr->Pass);
+
     MIDListItem::Copy(SrcItem_);
 }
 
-unsigned MUser::GetDataSize() const
+unsigned MUsersItem::GetDataSize() const
 {
-    return
-        Login.length()+sizeof('\0')+
-        Name.length()+sizeof('\0')+
-        sizeof(Active)+
+	return
+		sizeofLine(Login)+
+		sizeofLine(Name)+
+		sizeof(Active)+
         Pass.GetDataSize()+
-        MIDListItem::GetDataSize();     // ID-номер пользователя
+		MIDListItem::GetDataSize();     		// ID-номер пользователя
 }
 
-char *MUser::SetData(char *Data_) const
+void *MUsersItem::SetData(void *Data_) const
 {
-    Data_=MIDListItem::SetData(Data_);
-    Data_=MemSetCLine(Data_,Login.c_str());
-    Data_=MemSetCLine(Data_,Name.c_str());
+	Data_=MIDListItem::SetData(Data_);
+
+	Data_=MemSetLine(Data_,Login);
+	Data_=MemSetLine(Data_,Name);
     Data_=Pass.SetData(Data_);
     Data_=MemSet(Data_,Active);
-    return Data_;
+
+	return Data_;
 }
 
-const char *MUser::GetData(const char *Data_, const char *Limit_)
+const void *MUsersItem::GetData(const void *Data_, const void *Limit_)
 {
-    return
-        (Data_=MIDListItem::GetData(Data_,Limit_))!=NULL &&
-        (Data_=MemGetCLine(Data_,Login,MAX_UserLoginLen,Limit_))!=NULL &&
-        (Data_=MemGetCLine(Data_,Name,MAX_UserNameLen,Limit_))!=NULL &&
-        (Data_=Pass.GetData(Data_,Limit_))!=NULL &&
-        (Data_=MemGet(Data_,&Active,Limit_))!=NULL
-        ? Data_: NULL;
+	return
+		(Data_=MIDListItem::GetData(Data_,Limit_)) &&
+		(Data_=MemGetLine(Data_,Login,MAX_UserLoginLen,Limit_)) &&
+		(Data_=MemGetLine(Data_,Name,MAX_UserNameLen,Limit_)) &&
+		(Data_=Pass.GetData(Data_,Limit_)) &&
+		(Data_=MemGet(Data_,&Active,Limit_))
+		? Data_: nullptr;
 }
-
-/*void MUser::SetLogin(char *Login_)
-{
-    if ( strlen(Login_)>MAX_UserLoginLen )
-    {
-        throw std::runtime_error (
-            "MUser::SetLogin()\n"
-            "Длина строки превышает MAX_UserLoginLen."
-            );
-
-    }
-    strcpy(Login,Login_);
-}
-
-void MUser::SetName(char *Name_)
-{
-    if ( strlen(Name_)>MAX_UserNameLen )
-    {
-        throw std::runtime_error (
-            "MUser::SetName()\n"
-            "Длина строки превышает MAX_UserNameLen."
-            );
-    }
-    strcpy(Name,Name_);
-}*/
-
-
 //---------------------------------------------------------------------------
 unsigned MUsers::ActiveCount() const
 {
-    unsigned num=0;
+	size_t count=0;
 
-    for ( MUser *User=(MUser*)gFirst(); User;
-        User=(MUser*)User->gNext() ) if ( User->Active ) num++;
+	for ( MUsersItem *User=gFirst();
+		User; User=User->gNext() ) if ( User->Active ) count++;
 
-    return num;
+	return count;
 }
 //---------------------------------------------------------------------------
 

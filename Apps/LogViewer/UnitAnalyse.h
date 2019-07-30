@@ -8,11 +8,11 @@
 #include "UnitUsers.h"
 #include "UnitUsersUpTime.h"
 //---------------------------------------------------------------------------
-bool ProcessComputersState(MLogRecord *Position_,
+bool ProcessComputersState(MLogRecordsItem *Position_,
     MStates *States_, MTariffs *Tariffs_);
 //---------------------------------------------------------------------------
-bool ProcessUsersUpTime(MLogRecord *Begin_, MLogRecord *End_,
-    MUsers *Users_, MUsersUpTime *UpTimes_);
+bool ProcessUsersUpTime(MLogRecordsItem *Begin_, MLogRecordsItem *End_,
+	MUsers *Users_, MUsersUpTime *UpTimes_);
 //---------------------------------------------------------------------------
 #endif
 

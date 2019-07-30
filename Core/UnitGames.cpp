@@ -6,87 +6,90 @@
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
 //---------------------------------------------------------------------------
-MGame::MGame()
+void MGamesItem::Copy(const MListItem *SrcItem_)
 {
-    SubGames=NULL;
+	auto game=dynamic_cast<const MGamesItem*>(SrcItem_);
+
+	Name=game->Name;
+	Command=game->Command;
+	Icon=game->Icon;
+	if ( (game->SubGames!=nullptr)&&
+		(game->SubGames->gCount()>0) )
+	{
+		if ( SubGames==nullptr ) SubGames=new MGames;
+		SubGames->Copy(game->SubGames);
+	} else
+	{
+		delete SubGames;
+		SubGames=nullptr;
+	}
 }
 
-MGame::~MGame()
+unsigned MGamesItem::GetDataSize() const
 {
-    delete SubGames;
-}
-
-void MGame::Copy(const MListItem *SrcItem_)
-{
-    const MGame *game=
-        dynamic_cast<const MGame*>(SrcItem_);
-
-    Name=game->Name;
-    Command=game->Command;
-    Icon=game->Icon;
-    if ( (game->SubGames!=NULL)&&
-        (game->SubGames->gCount()>0) )
-    {
-        if ( SubGames==NULL ) SubGames=new MGames;
-        SubGames->Copy(game->SubGames);
-    } else
-    {
-        delete SubGames;
-        SubGames=NULL;
-    }
-}
-
-unsigned MGame::GetDataSize() const
-{
-    const MGames vGames;            // Заглушка для SubGames=NULL
+    const MGames vGames;            // Заглушка для SubGames=nullptr
 
     return
-        Name.length()+sizeof('\0')+
-        Command.length()+sizeof('\0')+
-        Icon.length()+sizeof('\0')+
-        ((SubGames==NULL)||(SubGames->gCount()==0)?
-            vGames.GetAllDataSize():
-            SubGames->GetAllDataSize());
+		sizeofLine(Name)+
+		sizeofLine(Command)+
+        sizeofLine(Icon)+
+		(
+			(SubGames==nullptr) || (SubGames->gCount()==0)?
+			vGames.GetAllDataSize():
+			SubGames->GetAllDataSize()
+		);
 }
 
-char *MGame::SetData(char *Data_) const
+void *MGamesItem::SetData(void *Data_) const
 {
-    const MGames vGames;            // Заглушка для SubGames=NULL
+    const MGames vGames;            // Заглушка для SubGames=nullptr
 
-    Data_=MemSetCLine(Data_,Name.c_str());
-    Data_=MemSetCLine(Data_,Command.c_str());
-    Data_=MemSetCLine(Data_,Icon.c_str());
-    Data_=(SubGames==NULL)||(SubGames->gCount()==0)?
+	Data_=MemSetLine(Data_,Name);
+	Data_=MemSetLine(Data_,Command);
+    Data_=MemSetLine(Data_,Icon);
+	Data_=
+		(SubGames==nullptr) || (SubGames->gCount()==0)?
         vGames.SetAllData(Data_):
-        SubGames->SetAllData(Data_);
+		SubGames->SetAllData(Data_);
+
     return Data_;
 }
 
-const char *MGame::GetData(const char *Data_, const char *Limit_)
+const void *MGamesItem::GetData(const void *Data_, const void *Limit_)
 {
-    if ( (Data_=MemGetCLine(Data_,Name,MAX_PrgNameLength,Limit_))==NULL ) goto error;
-    if ( (Data_=MemGetCLine(Data_,Command,MAX_PrgCmdLength,Limit_))==NULL ) goto error;
-    if ( (Data_=MemGetCLine(Data_,Icon,MAX_PrgIconLength,Limit_))==NULL ) goto error;
-    // Создаем SubGames и пробуем его заполнить
-    if ( AddSubGames()==NULL ) goto error;
-    if ( (Data_=SubGames->GetAllData(Data_,Limit_))==NULL ) goto error;
-    // Если SubGames оказался пустым, удалим его
-    if ( SubGames->gCount()==0 ) DelSubGames();
-    return Data_;
-error:
-    return NULL;
+	if ( !(
+		(Data_=MemGetLine(Data_,Name,MAX_PrgNameLength,Limit_)) &&
+		(Data_=MemGetLine(Data_,Command,MAX_PrgCmdLength,Limit_)) &&
+		(Data_=MemGetLine(Data_,Icon,MAX_PrgIconLength,Limit_))
+		) ) return nullptr;
+
+	// Создаем SubGames и пробуем его заполнить
+	if ( !(
+		AddSubGames() &&
+		(Data_=SubGames->GetAllData(Data_,Limit_))
+		) ) return nullptr;
+
+	// Если SubGames оказался пустым, удалим его
+	if ( SubGames->gCount()==0 ) DelSubGames();
+
+	return Data_;
 }
 
-MGames *MGame::AddSubGames()
+MGames *MGamesItem::AddSubGames()
 {
-    if ( SubGames==NULL ) SubGames=new MGames;
+    if ( SubGames==nullptr ) SubGames=new MGames;
     return SubGames;
 }
 
-void MGame::DelSubGames()
+void MGamesItem::DelSubGames()
 {
-    delete SubGames;
-    SubGames=NULL;
+	delete SubGames;
+	SubGames=nullptr;
+}
+
+MGamesItem::~MGamesItem()
+{
+	delete SubGames;
 }
 //---------------------------------------------------------------------------
 

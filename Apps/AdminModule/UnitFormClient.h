@@ -94,7 +94,7 @@ __published:	// IDE-managed Components
     void __fastcall EditIconExit(TObject *Sender);
 private:	// User declarations
     MSendSrv Send;                      // TCP-рассыльщик объектов
-    Marray <MComputer*> SendComps;      // Массив указателей на компьютеры, куда рассылать
+    Marray <MComputersItem*> SendComps;      // Массив указателей на компьютеры, куда рассылать
     MGames TmpGames;                    // Буфер для списка игр
     MClOptions TmpOptions;              // Буфер для настроек клиента
     bool Sending;                       // Флаг отправки/приема данных

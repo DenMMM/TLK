@@ -16,12 +16,12 @@ __fastcall TFormFines::TFormFines(TComponent* Owner)
 void __fastcall TFormFines::FormShow(TObject *Sender)
 {
     // Копируем текущие штрафы в буфер
-    TmpFines.Copy(Fines);
+    TmpFines.Copy(Fines.get());
 
     // Формируем их список
-    for ( MFine *fine=(MFine*)TmpFines.gFirst();
-        fine; fine=(MFine*)fine->gNext() )
-    {
+	for ( MFinesItem *fine=TmpFines.gFirst();
+		fine; fine=fine->gNext() )
+	{
         TListItem *item;
         item=ListViewFines->Items->Add();
         item->Data=fine;
@@ -31,7 +31,7 @@ void __fastcall TFormFines::FormShow(TObject *Sender)
     ListViewFines->AlphaSort();
 
     // Формируем список для выбора времени штрафа
-    ComboBoxTime->Items->Add("Все время");
+    ComboBoxTime->Items->Add(L"Все время");
     for ( int i=1; i<=60; i++ ) ComboBoxTime->Items->Add(IntToStr(i));
 
     EditDescription->MaxLength=MAX_FineDescrLen;
@@ -45,7 +45,7 @@ void __fastcall TFormFines::FormClose(TObject *Sender,
 {
     // Чистим интерфейсные элементы
     ListViewFines->Items->Clear();
-    EditDescription->Text="";
+    EditDescription->Text=L"";
     ComboBoxTime->Items->Clear();
     // Чистим буфер
     TmpFines.Clear();
@@ -55,40 +55,41 @@ void __fastcall TFormFines::ListViewFinesInsert(TObject *Sender,
       TListItem *Item)
 {
     Item->ImageIndex=-1;  // Устранение ошибки VCL
-    Item->SubItems->Add("");
+    Item->SubItems->Add(L"");
 }
 //---------------------------------------------------------------------------
 void __fastcall TFormFines::ListViewFinesSelectItem(TObject *Sender,
       TListItem *Item, bool Selected)
 {
-    if ( ((TListView*)Sender)->SelCount!=1 )
+    if ( dynamic_cast<TListView&>(*Sender).SelCount!=1 )
     {
         SetEdit(false);
         return;
     } else
         SetEdit(true);
 
-    MFine *fine=(MFine*)ListViewFines->Selected->Data;
+    auto fine=reinterpret_cast<MFinesItem*>(ListViewFines->Selected->Data);
     EditDescription->Text=fine->Descr.c_str();
     ComboBoxTime->ItemIndex=fine->Time==(24*60)? 0: fine->Time;
 }
 //---------------------------------------------------------------------------
 void __fastcall TFormFines::EditDescriptionExit(TObject *Sender)
 {
-    if ( ListViewFines->Selected==NULL ) return;
+    if ( ListViewFines->Selected==nullptr ) return;
 
     EditDescription->Text=EditDescription->Text.Trim();
-    MFine *fine=(MFine*)ListViewFines->Selected->Data;
+    auto fine=reinterpret_cast<MFinesItem*>(ListViewFines->Selected->Data);
     fine->Descr=EditDescription->Text.c_str();
     SetListViewFinesLine(ListViewFines->Selected);
 }
 //---------------------------------------------------------------------------
 void __fastcall TFormFines::ComboBoxTimeClick(TObject *Sender)
 {
-    if ( ListViewFines->Selected==NULL ) return;
+    if ( ListViewFines->Selected==nullptr ) return;
 
-    ((MFine*)ListViewFines->Selected->Data)->Time=
-        ((TComboBox*)Sender)->ItemIndex==0? 24*60: ((TComboBox*)Sender)->ItemIndex;
+	int ItemIndex=dynamic_cast<TComboBox&>(*Sender).ItemIndex;
+	reinterpret_cast<MFinesItem*>(ListViewFines->Selected->Data)->Time=
+		ItemIndex==0? 24*60: ItemIndex;
     SetListViewFinesLine(ListViewFines->Selected);
 }
 //---------------------------------------------------------------------------
@@ -101,8 +102,8 @@ void __fastcall TFormFines::ButtonAddClick(TObject *Sender)
     }
 
     // Добавляем в буфер новый штраф
-    MFine *fine=(MFine*)TmpFines.Add();
-    fine->Descr="Новый штраф";
+	MFinesItem* fine=TmpFines.Add();
+	fine->Descr=L"Новый штраф";
     fine->Time=1;
     // Добавляем строку в список и связываем ее с тарифом
     TListItem *item=ListViewFines->Items->Add();
@@ -111,7 +112,7 @@ void __fastcall TFormFines::ButtonAddClick(TObject *Sender)
     SetListViewFinesLine(item);
     ListViewFines->AlphaSort();
     ListViewFines->ItemFocused=item;
-    ListViewFines->Selected=NULL;
+    ListViewFines->Selected=nullptr;
     ListViewFines->Selected=ListViewFines->ItemFocused;
     ActiveControl=EditDescription;
 }
@@ -124,7 +125,7 @@ void __fastcall TFormFines::ButtonDelClick(TObject *Sender)
     while(item)
     {
         // Удаляем штраф из буфера
-        TmpFines.Del((MFine*)item->Data);
+        TmpFines.Del(reinterpret_cast<MFinesItem*>(item->Data));
         // Удаляем строку из списка
         next=ListViewFines->GetNextItem(item,sdAll,is);
         item->Delete();
@@ -139,7 +140,7 @@ void __fastcall TFormFines::ButtonSaveClick(TObject *Sender)
     // Замещаем штрафами из буфера текущие
     Fines->Move(&TmpFines);
     // Задаем ID-номера для новых
-    Fines->SetIDs();
+    Fines->SetUUIDs();
     // Сохраняем в файле
     if ( !Fines->Save() )
     {
@@ -148,7 +149,7 @@ void __fastcall TFormFines::ButtonSaveClick(TObject *Sender)
         return;
     }
     // Запись в логах
-    if ( !Log->AddFines(Fines) )
+    if ( !Log->AddFines(Fines.get()) )
     {
         // Настройки сохранили, но без отображения их в логе работать не дадим
         ShellState->State|=mssErrorLog|mssErrorConfig; FormMain->SetShell();
@@ -163,7 +164,7 @@ void TFormFines::SetEdit(bool Edit_)
     LabelDescription->Enabled=Edit_;
     EditDescription->Enabled=Edit_;
     EditDescription->Color=Color;
-//    if ( !Edit_ ) EditDescription->Text="";
+//    if ( !Edit_ ) EditDescription->Text=L"";
     LabelTime->Enabled=Edit_;
     ComboBoxTime->Enabled=Edit_;
     ComboBoxTime->Color=Color;
@@ -172,10 +173,10 @@ void TFormFines::SetEdit(bool Edit_)
 //---------------------------------------------------------------------------
 void TFormFines::SetListViewFinesLine(TListItem *Item_)
 {
-    MFine *fine=(MFine*)Item_->Data;
+    auto fine=reinterpret_cast<MFinesItem*>(Item_->Data);
     Item_->Caption=fine->Descr.c_str();
-    if ( fine->Time==(24*60) ) Item_->SubItems->Strings[0]="Все время";
-    else Item_->SubItems->Strings[0]=IntToStr(fine->Time)+" мин.";
+    if ( fine->Time==(24*60) ) Item_->SubItems->Strings[0]=L"Все время";
+    else Item_->SubItems->Strings[0]=IntToStr(fine->Time)+L" мин.";
 }
 //---------------------------------------------------------------------------
 

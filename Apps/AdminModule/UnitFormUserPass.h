@@ -37,7 +37,7 @@ private:	// User declarations
     void SetCoord(int Left_, int Top_, bool LeftTop_);
     void SetEdit(bool Current_, bool New_);
 public:		// User declarations
-    bool Execute(MUser *User_, int Left_, int Top_, bool LeftTop_);
+    bool Execute(MUsersItem *User_, int Left_, int Top_, bool LeftTop_);
     bool Execute(MUsers *Users_, int Left_, int Top_, bool LeftTop_);
     __fastcall TFormUserPass(TComponent* Owner);
 };

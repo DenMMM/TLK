@@ -1,7 +1,9 @@
 //---------------------------------------------------------------------------
+#include <stdio.h>
+#include <memory>
 #include <vector>
 #include <string>
-#include <stdio.h>
+#include <cwchar>
 #pragma hdrstop
 
 #include "UnitService.h"
@@ -55,14 +57,14 @@ VOID WINAPI ServiceMain(DWORD dwArgc, LPTSTR *lpszArgv)
 {
     SERVICE_STATUS_HANDLE service_status_handle;
     SERVICE_STATUS service_status;
-    Mptr <MSvcProcess> Svc;
+	std::unique_ptr <MSvcProcess> Svc;
 
     // Берем идентификатор потока для его использования обработчиком запросов от SCM
     ServiceThreadID=::GetCurrentThreadId();
     // Создаем очередь сообщений для потока
-    ::PeekMessage(NULL,NULL,0,0,PM_NOREMOVE);
+    ::PeekMessage(nullptr,nullptr,0,0,PM_NOREMOVE);
     // Регистрируем обработчик запросов от SCM к службе
-    service_status_handle=::RegisterServiceCtrlHandlerEx(SVC_Name,&HandlerEx,NULL);
+    service_status_handle=::RegisterServiceCtrlHandlerEx(SVC_Name, &HandlerEx, nullptr);
 
     // Информируем SCM о том, что идет запуск службы
     service_status.dwServiceType=SERVICE_WIN32_OWN_PROCESS;
@@ -78,7 +80,7 @@ VOID WINAPI ServiceMain(DWORD dwArgc, LPTSTR *lpszArgv)
 
     try
     {
-        Svc(new MSvcProcess);
+		Svc.reset(new MSvcProcess);
 
         if ( Svc->OnStart() )
         {
@@ -93,11 +95,11 @@ VOID WINAPI ServiceMain(DWORD dwArgc, LPTSTR *lpszArgv)
     }
     catch ( std::bad_alloc &e )
     {
-        ResMessageBox(NULL,1,3,MB_SERVICE_NOTIFICATION);
+        ResMessageBox(nullptr,1,3,MB_SERVICE_NOTIFICATION);
     }
     catch (std::exception &e)
     {
-        ::MessageBox(NULL, e.what(),
+		::MessageBoxA(nullptr, e.what(),
             "TLK - ошибка",MB_SERVICE_NOTIFICATION);
     }
 
@@ -119,11 +121,11 @@ VOID WINAPI ServiceMain(DWORD dwArgc, LPTSTR *lpszArgv)
     ::SetServiceStatus(service_status_handle,&service_status);
 }
 //---------------------------------------------------------------------------
-bool MSvcProcess::CheckUser(HANDLE hUser_, const char *Login_)
+bool MSvcProcess::CheckUser(HANDLE hUser_, const wchar_t *Login_)
 {
     std::vector <char> vUserToken;
-    std::vector <char> vUserName;
-    std::vector <char> vDomainName;
+	std::vector <wchar_t> vUserName;
+    std::vector <wchar_t> vDomainName;
     PTOKEN_USER pUserToken;
     DWORD dwTokenSize;
     DWORD dwUserNameSize;
@@ -133,12 +135,12 @@ bool MSvcProcess::CheckUser(HANDLE hUser_, const char *Login_)
     // Выделяем память для токена пользователя
     dwTokenSize=0;
     if ( (!::GetTokenInformation(
-        hUser_,TokenUser,NULL,
-        0,&dwTokenSize))&&
-        (::GetLastError()!=ERROR_INSUFFICIENT_BUFFER) ) goto error;
+		hUser_, TokenUser, nullptr,
+		0, &dwTokenSize))&&
+		(::GetLastError()!=ERROR_INSUFFICIENT_BUFFER) ) goto error;
     if ( dwTokenSize==0 ) goto error;
     vUserToken.resize(dwTokenSize);
-    pUserToken=(PTOKEN_USER)vUserToken.begin();
+	pUserToken=(PTOKEN_USER)vUserToken.data();
 
     // Запрашиваем его в буфер
     if ( !::GetTokenInformation(
@@ -148,10 +150,10 @@ bool MSvcProcess::CheckUser(HANDLE hUser_, const char *Login_)
     // Выделяем память для логина пользователя и имени домена
     dwUserNameSize=0;
     dwDomainNameSize=0;
-    if ( (!::LookupAccountSid(
-        NULL,pUserToken->User.Sid,
-        NULL,&dwUserNameSize,
-        NULL,&dwDomainNameSize,
+	if ( (!::LookupAccountSid(
+        nullptr,pUserToken->User.Sid,
+        nullptr,&dwUserNameSize,
+        nullptr,&dwDomainNameSize,
         &SidNameUse))&&
         (::GetLastError()!=ERROR_INSUFFICIENT_BUFFER) ) goto error;
     if ( (dwUserNameSize==0)||(dwDomainNameSize==0) ) goto error;
@@ -159,26 +161,29 @@ bool MSvcProcess::CheckUser(HANDLE hUser_, const char *Login_)
     vDomainName.resize(dwDomainNameSize);
     
     // Запрашиваем логин и пароль
-    if ( !::LookupAccountSid(
-        NULL,pUserToken->User.Sid,
-        vUserName.begin(),&dwUserNameSize,
-        vDomainName.begin(),&dwDomainNameSize,
-        &SidNameUse) ) goto error;
-    // Тип полученных данных верный ?
+	if ( !::LookupAccountSid(
+		nullptr, pUserToken->User.Sid,
+		vUserName.data(), &dwUserNameSize,
+		vDomainName.data(), &dwDomainNameSize,
+		&SidNameUse) ) goto error;
+	// Тип полученных данных верный ?
     if ( SidNameUse!=SidTypeUser ) goto error;
 
 #ifdef _DEBUG
-    ::MessageBox(NULL,vUserName.begin(),
-        "MSvcProcess::CheckUser()",MB_SERVICE_NOTIFICATION);
+	::MessageBox(
+		nullptr, vUserName.data(),
+		L"MSvcProcess::CheckUser()",
+		MB_SERVICE_NOTIFICATION);
 #endif
 
     // Сравниваем логин
-    return strcmpi(vUserName.begin(),Login_)==0;    /// совместимо с не ASCII ?
+//    return strcmpi(vUserName.data(), Login_)==0;    /// совместимо с не ASCII ?
+	return wcscmp(vUserName.data(), Login_)==0;
 error:
     return false;
 }
 //---------------------------------------------------------------------------
-HANDLE MSvcProcess::StartChild(HANDLE hProcess_, const char *Cmd_)
+HANDLE MSvcProcess::StartChild(HANDLE hProcess_, const wchar_t *Cmd_)
 {
     // Если пользователь не залогинен, то и запускать нечего
     if ( hUserToken==INVALID_HANDLE_VALUE ) return hProcess_;
@@ -188,11 +193,11 @@ HANDLE MSvcProcess::StartChild(HANDLE hProcess_, const char *Cmd_)
         (::WaitForSingleObject(hProcess_,0)==WAIT_TIMEOUT) ) return hProcess_;
 
     // Сформируем командную строку с параметрами
-    std::string cmd_line;
+	std::wstring cmd_line;
     cmd_line=ExeName;
-    cmd_line+=" ";
-    cmd_line+=Cmd_;
-    cmd_line+=":";
+	cmd_line+=L" ";
+	cmd_line+=Cmd_;
+    cmd_line+=L":";
     cmd_line+=Shared.InhToHEX();
 
     STARTUPINFO si;
@@ -202,23 +207,26 @@ HANDLE MSvcProcess::StartChild(HANDLE hProcess_, const char *Cmd_)
     si.cb=sizeof(STARTUPINFO);
 
 #ifdef _DEBUG
-    ::MessageBox(NULL,cmd_line.c_str(),"debug",MB_SERVICE_NOTIFICATION);
+	::MessageBox(nullptr, cmd_line.c_str(), L"debug", MB_SERVICE_NOTIFICATION);
 #endif
 
-    // Запустим процесс в сеансе залогиненного пользователя
-    LPVOID lpEnv=NULL;
-    if ( ::CreateEnvironmentBlock(
-            &lpEnv,
-            hUserToken,
-            FALSE)&&
-        ::CreateProcessAsUser(
-            hUserToken,
-            NULL,cmd_line.begin(),
-            NULL,NULL,TRUE,
-            CREATE_DEFAULT_ERROR_MODE|NORMAL_PRIORITY_CLASS|CREATE_UNICODE_ENVIRONMENT,
-            lpEnv,NULL,&si,&pi) ) hProcess_=pi.hProcess;
+	// Запустим процесс в сеансе залогиненного пользователя
+	std::vector <wchar_t> cmd_line_buff(cmd_line.length()+1);
+	wcscpy(cmd_line_buff.data(), cmd_line.c_str());
+
+	LPVOID lpEnv=nullptr;
+	if ( ::CreateEnvironmentBlock(
+			&lpEnv,
+			hUserToken,
+			FALSE)&&
+		::CreateProcessAsUser(
+			hUserToken,
+			nullptr, cmd_line_buff.data(),
+			nullptr, nullptr, TRUE,
+			CREATE_DEFAULT_ERROR_MODE|NORMAL_PRIORITY_CLASS|CREATE_UNICODE_ENVIRONMENT,
+			lpEnv, nullptr, &si, &pi) ) hProcess_=pi.hProcess;
     else hProcess_=INVALID_HANDLE_VALUE;
-    if ( lpEnv!=NULL ) ::DestroyEnvironmentBlock(lpEnv);
+    if ( lpEnv!=nullptr ) ::DestroyEnvironmentBlock(lpEnv);
 
     return hProcess_;
 }
@@ -239,15 +247,15 @@ void MSvcProcess::Route(bool Enable_)
 
         // Запрашиваем ее размер
         if ( ::GetAdaptersAddresses(
-            AF_INET,TableFlags,NULL,
-            NULL,&TableSize)!=ERROR_BUFFER_OVERFLOW ) continue;
+            AF_INET,TableFlags,nullptr,
+            nullptr,&TableSize)!=ERROR_BUFFER_OVERFLOW ) continue;
         if ( TableSize==0 ) continue;
         vTable.resize(TableSize);
 
         // Запрашиваем таблицу
         if ( ::GetAdaptersAddresses(
-            AF_INET,TableFlags,NULL,
-            (PIP_ADAPTER_ADDRESSES)vTable.begin(),
+            AF_INET,TableFlags,nullptr,
+            (PIP_ADAPTER_ADDRESSES)vTable.data(),
             &TableSize)==ERROR_SUCCESS ) break;
         vTable.clear();
     }
@@ -255,18 +263,18 @@ void MSvcProcess::Route(bool Enable_)
     if ( vTable.empty() ) return;
 
     // Ищем подходящий адаптер
-    pAdapter=(PIP_ADAPTER_ADDRESSES)vTable.begin();
+    pAdapter=(PIP_ADAPTER_ADDRESSES)vTable.data();
     while(pAdapter)
     {
         // Проверим указан ли хоть один DNS-сервер
-        if ( pAdapter->FirstDnsServerAddress!=NULL ) break;
+        if ( pAdapter->FirstDnsServerAddress!=nullptr ) break;
         pAdapter=pAdapter->Next;
     }
     // Закончим, если не нашли адаптер
-    if ( pAdapter==NULL ) return;
+    if ( pAdapter==nullptr ) return;
 
-    sockaddr_in *SockAddr=
-        (sockaddr_in*)pAdapter->FirstDnsServerAddress->Address.lpSockaddr;
+	sockaddr_in *SockAddr=reinterpret_cast<sockaddr_in*>(
+		pAdapter->FirstDnsServerAddress->Address.lpSockaddr);
 
     // Заполним запись для таблицы маршрутизации
     MIB_IPFORWARDROW Route;
@@ -294,11 +302,11 @@ void MSvcProcess::Route(bool Enable_)
 
 #ifdef _DEBUG
 {
-    char msg[256+1];
-    ::FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM,NULL,
-        result,MAKELANGID(LANG_NEUTRAL,SUBLANG_DEFAULT),
-        (LPTSTR)msg,256,NULL);
-    ::MessageBox(NULL,msg,"MSvcProcess::Route()",MB_SERVICE_NOTIFICATION);
+	wchar_t msg[256+1];
+	::FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM,nullptr,
+		result,MAKELANGID(LANG_NEUTRAL,SUBLANG_DEFAULT),
+		(LPTSTR)msg,256,nullptr);
+	::MessageBox(nullptr, msg, L"MSvcProcess::Route()", MB_SERVICE_NOTIFICATION);
 }
 #endif
 }
@@ -306,27 +314,27 @@ void MSvcProcess::Route(bool Enable_)
 bool MSvcProcess::OnStart()
 {
     // Сохраним имя файла службы
-    if ( !::GetModuleFileName(NULL,ExeName,MAX_PATH) )
+	if ( !::GetModuleFileName(nullptr, ExeName, MAX_PATH) )
     {
-        ResMessageBox(NULL,1,4,MB_SERVICE_NOTIFICATION,::GetLastError());
+        ResMessageBox(nullptr,1,4,MB_SERVICE_NOTIFICATION,::GetLastError());
         return false;
     }
 
     // Настраиваем пути
     {
-        char gms_path[MAX_PATH+7+1], *delim;
+        wchar_t gms_path[MAX_PATH+7+1], *delim;
 
-        strcpy(gms_path,ExeName);
-        delim=strrchr(gms_path,'\\');
-        if ( delim!=NULL ) delim[1]=0;
-        strcat(gms_path,"TLK.GMS");
+		wcscpy(gms_path, ExeName);
+		delim=wcsrchr(gms_path, L'\\');
+		if ( delim!=nullptr ) delim[1]=0;
+		wcscat(gms_path, L"TLK.GMS");
 
         State.SetDefault(
-            HKEY_LOCAL_MACHINE,"Software\\MMM Groups\\TLK\\3.0\\Client","State",    //path//
-            HKEY_LOCAL_MACHINE,"Software\\MMM Groups\\TLK\\3.0\\Client","Options",  //path//
-            gms_path,ENC_Code);
-        Auth.SetDefaultKey(
-            HKEY_LOCAL_MACHINE,"Software\\MMM Groups\\TLK\\3.0\\Client","Auth",ENC_Code);    //path//
+			HKEY_LOCAL_MACHINE, L"Software\\MMM Groups\\TLK\\3.0\\Client", L"State",    //path//
+			HKEY_LOCAL_MACHINE, L"Software\\MMM Groups\\TLK\\3.0\\Client", L"Options",  //path//
+			gms_path,ENC_Code);
+		Auth.SetDefaultKey(
+			HKEY_LOCAL_MACHINE, L"Software\\MMM Groups\\TLK\\3.0\\Client", L"Auth",ENC_Code);    //path//
     }
 
     // Загружаем настройки, заменяя их "дефолтом" при необходимости
@@ -334,7 +342,7 @@ bool MSvcProcess::OnStart()
     if ( !State.Load() ) State.Save();
     if ( !State.GetOptions(&Options) )
     {
-        Options.SetShellUser("");
+        Options.SetShellUser(L"");
         Options.ToEndTime=2;
         Options.MessageTime=15;
         Options.MsgEndTime=10;
@@ -348,13 +356,13 @@ bool MSvcProcess::OnStart()
     if ( !(Sync.NetInit(ENC_Net,&Auth)&&
         Send.NetInit(&State,ENC_Net,&Auth)) )
     {
-        ResMessageBox(NULL,1,12,MB_SERVICE_NOTIFICATION);
+        ResMessageBox(nullptr,1,12,MB_SERVICE_NOTIFICATION);
         return false;
     }
 
     if ( !Shared.Create() )
     {
-        ResMessageBox(NULL,1,13,MB_SERVICE_NOTIFICATION);
+        ResMessageBox(nullptr,1,13,MB_SERVICE_NOTIFICATION);
         return false;
     }
 
@@ -362,10 +370,10 @@ bool MSvcProcess::OnStart()
     Shared.SetTransp(Options.Flags&mcoTransp);
 
     // Запуск таймера
-    uTimer=::SetTimer(NULL,0,1000,NULL);
+    uTimer=::SetTimer(nullptr,0,1000,nullptr);
     if ( uTimer==0 )
     {
-        ResMessageBox(NULL,1,4,MB_SERVICE_NOTIFICATION,::GetLastError());
+        ResMessageBox(nullptr,1,4,MB_SERVICE_NOTIFICATION,::GetLastError());
         return false;
     }
 
@@ -374,7 +382,7 @@ bool MSvcProcess::OnStart()
     if ( (!Sync.Start())||
          (!Send.Start()) )
     {
-        ResMessageBox(NULL,1,12,MB_SERVICE_NOTIFICATION);
+        ResMessageBox(nullptr,1,12,MB_SERVICE_NOTIFICATION);
         return false;
     }
 
@@ -383,7 +391,7 @@ bool MSvcProcess::OnStart()
 //---------------------------------------------------------------------------
 void MSvcProcess::OnStop()
 {
-    ::KillTimer(NULL,uTimer);
+    ::KillTimer(nullptr,uTimer);
 
     Send.Stop(); Send.NetFree();
     Sync.Stop(); Sync.NetFree();
@@ -401,7 +409,7 @@ void MSvcProcess::OnExecute()
     if ( !::WTSEnumerateSessions(WTS_CURRENT_SERVER_HANDLE,
         0,1,&pInfo,&dwInfoCount) )
     {
-///        ResMessageBox(NULL,1,11,MB_SERVICE_NOTIFICATION,::GetLastError());
+///        ResMessageBox(nullptr,1,11,MB_SERVICE_NOTIFICATION,::GetLastError());
     } else
     {
         for ( DWORD i=0; i<dwInfoCount; i++ )
@@ -416,7 +424,7 @@ void MSvcProcess::OnExecute()
     }
 
     MSG msg;
-    while(::GetMessage(&msg,NULL,0,0))
+    while(::GetMessage(&msg,nullptr,0,0))
     {
         if ( msg.message==scmSTOP ) break;
         switch(msg.message)
@@ -432,7 +440,7 @@ void MSvcProcess::OnExecute()
 void MSvcProcess::OnTimer()
 {
     __int64 SystemTime;
-    MStateInfo Info;
+	MStatesInfo Info;
 
     // Опытаемся занять shared-секцию
     if ( !Shared.Lock() ) return;
@@ -587,10 +595,10 @@ void MSvcProcess::OnLogOn(DWORD dwSessionId_)
     // Проверим под этим ли пользователем запускать TLK shell
     if ( !::WTSQueryUserToken(dwSessionId_,&hUser) )
     {
-//        ResMessageBox(NULL,1,10,MB_SERVICE_NOTIFICATION,::GetLastError());
+//        ResMessageBox(nullptr,1,10,MB_SERVICE_NOTIFICATION,::GetLastError());
         return;
     }
-    if ( !CheckUser(hUser,Options.ShellUser) ) return;
+	if ( !CheckUser(hUser, Options.ShellUser.c_str()) ) return;
 
     // Запомним handle "нашего" пользователя и запустим оболочку
     hUserToken=hUser;
@@ -601,7 +609,7 @@ void MSvcProcess::OnLogOn(DWORD dwSessionId_)
     {
         RegExecList(
             HKEY_LOCAL_MACHINE,
-            "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run",
+            L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run",
             hUserToken);
     }
 }
@@ -614,7 +622,7 @@ void MSvcProcess::OnLogOff(DWORD dwSessionId_)
     HANDLE hUser;
     if ( !::WTSQueryUserToken(dwSessionId_,&hUser) )
     {
-//        ResMessageBox(NULL,1,10,MB_SERVICE_NOTIFICATION,::GetLastError());
+//        ResMessageBox(nullptr,1,10,MB_SERVICE_NOTIFICATION,::GetLastError());
         return;
     }
     if ( hUser!=hUserToken ) return;

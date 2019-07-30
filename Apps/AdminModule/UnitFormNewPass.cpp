@@ -42,7 +42,7 @@ void TFormNewPass::SetCoord(int Left_, int Top_, bool LeftTop_)
 void __fastcall TFormNewPass::FormClose(TObject *Sender,
       TCloseAction &Action)
 {
-    LabelPassword->Caption="";
+	LabelPassword->Caption=L"";
     ComboBoxLength->Clear();
 }
 //---------------------------------------------------------------------------

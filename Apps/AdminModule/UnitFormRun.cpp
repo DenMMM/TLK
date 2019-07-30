@@ -2,6 +2,7 @@
 #include <vcl.h>
 #include <stdio.h>
 #include <stdexcept>
+#include <cwchar>
 #pragma hdrstop
 
 #include "UnitFormRun.h"
@@ -31,8 +32,8 @@ void __fastcall TFormRun::FormShow(TObject *Sender)
     for ( TListItem *item=FormMain->ListViewComputers->Selected; item;
         item=FormMain->ListViewComputers->GetNextItem(item,sdAll,is) )
     {
-        MState *state=(MState*)item->Data;
-        MRunTime tmptime;
+        auto state=reinterpret_cast<MStatesItem*>(item->Data);
+        MTariffRunTimesItem tmptime;
         // Запрашиваем параметры для запуска/добавления
         state->RunParam(&tmptime);
         // Проверяем можно ли поставить/добавить время
@@ -46,19 +47,20 @@ void __fastcall TFormRun::FormShow(TObject *Sender)
         {
             // Проверяем существует ли еще тариф, по которому был запущен компьютер,
             // и применим ли до сих пор этот тариф к компьютеру
-            MTariff *tariff=(MTariff*)Tariffs->SrchID(tmptime.TariffID);
-            if ( (tariff==NULL)||(!tariff->CheckForComp(tmptime.Number)) ) continue;
+            MTariffsItem* tariff=Tariffs->SrchUUID(tmptime.TariffID);
+			if ( (tariff==nullptr)||
+				(!tariff->CheckForComp(tmptime.Number)) ) continue;
             // Добавляем тариф в список для использования, если он еще не добавлен
             if ( !UseTariffs.Search(tmptime.TariffID) )
             {
-                MTariffInfo *info=(MTariffInfo*)UseTariffs.Add();
-                tariff->GetInfo(info);
-            }
-        }
+				MTariffsInfoItem* info=UseTariffs.Add();
+				tariff->GetInfo(info);
+			}
+		}
 
-        // Копируем параметры запуска/добавления
-        MRunTime *time=(MRunTime*)CompTimes.Add();
-        time->Copy(&tmptime);
+		// Копируем параметры запуска/добавления
+		MTariffRunTimesItem* time=CompTimes.Add();
+		time->Copy(&tmptime);
         // Добавляем строку в список компьютеров и связываем с параметрами
         TListItem *newitem=ListViewComputers->Items->Add();
         newitem->Data=time;
@@ -76,22 +78,22 @@ void __fastcall TFormRun::FormShow(TObject *Sender)
     }
 
     // Заносим в список тарифы, которые можно использовать в это время
-    // или с выбранными компьютерами (при добавлении времени)
-    for ( MTariffInfo *Info=(MTariffInfo*)UseTariffs.gFirst();
-        Info; Info=(MTariffInfo*)Info->gNext() )
+	// или с выбранными компьютерами (при добавлении времени)
+	for ( MTariffsInfoItem* Info=UseTariffs.gFirst();
+		Info; Info=Info->gNext() )
         ComboBoxTariff->Items->Add(Info->Name.c_str());
 
     // Корректируем интерфейс в соответствии с режимом работы диалога
     if ( RunMode )
     {
-        Caption="Запуск компьютеров";
-        ComboBoxTariff->Enabled=true;
-        BitBtnRun->Caption="Запустить";
-    } else
-    {
-        Caption="Добавление времени";
-        ComboBoxTariff->Enabled=false;
-        BitBtnRun->Caption="Добавить";
+		Caption=L"Запуск компьютеров";
+		ComboBoxTariff->Enabled=true;
+		BitBtnRun->Caption=L"Запустить";
+	} else
+	{
+		Caption=L"Добавление времени";
+		ComboBoxTariff->Enabled=false;
+        BitBtnRun->Caption=L"Добавить";
     }
 
     // Блокируем поле ввода времени до первого выбора тарифа
@@ -107,8 +109,10 @@ void __fastcall TFormRun::FormShow(TObject *Sender)
     TimerDialogLock->Enabled=true;
     BitBtnRun->Enabled=true;
 
-    ActiveControl=RunMode?(TWinControl*)ComboBoxTariff:
-        (TWinControl*)ListViewComputers;
+	ActiveControl=
+		RunMode?
+		static_cast<TWinControl*>(ComboBoxTariff):
+        static_cast<TWinControl*>(ListViewComputers);
 }
 //---------------------------------------------------------------------------
 void __fastcall TFormRun::FormClose(TObject *Sender, TCloseAction &Action)
@@ -118,7 +122,7 @@ void __fastcall TFormRun::FormClose(TObject *Sender, TCloseAction &Action)
     ListViewComputers->Items->Clear();
     ComboBoxTariff->Clear();
     ComboBoxTime->Clear();
-    LabelAllCost->Caption="";
+    LabelAllCost->Caption=L"";
     // Очищаем буферы
     CompTimes.Clear();
     UseTariffs.Clear();
@@ -140,29 +144,30 @@ void __fastcall TFormRun::ListViewComputersInsert(TObject *Sender,
       TListItem *Item)
 {
     Item->ImageIndex=-1;
-    Item->SubItems->Add("");
-    Item->SubItems->Add("");
-    Item->SubItems->Add("");
-    Item->SubItems->Add("");
+	Item->SubItems->Add(L"");
+	Item->SubItems->Add(L"");
+	Item->SubItems->Add(L"");
+    Item->SubItems->Add(L"");
 }
 //---------------------------------------------------------------------------
 void __fastcall TFormRun::ListViewComputersSelectItem(TObject *Sender,
       TListItem *Item, bool Selected)
 {
-    if ( RunMode||(!Selected)||(ListViewComputers->Selected==NULL) ) return;
+    if ( RunMode||(!Selected)||(ListViewComputers->Selected==nullptr) ) return;
 
-    MRunTime *Time=(MRunTime*)ListViewComputers->Selected->Data;
+	auto Time=reinterpret_cast<MTariffRunTimesItem*>(
+		ListViewComputers->Selected->Data);
     int Num=0;
 
-    for ( MTariffInfo *Info=(MTariffInfo*)UseTariffs.gFirst();
-        Info; Info=(MTariffInfo*)Info->gNext() )
+	for ( MTariffsInfoItem* Info=UseTariffs.gFirst();
+		Info; Info=Info->gNext() )
     {
         if ( Info->ID==Time->TariffID )
         {
             OpenDialogTime=Time->StartTime;
             SelTariffID=Time->TariffID;
             ComboBoxTariff->ItemIndex=Num;
-            ComboBoxTariffClick(NULL);
+            ComboBoxTariffClick(nullptr);
             break;
         }
         Num++;
@@ -171,22 +176,23 @@ void __fastcall TFormRun::ListViewComputersSelectItem(TObject *Sender,
 //---------------------------------------------------------------------------
 void __fastcall TFormRun::ComboBoxTariffClick(TObject *Sender)
 {
-    MTariff *Tariff;
-    MRunTime *Time;
-    char line[30];
+	MTariffsItem *Tariff;
+	MTariffRunTimesItem *Time;
+	wchar_t line[30];
 
-    // Определяем какой тариф был выбран
-    if ( RunMode ) SelTariffID=((MTariffInfo*)UseTariffs.
-        Item(ComboBoxTariff->ItemIndex))->ID;
-    Tariff=(MTariff*)Tariffs->SrchID(SelTariffID);
-    // Задаем для выбранных компьютеров тариф, если он применим к ним
+	// Определяем какой тариф был выбран
+	if ( RunMode ) SelTariffID=
+		UseTariffs.GetItem(ComboBoxTariff->ItemIndex)->ID;
+
+	Tariff=Tariffs->SrchUUID(SelTariffID);
+	// Задаем для выбранных компьютеров тариф, если он применим к ним
     if ( RunMode )
     {
         TItemStates is=TItemStates()<<isSelected;
         for ( TListItem *Item=ListViewComputers->Selected; Item;
             Item=ListViewComputers->GetNextItem(Item,sdAll,is) )
         {
-            Time=(MRunTime*)Item->Data;
+            Time=reinterpret_cast<MTariffRunTimesItem*>(Item->Data);
             if ( !Tariff->CheckForComp(Time->Number) ) continue;
             if ( Time->TariffID==SelTariffID ) continue;
             Time->TariffID=SelTariffID;
@@ -199,8 +205,8 @@ void __fastcall TFormRun::ComboBoxTariffClick(TObject *Sender)
     // Запрашиваем для тарифа список пакетов
     Tariff->GetRunTimes(OpenDialogTime,&UseTimes);
     // Если пакетов для тарифа в это время нету, то запрещаем ввод времени
-    Time=(MRunTime*)UseTimes.gFirst();
-    if ( Time==NULL )
+    Time=UseTimes.gFirst();
+    if ( Time==nullptr )
     {
         ComboBoxTime->Enabled=false;
         ComboBoxTime->Color=clBtnFace;
@@ -216,7 +222,7 @@ void __fastcall TFormRun::ComboBoxTariffClick(TObject *Sender)
     {
         ComboBoxTime->Style=Time->gNext()?csDropDown:csSimple;
         UseTimes.Del(Time);
-        Time=(MRunTime*)UseTimes.gFirst();
+        Time=UseTimes.gFirst();
     } else ComboBoxTime->Style=csDropDownList;
     // Заносим в список пакеты
     while(Time)
@@ -224,19 +230,29 @@ void __fastcall TFormRun::ComboBoxTariffClick(TObject *Sender)
         switch(Time->Type)
         {
             case mttFlyPacket:
-                sprintf(line,"На %i час. %.2i мин.",
-                    Time->SizeTime/60,Time->SizeTime%60);
+				swprintf(
+					line, sizeof(line),
+					L"На %i час. %.2i мин.",
+					Time->SizeTime/60,
+					Time->SizeTime%60);
                 break;
             case mttPacket:
                 int EndTime;
                 EndTime=Time->EndTime; if ( EndTime>=(24*60) ) EndTime-=24*60;
-                sprintf(line,"С %i:%.2i до %i:%.2i",
-                    Time->BeginTime/60,Time->BeginTime%60,EndTime/60,EndTime%60);
+				swprintf(
+					line, sizeof(line),
+					L"С %i:%.2i до %i:%.2i",
+					Time->BeginTime/60,
+					Time->BeginTime%60,
+					EndTime/60,
+					EndTime%60);
                 break;
-            default: *line=0; break;
+			default:
+				*line=0;
+				break;
         }
         ComboBoxTime->Items->Add(line);
-        Time=(MRunTime*)Time->gNext();
+        Time=Time->gNext();
     }
 
     // Обновляем сведения об общей стоимости заказа
@@ -245,11 +261,11 @@ void __fastcall TFormRun::ComboBoxTariffClick(TObject *Sender)
 //---------------------------------------------------------------------------
 void __fastcall TFormRun::ComboBoxTimeClick(TObject *Sender)
 {
-    MRunTime *SelTime, *Time;
-    MTariff *Tariff;
+	MTariffRunTimesItem *SelTime, *Time;
+    MTariffsItem *Tariff;
 
-    Tariff=(MTariff*)Tariffs->SrchID(SelTariffID);
-    SelTime=(MRunTime*)UseTimes.Item(ComboBoxTime->ItemIndex);
+	Tariff=Tariffs->SrchUUID(SelTariffID);
+    SelTime=UseTimes.GetItem(ComboBoxTime->ItemIndex);
 
     ComboBoxTime->Color=clWindow;
 
@@ -259,7 +275,7 @@ void __fastcall TFormRun::ComboBoxTimeClick(TObject *Sender)
     for ( TListItem *Item=ListViewComputers->Selected; Item;
         Item=ListViewComputers->GetNextItem(Item,sdAll,is) )
     {
-        Time=(MRunTime*)Item->Data;
+        Time=reinterpret_cast<MTariffRunTimesItem*>(Item->Data);
         if ( RunMode )
         {
             // Проверяем применим ли к компьютеру выбранный ранее тариф
@@ -289,30 +305,30 @@ void __fastcall TFormRun::ComboBoxTimeClick(TObject *Sender)
 //---------------------------------------------------------------------------
 void __fastcall TFormRun::ComboBoxTimeChange(TObject *Sender)
 {
-    char hours[10], *minutes;
+    wchar_t hours[10], *minutes;
     int h, m, time;
-    MRunTime *SelTime, *Time;
-    MTariff *Tariff;
+	MTariffRunTimesItem *SelTime, *Time;
+    MTariffsItem *Tariff;
     TItemStates is;
 
     if ( (ComboBoxTime->ItemIndex>=0)||
-        ((Tariff=(MTariff*)Tariffs->SrchID(SelTariffID))==NULL) ) return;
+        ((Tariff=Tariffs->SrchUUID(SelTariffID))==nullptr) ) return;
 
-    strcpy(hours,ComboBoxTime->Text.c_str());
-    // Ищем в строке разделитель часов и минут
-    minutes=strchr(hours,':');
+	wcscpy(hours,ComboBoxTime->Text.c_str());
+	// Ищем в строке разделитель часов и минут
+	minutes=wcschr(hours,L':');
     //
-    if ( minutes==NULL )
+    if ( minutes==nullptr )
     {
         // Разбираем время как заданное только в минутах (вплоть до суток)
-        if ( sscanf(hours,"%d",&m)!=1 ) goto error; h=0;
+        if ( swscanf(hours,L"%d",&m)!=1 ) goto error; h=0;
     } else
     {
         // Делим строку на две и разбираем по-отдельности
         *(minutes++)=0;
-        if ( (sscanf(hours,"%d",&h)!=1)||(h<0)||(h>24) ) goto error;
-        if ( *minutes==0 ) m=0;
-        else if( (sscanf(minutes,"%d",&m)!=1)||(m<0)||(m>59) ) goto error;
+		if ( (swscanf(hours,L"%d",&h)!=1)||(h<0)||(h>24) ) goto error;
+		if ( *minutes==0 ) m=0;
+        else if( (swscanf(minutes,L"%d",&m)!=1)||(m<0)||(m>59) ) goto error;
     }
     // Подсчитываем желаемое время работы и проверяем его на ограничения
     time=h*60+m; if ( (time<=0)||(time>24*60) ) goto error;
@@ -325,8 +341,8 @@ void __fastcall TFormRun::ComboBoxTimeChange(TObject *Sender)
     for ( TListItem *Item=ListViewComputers->Selected; Item;
         Item=ListViewComputers->GetNextItem(Item,sdAll,is) )
     {
-        Time=(MRunTime*)Item->Data;
-        if ( RunMode )
+		Time=reinterpret_cast<MTariffRunTimesItem*>(Item->Data);
+		if ( RunMode )
         {
             // Проверяем применим ли к компьютеру выбранный ранее тариф
             if ( !Tariff->CheckForComp(Time->Number) ) continue;
@@ -362,12 +378,12 @@ void __fastcall TFormRun::BitBtnRunClick(TObject *Sender)
     TListItem *item=ListViewComputers->Selected, *next;
     while(item)
     {
-        MRunTime *time=(MRunTime*)item->Data;
+        auto time=reinterpret_cast<MTariffRunTimesItem*>(item->Data);
         next=ListViewComputers->GetNextItem(item,sdAll,is);
         if ( time->TariffID&&(time->Type!=mttUndefined)&&time->WorkTime )
         {
-            MState *state=States->Search(time->Number);     ///
-            MTariff *tariff=(MTariff*)Tariffs->SrchID(time->TariffID);
+			MStatesItem *state=States->Search(time->Number);     ///
+            MTariffsItem* tariff=Tariffs->SrchUUID(time->TariffID);
             // Проверяем возможно ли применить команду
             if ( state->CmdRun(tariff,time,true) )
             {
@@ -401,38 +417,44 @@ void __fastcall TFormRun::BitBtnRunClick(TObject *Sender)
 //---------------------------------------------------------------------------
 void TFormRun::SetListViewComputersLine(TListItem *Item_)
 {
-    MRunTime *RunTime=(MRunTime*)Item_->Data;
+    auto RunTime=reinterpret_cast<MTariffRunTimesItem*>(Item_->Data);
     TStrings *SubItems=Item_->SubItems;
-    MComputer *Computer;
-    char line[100];
+    MComputersItem *Computer;
+    wchar_t line[100];
     int icon;
 
-    Computer=(MComputer*)Computers->Search(RunTime->Number);
-    if ( Computer==NULL ) return;
+    Computer=Computers->Search(RunTime->Number);
+    if ( Computer==nullptr ) return;
 
     Item_->SubItemImages[0]=FormMain->GetCompColorIcon(Computer);
-    sprintf(line,"%i",RunTime->Number);
-    SubItems->Strings[0]=line;
+	swprintf(
+		line, sizeof(line),
+		L"%i",
+		RunTime->Number);
+	SubItems->Strings[0]=line;
     if ( RunTime->TariffID==0 )
     {
-        SubItems->Strings[1]="";
-        SubItems->Strings[2]="";
-        SubItems->Strings[3]="";
-    } else
-    {
-        SubItems->Strings[1]=UseTariffs.Search(RunTime->TariffID)->Name.c_str();
-        if ( RunTime->Type==mttUndefined )
-        {
-            SubItems->Strings[2]="";
-            SubItems->Strings[3]="";
+		SubItems->Strings[1]=L"";
+		SubItems->Strings[2]=L"";
+		SubItems->Strings[3]=L"";
+	} else
+	{
+		SubItems->Strings[1]=UseTariffs.Search(RunTime->TariffID)->Name.c_str();
+		if ( RunTime->Type==mttUndefined )
+		{
+			SubItems->Strings[2]=L"";
+            SubItems->Strings[3]=L"";
         } else
         {
             if ( (RunTime->Type==mttHours)||(RunTime->Type==mttFlyPacket) )
                 icon=RunTime->WorkTime<RunTime->SizeTime?17:-1;
             else icon =-1;
             Item_->SubItemImages[2]=icon;
-            sprintf(line,"%i час. %.2i мин.",
-                RunTime->WorkTime/60,RunTime->WorkTime%60);
+			swprintf(
+				line, sizeof(line),
+				L"%i час. %.2i мин.",
+				RunTime->WorkTime/60,
+				RunTime->WorkTime%60);
             SubItems->Strings[2]=line;
             SubItems->Strings[3]=FloatToStrF(RunTime->Cost,ffCurrency,8,2);
         }
@@ -442,13 +464,14 @@ void TFormRun::SetListViewComputersLine(TListItem *Item_)
 void TFormRun::UpdateFullCost()
 {
     double cost=0.;
-    MRunTime *time;
 
-    for ( int i=0, j=ListViewComputers->Items->Count; i<j; i++ )
-    {
-        time=(MRunTime*)ListViewComputers->Items->Item[i]->Data;
-        if ( time->TariffID&&
-            (time->Type!=mttUndefined)&&time->WorkTime ) cost+=time->Cost;
+	for ( int i=0, j=ListViewComputers->Items->Count; i<j; i++ )
+	{
+		auto time=reinterpret_cast<MTariffRunTimesItem*>(
+			ListViewComputers->Items->Item[i]->Data);
+		if ( time->TariffID&&
+			(time->Type!=mttUndefined)&&
+			time->WorkTime ) cost+=time->Cost;
     }
 
     LabelAllCost->Caption=FloatToStrF(cost,ffCurrency,8,2);

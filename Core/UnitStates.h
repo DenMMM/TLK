@@ -2,21 +2,22 @@
 #ifndef UnitStatesH
 #define UnitStatesH
 //---------------------------------------------------------------------------
-struct MStateInfo;
-class MState;
-class MStates;
-class MStateCl;
-//---------------------------------------------------------------------------
 #include <winsock2.h>
 //#include <windows.h>
 #include <string>
+
 #include "UnitWinAPI.h"
 #include "UnitSLList.h"
 #include "UnitComputers.h"
 #include "UnitTariffs.h"
 #include "UnitGames.h"
 #include "UnitClOptions.h"
-#include "UnitSync.h"
+#include "UnitSyncMsgs.h"
+//---------------------------------------------------------------------------
+struct MStatesInfo;
+class MStatesItem;
+class MStates;
+class MStateCl;
 //---------------------------------------------------------------------------
 #define MAX_TimeShift   20      // Максимальное расхождение времени сервера и клиента (секунд)
 //---------------------------------------------------------------------------
@@ -54,174 +55,192 @@ class MStateCl;
 #define mdcAll (mdcNumber|mdcState|mdcTariff|mdcWorkTime|mdcFineTime|mdcCommands|mdcNetState)
 //#define mdcAllCl (mdcNumber|mdcState|mdcWorkTime|mdcFineTime|mdcPrograms|mdcCommands|mdcOptions)
 //---------------------------------------------------------------------------
-struct MStateInfo
+struct MStatesInfo
 {
-    char Number;                // Номер компьютера
-    unsigned State;             // Состояние компьютера (режимы работы)
-    unsigned TariffID;          // ID-номер тарифа, по которому работает компьютер
-    short WorkTime;             // На какое время был запущен компьютер (в минутах)
-    short ToEndWork;            // Оставшееся время работы (в минутах)
-    short EndWorkTime;          // До скольки еще ждать окончания работы (в минутах с начала суток)
-    short FineTime;             // Время ожидания в режиме штрафа (в минутах)
-    short ToEndFine;            // Оставшееся время штрафа (в минутах)
-    short EndFineTime;          // До скольки еще ждать окончания штрафа (в минутах с начала суток)
-    unsigned Programs;          // Групы программ, разрешенных для запуска
-    unsigned Commands;          // Дополнительные команды для компьютера
-    unsigned NetState;          // Состояние сети
-    unsigned Changes;           // Изменения данных для оболочки со времени их последнего запроса
+	char Number;                // Номер компьютера
+	unsigned State;             // Состояние компьютера (режимы работы)
+	unsigned TariffID;          // ID-номер тарифа, по которому работает компьютер
+	short WorkTime;             // На какое время был запущен компьютер (в минутах)
+	short ToEndWork;            // Оставшееся время работы (в минутах)
+	short EndWorkTime;          // До скольки еще ждать окончания работы (в минутах с начала суток)
+	short FineTime;             // Время ожидания в режиме штрафа (в минутах)
+	short ToEndFine;            // Оставшееся время штрафа (в минутах)
+	short EndFineTime;          // До скольки еще ждать окончания штрафа (в минутах с начала суток)
+	unsigned Programs;          // Групы программ, разрешенных для запуска
+	unsigned Commands;          // Дополнительные команды для компьютера
+	unsigned NetState;          // Состояние сети
+	unsigned Changes;           // Изменения данных для оболочки со времени их последнего запроса
 };
 //---------------------------------------------------------------------------
-class MState:public MSLListItem
+class MStatesItem:
+	public MSLListItem::Simple <
+		MSLListItem::Proxy <MSLListItem, MStatesItem>,
+		MStatesItem>
 {
-private:
-    void Copy(const MListItem *SrcItem_) {}
-    // Функции механизма сохранения/загрузки данных
-    unsigned GetDataSize() const;
-    char *SetData(char *Data_) const;
-    const char *GetData(const char *Data_, const char *Limit_);
+protected:
+	void Copy(const MListItem *SrcItem_) override {}
+	// Функции механизма сохранения/загрузки данных
+	unsigned GetDataSize() const override;
+	void *SetData(void *Data_) const override;
+	const void *GetData(const void *Data_, const void *Limit_) override;
 
-    mutable MWAPI::CRITICAL_SECTION CS_Main;    // Объект для синхронизации доступа потоков к данным
-    __int64 SystemTime;         // Системное время, используемое при всех расчетах
+	mutable MWAPI::CRITICAL_SECTION CS_Main;    // Объект для синхронизации доступа потоков к данным
+	__int64 SystemTime;         // Системное время, используемое при всех расчетах
 
-    char Number;                // Номер компьютера, с которым ассоциировано состояние
-    unsigned State;             // Состояние компьютера (режимы работы)
-    unsigned TariffID;          // ID-номер тарифа, по которому работает компьютер
-    __int64 StartWorkTime;      // Время запуска компьютера в работу (абсолютное время)
-    short SizeWorkTime;         // На какое время запущен компьютер (в минутах)
-    __int64 StartFineTime;      // Время, когда был применен штраф (абсолютное время)
-    short SizeFineTime;         // Время ожидания в режиме штрафа (в минутах)
-    __int64 StopTimerTime;      // Время остановки отсчета времени (абсолютное время)
-    unsigned Programs;          // Групы программ, разрешенных для запуска
-    unsigned Commands;          // Дополнительные команды для компьютера
-    unsigned CmdsToReset;       // Команды требующие отмены по окончании выполнения
-    unsigned NetState;          // Состояние сети
-    unsigned Changes;           // Изменения данных для оболочки со времени их последнего запроса
+	char Number;                // Номер компьютера, с которым ассоциировано состояние
+	unsigned State;             // Состояние компьютера (режимы работы)
+	unsigned TariffID;          // ID-номер тарифа, по которому работает компьютер
+	__int64 StartWorkTime;      // Время запуска компьютера в работу (абсолютное время)
+	short SizeWorkTime;         // На какое время запущен компьютер (в минутах)
+	__int64 StartFineTime;      // Время, когда был применен штраф (абсолютное время)
+	short SizeFineTime;         // Время ожидания в режиме штрафа (в минутах)
+	__int64 StopTimerTime;      // Время остановки отсчета времени (абсолютное время)
+	unsigned Programs;          // Групы программ, разрешенных для запуска
+	unsigned Commands;          // Дополнительные команды для компьютера
+	unsigned CmdsToReset;       // Команды требующие отмены по окончании выполнения
+	unsigned NetState;          // Состояние сети
+	unsigned Changes;           // Изменения данных для оболочки со времени их последнего запроса
 
-    // Функции проверки окончания времени работы и времени штрафа
-    bool ControlWorkTime();
-    bool ControlFineTime();
+	// Функции проверки окончания времени работы и времени штрафа
+	bool ControlWorkTime();
+	bool ControlFineTime();
 
 public:
-    // Команды, применяемые к компьютерам
-    bool CmdRun(MTariff *Tariff_, MRunTime *Time_, bool Check_);
-    bool CmdFine(short FineSize_, bool Check_);
-    bool CmdExchange(MState *State_, bool Check_);
-    bool CmdLock(bool Apply_, bool Check_);
-    bool CmdPause(bool Apply_, bool Check_);
-    bool CmdOpen(bool Apply_, bool Check_);
-    bool CmdPowerOn(bool Check_);
-    bool CmdReboot(bool Check_);
-    bool CmdShutdown(bool Check_);
+	// Команды, применяемые к компьютерам
+	bool CmdRun(
+		MTariffsItem *Tariff_,
+		MTariffRunTimesItem *Time_,
+		bool Check_);
+	bool CmdFine(short FineSize_, bool Check_);
+	bool CmdExchange(MStatesItem *State_, bool Check_);
+	bool CmdLock(bool Apply_, bool Check_);
+	bool CmdPause(bool Apply_, bool Check_);
+	bool CmdOpen(bool Apply_, bool Check_);
+	bool CmdPowerOn(bool Check_);
+	bool CmdReboot(bool Check_);
+	bool CmdShutdown(bool Check_);
 
-    // Вспомогательные функции
-    void RunParam(MRunTime *RunTime_);
-    void StateInfo(MStateInfo *Info_);
-    bool Timer(__int64 SystemTime_);
+	// Вспомогательные функции
+	void RunParam(MTariffRunTimesItem *RunTime_);
+	void StateInfo(MStatesInfo *Info_);
+	bool Timer(__int64 SystemTime_);
 
-    // Назначение и проверка связей с другими данными
-    int MState::Associated() const { return Number; }
-    void Associate(int Number_);
+	// Назначение и проверка связей с другими данными
+	int Associated() const { return Number; }
+	void Associate(int Number_);
 
-    // Операции для сетевого интерфейса
-    bool NetBegin();
-    bool NetEnd();
+	// Операции для сетевого интерфейса
+	bool NetBegin();
+	bool NetEnd();
 
-    bool NetSyncNewData();                  // Есть ли что отправить клиенту ?
-    void NetSyncData(MSyncData *Data_);     // Запрос данных для отправки клиенту
-    void NetSyncExecuted(bool Executed_);   //
+	bool NetSyncNewData();                  // Есть ли что отправить клиенту ?
+	void NetSyncData(MSyncData *Data_);     // Запрос данных для отправки клиенту
+	void NetSyncExecuted(bool Executed_);   //
 
-    bool NetPwrOnNeed();
-    void NetPwrOnExecuted();
+	bool NetPwrOnNeed();
+	void NetPwrOnExecuted();
 
-    // Поддержка логов
-    struct LogData
-    {
-        char Number;                // Номер компьютера
-        unsigned State;             // Состояние компьютера (режимы работы)
-        unsigned TariffID;          // ID-номер тарифа, по которому работает компьютер
-        __int64 StartWorkTime;      // Время запуска компьютера в работу (абсолютное время)
-        short SizeWorkTime;         // На какое время запущен компьютер (в минутах)
-        __int64 StartFineTime;      // Время, когда был применен штраф (абсолютное время)
-        short SizeFineTime;         // Время ожидания в режиме штрафа (в минутах)
-        __int64 StopTimerTime;      // Время остановки отсчета времени (абсолютное время)
+	// Поддержка логов
+	struct LogData
+	{
+		char Number;                // Номер компьютера
+		unsigned State;             // Состояние компьютера (режимы работы)
+		unsigned TariffID;          // ID-номер тарифа, по которому работает компьютер
+		__int64 StartWorkTime;      // Время запуска компьютера в работу (абсолютное время)
+		short SizeWorkTime;         // На какое время запущен компьютер (в минутах)
+		__int64 StartFineTime;      // Время, когда был применен штраф (абсолютное время)
+		short SizeFineTime;         // Время ожидания в режиме штрафа (в минутах)
+		__int64 StopTimerTime;      // Время остановки отсчета времени (абсолютное время)
 
-        LogData &operator=(const MState &State_)
-        {
-            MWAPI::CRITICAL_SECTION::Lock lckObj(State_.CS_Main);
+		LogData &operator=(const MStatesItem &State_)
+		{
+			MWAPI::CRITICAL_SECTION::Lock lckObj(State_.CS_Main);
 
-            Number=State_.Number;
-            State=State_.State;
-            TariffID=State_.TariffID;
-            StartWorkTime=State_.StartWorkTime;
-            SizeWorkTime=State_.SizeWorkTime;
-            StartFineTime=State_.StartFineTime;
-            SizeFineTime=State_.SizeFineTime;
-            StopTimerTime=State_.StopTimerTime;
+			Number=State_.Number;
+			State=State_.State;
+			TariffID=State_.TariffID;
+			StartWorkTime=State_.StartWorkTime;
+			SizeWorkTime=State_.SizeWorkTime;
+			StartFineTime=State_.StartFineTime;
+			SizeFineTime=State_.SizeFineTime;
+			StopTimerTime=State_.StopTimerTime;
 
-            return *this;
-        }
-    };
-    friend LogData;                 // Нужен доступ к "CS_Main"
+			return *this;
+		}
+	};
 
-    MState &operator=(const LogData &Data_)
-    {
-        MWAPI::CRITICAL_SECTION::Lock lckObj(CS_Main);
+	MStatesItem &operator=(const LogData &Data_)
+	{
+		MWAPI::CRITICAL_SECTION::Lock lckObj(CS_Main);
 
-        Number=Data_.Number;
-        State=Data_.State;
-        TariffID=Data_.TariffID;
-        StartWorkTime=Data_.StartWorkTime;
-        SizeWorkTime=Data_.SizeWorkTime;
-        StartFineTime=Data_.StartFineTime;
-        SizeFineTime=Data_.SizeFineTime;
-        StopTimerTime=Data_.StopTimerTime;
-        Changes=mdcAll;
+		Number=Data_.Number;
+		State=Data_.State;
+		TariffID=Data_.TariffID;
+		StartWorkTime=Data_.StartWorkTime;
+		SizeWorkTime=Data_.SizeWorkTime;
+		StartFineTime=Data_.StartFineTime;
+		SizeFineTime=Data_.SizeFineTime;
+		StopTimerTime=Data_.StopTimerTime;
+		Changes=mdcAll;
 
-        return *this;
-    }
+		return *this;
+	}
 
-    MState();
-    ~MState();
+	MStatesItem():
+		SystemTime(0),
+		Number(0),
+		State(0),
+		TariffID(0),
+		StartWorkTime(0),
+		SizeWorkTime(0),
+		StartFineTime(0),
+		SizeFineTime(0),
+		StopTimerTime(0),
+		Programs(0),
+		Commands(0),
+		CmdsToReset(0),
+		NetState(0),
+		Changes(0)
+	{
+	}
+
+	virtual ~MStatesItem()
+	{
+	}
 };
 //---------------------------------------------------------------------------
-class MStates:public MSLList
+class MStates:
+	public MSLList::Simple <MSLList, MStates, MStatesItem>
 {
 private:
-    MListItem *item_new(unsigned char TypeID_) const { return (MListItem*)new MState; }
-    void item_del(MListItem *Item_) const { delete (MState*)Item_; }
-
-    MWAPI::CRITICAL_SECTION CS_File;   // Объект для синхронизации
+	MWAPI::CRITICAL_SECTION CS_File;   // Объект для синхронизации
 
 public:
-    // Вспомогательные функции
-    MState *Search(int Number_);
-    bool Update(MComputers *Computers_);
-    bool Timer(__int64 SystemTime_);
+	// Вспомогательные функции
+	MStatesItem *Search(int Number_);
+	bool Update(MComputers *Computers_);
+	bool Timer(__int64 SystemTime_);
 
-    // Переопределяем функцию сохранения списка в файл
-    bool Save();
+	// Переопределяем функцию сохранения списка в файл
+	bool Save();
 
-    MStates() { }
-    ~MStates() { Clear(); }
+	MStates() {}
+	~MStates() {}
 };
 //---------------------------------------------------------------------------
-class MStateCl:public MSLList
+class MStateCl: public MSLList          /// придумать лучшее наследование
 {
 private:
-    // Заглушки, т.к. списка на самом деле нет - только "заголовок"
-    MListItem *item_new(unsigned char TypeID_) const { return NULL; }
-    void item_del(MListItem *Item_) const { return; }
-
     // Функции механизма сохранения/загрузки данных
-    unsigned GetDataSize() const;
-    char *SetData(char *Data_) const;
-    const char *GetData(const char *Data_, const char *Limit_);
+	unsigned GetDataSize() const override;
+	void *SetData(void *Data_) const override;
+	const void *GetData(const void *Data_, const void *Limit_) override;
     
-    HKEY OptKey;                //
-    std::string OptPath;        //
-    std::string OptValue;       //
-    std::string PrgFile;        // Файл для хранения списка программ
-    unsigned AutoLockTime;      // Время отсутствия связи с сервером до автоблокировки
+	HKEY OptKey;				//
+	std::wstring OptPath;		//
+	std::wstring OptValue;		//
+	std::wstring PrgFile;		// Файл для хранения списка программ
+	unsigned AutoLockTime;		// Время отсутствия связи с сервером до автоблокировки
 
     mutable MWAPI::CRITICAL_SECTION CS_Main;   // Объект для синхронизации доступа потоков к данным
     __int64 SystemTime;         // Системное время, используемое при всех расчетах
@@ -245,7 +264,7 @@ private:
 
 public:
     // Вспомогательные функции
-    void StateInfo(MStateInfo *Info_);
+    void StateInfo(MStatesInfo *Info_);
     bool GetOptions(MClOptions *Options_);
     bool GetGames(MGames *Games_);
     bool Timer(__int64 SystemTime_);
@@ -260,16 +279,35 @@ public:
     // Переадресуем обращения для загрузки/сохранения к методам базового класса MSLList
     void SetDefault(
         HKEY RegKey_,
-        const std::string &RegPath_,
-        const std::string &RegValue_,
+        const std::wstring &RegPath_,
+        const std::wstring &RegValue_,
         HKEY OptKey_,
-        const std::string &OptPath_,
-        const std::string &OptValue_,
-        const std::string &PrgFile_,
+        const std::wstring &OptPath_,
+        const std::wstring &OptValue_,
+        const std::wstring &PrgFile_,
         unsigned RegCode_);
 
-    MStateCl();
-    ~MStateCl();
+	MStateCl():
+		OptKey(nullptr),
+//	    OptCode=PrgCode=0;
+		AutoLockTime(0),
+		Number(0),
+		State(mcsFree),
+		StartWorkTime(0),
+		SizeWorkTime(0),
+		StartFineTime(0),
+		SizeFineTime(0),
+		StopTimerTime(0),
+		Programs(0),
+		Commands(0),
+		Changes(mdcNumber|mdcState)
+	{
+		SystemTime=LastSyncTime=::GetTickCount();
+	}
+
+	~MStateCl()
+	{
+	}
 };
 //---------------------------------------------------------------------------
 #endif

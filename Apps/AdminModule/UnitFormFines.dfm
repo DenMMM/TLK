@@ -133,7 +133,6 @@ object FormFines: TFormFines
     Width = 153
     Height = 21
     Style = csDropDownList
-    ItemHeight = 13
     TabOrder = 2
     OnClick = ComboBoxTimeClick
   end

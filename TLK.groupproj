@@ -1,0 +1,84 @@
+﻿	<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+		<PropertyGroup>
+			<ProjectGuid>{51FFDAFD-A2E2-446E-9064-CCAD09DE6E5D}</ProjectGuid>
+		</PropertyGroup>
+		<ItemGroup>
+			<Projects Include="Apps\AdminModule\AdminMdl.cbproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="Apps\ClientModule\TLk.cbproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="Apps\EXEReplacer\ExeRepl.cbproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="Apps\LogViewer\LogView.cbproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="Apps\VPlay\VPlay.cbproj">
+				<Dependencies/>
+			</Projects>
+		</ItemGroup>
+		<ProjectExtensions>
+			<Borland.Personality>Default.Personality.12</Borland.Personality>
+			<Borland.ProjectType/>
+			<BorlandProject>
+				<Default.Personality/>
+			</BorlandProject>
+		</ProjectExtensions>
+		<Target Name="AdminMdl">
+			<MSBuild Projects="Apps\AdminModule\AdminMdl.cbproj"/>
+		</Target>
+		<Target Name="AdminMdl:Clean">
+			<MSBuild Targets="Clean" Projects="Apps\AdminModule\AdminMdl.cbproj"/>
+		</Target>
+		<Target Name="AdminMdl:Make">
+			<MSBuild Targets="Make" Projects="Apps\AdminModule\AdminMdl.cbproj"/>
+		</Target>
+		<Target Name="TLk">
+			<MSBuild Projects="Apps\ClientModule\TLk.cbproj"/>
+		</Target>
+		<Target Name="TLk:Clean">
+			<MSBuild Targets="Clean" Projects="Apps\ClientModule\TLk.cbproj"/>
+		</Target>
+		<Target Name="TLk:Make">
+			<MSBuild Targets="Make" Projects="Apps\ClientModule\TLk.cbproj"/>
+		</Target>
+		<Target Name="ExeRepl">
+			<MSBuild Projects="Apps\EXEReplacer\ExeRepl.cbproj"/>
+		</Target>
+		<Target Name="ExeRepl:Clean">
+			<MSBuild Targets="Clean" Projects="Apps\EXEReplacer\ExeRepl.cbproj"/>
+		</Target>
+		<Target Name="ExeRepl:Make">
+			<MSBuild Targets="Make" Projects="Apps\EXEReplacer\ExeRepl.cbproj"/>
+		</Target>
+		<Target Name="LogView">
+			<MSBuild Projects="Apps\LogViewer\LogView.cbproj"/>
+		</Target>
+		<Target Name="LogView:Clean">
+			<MSBuild Targets="Clean" Projects="Apps\LogViewer\LogView.cbproj"/>
+		</Target>
+		<Target Name="LogView:Make">
+			<MSBuild Targets="Make" Projects="Apps\LogViewer\LogView.cbproj"/>
+		</Target>
+		<Target Name="VPlay">
+			<MSBuild Projects="Apps\VPlay\VPlay.cbproj"/>
+		</Target>
+		<Target Name="VPlay:Clean">
+			<MSBuild Targets="Clean" Projects="Apps\VPlay\VPlay.cbproj"/>
+		</Target>
+		<Target Name="VPlay:Make">
+			<MSBuild Targets="Make" Projects="Apps\VPlay\VPlay.cbproj"/>
+		</Target>
+		<Target Name="Build">
+			<CallTarget Targets="AdminMdl;TLk;ExeRepl;LogView;VPlay"/>
+		</Target>
+		<Target Name="Clean">
+			<CallTarget Targets="AdminMdl:Clean;TLk:Clean;ExeRepl:Clean;LogView:Clean;VPlay:Clean"/>
+		</Target>
+		<Target Name="Make">
+			<CallTarget Targets="AdminMdl:Make;TLk:Make;ExeRepl:Make;LogView:Make;VPlay:Make"/>
+		</Target>
+		<Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
+	</Project>

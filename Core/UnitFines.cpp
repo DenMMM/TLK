@@ -8,50 +8,40 @@
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
 //---------------------------------------------------------------------------
-
-MFine::MFine()
+void MFinesItem::Copy(const MListItem *SrcItem_)
 {
-    Time=0;
+	auto fine=dynamic_cast<const MFinesItem*>(SrcItem_);
+
+	Descr=fine->Descr;
+	Time=fine->Time;
+
+	MIDListItem::Copy(SrcItem_);
 }
 
-MFine::~MFine()
+unsigned MFinesItem::GetDataSize() const
 {
-//
+	return
+		MIDListItem::GetDataSize()+				// ID-номер штрафа
+		sizeofLine(Descr)+						// Описание штрафа
+		sizeof(Time);                   		// Время штрафа
 }
 
-void MFine::Copy(const MListItem *SrcItem_)
-{
-    const MFine *fine=
-        dynamic_cast<const MFine*>(SrcItem_);
-
-    Descr=fine->Descr;
-    Time=fine->Time;
-    MIDListItem::Copy(SrcItem_);
-}
-
-unsigned MFine::GetDataSize() const
-{
-    return
-        MIDListItem::GetDataSize()+     // ID-номер штрафа
-        Descr.length()+sizeof('\0')+    // Описание штрафа
-        sizeof(Time);                   // Время штрафа
-}
-
-char *MFine::SetData(char *Data_) const
+void *MFinesItem::SetData(void *Data_) const
 {
     Data_=MIDListItem::SetData(Data_);
-    Data_=MemSetCLine(Data_,Descr.c_str());
-    Data_=MemSet(Data_,Time);
+	Data_=MemSetLine(Data_,Descr);
+	Data_=MemSet(Data_,Time);
+
     return Data_;
 }
 
-const char *MFine::GetData(const char *Data_, const char *Limit_)
+const void *MFinesItem::GetData(const void *Data_, const void *Limit_)
 {
     return
-        (Data_=MIDListItem::GetData(Data_,Limit_))!=NULL &&
-        (Data_=MemGetCLine(Data_,Descr,MAX_FineDescrLen,Limit_))!=NULL &&
-        (Data_=MemGet(Data_,&Time,Limit_))!=NULL
-        ? Data_: NULL;
+		(Data_=MIDListItem::GetData(Data_,Limit_)) &&
+		(Data_=MemGetLine(Data_,Descr,MAX_FineDescrLen,Limit_)) &&
+		(Data_=MemGet(Data_,&Time,Limit_))
+		? Data_: nullptr;
 }
 //---------------------------------------------------------------------------
 

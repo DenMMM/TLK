@@ -27,7 +27,7 @@ void __fastcall TFormMain::FormShow(TObject *Sender)
     FileName=FileName.Trim();
 
     // Меняем заголовок окна программы
-    Caption="VPlay - "+ExtractFileName(FileName);
+    Caption=L"VPlay - "+ExtractFileName(FileName);
 
     // Отправляем сообщение для открытия устройства
     ::PostMessage(Handle,MOPEN,0,0);
@@ -37,7 +37,7 @@ void __fastcall TFormMain::FormClose(TObject *Sender, TCloseAction &Action)
 {
     // Закрываем MCI-устройство
     mcierror=::mciSendCommand(DeviceID, MCI_CLOSE,
-        0, (DWORD)(LPMCI_GENERIC_PARMS)NULL);
+        0, (DWORD)(LPMCI_GENERIC_PARMS)nullptr);
 }
 //---------------------------------------------------------------------------
 void __fastcall TFormMain::FormResize(TObject *Sender)
@@ -83,8 +83,8 @@ void __fastcall TFormMain::TimerTimer(TObject *Sender)
         MCI_STATUS_ITEM, (DWORD)(LPMCI_STATUS_PARMS)&status_parms);
     switch(status_parms.dwReturn)
     {
-        case MCI_MODE_NOT_READY: LabelState->Caption="Устройство не готово"; break;
-        case MCI_MODE_PAUSE: LabelState->Caption="Пауза"; break;        case MCI_MODE_PLAY: LabelState->Caption="Воспроизведение"; break;        case MCI_MODE_STOP: LabelState->Caption="Остановлено"; break;        case MCI_MODE_OPEN: LabelState->Caption="Открыто"; break;        case MCI_MODE_SEEK: LabelState->Caption="Перемотка"; break;        default: break;
+		case MCI_MODE_NOT_READY: LabelState->Caption=L"Устройство не готово"; break;
+		case MCI_MODE_PAUSE: LabelState->Caption=L"Пауза"; break;		case MCI_MODE_PLAY: LabelState->Caption=L"Воспроизведение"; break;		case MCI_MODE_STOP: LabelState->Caption=L"Остановлено"; break;		case MCI_MODE_OPEN: LabelState->Caption=L"Открыто"; break;        case MCI_MODE_SEEK: LabelState->Caption=L"Перемотка"; break;        default: break;
     }
 
     // Запрашиваем текущую позицию
@@ -114,7 +114,7 @@ void __fastcall TFormMain::TimerTimer(TObject *Sender)
         if ( InActiveTimer!=0xFF )
         {
             InActiveTimer=0xFF;
-            SpeedButtonPause->Down=true; SpeedButtonPauseClick(NULL);
+            SpeedButtonPause->Down=true; SpeedButtonPauseClick(nullptr);
         }
     } else InActiveTimer++;
 }
@@ -185,18 +185,18 @@ void TFormMain::GetTimeString(int Time_, char *Line_)
 void __fastcall TFormMain::MOpen(TMessage &Msg)
 {
     // Помечаем текущую операцию
-    LabelState->Caption="Загрузка данных..."; Application->ProcessMessages();
+    LabelState->Caption=L"Загрузка данных..."; Application->ProcessMessages();
 
     // Открываем MCI-устройство
     MCI_OPEN_PARMS open_params;
     setmem(&open_params,sizeof(open_params),0);
     open_params.dwCallback=(DWORD)Handle;
-    open_params.lpstrDeviceType="MPEGVideo";
-    open_params.lpstrElementName=FileName.c_str();
+    open_params.lpstrDeviceType=L"MPEGVideo";
+	open_params.lpstrElementName=FileName.c_bstr();
     mcierror=::mciSendCommand(0, MCI_OPEN,
         MCI_OPEN_ELEMENT|MCI_OPEN_TYPE|MCI_DGV_OPEN_32BIT,
         (DWORD)(LPMCI_OPEN_PARMS)&open_params);
-    if ( mcierror ) { LabelState->Caption="Не удалось открыть файл !"; return; }
+    if ( mcierror ) { LabelState->Caption=L"Не удалось открыть файл !"; return; }
     DeviceID=open_params.wDeviceID;
 
     // Определяем изначальный размер картинки
@@ -223,7 +223,7 @@ void __fastcall TFormMain::MOpen(TMessage &Msg)
 
     // Включаем звук
     mcierror=::mciSendCommand(DeviceID, MCI_SETAUDIO,
-        MCI_SET_ON, (DWORD)(LPMCI_GENERIC_PARMS)NULL);
+        MCI_SET_ON, (DWORD)(LPMCI_GENERIC_PARMS)nullptr);
     if ( mcierror ) return;
 
     // Устанавливаем громкость
@@ -278,12 +278,12 @@ void __fastcall TFormMain::MStop(TMessage &Msg)
         MCI_NOTIFY, (DWORD)(LPMCI_GENERIC_PARMS)&generic_parms);    if ( mcierror ) return;
 
     mcierror=::mciSendCommand(DeviceID, MCI_SEEK,
-        MCI_SEEK_TO_START, (DWORD)(LPMCI_SEEK_PARMS)NULL);}//---------------------------------------------------------------------------
+        MCI_SEEK_TO_START, (DWORD)(LPMCI_SEEK_PARMS)nullptr);}//---------------------------------------------------------------------------
 void __fastcall TFormMain::MSeek(TMessage &Msg)
 {
     if ( !DeviceID ) return;
 
-    LabelState->Caption="Перемотка..."; Application->ProcessMessages();
+    LabelState->Caption=L"Перемотка..."; Application->ProcessMessages();
 
     MCI_SEEK_PARMS seek_parms;
     setmem(&seek_parms,sizeof(seek_parms),0);

@@ -22,38 +22,48 @@ void __fastcall TFormMain::FormClose(TObject *Sender, TCloseAction &Action)
 //---------------------------------------------------------------------------
 void __fastcall TFormMain::NOpenClick(TObject *Sender)
 {
-    MLogFile *File=NULL;
-    char file_name[MAX_PATH+1];
-    TMenuItem *Menu;
+	MLogFile *File=nullptr;
+	wchar_t file_name[MAX_PATH+1];
+	TMenuItem *Menu;
 
-    if ( !OpenDialog->Execute() ) return;
-    //
-    if ( ((File=new MLogFile)==NULL)||
-        (OpenDialog->FileName.Length()>MAX_PATH) ) goto error;
-    strcpy(File->Name,OpenDialog->FileName.c_str());
+	if ( !OpenDialog->Execute() ) return;
+	//
+	File=new MLogFile;                     		/// try {} catch()
+	File->Name=OpenDialog->FileName.c_str();
     // Загружаем файл лога
     File->Records.LoadFrom(File->Name,ENC_Code);
     //
-    if ( ::GetFileTitle(File->Name,file_name,sizeof(file_name))<0 ) goto error;
+	if ( ::GetFileTitle(
+		File->Name.c_str(),
+		file_name,
+		sizeof(file_name))<0 ) goto error;
+
     Menu=new TMenuItem(NWindows);
     Menu->Caption=file_name;
     Menu->Tag=(int)File;
     NWindows->Add(Menu);
     // Обрабатываем его записи
     FormEvents=new TFormEvents(this);
-    FormEvents->Open(File,(MLogRecord*)File->Records.gFirst(),
-        (MLogRecord*)File->Records.gLast());
-    FormUsersUpTime=new TFormUsersUpTime(this);
-    if ( FormUsersUpTime->Open(File,(MLogRecord*)File->Records.gFirst(),
-        (MLogRecord*)File->Records.gLast()) )
-    return;
+	FormEvents->Open(File,File->Records.gFirst(),File->Records.gLast());
+
+	FormUsersUpTime=new TFormUsersUpTime(this);
+	FormUsersUpTime->Open(
+		File,
+		File->Records.gFirst(),
+		File->Records.gLast());
+
 error:
     return;
 }
 //---------------------------------------------------------------------------
 void __fastcall TFormMain::NWindowsClick(TObject *Sender)
 {
-    if ( ((TMenuItem*)Sender)->Tag ) ((TForm*)((TMenuItem*)Sender)->Tag)->Show();
+	if ( reinterpret_cast<TMenuItem*>(Sender)->Tag )
+	{
+		reinterpret_cast<TForm*>(
+			dynamic_cast<TMenuItem&>(*Sender).Tag		/// очень грязный трюк
+			)->Show();
+	}
 }
 //---------------------------------------------------------------------------
 void __fastcall TFormMain::NCloseClick(TObject *Sender)
@@ -104,7 +114,7 @@ void TFormMain::WindowClose(TForm *Window_)
             // Удаляем группу, если с файлом больше ни одно окно не работает
             if ( SubItem->Count==0 )
             {
-                delete (MLogFile*)SubItem->Tag;
+                delete reinterpret_cast<MLogFile*>(SubItem->Tag);
                 NWindows->Remove(SubItem);
             }
             break;

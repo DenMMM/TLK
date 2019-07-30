@@ -12,7 +12,9 @@
 #include <ExtCtrls.hpp>
 #include <Buttons.hpp>
 #include <Graphics.hpp>
+#include <System.ImageList.hpp>
 //---------------------------------------------------------------------------
+#include <memory>
 #include "UnitComputers.h"
 #include "UnitTariffs.h"
 #include "UnitFines.h"
@@ -156,27 +158,27 @@ private:	// User declarations
 //    bool EnableCommon;        ///
     bool ConfigMode;
     int Filter;                 // Режим фильтрации показываемых в списке компьютеров
-    bool CheckFilter(MStateInfo *Info_, int FreeTime_);
-    void SetListViewComputersLine(TListItem *Item_, MStateInfo *Info_);
+    bool CheckFilter(MStatesInfo *Info_, int FreeTime_);
+    void SetListViewComputersLine(TListItem *Item_, MStatesInfo *Info_);
 public:		// User declarations
     void UpdateListViewComputers(bool Full_);
         __fastcall TFormMain(TComponent* Owner);
     void SetShell();
-    int GetCompColorIcon(MComputer *Comp_);
+    int GetCompColorIcon(MComputersItem *Comp_);
 };
 //---------------------------------------------------------------------------
 extern PACKAGE TFormMain *FormMain;
 //---------------------------------------------------------------------------
-extern Mptr <MShellState> ShellState;
-extern Mptr <MOptions> Options;
-extern Mptr <MComputers> Computers;
-extern Mptr <MTariffs> Tariffs;
-extern Mptr <MFines> Fines;
-extern Mptr <MUsers> Users;
-extern Mptr <MStates> States;
-extern Mptr <MSync> Sync;
-extern Mptr <MAuth> Auth;
-extern Mptr <MLog> Log;
+extern std::unique_ptr <MShellState> ShellState;
+extern std::unique_ptr <MOptions> Options;
+extern std::unique_ptr <MComputers> Computers;
+extern std::unique_ptr <MTariffs> Tariffs;
+extern std::unique_ptr <MFines> Fines;
+extern std::unique_ptr <MUsers> Users;
+extern std::unique_ptr <MStates> States;
+extern std::unique_ptr <MSync> Sync;
+extern std::unique_ptr <MAuth> Auth;
+extern std::unique_ptr <MLog> Log;
 //---------------------------------------------------------------------------
 #endif
 

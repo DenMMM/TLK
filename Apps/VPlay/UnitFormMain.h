@@ -54,7 +54,7 @@ __published:	// IDE-managed Components
 private:	// User declarations
     MCIERROR mcierror;
     MCIDEVICEID DeviceID;
-    AnsiString FileName;
+    WideString FileName;
     bool PosChanging;
     unsigned int InActiveTimer;
     void GetTimeString(int Time_, char *Line_);

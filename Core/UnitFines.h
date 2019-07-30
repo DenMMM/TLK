@@ -2,65 +2,70 @@
 #ifndef UnitFinesH
 #define UnitFinesH
 //---------------------------------------------------------------------------
-class MFine;
-class MFines;
-//---------------------------------------------------------------------------
 #include <string>
-//---------------------------------------------------------------------------
+
 #include "UnitIDList.h"
+//---------------------------------------------------------------------------
+class MFinesItem;
+class MFines;
 //---------------------------------------------------------------------------
 #define MAX_Fines           20      // Предел количества штрафов
 #define MAX_FineDescrLen    50      // Допустимая длина описания штрафа
 //---------------------------------------------------------------------------
-class MFine:public MIDListItem
+class MFinesItem:
+	public MIDListItem::Simple <
+		MIDListItem::Proxy <MIDListItem, MFinesItem>,
+		MFinesItem>
 {
-private:
-    // Функции механизма сохранения/загрузки данных
-    unsigned GetDataSize() const;
-    char *SetData(char *Data_) const;
-    const char *GetData(const char *Data_, const char *Limit_);
+public:
+	// Функции механизма сохранения/загрузки данных
+	unsigned GetDataSize() const override;
+	void *SetData(void *Data_) const override;
+	const void *GetData(const void *Data_, const void *Limit_) override;
 
 public:
-    short Time;                             // Время штрафа
-    std::string Descr;                      // Описание штрафа
+	short Time;                   	// Время штрафа
+	std::wstring Descr;             // Описание штрафа
 
-    void Copy(const MListItem *SrcItem_);
+	void Copy(const MListItem *SrcItem_) override;
 
-    // Поддержка логов
-    struct LogData
-    {
-        unsigned ID;                    // ID-номер штрафа
-        std::string Descr;              // Описание штрафа
+	// Поддержка логов
+	struct LogData
+	{
+		unsigned UUID;				// ID-номер штрафа
+		std::wstring Descr;         // Описание штрафа
 
-        LogData &operator=(const MFine &Fine_)
-        {
-            ID=Fine_.ItemID;
-            Descr=Fine_.Descr;
-            return *this;
-        }
-    };
-    friend LogData;                     // Нужен дсотуп к "ItemID"
+		LogData &operator=(const MFinesItem &Fine_)
+		{
+			UUID=Fine_.gUUID();
+			Descr=Fine_.Descr;
+			return *this;
+		}
+	};
 
-    MFine &operator=(const LogData &Data_)
-    {
-        ItemID=Data_.ID;
-        Descr=Data_.Descr;
-        return *this;
-    }
+	MFinesItem &operator=(const LogData &Data_)
+	{
+		UUID=Data_.UUID;
+		Descr=Data_.Descr;
+		return *this;
+	}
 
-    MFine();
-    ~MFine();
+	MFinesItem():
+		Time(0)
+	{
+	}
+
+	virtual ~MFinesItem()
+	{
+	}
 };
 //---------------------------------------------------------------------------
-class MFines:public MIDList
+class MFines:
+	public MIDList::Simple <MIDList, MFines, MFinesItem>
 {
-private:
-    MListItem *item_new(unsigned char TypeID_) const { return (MListItem*)new MFine; }
-    void item_del(MListItem *Item_) const { delete (MFine*)Item_; }
-
 public:
-    MFines() {}
-    ~MFines() { Clear(); }
+	MFines() {}
+	~MFines() {}
 };
 //---------------------------------------------------------------------------
 #endif

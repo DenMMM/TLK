@@ -67,20 +67,21 @@ __published:	// IDE-managed Components
     void __fastcall NEventAllClick(TObject *Sender);
     void __fastcall FormCreate(TObject *Sender);
 private:	// User declarations
-    MLogRecord *EventsBegin;
-    MLogRecord *EventsEnd;
+	MLogRecordsItem *EventsBegin;
+    MLogRecordsItem *EventsEnd;
     int EventSort;
     int StateFilter;
-    bool CheckFilter(MStateInfo *Info_, int FreeTime_);
-    void SetListViewComputersLine(TListItem *Item_, MStateInfo *Info_, MTariffs *Tariffs_);
+    bool CheckFilter(MStatesInfo *Info_, int FreeTime_);
+	int GetCompNum(const MLogRecordsItem *Item_);
+	void SetListViewComputersLine(TListItem *Item_, MStatesInfo *Info_, MTariffs *Tariffs_);
     void UpdateListViewComputers(bool Full_, MStates *States_, MTariffs *Tariffs_);
-    void UpdateTariffs(MTariffs *Tariffs_, MLogRecordDataTariffs *LogRecord_);
-    void UpdateFines(MFines *Fines_, MLogRecordDataFines *LogRecord_);
-    void UpdateUsers(MUsers *Users_, MLogRecordDataUsers *LogRecord_);
+	void UpdateTariffs(MTariffs *Tariffs_, MLogRecords::DataTariffs *LogRecord_);
+	void UpdateFines(MFines *Fines_, MLogRecords::DataFines *LogRecord_);
+    void UpdateUsers(MUsers *Users_, MLogRecords::DataUsers *LogRecord_);
     bool CheckEventFilter(unsigned char TypeID_);
     void UpdateListViewEvents();
 public:		// User declarations
-    bool Open(MLogFile *File_, MLogRecord *Begin_, MLogRecord *End_);
+    bool Open(MLogFile *File_, MLogRecordsItem *Begin_, MLogRecordsItem *End_);
     __fastcall TFormEvents(TComponent* Owner);
 };
 //---------------------------------------------------------------------------
