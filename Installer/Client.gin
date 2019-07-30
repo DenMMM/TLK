@@ -1,0 +1,6 @@
+[Config]
+ImagePath=GameClient
+ExeName=GmClient
+Password=
+UpdateVersionInfo=1
+Compression=RAR
