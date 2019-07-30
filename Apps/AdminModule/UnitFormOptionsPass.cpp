@@ -66,13 +66,13 @@ void __fastcall TFormOptionsPass::FormClose(TObject *Sender,
 //---------------------------------------------------------------------------
 void __fastcall TFormOptionsPass::ButtonGenerateClick(TObject *Sender)
 {
-    Munique_ptr <TFormNewPass> form;
+    Mptr <TFormNewPass> form;
     char buffer[MAX_OptPassLen+1];
 
     try
     {
         form(new TFormNewPass(0));
-        if ( !form.get()->Execute(buffer,5,sizeof(buffer),
+        if ( !form->Execute(buffer,5,sizeof(buffer),
             Left+20,Top+30,true) ) return;
         EditNew->Text=buffer;
         EditConfirm->Text=""; EditConfirm->ClearUndo();

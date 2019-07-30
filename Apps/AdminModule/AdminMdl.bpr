@@ -117,7 +117,7 @@ AutoIncBuild=1
 MajorVer=1
 MinorVer=0
 Release=0
-Build=248
+Build=249
 Debug=0
 PreRelease=0
 Special=0
@@ -129,7 +129,7 @@ CodePage=1251
 [Version Info Keys]
 CompanyName=MMM Groups
 FileDescription=Модуль управления TLK
-FileVersion=1.0.0.248
+FileVersion=1.0.0.249
 InternalName=AdminModule
 LegalCopyright=
 LegalTrademarks=

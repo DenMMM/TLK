@@ -1,6 +1,6 @@
 object FormEvents: TFormEvents
-  Left = 178
-  Top = 217
+  Left = 248
+  Top = 167
   Width = 741
   Height = 491
   Caption = #1057#1086#1073#1099#1090#1080#1103
@@ -15,7 +15,7 @@ object FormEvents: TFormEvents
   Position = poDefaultPosOnly
   Visible = True
   OnClose = FormClose
-  OnShow = FormShow
+  OnCreate = FormCreate
   DesignSize = (
     733
     464)
@@ -206,11 +206,43 @@ object FormEvents: TFormEvents
       MultiSelect = True
       ReadOnly = True
       RowSelect = True
+      PopupMenu = PopupMenuEventFilter
       TabOrder = 1
       ViewStyle = vsReport
       OnColumnClick = ListViewEventsColumnClick
       OnCompare = ListViewEventsCompare
       OnSelectItem = ListViewEventsSelectItem
+    end
+  end
+  object PopupMenuEventFilter: TPopupMenu
+    Left = 8
+    Top = 8
+    object NEventComputers: TMenuItem
+      AutoCheck = True
+      Caption = #1050#1086#1084#1087#1100#1102#1090#1077#1088#1099
+      OnClick = NEventAllClick
+    end
+    object NEventUsers: TMenuItem
+      AutoCheck = True
+      Caption = #1055#1086#1083#1100#1079#1086#1074#1072#1090#1077#1083#1080
+      OnClick = NEventAllClick
+    end
+    object NEventAdminMdl: TMenuItem
+      AutoCheck = True
+      Caption = #1052#1086#1076#1091#1083#1100' '#1091#1087#1088#1072#1074#1083#1077#1085#1080#1103
+      OnClick = NEventAllClick
+    end
+    object NEventService: TMenuItem
+      AutoCheck = True
+      Caption = #1057#1083#1091#1078#1077#1073#1085#1099#1077
+      OnClick = NEventAllClick
+    end
+    object N1: TMenuItem
+      Caption = '-'
+    end
+    object NEventAll: TMenuItem
+      Caption = #1042#1089#1077
+      OnClick = NEventAllClick
     end
   end
 end

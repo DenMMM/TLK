@@ -11,12 +11,12 @@
       ..\..\Core\UnitSync.obj ..\..\Core\UnitSend.obj 
       ..\..\Ext\BrianGladman\SHA\hmac.obj ..\..\Ext\BrianGladman\SHA\sha1.obj 
       ..\..\Ext\BrianGladman\SHA\sha2.obj ..\..\Core\UnitAuth.obj 
-      UnitFormDesk.obj UnitFormGames.obj UnitLockDsk.obj"/>
+      UnitFormGames.obj UnitLockDsk.obj"/>
     <RESFILES value="TLk.res Messages.res LockDesk.res"/>
     <IDLFILES value=""/>
     <IDLGENFILES value=""/>
     <DEFFILE value=""/>
-    <RESDEPEN value="$(RESFILES) UnitFormMain.dfm UnitFormDesk.dfm UnitFormGames.dfm"/>
+    <RESDEPEN value="$(RESFILES) UnitFormMain.dfm UnitFormGames.dfm"/>
     <LIBFILES value=""/>
     <LIBRARIES value="vclx.lib bcbsmp.lib bcbie.lib vcl.lib rtl.lib"/>
     <SPARELIBS value="rtl.lib vcl.lib bcbie.lib bcbsmp.lib vclx.lib"/>
@@ -31,14 +31,14 @@
     <USERDEFINES value=""/>
     <SYSDEFINES value="NO_STRICT"/>
     <MAINSOURCE value="TLk.cpp"/>
-    <INCLUDEPATH value="..\..\Ext\BrianGladman\SHA;..\..\Core;$(BCB)\include;$(BCB)\include\vcl"/>
-    <LIBPATH value="..\..\Ext\BrianGladman\SHA;..\..\Core;$(BCB)\lib\obj;$(BCB)\lib"/>
+    <INCLUDEPATH value="..\..\Ext\MSDN\TerminateApp;..\..\Ext\BrianGladman\SHA;..\..\Core;$(BCB)\include;$(BCB)\include\vcl"/>
+    <LIBPATH value="..\..\Ext\MSDN\TerminateApp;..\..\Ext\BrianGladman\SHA;..\..\Core;$(BCB)\lib\obj;$(BCB)\lib"/>
     <WARNINGS value="-w-par"/>
     <OTHERFILES value=""/>
   </MACROS>
   <OPTIONS>
-    <IDLCFLAGS value="-I..\..\Ext\BrianGladman\SHA -I..\..\Core -I$(BCB)\include 
-      -I$(BCB)\include\vcl -src_suffix cpp -boa"/>
+    <IDLCFLAGS value="-I..\..\Ext\MSDN\TerminateApp -I..\..\Ext\BrianGladman\SHA -I..\..\Core 
+      -I$(BCB)\include -I$(BCB)\include\vcl -src_suffix cpp -boa"/>
     <CFLAG1 value="-O2 -Vx -Ve -X- -pr -a8 -6 -b- -k- -vi -c -tW -tWM"/>
     <PFLAGS value="-$Y- -$L- -$D- -$A8 -v -JPHNE -M"/>
     <RFLAGS value=""/>
@@ -71,7 +71,6 @@
       <FILE FILENAME="..\..\Ext\BrianGladman\SHA\sha2.c" FORMNAME="" UNITNAME="sha2.c" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="..\..\Core\UnitAuth.cpp" FORMNAME="" UNITNAME="UnitAuth" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="Messages.res" FORMNAME="" UNITNAME="Messages.res" CONTAINERID="ResTool" DESIGNCLASS="" LOCALCOMMAND=""/>
-      <FILE FILENAME="UnitFormDesk.cpp" FORMNAME="FormDesk" UNITNAME="UnitFormDesk" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="UnitFormGames.cpp" FORMNAME="FormGames" UNITNAME="UnitFormGames" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="UnitLockDsk.cpp" FORMNAME="" UNITNAME="UnitLockDsk" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="LockDesk.res" FORMNAME="" UNITNAME="LockDesk.res" CONTAINERID="ResTool" DESIGNCLASS="" LOCALCOMMAND=""/>
@@ -86,7 +85,7 @@ AutoIncBuild=1
 MajorVer=1
 MinorVer=0
 Release=0
-Build=107
+Build=110
 Debug=0
 PreRelease=0
 Special=0
@@ -98,7 +97,7 @@ CodePage=1251
 [Version Info Keys]
 CompanyName=MMM Groups
 FileDescription=Клиент TLK
-FileVersion=1.0.0.107
+FileVersion=1.0.0.110
 InternalName=ClientModule
 LegalCopyright=
 LegalTrademarks=
@@ -107,16 +106,18 @@ ProductName=TLK
 ProductVersion=3.11
 
 [HistoryLists\hlIncludePath]
-Count=3
-Item0=..\..\Ext\BrianGladman\SHA;..\..\Core;$(BCB)\include;$(BCB)\include\vcl
-Item1=..\..\Core;$(BCB)\include;$(BCB)\include\vcl
-Item2=$(BCB)\include;$(BCB)\include\vcl
+Count=4
+Item0=..\..\Ext\MSDN\TerminateApp;..\..\Ext\BrianGladman\SHA;..\..\Core;$(BCB)\include;$(BCB)\include\vcl
+Item1=..\..\Ext\BrianGladman\SHA;..\..\Core;$(BCB)\include;$(BCB)\include\vcl
+Item2=..\..\Core;$(BCB)\include;$(BCB)\include\vcl
+Item3=$(BCB)\include;$(BCB)\include\vcl
 
 [HistoryLists\hlLibraryPath]
-Count=3
-Item0=..\..\Ext\BrianGladman\SHA;..\..\Core;$(BCB)\lib\obj;$(BCB)\lib
-Item1=..\..\Core;$(BCB)\lib\obj;$(BCB)\lib
-Item2=$(BCB)\lib\obj;$(BCB)\lib
+Count=4
+Item0=..\..\Ext\MSDN\TerminateApp;..\..\Ext\BrianGladman\SHA;..\..\Core;$(BCB)\lib\obj;$(BCB)\lib
+Item1=..\..\Ext\BrianGladman\SHA;..\..\Core;$(BCB)\lib\obj;$(BCB)\lib
+Item2=..\..\Core;$(BCB)\lib\obj;$(BCB)\lib
+Item3=$(BCB)\lib\obj;$(BCB)\lib
 
 [HistoryLists\hlDebugSourcePath]
 Count=1

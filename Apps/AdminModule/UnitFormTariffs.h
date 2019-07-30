@@ -44,6 +44,7 @@ __published:	// IDE-managed Components
     TButton *ButtonResAllComp;
     TButton *ButtonResSelComp;
     TCheckBox *CheckBoxRoute;
+    TCheckBox *CheckBoxDesktop;
     void __fastcall FormShow(TObject *Sender);
     void __fastcall FormClose(TObject *Sender, TCloseAction &Action);
     void __fastcall ListViewComputersKeyPress(TObject *Sender, char &Key);
@@ -61,6 +62,7 @@ __published:	// IDE-managed Components
     void __fastcall EditNameExit(TObject *Sender);
     void __fastcall CheckBoxRouteExit(TObject *Sender);
     void __fastcall ButtonSaveClick(TObject *Sender);
+    void __fastcall CheckBoxDesktopExit(TObject *Sender);
 private:	// User declarations
     MTariffs TmpTariffs;               // Буфер для списка тарифов
     char TmpComps[MAX_Comps];          // Буфер для списка компьютеров редактируемого тарифа

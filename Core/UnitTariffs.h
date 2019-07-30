@@ -32,7 +32,7 @@ class MTariffsInfo;         /// больше нигде не используютс€
 #define mgp8        128
 #define mgpRoute    256
 #define mgpDesktop  512
-#define mgpAll (mgp1|mgp2|mgp3|mgp4|mgp5|mgp6|mgp7|mgp8|mgpRoute)
+#define mgpAll (mgp1|mgp2|mgp3|mgp4|mgp5|mgp6|mgp7|mgp8)
 //---------------------------------------------------------------------------
 #define mttUndefined    0
 #define mttHours        1       // ѕочасовой

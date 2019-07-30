@@ -11,7 +11,9 @@ object FormGames: TFormGames
   Font.Name = 'MS Sans Serif'
   Font.Style = []
   OldCreateOrder = False
+  OnClose = FormClose
   OnCloseQuery = FormCloseQuery
+  OnCreate = FormCreate
   DesignSize = (
     657
     438)

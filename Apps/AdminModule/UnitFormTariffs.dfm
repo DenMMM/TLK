@@ -28,7 +28,7 @@ object FormTariffs: TFormTariffs
     Left = 220
     Top = 52
     Width = 417
-    Height = 57
+    Height = 73
     Shape = bsFrame
   end
   object Bevel7: TBevel
@@ -56,14 +56,14 @@ object FormTariffs: TFormTariffs
   end
   object LabelTariffApps: TLabel
     Left = 228
-    Top = 112
+    Top = 128
     Width = 94
     Height = 13
     Caption = #1043#1088#1091#1087#1087#1099' '#1087#1088#1086#1075#1088#1072#1084#1084':'
   end
   object LabelTariffComputers: TLabel
     Left = 410
-    Top = 112
+    Top = 128
     Width = 96
     Height = 13
     Caption = #1044#1083#1103' '#1082#1086#1084#1087#1100#1102#1090#1077#1088#1086#1074':'
@@ -98,9 +98,9 @@ object FormTariffs: TFormTariffs
   end
   object ListViewComputers: TListView
     Left = 408
-    Top = 128
+    Top = 144
     Width = 229
-    Height = 209
+    Height = 193
     Checkboxes = True
     Columns = <>
     ColumnClick = False
@@ -135,7 +135,7 @@ object FormTariffs: TFormTariffs
   end
   object ButtonTimes: TButton
     Left = 538
-    Top = 70
+    Top = 76
     Width = 89
     Height = 24
     Caption = #1042#1088#1077#1084#1103'...'
@@ -181,9 +181,9 @@ object FormTariffs: TFormTariffs
   end
   object CheckListBoxApps: TCheckListBox
     Left = 220
-    Top = 128
+    Top = 144
     Width = 181
-    Height = 177
+    Height = 161
     ItemHeight = 13
     TabOrder = 6
     OnExit = CheckListBoxAppsExit
@@ -232,6 +232,16 @@ object FormTariffs: TFormTariffs
     Caption = #1042#1099#1093#1086#1076' '#1074' Internet'
     TabOrder = 15
     OnExit = CheckBoxRouteExit
+  end
+  object CheckBoxDesktop: TCheckBox
+    Left = 232
+    Top = 100
+    Width = 177
+    Height = 17
+    Caption = #1054#1090#1082#1088#1099#1090#1100' '#1088#1072#1073#1086#1095#1080#1081' '#1089#1090#1086#1083
+    TabOrder = 16
+    Visible = False
+    OnExit = CheckBoxDesktopExit
   end
   object OpenPictureDialog: TOpenPictureDialog
     DefaultExt = '*.ico'

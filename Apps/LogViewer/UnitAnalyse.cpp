@@ -86,7 +86,7 @@ bool ProcessComputersState(MLogRecord *Position_,
                 rcdo=(MLogRecordOpen*)Record;
                 if ( (state=States_->Search(rcdo->Number))==NULL ) goto error;
                 state->Timer(rcdo->SystemTime);
-                state->CmdPause(rcdo->Apply,false);
+                state->CmdOpen(rcdo->Apply,false);
                 break;
             case mlrDataTariffs:
                 rcddtrf=(MLogRecordDataTariffs*)Record;

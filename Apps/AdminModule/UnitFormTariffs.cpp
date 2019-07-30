@@ -94,6 +94,7 @@ void __fastcall TFormTariffs::ListViewNamesSelectItem(TObject *Sender,
     //
     CheckBoxReboot->Checked=tariff->Reboot;
     CheckBoxRoute->Checked=tariff->Programs&mgpRoute;
+    CheckBoxDesktop->Checked=tariff->Programs&mgpDesktop;
     // Проставляем для каких компьютеров используется тариф
     int i=0;
     for ( MComputer *comp=(MComputer*)Computers->gFirst();
@@ -172,6 +173,15 @@ void __fastcall TFormTariffs::CheckBoxRouteExit(TObject *Sender)
     else ((MTariff*)ListViewNames->Selected->Data)->Programs&=~mgpRoute;
 }
 //---------------------------------------------------------------------------
+void __fastcall TFormTariffs::CheckBoxDesktopExit(TObject *Sender)
+{
+    if ( ListViewNames->Selected==NULL ) return;
+
+    if ( ((TCheckBox*)Sender)->Checked )
+        ((MTariff*)ListViewNames->Selected->Data)->Programs|=mgpDesktop;
+    else ((MTariff*)ListViewNames->Selected->Data)->Programs&=~mgpDesktop;
+}
+//---------------------------------------------------------------------------
 void __fastcall TFormTariffs::CheckListBoxAppsExit(TObject *Sender)
 {
     if ( ListViewNames->Selected==NULL ) return;
@@ -224,7 +234,7 @@ void __fastcall TFormTariffs::ButtonSetSelCompClick(TObject *Sender)
     TListItems *items=ListViewComputers->Items;
     for ( int i=0, j=items->Count; i<j; i++ )
         if ( items->Item[i]->Selected ) items->Item[i]->Checked=checked;
-        
+
     ListViewComputersExit(ListViewComputers);
 }
 //---------------------------------------------------------------------------
@@ -244,7 +254,7 @@ void __fastcall TFormTariffs::ButtonSetAllCompClick(TObject *Sender)
 //---------------------------------------------------------------------------
 void __fastcall TFormTariffs::ButtonTimesClick(TObject *Sender)
 {
-    Munique_ptr <TFormTariffTimes> form;
+    Mptr <TFormTariffTimes> form;
 
     if ( ListViewNames->Selected==NULL ) return;
 
@@ -253,7 +263,7 @@ void __fastcall TFormTariffs::ButtonTimesClick(TObject *Sender)
         MTariff *tariff=(MTariff*)ListViewNames->Selected->Data;
         // Открываем диалог редактирования
         form(new TFormTariffTimes(0));
-        form.get()->Execute(&tariff->Times,tariff->Name,Left+30,Top+30);
+        form->Execute(&tariff->Times,tariff->Name,Left+30,Top+30);
     }
     catch (Exception &ex)
     {
@@ -294,6 +304,7 @@ void TFormTariffs::SetEdit(bool Edit_)
     EditName->Color=Color;
     CheckBoxReboot->Enabled=Edit_;
     CheckBoxRoute->Enabled=Edit_;
+    CheckBoxDesktop->Enabled=Edit_;
     ButtonTimes->Enabled=Edit_;
     LabelTariffApps->Enabled=Edit_;
     CheckListBoxApps->Enabled=Edit_;

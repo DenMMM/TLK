@@ -14,13 +14,14 @@ TFormEvents *FormEvents;
 __fastcall TFormEvents::TFormEvents(TComponent* Owner)
     : TForm(Owner)
 {
-    SortMode=0;
+    EventsBegin=NULL;
+    EventsEnd=NULL;
+    EventSort=0;
+    StateFilter=mcfAll;
 }
 //---------------------------------------------------------------------------
-void __fastcall TFormEvents::FormShow(TObject *Sender)
+void __fastcall TFormEvents::FormCreate(TObject *Sender)
 {
-    Filter=mcfAll;
-    CheckBoxCompAUpd->Checked=true;
     ListViewComputers->DoubleBuffered=true;
 }
 //---------------------------------------------------------------------------
@@ -91,7 +92,7 @@ void __fastcall TFormEvents::ListViewEventsSelectItem(TObject *Sender,
 void __fastcall TFormEvents::ListViewEventsColumnClick(TObject *Sender,
       TListColumn *Column)
 {
-    SortMode=Column->Index;
+    EventSort=Column->Index;
     ListViewEvents->AlphaSort();
 }
 //---------------------------------------------------------------------------
@@ -106,7 +107,7 @@ void __fastcall TFormEvents::ListViewEventsCompare(TObject *Sender,
 
     Type1=((MLogRecord*)Item1->Data)->gTypeID(); RecordRun1=(MLogRecordRun*)Item1->Data;
     Type2=((MLogRecord*)Item2->Data)->gTypeID(); RecordRun2=(MLogRecordRun*)Item2->Data;
-    switch(SortMode)
+    switch(EventSort)
     {
         case 1:
             Compare=DComp(RecordRun1->SystemTime,RecordRun2->SystemTime);
@@ -178,7 +179,9 @@ void __fastcall TFormEvents::ListViewEventsCompare(TObject *Sender,
                 Type1==mlrRun?-1:(
                 Type2==mlrRun?1:0);
             break;
-        default: Compare=0; break;
+        default:
+            Compare=0;
+            break;
     }
 }
 //---------------------------------------------------------------------------
@@ -201,16 +204,22 @@ void __fastcall TFormEvents::ButtonCompUpdClick(TObject *Sender)
 bool TFormEvents::CheckFilter(MStateInfo *Info_, int FreeTime_)
 {
     bool result=false;
-    switch(Filter)
+
+    switch(StateFilter)
     {
-        case mcfAll: result=true; break;
+        case mcfAll:
+            result=true;
+            break;
         case mcfFree:
             if ( (Info_->State==mcsFree)||
                 ((Info_->State&mcsWork)&&(Info_->ToEndWork<FreeTime_)) ) result=true;
             break;
-        case mcfService: if ( Info_->State&mcsOpen ) result=true; break;
+        case mcfService:
+            if ( Info_->State&mcsOpen ) result=true;
+            break;
         default: break;
     }
+    
     return result;
 }
 //---------------------------------------------------------------------------
@@ -333,6 +342,101 @@ void TFormEvents::UpdateListViewComputers(bool Full_, MStates *States_, MTariffs
 //---------------------------------------------------------------------------
 bool TFormEvents::Open(MLogFile *File_, MLogRecord *Begin_, MLogRecord *End_)
 {
+    // Чистим интерфейс
+    ListViewEvents->Items->Clear();
+    ListViewComputers->Items->Clear();
+    //
+    if ( Begin_==NULL ) goto error;
+
+    Caption="События  -  "; Caption=Caption+File_->Name;
+
+    EventsBegin=Begin_;
+    EventsEnd=End_;
+
+    StateFilter=mcfAll;
+    EventSort=0;
+    CheckBoxCompAUpd->Checked=true;
+    NEventComputers->Checked=true;
+    UpdateListViewEvents();
+
+    FormMain->WindowOpen(File_,this);
+    FormMain->WindowCaption(this,"События");
+    return true;
+error:
+    Close();
+    return false;
+}
+//---------------------------------------------------------------------------
+void TFormEvents::UpdateTariffs(MTariffs *Tariffs_, MLogRecordDataTariffs *LogRecord_)
+{
+    Tariffs_->Clear();
+    for ( unsigned i=0; i<LogRecord_->Tariffs.Count(); i++ )
+    {
+        MTariff *trf=(MTariff*)Tariffs_->Add();
+        trf->SetTariffData(&LogRecord_->Tariffs[i]);
+    }
+}
+//---------------------------------------------------------------------------
+void TFormEvents::UpdateFines(MFines *Fines_, MLogRecordDataFines *LogRecord_)
+{
+    Fines_->Clear();
+    for ( unsigned i=0; i<LogRecord_->Fines.Count(); i++ )
+    {
+        MFine *fn=(MFine*)Fines_->Add();
+        fn->SetFineData(&LogRecord_->Fines[i]);
+    }
+}
+//---------------------------------------------------------------------------
+void TFormEvents::UpdateUsers(MUsers *Users_, MLogRecordDataUsers *LogRecord_)
+{
+    Users_->Clear();
+    for ( unsigned i=0; i<LogRecord_->Users.Count(); i++ )
+    {
+        MUser *usr=(MUser*)Users_->Add();
+        usr->SetUserData(&LogRecord_->Users[i]);
+    }
+}
+//---------------------------------------------------------------------------
+bool TFormEvents::CheckEventFilter(unsigned char TypeID_)
+{
+    bool result=false;
+
+    if ( NEventAdminMdl->Checked )
+    {
+        unsigned char et[]={
+            mlrStart,mlrStop,
+            mlrConfig,mlrComputers,mlrTariffs,mlrFines,mlrUsers,mlrOptions};
+        result=result||MemSrch(et,et+sizeof(et),TypeID_);
+    }
+
+    if ( NEventUsers->Checked )
+    {
+        unsigned char et[]={
+            mlrLogIn,mlrLogOut};
+        result=result||MemSrch(et,et+sizeof(et),TypeID_);
+    }
+
+    if ( NEventComputers->Checked )
+    {
+        unsigned char et[]={
+            mlrRun,mlrFine,mlrExchange,mlrLock,mlrPause,mlrOpen,
+            mlrPowerOn,mlrReboot,mlrShutdown};
+        result=result||MemSrch(et,et+sizeof(et),TypeID_);
+    }
+
+    if ( NEventService->Checked )
+    {
+        unsigned char et[]={
+            mlrBegin,mlrEnd,
+            mlrDataShState,mlrDataStates,mlrDataTariffs,mlrDataFines,mlrDataUsers};
+        result=result||MemSrch(et,et+sizeof(et),TypeID_);
+    }
+
+    return result;
+}
+//---------------------------------------------------------------------------
+void TFormEvents::UpdateListViewEvents()
+{
     MTariffs Tariffs;
     MFines Fines;
     MUsers Users;
@@ -340,14 +444,33 @@ bool TFormEvents::Open(MLogFile *File_, MLogRecord *Begin_, MLogRecord *End_)
     char line[256];
     TListItem *Item;
 
-    // Чистим интерфейс
+    MLogRecord *Begin_=EventsBegin;
+    MLogRecord *End_=EventsEnd;
+
     ListViewEvents->Items->Clear();
-    ListViewComputers->Items->Clear();
-    //
-    if ( Begin_==NULL ) goto error;
+
     for ( ; Begin_!=End_->gNext();
         Begin_=(MLogRecord*)Begin_->gNext() )
     {
+        // Обновим список тарифов/штрафов/пользователей
+        switch(Begin_->gTypeID())
+        {
+            case mlrDataTariffs:
+                UpdateTariffs(&Tariffs,(MLogRecordDataTariffs*)Begin_);
+                break;
+            case mlrDataFines:
+                UpdateFines(&Fines,(MLogRecordDataFines*)Begin_);
+                break;
+            case mlrDataUsers:
+                UpdateUsers(&Users,(MLogRecordDataUsers*)Begin_);
+                break;
+            default:
+                break;
+        }
+
+        // Проверим подходит ли запись выбранному набору фильтров
+        if ( !CheckEventFilter(Begin_->gTypeID()) ) continue;
+
         // Общие данные
         Item=ListViewEvents->Items->Add();
         Item->ImageIndex=-1;
@@ -359,6 +482,7 @@ bool TFormEvents::Open(MLogFile *File_, MLogRecord *Begin_, MLogRecord *End_)
                 ss_time.wHour,ss_time.wMinute,ss_time.wSecond);
         else *line=0;
         Item->SubItems->Add(line);
+
         // Описание
         switch(Begin_->gTypeID())
         {
@@ -533,61 +657,33 @@ bool TFormEvents::Open(MLogFile *File_, MLogRecord *Begin_, MLogRecord *End_)
                 Item->SubItems->Add("Данные по компьютерам");
                 break;
             case mlrDataTariffs:
-            {
                 Item->SubItems->Add("");
                 Item->SubItems->Add("Данные по тарифам");
-                MLogRecordDataTariffs *rcddtrf;
-                rcddtrf=(MLogRecordDataTariffs*)Begin_;
-                Tariffs.Clear();
-                for ( unsigned i=0; i<rcddtrf->Tariffs.Count(); i++ )
-                {
-                    MTariff *trf;
-                    trf=(MTariff*)Tariffs.Add();
-                    trf->SetTariffData(&rcddtrf->Tariffs[i]);
-                }
-            }
                 break;
             case mlrDataFines:
-            {
                 Item->SubItems->Add("");
                 Item->SubItems->Add("Данные по штрафам");
-                MLogRecordDataFines *rcddfn;
-                rcddfn=(MLogRecordDataFines*)Begin_;
-                Fines.Clear();
-                for ( unsigned i=0; i<rcddfn->Fines.Count(); i++ )
-                {
-                    MFine *fn;
-                    fn=(MFine*)Fines.Add();
-                    fn->SetFineData(&rcddfn->Fines[i]);
-                }
-            }
                 break;
             case mlrDataUsers:
-            {
                 Item->SubItems->Add("");
                 Item->SubItems->Add("Данные по пользователям");
-                MLogRecordDataUsers *rcddusr;
-                rcddusr=(MLogRecordDataUsers*)Begin_;
-                Users.Clear();
-                for ( unsigned i=0; i<rcddusr->Users.Count(); i++ )
-                {
-                    MUser *usr;
-                    usr=(MUser*)Users.Add();
-                    usr->SetUserData(&rcddusr->Users[i]);
-                }
-            }
                 break;
+
             default: break;
         }
     }
-
-    Caption="События  -  "; Caption=Caption+File_->Name;
-    FormMain->WindowOpen(File_,this);
-    FormMain->WindowCaption(this,"События");
-    return true;
-error:
-    Close();
-    return false;
+}
+//---------------------------------------------------------------------------
+void __fastcall TFormEvents::NEventAllClick(TObject *Sender)
+{
+    if ( Sender==NEventAll )
+    {
+        NEventComputers->Checked=true;
+        NEventUsers->Checked=true;
+        NEventAdminMdl->Checked=true;
+        NEventService->Checked=true;
+    } 
+    UpdateListViewEvents();
 }
 //---------------------------------------------------------------------------
 

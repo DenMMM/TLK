@@ -31,6 +31,7 @@ object FormMain: TFormMain
       Caption = #1060#1072#1081#1083
       object NOpen: TMenuItem
         Caption = #1054#1082#1088#1099#1090#1100'...'
+        ShortCut = 16463
         OnClick = NOpenClick
       end
       object N2: TMenuItem

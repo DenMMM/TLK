@@ -291,7 +291,7 @@ void RegExecList(HKEY hkey, LPCTSTR subkey)
 {
     HKEY key;
     DWORD index, type, name_size, data_size;
-    char name[256], value[256];
+    char name[256+1], value[MAX_PATH+1];
     STARTUPINFO si;
     PROCESS_INFORMATION pi;
 
@@ -301,7 +301,8 @@ void RegExecList(HKEY hkey, LPCTSTR subkey)
     index=0;
     while(true)
     {
-        name_size=data_size=256;
+        name_size=256;
+        data_size=MAX_PATH;
         if ( ::RegEnumValue(key,index,name,&name_size,NULL,
             &type,value,&data_size)!=ERROR_SUCCESS ) break;
         if ( (data_size>1)&&(type==REG_SZ) )

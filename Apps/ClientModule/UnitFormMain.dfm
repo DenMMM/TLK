@@ -1,6 +1,6 @@
 object FormMain: TFormMain
-  Left = 325
-  Top = 144
+  Left = 327
+  Top = 145
   BorderIcons = []
   BorderStyle = bsNone
   ClientHeight = 454
@@ -15,6 +15,7 @@ object FormMain: TFormMain
   Position = poDefaultPosOnly
   OnClose = FormClose
   OnCloseQuery = FormCloseQuery
+  OnCreate = FormCreate
   OnResize = FormResize
   OnShow = FormShow
   DesignSize = (
@@ -2662,5 +2663,21 @@ object FormMain: TFormMain
     OnTimer = TimerTimer
     Left = 4
     Top = 4
+  end
+  object PopupMenuConfig: TPopupMenu
+    Alignment = paRight
+    Left = 32
+    Top = 4
+    object NLogOff: TMenuItem
+      Caption = #1042#1099#1081#1090#1080' '#1080#1079' '#1089#1080#1089#1090#1077#1084#1099
+      OnClick = NLogOffClick
+    end
+    object N2: TMenuItem
+      Caption = '-'
+    end
+    object NShutdown: TMenuItem
+      Caption = #1047#1072#1074#1077#1088#1096#1077#1085#1080#1077' '#1088#1072#1073#1086#1090#1099
+      OnClick = NShutdownClick
+    end
   end
 end

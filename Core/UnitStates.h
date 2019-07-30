@@ -230,6 +230,7 @@ public:
     bool GetGames(MGames *Games_);
     bool Timer(__int64 SystemTime_);
     void CmdReboot();                       // Нужна ли ?
+    void CmdShutdown();
 
     // Операции для сетевого интерфейса
     bool NewSyncData(MSyncData *Data_);

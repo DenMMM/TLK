@@ -391,6 +391,7 @@ object FormMain: TFormMain
     ReadOnly = True
     RowSelect = True
     ParentBiDiMode = False
+    PopupMenu = PopupMenuCmp
     SmallImages = ImageListIcons
     SortType = stData
     TabOrder = 2
@@ -1265,5 +1266,72 @@ object FormMain: TFormMain
     OnTimer = TimerNetTimer
     Left = 460
     Top = 28
+  end
+  object PopupMenuCmp: TPopupMenu
+    Left = 516
+    Top = 28
+    object NCmpRun: TMenuItem
+      Caption = #1047#1072#1087#1091#1089#1090#1080#1090#1100'...'
+      ShortCut = 16466
+      OnClick = BitBtnRunClick
+    end
+    object NCmpAdd: TMenuItem
+      Caption = #1044#1086#1073#1072#1074#1080#1090#1100'...'
+      ShortCut = 16449
+      OnClick = BitBtnRunClick
+    end
+    object N13: TMenuItem
+      Caption = '-'
+    end
+    object NCmpFine: TMenuItem
+      Caption = #1064#1090#1088#1072#1092'...'
+      ShortCut = 16454
+      OnClick = BitBtnRunClick
+    end
+    object N15: TMenuItem
+      Caption = '-'
+    end
+    object NCmpExchange: TMenuItem
+      Caption = #1055#1077#1088#1077#1089#1072#1076#1080#1090#1100
+      ShortCut = 16453
+      OnClick = BitBtnExchangeClick
+    end
+    object N16: TMenuItem
+      Caption = '-'
+    end
+    object NCmpLock: TMenuItem
+      Caption = #1055#1088#1080#1082#1088#1099#1090#1100
+      ShortCut = 16460
+      OnClick = BitBtnLockClick
+    end
+    object NCmpUnLock: TMenuItem
+      Caption = #1054#1090#1082#1088#1099#1090#1100
+      ShortCut = 16469
+      OnClick = BitBtnLockClick
+    end
+    object N10: TMenuItem
+      Caption = '-'
+    end
+    object NCmpFilterAll: TMenuItem
+      Caption = #1042#1089#1077
+      GroupIndex = 1
+      RadioItem = True
+      ShortCut = 16496
+      OnClick = NFilterAllClick
+    end
+    object NCmpFilterFree: TMenuItem
+      Caption = #1057#1074#1086#1073#1086#1076#1085#1099#1077
+      GroupIndex = 1
+      RadioItem = True
+      ShortCut = 16497
+      OnClick = NFilterAllClick
+    end
+    object NCmpFilterService: TMenuItem
+      Caption = #1053#1072' '#1086#1073#1089#1083#1091#1078#1080#1074#1072#1085#1080#1080
+      GroupIndex = 1
+      RadioItem = True
+      ShortCut = 16498
+      OnClick = NFilterAllClick
+    end
   end
 end

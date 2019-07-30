@@ -109,6 +109,20 @@ __published:	// IDE-managed Components
     TMenuItem *N8;
     TListView *ListViewComputers;
     TTimer *TimerNet;
+    TPopupMenu *PopupMenuCmp;
+    TMenuItem *NCmpRun;
+    TMenuItem *NCmpAdd;
+    TMenuItem *NCmpFine;
+    TMenuItem *N13;
+    TMenuItem *NCmpExchange;
+    TMenuItem *N15;
+    TMenuItem *N16;
+    TMenuItem *NCmpLock;
+    TMenuItem *NCmpUnLock;
+    TMenuItem *N10;
+    TMenuItem *NCmpFilterAll;
+    TMenuItem *NCmpFilterFree;
+    TMenuItem *NCmpFilterService;
     void __fastcall TimerTimer(TObject *Sender);
     void __fastcall BitBtnRunClick(TObject *Sender);
     void __fastcall NClosePrgClick(TObject *Sender);
@@ -152,16 +166,16 @@ public:		// User declarations
 //---------------------------------------------------------------------------
 extern PACKAGE TFormMain *FormMain;
 //---------------------------------------------------------------------------
-extern MShellState *ShellState;
-extern MOptions *Options;
-extern MComputers *Computers;
-extern MTariffs *Tariffs;
-extern MFines *Fines;
-extern MUsers *Users;
-extern MStates *States;
-extern MSync *Sync;
-extern MAuth *Auth;
-extern MLog *Log;
+extern Mptr <MShellState> ShellState;
+extern Mptr <MOptions> Options;
+extern Mptr <MComputers> Computers;
+extern Mptr <MTariffs> Tariffs;
+extern Mptr <MFines> Fines;
+extern Mptr <MUsers> Users;
+extern Mptr <MStates> States;
+extern Mptr <MSync> Sync;
+extern Mptr <MAuth> Auth;
+extern Mptr <MLog> Log;
 //---------------------------------------------------------------------------
 #endif
 

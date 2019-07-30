@@ -11,7 +11,7 @@
 #define ENC_Net         0x9ABD5BAE  // Код шифрования сетевых данных
 //---------------------------------------------------------------------------
 template <typename type>
-class Munique_ptr
+class Mptr
 {
 private:
     type *ptr;
@@ -31,10 +31,11 @@ public:
         }
         ptr=ptr_;
     }
-    type* get() const { return ptr; }
+    type* operator->() { return ptr; }
+    operator type*() { return ptr; }
 
-    Munique_ptr() { ptr=NULL; }
-    ~Munique_ptr() { delete ptr; }
+    Mptr() { ptr=NULL; }
+    ~Mptr() { delete ptr; }
 };
 //---------------------------------------------------------------------------
 template <typename titem>

@@ -53,14 +53,14 @@ DWORD MLockDsk::ThreadP()
     if ( hPrevDsk==NULL ) goto api_error;
     hMainDsk=::CreateDesktop(LOCKDSK_Name,NULL,NULL,0,GENERIC_ALL,NULL);
     if ( hMainDsk==NULL ) goto api_error;
-    // Выберем его для потока и переключимся
 #ifndef _DEBUG
+    // Выберем его для потока и переключимся
     if ( !::SetThreadDesktop(hMainDsk) ) goto api_error;
-//    if ( !::SwitchDesktop(hMainDsk) ) goto api_error;
     ::SwitchDesktop(hMainDsk);
-#endif
+//    if ( !::SwitchDesktop(hMainDsk) ) goto api_error;
     // Зададим режим экрана по-умолчанию (как при входе пользователя)
     ::ChangeDisplaySettings(NULL,0);
+#endif
 
 
 {
@@ -212,7 +212,9 @@ DWORD MLockDsk::ThreadP()
         if ( Msg.message==MSG_Exit ) break;
         switch(Msg.message)
         {
+#ifndef _DEBUG
             case WM_TIMER: ::SwitchDesktop(hMainDsk); break;
+#endif
             case MSG_UpdTransp: UpdTransp(); break;
             case MSG_UpdMsg: LoadImg(); break;
             case MSG_UpdCompNum: UpdCompNum(); break;
@@ -227,13 +229,13 @@ DWORD MLockDsk::ThreadP()
     // Уничтожим основное окно и все что в нем создано
     ::DestroyWindow(hwMain);
 
+#ifndef _DEBUG
     // Вернем прежние настройки экрана
     ::ChangeDisplaySettings(&dmPrev,CDS_RESET);
     // Переключимся на прежний рабочий стол и уничтожим свой
-#ifndef _DEBUG
     ::SwitchDesktop(hPrevDsk);
     ::SetThreadDesktop(hPrevDsk);
-#endif    
+#endif
     ::CloseDesktop(hMainDsk);
 
     return 0;
@@ -472,6 +474,9 @@ LRESULT CALLBACK MLockDsk::WndProc(HWND hWnd_,
             // Все static-элементы c "прозрачной" заливкой
             ::SetBkMode((HDC)wParam_,TRANSPARENT);
             return (LRESULT)::GetStockObject(NULL_BRUSH);
+
+        case WM_CLOSE:
+            return 0;
 
         case WM_DESTROY:
             ::PostQuitMessage(0);

@@ -13,31 +13,37 @@ TFormGames *FormGames;
 __fastcall TFormGames::TFormGames(TComponent* Owner)
     : TForm(Owner)
 {
-    this->DoubleBuffered=true;          /// глючит
-    TreeViewGames->DoubleBuffered=true; /// глючит
+    MyClose=true;
 }
 //---------------------------------------------------------------------------
 void TFormGames::ShowGames(unsigned Pages_)
 {
-    MGame *Game;
+    // Отфильтруем список программ от других флагов
+    Pages_&=mgpAll;
 
+    // Если не заданы группы программ скроем окно
+    if ( Pages_==mgpNone )
+    {
+        MyClose=true; Close();
+    } else
+    {
+        UpdateGames(Pages_);
+        MyClose=false; Show();
+    }
+}
+//---------------------------------------------------------------------------
+void TFormGames::UpdateGames(unsigned Pages_)
+{
     // Очистим список программ и иконок
     TreeViewGames->Items->Clear();
     ImageListGamesIcons->Clear();
     Games.Clear();
-    
-    // Если не заданы группы программ скроем окно
-    if ( Pages_==mgpNone )
-    {
-        // Скроем окно
-        Tag=true; Hide();
-        return;
-    }
-    Tag=false;
 
     // Загрузим и добавим новые
     if ( State->GetGames(&Games) )
     {
+        MGame *Game;
+        
         if ( (Pages_&mgp1)&&((Game=(MGame*)Games.Item(0))!=NULL) )
             AddGamesToTree(Game->SubGames,NULL,ImageListGamesIcons);
         if ( (Pages_&mgp2)&&((Game=(MGame*)Games.Item(1))!=NULL) )
@@ -55,16 +61,13 @@ void TFormGames::ShowGames(unsigned Pages_)
         if ( (Pages_&mgp8)&&((Game=(MGame*)Games.Item(7))!=NULL) )
             AddGamesToTree(Game->SubGames,NULL,ImageListGamesIcons);
     }
-
-    // Покажем окно
-    Show();
 }
 //---------------------------------------------------------------------------
 void TFormGames::AddGamesToTree(MGames *Games_, TTreeNode *TreeNode_, TImageList *ImageList_)
 {
     TTreeNode *NewTreeNode;
     HICON icon;
-    char icon_file[MAX_PrgIconLength+1];    /// надо: max(MAX_PrgCmdLength,MAX_PrgIconLength)+1
+    char icon_file[MAX_PrgIconLength+1];    /// надо: [max(MAX_PrgCmdLength,MAX_PrgIconLength)+1]
     char *pos1, *pos2;
 
     if ( Games_==NULL ) return;
@@ -98,7 +101,7 @@ void TFormGames::AddGamesToTree(MGames *Games_, TTreeNode *TreeNode_, TImageList
             NewTreeNode->SelectedIndex=
                 NewTreeNode->ImageIndex;
         }
-        
+
         // Командная строка для запуска
         NewTreeNode->Data=Game->Command;
         // Подуровни дерева
@@ -106,12 +109,34 @@ void TFormGames::AddGamesToTree(MGames *Games_, TTreeNode *TreeNode_, TImageList
     }
 }
 //---------------------------------------------------------------------------
+void __fastcall TFormGames::FormCreate(TObject *Sender)
+{
+    this->DoubleBuffered=true;
+    TreeViewGames->DoubleBuffered=true;
+    TreeViewGames->Font->Color=(TColor)0x02D2C66F;
+}
+//---------------------------------------------------------------------------
+void __fastcall TFormGames::FormCloseQuery(TObject *Sender, bool &CanClose)
+{
+    CanClose=MyClose;
+}
+//---------------------------------------------------------------------------
+void __fastcall TFormGames::FormClose(TObject *Sender,
+      TCloseAction &Action)
+{
+    // Очистим список программ и иконок
+    TreeViewGames->Items->Clear();
+    ImageListGamesIcons->Clear();
+    Games.Clear();
+}
+//---------------------------------------------------------------------------
 void __fastcall TFormGames::TreeViewGamesDblClick(TObject *Sender)
 {
     TTreeNode *TreeNode=TreeViewGames->Selected;
     if ( (TreeNode==NULL)||TreeNode->HasChildren ) return;
 
-/*    char buff[MAX_PrgCmdLength+1];
+/*
+    char buff[MAX_PrgCmdLength+1];
     char *cmd=(char*)TreeNode->Data;
 
     // Проверим спец-команды shell'а
@@ -121,6 +146,7 @@ void __fastcall TFormGames::TreeViewGamesDblClick(TObject *Sender)
 
         try
         {
+    /// От интеграции плейера в оболочку пока отказался ради стабильности
             // Открываем плеер
             form(new TFormVPlay(0));        /// new TFormVPlay(this) ?
             form.get()->ShowModal();
@@ -130,7 +156,8 @@ void __fastcall TFormGames::TreeViewGamesDblClick(TObject *Sender)
             Application->ShowException(&ex);
         }
         return;
-    }*/
+    }
+*/
 
     // Запустим обычное приложение
     AnsiString path, command=(char*)TreeNode->Data;
@@ -155,11 +182,6 @@ void __fastcall TFormGames::TreeViewGamesKeyPress(TObject *Sender,
       char &Key)
 {
 //    if ( Key==VK_RETURN ) TreeViewGamesDblClick(NULL);
-}
-//---------------------------------------------------------------------------
-void __fastcall TFormGames::FormCloseQuery(TObject *Sender, bool &CanClose)
-{
-    CanClose=Tag;
 }
 //---------------------------------------------------------------------------
 

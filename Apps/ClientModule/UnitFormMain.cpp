@@ -6,7 +6,6 @@
 
 #include "UnitFormMain.h"
 #include "UnitFormGames.h"
-#include "UnitFormDesk.h"
 #include "UnitTariffs.h"
 #include "UnitCommon.h"
 //---------------------------------------------------------------------------
@@ -15,33 +14,40 @@
 TFormMain *FormMain;
 //---------------------------------------------------------------------------
 char win_dir[MAX_PATH+1];
-MClOptions *Options=NULL;
-MStateCl *State=NULL;
-MSyncCl *Sync=NULL;
-MSendCl *Send=NULL;
-MAuth *Auth=NULL;
-MMessage *Message=NULL;
+Mptr <MClOptions> Options;
+Mptr <MStateCl> State;
+Mptr <MSyncCl> Sync;
+Mptr <MSendCl> Send;
+Mptr <MAuth> Auth;
+Mptr <MMessage> Message;
 //---------------------------------------------------------------------------
 __fastcall TFormMain::TFormMain(TComponent* Owner)
     : TForm(Owner)
 {
-    TimeToReboot=0;
     TimeMsgEndTime=0;
+    TimeToReboot=0;
     MessageAreShowed=false;
-    PanelMenu->DoubleBuffered=true;       /// глючит
+    MyClose=false;
+    ConfigMode=false;
+}
+//---------------------------------------------------------------------------
+void __fastcall TFormMain::FormCreate(TObject *Sender)
+{
+    PanelMenu->DoubleBuffered=true;
 }
 //---------------------------------------------------------------------------
 void __fastcall TFormMain::FormShow(TObject *Sender)
 {
+
     try
     {
 
-    Options=new MClOptions;
-    State=new MStateCl;
-    Sync=new MSyncCl;
-    Send=new MSendCl;
-    Auth=new MAuth;
-    Message=new MMessage;
+    Options(new MClOptions);
+    State(new MStateCl);
+    Sync(new MSyncCl);
+    Send(new MSendCl);
+    Auth(new MAuth);
+    Message(new MMessage);
 
     // Настраиваем пути для файлов
     ::GetWindowsDirectory(win_dir,MAX_PATH-20);
@@ -78,12 +84,11 @@ void __fastcall TFormMain::FormShow(TObject *Sender)
         Send->NetInit(State,ENC_Net,Auth)) )
     {
         ResMessageBox(Handle,1,2,MB_APPLMODAL|MB_OK|MB_ICONERROR);
-        Tag=true; Close();
+        MyClose=true; Close();
         return;
     }
 
     // Настроим внешний вид
-    FormGames->TreeViewGames->Font->Color=(TColor)0x02D2C66F;
     SetTransp(Options->Flags&mcoTransp);
 
     Timer->Interval=1000;
@@ -102,34 +107,30 @@ void __fastcall TFormMain::FormShow(TObject *Sender)
     catch (std::bad_alloc &e)
     {
         ResMessageBox(Handle,1,3,MB_APPLMODAL|MB_OK|MB_ICONERROR);
-        Tag=true; Close();
+        MyClose=true; Close();
         return;
     }
     catch (std::exception &e)
     {
         ::MessageBox(Handle, e.what(),
             "TLK - ошибка",MB_APPLMODAL|MB_OK|MB_ICONERROR);
-        Tag=true; Close();
+        MyClose=true; Close();
         return;
     }
 }
 //---------------------------------------------------------------------------
 void __fastcall TFormMain::FormCloseQuery(TObject *Sender, bool &CanClose)
 {
-    CanClose=Tag;
+    CanClose=MyClose;
 }
 //---------------------------------------------------------------------------
 void __fastcall TFormMain::FormClose(TObject *Sender, TCloseAction &Action)
 {
     Timer->Enabled=false;
+
     Send->Stop(); Send->NetFree();
     Sync->Stop(); Sync->NetFree();
     Message->Stop();
-    delete Send;
-    delete Sync;
-    delete State;
-    delete Message;
-    delete Options;
 }
 //---------------------------------------------------------------------------
 void __fastcall TFormMain::FormResize(TObject *Sender)
@@ -171,7 +172,35 @@ void __fastcall TFormMain::SpeedButtonRebootClick(TObject *Sender)
 //---------------------------------------------------------------------------
 void __fastcall TFormMain::SpeedButtonOptionsClick(TObject *Sender)
 {
-    Tag=WinExit(EWX_LOGOFF|EWX_FORCE);
+    TPoint coord;
+
+    coord.x=PanelMenu->Left+SpeedButtonOptions->Left+4;
+    coord.y=PanelMenu->Top+SpeedButtonOptions->Top+SpeedButtonOptions->Height-4;
+    coord=ClientToScreen(coord);
+    PopupMenuConfig->Popup(coord.x,coord.y);
+}
+//---------------------------------------------------------------------------
+void __fastcall TFormMain::NLogOffClick(TObject *Sender)
+{
+    // Доп. проверка для большей безопасности
+    if ( !ConfigMode ) return;
+
+    FormMain->MyClose=true;
+    FormGames->MyClose=true;
+#ifdef _DEBUG
+    Close();
+#else
+    WinExit(EWX_LOGOFF|EWX_FORCE);
+#endif
+}
+//---------------------------------------------------------------------------
+void __fastcall TFormMain::NShutdownClick(TObject *Sender)
+{
+    // Доп. проверка для большей безопасности
+    if ( !ConfigMode ) return;
+
+    // Команда отработает в TFormMain::SetState()
+    State->CmdShutdown();
 }
 //---------------------------------------------------------------------------
 void TFormMain::SetState(MStateInfo *Info_)
@@ -188,15 +217,16 @@ void TFormMain::SetState(MStateInfo *Info_)
     {
         LabelCompNum->Caption=IntToStr(Info_->Number);
         LabelCompNumShad->Caption=LabelCompNum->Caption;
-        FormDesk->LabelCompNum->Caption=LabelCompNum->Caption;
         LockDesk.UpdateCompNum(Info_->Number);
     }
     // Режим работы
     if ( Info_->Changes&mdcState )
     {
+        ConfigMode=false;
         if ( Info_->State&mcsOpen )
         {
             // Открыт для настройки
+            ConfigMode=true;
             TimeToReboot=0;
             TimeMsgEndTime=0;
             Message->Stop();
@@ -205,10 +235,9 @@ void TFormMain::SetState(MStateInfo *Info_)
         } else if ( Info_->State&mcsFree )
         {
             Message->Stop();
+            ShowGames(mgpNone);                     // для очистки памяти
             LabelWorkTime->Caption="--:--";
-            FormDesk->LabelWorkTime->Caption=LabelWorkTime->Caption;
             LockDesk.UpdateWorkTime(0);
-            ShowGames(mgpNone);
             if ( Info_->Changes&mdcWorkTime )
             {
                 // Время закончилось
@@ -235,17 +264,17 @@ void TFormMain::SetState(MStateInfo *Info_)
             if ( Info_->State&mcsPause )
             {
                 // Время приостановлено
-                ShowGames(mgpNone);
+                ShowGames(mgpNone);                 // для очистки памяти
                 ShowImageMessage(mimTimePaused);
             } else if ( Info_->State&mcsLock )
             {
                 // Прикрыт
-                ShowGames(mgpNone);
+                ShowGames(mgpNone);                 // для очистки памяти
                 ShowImageMessage(mimPaused);
             } else if ( Info_->State&mcsFine )
             {
                 // Штраф
-                ShowGames(mgpNone);
+                ShowGames(mgpNone);                 // для очистки памяти
                 ShowImageMessage(mimFine);
             } else
             {
@@ -261,13 +290,12 @@ void TFormMain::SetState(MStateInfo *Info_)
     // Выводим оставшееся время
     if ( Info_->State&mcsWork )
     {
-        char line[5+1];
+        char line[]="00:00";
         sprintf(line,"%.2i:%.2i",Info_->ToEndWork/60,Info_->ToEndWork%60);
         LabelWorkTime->Caption=line;
-        FormDesk->LabelWorkTime->Caption=line;
         LockDesk.UpdateWorkTime(Info_->ToEndWork);
         // Если до окончания времени осталось менее двух минут, запускаем показ сообщения
-        if ( Options->ToEndTime&&(!MessageAreShowed)&&
+        if ( (!MessageAreShowed)&&Options->ToEndTime&&
             (Info_->ToEndWork<=Options->ToEndTime) )
         {
             MessageAreShowed=true;
@@ -278,8 +306,8 @@ void TFormMain::SetState(MStateInfo *Info_)
     if ( Info_->Changes&mdcPrograms )
     {
         // Список программ для запуска
-        if ( Info_->State==mcsWork ) ShowGames(Info_->Programs);
-        else if ( Info_->State&mcsOpen ) ShowGames(mgpAll);
+        if ( Info_->State==mcsWork ) FormGames->UpdateGames(Info_->Programs);
+        else if ( Info_->State&mcsOpen ) FormGames->UpdateGames(mgpAll);
     }
     //
     if ( Info_->Changes&mdcCommands )
@@ -287,16 +315,24 @@ void TFormMain::SetState(MStateInfo *Info_)
         if ( Info_->Commands&mccShutdown )
         {
             State->Save();
-#ifndef _DEBUG
-            Tag=WinExit(EWX_POWEROFF|EWX_FORCE);
+            FormMain->MyClose=true;
+            FormGames->MyClose=true;
+#ifdef _DEBUG
+            Close();
+#else
+            WinExit(EWX_POWEROFF|EWX_FORCE);
 #endif
             return;
         } else if ( Info_->Commands&mccReboot )
         {
             State->Save();
-#ifndef _DEBUG
-            Tag=WinExit(EWX_REBOOT|EWX_FORCE);
-#endif                      
+            FormMain->MyClose=true;
+            FormGames->MyClose=true;
+#ifdef _DEBUG
+            Close();
+#else
+            WinExit(EWX_REBOOT|EWX_FORCE);
+#endif
             return;
         }
     }

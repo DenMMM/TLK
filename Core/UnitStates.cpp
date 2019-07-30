@@ -827,6 +827,13 @@ void MStateCl::CmdReboot()
     UnLock();
 }
 //---------------------------------------------------------------------------
+void MStateCl::CmdShutdown()
+{
+    Lock();
+    Commands|=mccShutdown; Changes|=mdcCommands;
+    UnLock();
+}
+//---------------------------------------------------------------------------
 bool MStateCl::NewSyncData(MSyncData *Data_)
 {
     bool NeedSave=false;

@@ -116,9 +116,9 @@ void __fastcall TFormUsers::ButtonPasswordClick(TObject *Sender)
     // Открываем окно смены пароля
     try
     {
-        Munique_ptr <TFormUserPass> form;
+        Mptr <TFormUserPass> form;
         form(new TFormUserPass(0));
-        form.get()->Execute(user,dialog_coord.x,dialog_coord.y,false);
+        form->Execute(user,dialog_coord.x,dialog_coord.y,false);
     }
     catch (Exception &ex)
     {

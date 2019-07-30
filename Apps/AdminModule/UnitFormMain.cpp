@@ -24,16 +24,16 @@
 #pragma resource "*.dfm"
 TFormMain *FormMain;
 //---------------------------------------------------------------------------
-MShellState *ShellState=NULL;
-MOptions *Options=NULL;
-MComputers *Computers=NULL;
-MTariffs *Tariffs=NULL;
-MFines *Fines=NULL;
-MUsers *Users=NULL;
-MStates *States=NULL;
-MSync *Sync=NULL;
-MAuth *Auth=NULL;
-MLog *Log=NULL;
+Mptr <MShellState> ShellState;
+Mptr <MOptions> Options;
+Mptr <MComputers> Computers;
+Mptr <MTariffs> Tariffs;
+Mptr <MFines> Fines;
+Mptr <MUsers> Users;
+Mptr <MStates> States;
+Mptr <MSync> Sync;
+Mptr <MAuth> Auth;
+Mptr <MLog> Log;
 //---------------------------------------------------------------------------
 __fastcall TFormMain::TFormMain(TComponent* Owner)
         : TForm(Owner)
@@ -45,16 +45,16 @@ void __fastcall TFormMain::FormShow(TObject *Sender)
     try
     {
     // Создадим объекты глобального пользования
-    ShellState=new MShellState;
-    Options=new MOptions;
-    Computers=new MComputers;
-    Tariffs=new MTariffs;
-    Fines=new MFines;
-    Users=new MUsers;
-    States=new MStates;
-    Sync=new MSync;
-    Auth=new MAuth;
-    Log=new MLog;
+    ShellState(new MShellState);
+    Options(new MOptions);
+    Computers(new MComputers);
+    Tariffs(new MTariffs);
+    Fines(new MFines);
+    Users(new MUsers);
+    States(new MStates);
+    Sync(new MSync);
+    Auth(new MAuth);
+    Log(new MLog);
 
     // Настроим пути хранения файлов и коды шифрования
     char dir[MAX_PATH+1], file[MAX_PATH+1];
@@ -194,17 +194,6 @@ void __fastcall TFormMain::FormClose(TObject *Sender, TCloseAction &Action)
 
     // Добавим запись в лог о нормальном завершении работы
     if ( !Tag ) Log->AddStop();
-
-    delete ShellState;
-    delete Options;
-    delete Computers;
-    delete Tariffs;
-    delete Fines;
-    delete Users;
-    delete States;
-    delete Sync;
-    delete Auth;
-    delete Log;
 }
 //---------------------------------------------------------------------------
 void __fastcall TFormMain::TimerTimer(TObject *Sender)
@@ -233,14 +222,14 @@ void __fastcall TFormMain::TimerNetTimer(TObject *Sender)
 //---------------------------------------------------------------------------
 void __fastcall TFormMain::NLogInClick(TObject *Sender)
 {
-    Munique_ptr <TFormLogIn> form;
+    Mptr <TFormLogIn> form;
     unsigned User;
 
     try
     {
         // Открываем диалог авторизации
         form(new TFormLogIn(0));
-        User=form.get()->Execute(Users);
+        User=form->Execute(Users);
         if ( User==0 ) return;
     }
     catch (Exception &ex)
@@ -295,14 +284,14 @@ void __fastcall TFormMain::NClosePrgClick(TObject *Sender)
 //---------------------------------------------------------------------------
 void __fastcall TFormMain::NConfigOpenClick(TObject *Sender)
 {
-    Munique_ptr <TFormOpenConfig> form;
+    Mptr <TFormOpenConfig> form;
 
     if ( !(ShellState->State&mssConfig) )
     {
         try
         {
             form(new TFormOpenConfig(0));
-            if ( !form.get()->Execute(Options,Left+20,Top+50,true) ) return;
+            if ( !form->Execute(Options,Left+20,Top+50,true) ) return;
         }
         catch (Exception &ex)
         {
@@ -317,7 +306,7 @@ void __fastcall TFormMain::NConfigOpenClick(TObject *Sender)
 //---------------------------------------------------------------------------
 void __fastcall TFormMain::NComputersClick(TObject *Sender)
 {
-    Munique_ptr <TForm> form;
+    Mptr <TForm> form;
 
     try
     {
@@ -330,9 +319,9 @@ void __fastcall TFormMain::NComputersClick(TObject *Sender)
         else if ( Sender==NAuth ) form(new TFormAuth(0));
         else return;
 
-        form.get()->Left=Left+30;
-        form.get()->Top=Top+50;
-        form.get()->ShowModal();
+        form->Left=Left+30;
+        form->Top=Top+50;
+        form->ShowModal();
     }
     catch (Exception &ex)
     {
@@ -342,12 +331,12 @@ void __fastcall TFormMain::NComputersClick(TObject *Sender)
 //---------------------------------------------------------------------------
 void __fastcall TFormMain::NOptionsPasswordClick(TObject *Sender)
 {
-    Munique_ptr <TFormOptionsPass> form;
+    Mptr <TFormOptionsPass> form;
 
     try
     {
         form(new TFormOptionsPass(0));
-        if ( !form.get()->Execute(Options,Left+100,Top+50,true) ) return;
+        if ( !form->Execute(Options,Left+100,Top+50,true) ) return;
         if ( Options->Save() ) return;
 //        ShellState->State|=mssErrorConfig; SetShell();  /// не имеет смысла и опасно
         ResMessageBox(Handle,1,31,MB_APPLMODAL|MB_OK|MB_ICONERROR,Options->gLastErr());
@@ -360,12 +349,12 @@ void __fastcall TFormMain::NOptionsPasswordClick(TObject *Sender)
 //---------------------------------------------------------------------------
 void __fastcall TFormMain::NUsersPasswordsClick(TObject *Sender)
 {
-    Munique_ptr <TFormUserPass> form;
+    Mptr <TFormUserPass> form;
 
     try
     {
         form(new TFormUserPass(0));
-        if ( !form.get()->Execute(Users,Left+100,Top+50,true) ) return;
+        if ( !form->Execute(Users,Left+100,Top+50,true) ) return;
         if ( Users->Save() ) return;
 //        ShellState->State|=mssErrorConfig; SetShell();  /// не имеет смысла и опасно
         ResMessageBox(Handle,1,3,MB_APPLMODAL|MB_OK|MB_ICONERROR,Users->gLastErr());
@@ -379,30 +368,32 @@ void __fastcall TFormMain::NUsersPasswordsClick(TObject *Sender)
 void __fastcall TFormMain::BitBtnRunClick(TObject *Sender)
 {
     TPoint local_button_coord;
-    Munique_ptr <TForm> form;
+    Mptr <TForm> form;
 
     try
     {
         // Создаем объект формы
-        if ( Sender==BitBtnRun )
+        if ( (Sender==BitBtnRun)||(Sender==NCmpRun) )
         {
             form(new TFormRun(0));
-            ((TFormRun*)form.get())->RunMode=true;
-        } else if ( Sender==BitBtnAdd )
+            ((TFormRun*)(TForm*)form)->RunMode=true;
+        } else if ( (Sender==BitBtnAdd)||(Sender==NCmpAdd) )
         {
             form(new TFormRun(0));
-            ((TFormRun*)form.get())->RunMode=false;
-        } else if ( Sender==BitBtnFine ) form(new TFormFine(0));
-        else return;
+            ((TFormRun*)(TForm*)form)->RunMode=false;
+        } else if ( (Sender==BitBtnFine)||(Sender==NCmpFine) )
+        {
+            form(new TFormFine(0));
+        } else return;
 
         // Задаем удобные координаты
-        local_button_coord.x=PanelButtons->Left+BitBtnRun->Left-form.get()->Width-2;
+        local_button_coord.x=PanelButtons->Left+BitBtnRun->Left-form->Width-2;
         local_button_coord.y=PanelButtons->Top+BitBtnRun->Top-40;
         local_button_coord=ClientToScreen(local_button_coord);
-        form.get()->Left=local_button_coord.x;
-        form.get()->Top=local_button_coord.y;
+        form->Left=local_button_coord.x;
+        form->Top=local_button_coord.y;
         // Выводим
-        form.get()->ShowModal();
+        form->ShowModal();
     }
     catch (Exception &ex)
     {
@@ -429,7 +420,11 @@ void __fastcall TFormMain::BitBtnExchangeClick(TObject *Sender)
     // и не нужно ли поменять местами компьютеры
     if ( !state1->CmdExchange(state2,true) )
     {
-        if ( !state2->CmdExchange(state1,true) ) return;
+        if ( !state2->CmdExchange(state1,true) )
+        {
+            ResMessageBox(Handle,0,34,MB_APPLMODAL|MB_OK|MB_ICONINFORMATION);
+            return;
+        }
         tmpstate=state1;
         state1=state2;
         state2=tmpstate;
@@ -470,8 +465,8 @@ void __fastcall TFormMain::BitBtnExchangeClick(TObject *Sender)
 void __fastcall TFormMain::BitBtnLockClick(TObject *Sender)
 {
     bool lock;
-    if ( Sender==BitBtnLock ) lock=true;
-    else if ( Sender==BitBtnUnLock ) lock=false;
+    if ( (Sender==BitBtnLock)||(Sender==NCmpLock) ) lock=true;
+    else if ( (Sender==BitBtnUnLock)||(Sender==NCmpUnLock) ) lock=false;
     else return;
 
     TItemStates is=TItemStates()<<isSelected;
@@ -676,12 +671,29 @@ void __fastcall TFormMain::NOpenClick(TObject *Sender)
 //---------------------------------------------------------------------------
 void __fastcall TFormMain::NFilterAllClick(TObject *Sender)
 {
-    if ( Sender==NFilterAll ) Filter=mcfAll;
-    else if ( Sender==NFilterFree ) Filter=mcfFree;
-    else if ( Sender==NFilterService ) Filter=mcfService;
-    else return;
-    ((TMenuItem*)Sender)->Default=true;
-    ((TMenuItem*)Sender)->Checked=true;
+    if ( (Sender==NFilterAll)||(Sender==NCmpFilterAll) )
+    {
+        Filter=mcfAll;
+        NFilterAll->Default=true;
+        NFilterAll->Checked=true;
+        NCmpFilterAll->Default=true;
+        NCmpFilterAll->Checked=true;
+    } else if ( (Sender==NFilterFree)||(Sender==NCmpFilterFree) )
+    {
+        Filter=mcfFree;
+        NFilterFree->Default=true;
+        NFilterFree->Checked=true;
+        NCmpFilterFree->Default=true;
+        NCmpFilterFree->Checked=true;
+    } else if ( (Sender==NFilterService)||(Sender==NCmpFilterService) )
+    {
+        Filter=mcfService;
+        NFilterService->Default=true;
+        NFilterService->Checked=true;
+        NCmpFilterService->Default=true;
+        NCmpFilterService->Checked=true;
+    } else return;
+    // Обновляем список компьютеров
     UpdateListViewComputers(true);
 }
 //---------------------------------------------------------------------------
@@ -857,12 +869,12 @@ void TFormMain::SetShell()
     // Общие операции
     enable=(ShellState->State&mssConfig)||(ShellState->User!=0);
     enable=ShellState->State&(mssErrorState|mssErrorConfig)? false: enable;
-    BitBtnRun->Enabled=enable;
-    BitBtnAdd->Enabled=enable;
-    BitBtnFine->Enabled=enable;
-    BitBtnExchange->Enabled=enable;
-    BitBtnLock->Enabled=enable;
-    BitBtnUnLock->Enabled=enable;
+    BitBtnRun->Enabled=enable;          NCmpRun->Enabled=enable;
+    BitBtnAdd->Enabled=enable;          NCmpAdd->Enabled=enable;
+    BitBtnFine->Enabled=enable;         NCmpFine->Enabled=enable;
+    BitBtnExchange->Enabled=enable;     NCmpExchange->Enabled=enable;
+    BitBtnLock->Enabled=enable;         NCmpLock->Enabled=enable;
+    BitBtnUnLock->Enabled=enable;       NCmpUnLock->Enabled=enable;
     BitBtnAdditionals->Enabled=enable;
     // Приостановка компьютеров
     NPause->Enabled=((ShellState->User!=0)&&(Options->UsersRights&murPause))||

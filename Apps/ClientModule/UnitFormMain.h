@@ -20,6 +20,7 @@
 #include "UnitAuth.h"
 #include "UnitMessage.h"
 #include "UnitLockDsk.h"
+#include <Menus.hpp>
 //---------------------------------------------------------------------------
 // Сообщения (картинки)
 #define mimNone             0       // Скрыть картинку с сообщением
@@ -43,35 +44,44 @@ __published:	// IDE-managed Components
     TLabel *LabelCompNum;
     TSpeedButton *SpeedButtonOptions;
     TLabel *LabelCompNumShad;
+    TPopupMenu *PopupMenuConfig;
+    TMenuItem *NLogOff;
+    TMenuItem *NShutdown;
+    TMenuItem *N2;
     void __fastcall TimerTimer(TObject *Sender);
-    void __fastcall FormShow(TObject *Sender);
     void __fastcall FormClose(TObject *Sender, TCloseAction &Action);
     void __fastcall SpeedButtonRebootClick(TObject *Sender);
     void __fastcall FormCloseQuery(TObject *Sender, bool &CanClose);
     void __fastcall SpeedButtonOptionsClick(TObject *Sender);
     void __fastcall FormResize(TObject *Sender);
+    void __fastcall FormCreate(TObject *Sender);
+    void __fastcall FormShow(TObject *Sender);
+    void __fastcall NLogOffClick(TObject *Sender);
+    void __fastcall NShutdownClick(TObject *Sender);
 private:	// User declarations
-    int TimeToReboot;
     int TimeMsgEndTime;
+    int TimeToReboot;
     bool MessageAreShowed;
+    bool MyClose;
     MLockDsk LockDesk;
     void SetState(MStateInfo *Info_);
     void SetTransp(bool Transp_);
     void ShowGames(unsigned Pages_);
     void ShowImageMessage(int Message_);
 public:		// User declarations
+    bool ConfigMode;
     __fastcall TFormMain(TComponent* Owner);
 };
 //---------------------------------------------------------------------------
 extern PACKAGE TFormMain *FormMain;
 //---------------------------------------------------------------------------
 extern char win_dir[];
-extern MClOptions *Options;
-extern MStateCl *State;
-extern MSyncCl *Sync;
-extern MSendCl *Send;
-extern MAuth *Auth;
-extern MMessage *Message;
+extern Mptr <MClOptions> Options;
+extern Mptr <MStateCl> State;
+extern Mptr <MSyncCl> Sync;
+extern Mptr <MSendCl> Send;
+extern Mptr <MAuth> Auth;
+extern Mptr <MMessage> Message;
 //---------------------------------------------------------------------------
 #endif
 
