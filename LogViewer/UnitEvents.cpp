@@ -20,7 +20,7 @@ MEvent::~MEvent()
 //
 }
 //---------------------------------------------------------------------------
-char *MEvents::GetData(char *Data_, char *LimitData_)
+char *MEvents::GetData_(char *Data_, char *LimitData_, bool InfoOnly_)
 {
     MEvent *NewEvent;
     int str_length;
@@ -46,23 +46,23 @@ char *MEvents::GetData(char *Data_, char *LimitData_)
         if ( (Data_+sizeof(double))>LimitData_ ) { CloseTime=OpenTime; return Data_; }
         if ( (*((double*)Data_))<0. ) { Data_+=sizeof(double); break; }
         //
-        NewEvent=(MEvent*)Add();
+        if ( !InfoOnly_ ) NewEvent=(MEvent*)Add();
         // Системное время
         if ( (Data_+sizeof(double))>LimitData_ ) return NULL;
-        NewEvent->Time=*((double*)Data_); Data_+=sizeof(double);
+        if ( !InfoOnly_ ) NewEvent->Time=*((double*)Data_); Data_+=sizeof(double);
         // Номер компьютера
         if ( (Data_+sizeof(int))>LimitData_ ) return NULL;
-        NewEvent->ComputerNumber=*((int*)Data_); Data_+=sizeof(int);
+        if ( !InfoOnly_ ) NewEvent->ComputerNumber=*((int*)Data_); Data_+=sizeof(int);
         // Название тарифа
         str_length=strlen(Data_);
         if ( ((Data_+str_length+1)>LimitData_)||(str_length>=255) ) return NULL;
-        NewEvent->TariffName=Data_; Data_+=str_length+1;
+        if ( !InfoOnly_ ) NewEvent->TariffName=Data_; Data_+=str_length+1;
         // Номер компьютера
         if ( (Data_+sizeof(int))>LimitData_ ) return NULL;
-        NewEvent->TimeSize=*((int*)Data_); Data_+=sizeof(int);
+        if ( !InfoOnly_ ) NewEvent->TimeSize=*((int*)Data_); Data_+=sizeof(int);
         // На какую сумму
         if ( (Data_+sizeof(double))>LimitData_ ) return NULL;
-        NewEvent->Cost=*((double*)Data_); Data_+=sizeof(double);
+        if ( !InfoOnly_ ) NewEvent->Cost=*((double*)Data_); Data_+=sizeof(double);
     }
 
     //
@@ -73,7 +73,7 @@ char *MEvents::GetData(char *Data_, char *LimitData_)
     return Data_;
 }
 //---------------------------------------------------------------------------
-bool MEvents::Load(AnsiString FileName_)
+bool MEvents::Load_(AnsiString FileName_, bool InfoOnly_)
 {
     HANDLE file=NULL;
     DWORD rw_size;
@@ -94,7 +94,7 @@ bool MEvents::Load(AnsiString FileName_)
     BasicEncode(all_data,data_size,0x7F29C13E);
     all_data[data_size]=0; Clear();
     //
-    if ( GetData(all_data,all_data+data_size)==NULL ) goto error;
+    if ( GetData_(all_data,all_data+data_size,InfoOnly_)==NULL ) goto error;
 
     delete[] all_data;
     return true;
@@ -102,6 +102,16 @@ error:
     if ( (file!=NULL)&&(file!=INVALID_HANDLE_VALUE) ) ::CloseHandle(file);
     if ( all_data!=NULL ) delete[] all_data;
     return false;
+}
+//---------------------------------------------------------------------------
+bool MEvents::Load(AnsiString FileName_)
+{
+    return Load_(FileName_,false);
+}
+//---------------------------------------------------------------------------
+bool MEvents::LoadInfo(AnsiString FileName_)
+{
+    return Load_(FileName_,true);
 }
 //---------------------------------------------------------------------------
 

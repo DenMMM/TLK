@@ -1,8 +1,8 @@
 object FormMain: TFormMain
-  Left = 221
-  Top = 170
-  Width = 657
-  Height = 472
+  Left = 209
+  Top = 134
+  Width = 734
+  Height = 521
   Caption = 'Просмотр логов'
   Color = clBtnFace
   Constraints.MinHeight = 226
@@ -19,7 +19,7 @@ object FormMain: TFormMain
   object Bevel1: TBevel
     Left = 4
     Top = 4
-    Width = 641
+    Width = 718
     Height = 109
     Anchors = [akLeft, akTop, akRight]
     Shape = bsFrame
@@ -91,7 +91,7 @@ object FormMain: TFormMain
   object Bevel2: TBevel
     Left = 12
     Top = 68
-    Width = 625
+    Width = 702
     Height = 5
     Anchors = [akLeft, akTop, akRight]
     Shape = bsTopLine
@@ -141,51 +141,6 @@ object FormMain: TFormMain
     Height = 13
     Caption = '000 000,00'
   end
-  object ListViewEvents: TListView
-    Left = 4
-    Top = 120
-    Width = 641
-    Height = 289
-    AllocBy = 250
-    Anchors = [akLeft, akTop, akRight, akBottom]
-    Columns = <
-      item
-        Width = 0
-      end
-      item
-        Alignment = taRightJustify
-        Caption = 'Когда'
-        Width = 130
-      end
-      item
-        Alignment = taRightJustify
-        Caption = 'Компьютер'
-        Width = 70
-      end
-      item
-        Caption = 'По тарифу'
-        Width = 150
-      end
-      item
-        Alignment = taRightJustify
-        Caption = 'На время'
-        Width = 100
-      end
-      item
-        Alignment = taRightJustify
-        Caption = 'Оплачено'
-        Width = 120
-      end>
-    MultiSelect = True
-    ReadOnly = True
-    RowSelect = True
-    TabOrder = 3
-    ViewStyle = vsReport
-    OnColumnClick = ListViewEventsColumnClick
-    OnDeletion = ListViewEventsDeletion
-    OnInsert = ListViewEventsInsert
-    OnSelectItem = ListViewEventsSelectItem
-  end
   object EditName: TEdit
     Left = 316
     Top = 12
@@ -214,14 +169,14 @@ object FormMain: TFormMain
     OnClick = ButtonSelectClick
   end
   object BitBtnClose: TBitBtn
-    Left = 532
-    Top = 416
+    Left = 609
+    Top = 465
     Width = 105
     Height = 25
     Anchors = [akRight, akBottom]
     Cancel = True
     Caption = 'Закрыть'
-    TabOrder = 4
+    TabOrder = 6
     OnClick = BitBtnCloseClick
     Glyph.Data = {
       DE010000424DDE01000000000000760000002800000024000000120000000100
@@ -249,7 +204,7 @@ object FormMain: TFormMain
     Height = 29
     BorderStyle = bsNone
     ReadOnly = True
-    TabOrder = 5
+    TabOrder = 7
     Visible = False
     WordWrap = False
   end
@@ -259,8 +214,113 @@ object FormMain: TFormMain
     Width = 95
     Height = 25
     Caption = 'Сохранить...'
-    TabOrder = 6
+    TabOrder = 3
     OnClick = ButtonSaveReportClick
+  end
+  object PanelLog: TPanel
+    Left = 4
+    Top = 136
+    Width = 717
+    Height = 323
+    Anchors = [akLeft, akTop, akRight, akBottom]
+    BorderWidth = 3
+    TabOrder = 5
+    object SplitterLog: TSplitter
+      Left = 4
+      Top = 97
+      Width = 709
+      Height = 3
+      Cursor = crVSplit
+      Align = alTop
+    end
+    object ListViewEvents: TListView
+      Left = 4
+      Top = 100
+      Width = 709
+      Height = 219
+      Align = alClient
+      AllocBy = 250
+      Columns = <
+        item
+          Width = 0
+        end
+        item
+          Alignment = taRightJustify
+          Caption = 'Когда'
+          Width = 130
+        end
+        item
+          Alignment = taRightJustify
+          Caption = 'Компьютер'
+          Width = 70
+        end
+        item
+          Caption = 'Тариф/операция'
+          Width = 250
+        end
+        item
+          Alignment = taRightJustify
+          Caption = 'Время'
+          Width = 120
+        end
+        item
+          Alignment = taRightJustify
+          Caption = 'Оплачено'
+          Width = 120
+        end>
+      MultiSelect = True
+      ReadOnly = True
+      RowSelect = True
+      TabOrder = 1
+      ViewStyle = vsReport
+      OnColumnClick = ListViewEventsColumnClick
+      OnDeletion = ListViewEventsDeletion
+      OnInsert = ListViewEventsInsert
+      OnSelectItem = ListViewEventsSelectItem
+    end
+    object ListViewFiles: TListView
+      Left = 4
+      Top = 4
+      Width = 709
+      Height = 93
+      Align = alTop
+      AllocBy = 250
+      Columns = <
+        item
+          Width = 0
+        end
+        item
+          Caption = 'Файл'
+          Width = 150
+        end
+        item
+          Caption = 'Заведен'
+          Width = 170
+        end
+        item
+          Caption = 'Админ'
+          Width = 300
+        end>
+      HideSelection = False
+      MultiSelect = True
+      ReadOnly = True
+      RowSelect = True
+      TabOrder = 0
+      ViewStyle = vsReport
+      Visible = False
+      OnSelectItem = ListViewFilesSelectItem
+    end
+  end
+  object ButtonShowFiles: TButton
+    Left = 624
+    Top = 118
+    Width = 95
+    Height = 17
+    Anchors = [akTop, akRight]
+    Caption = 'Файлы <</>>'
+    Enabled = False
+    TabOrder = 4
+    OnClick = ButtonShowFilesClick
   end
   object OpenDialog: TOpenDialog
     Filter = 'Файлы логов TimeLocker'#39'а (*.tlg)|*.TLG|Все файлы (*.*)|*.*'

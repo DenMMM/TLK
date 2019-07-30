@@ -26,7 +26,8 @@ private:
     MListItem *new_() { return (MListItem*)(new MEvent); }
     void delete_(MListItem *ListItem_) { delete ((MEvent*)ListItem_); }
 
-    char *GetData(char *Data_, char *LimitData_);
+    char *GetData_(char *Data_, char *LimitData_, bool InfoOnly_);
+    bool Load_(AnsiString FileName_, bool InfoOnly_);
 public:
     double OpenTime;  //
     double CloseTime;  //
@@ -35,6 +36,7 @@ public:
     unsigned int Rights;  // Права
 
     bool Load(AnsiString FileName_);
+    bool LoadInfo(AnsiString FileName_);
 
     MEvents() { constructor(); }
     ~MEvents() { destructor(); }

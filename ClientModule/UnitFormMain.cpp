@@ -38,7 +38,7 @@ void __fastcall TFormMain::FormShow(TObject *Sender)
     ThreadNetSync=new MThreadNetSync(true);
     ThreadNetSync->FreeOnTerminate=true;
 
-    char file_name[MAX_PATH];
+/*    char file_name[MAX_PATH];
     strcpy(file_name,win_dir);
     strcat(file_name,"SYSTEM.INI");
     TIniFile *IniFile=new TIniFile(file_name);
@@ -48,7 +48,7 @@ void __fastcall TFormMain::FormShow(TObject *Sender)
         IniFile->WriteString("boot","shell",file_name);
         IniFile->UpdateFile();
         delete IniFile;
-    }
+    }*/
 
     TimeToReboot=0;
     MessageTimer=0;
@@ -86,6 +86,13 @@ void __fastcall TFormMain::TimerTimer(TObject *Sender)
     static BITMAP bitmap;
 
     double SystemTime=(double)(Date()+Time());
+
+    // Показываем сообщение о скором окончании времени
+    if ( MessageTimer&&message_bitmap ) DrawMessage(message_bitmap,bitmap);
+    // Позиционируем окно программы
+    if ( Width!=Screen->Width ) { Left=0; Width=Screen->Width; }
+    if ( Height!=Screen->Height ) { Top=0; Height=Screen->Height; }
+
     if ( (++timer_1000msec)>=(1000/Timer->Interval) )
     {
         timer_1000msec=0;
@@ -126,31 +133,24 @@ void __fastcall TFormMain::TimerTimer(TObject *Sender)
         }
         // Проверяем время последнего контакта с админским модулем
         if ( State->ControlPingTime() ) { StateSave(State); State->NeedUpdate=true; }
-        State->UnLock();
-        // Проверяем время неактивности диалога ввода пароля и закрываем его при необходимости
-        if ( PanelPassword->Tag&&((++(PanelPassword->Tag))>=Max_EnterPasswordTime) )
-            SpeedButtonPasswordCancelClick(NULL);
-        // Если таймер перезагрузки истек, то перезагружаем компьютер
+        // Если таймер перезагрузки истек, то помечаем, что нужно перезагрузиться
         if ( TimeToReboot&&((++TimeToReboot)>=WaitRebootTime) )
         {
-            TimeToReboot=0; State->NeedUpdate=true;
-            SpeedButtonRebootClick(NULL); return;
+            TimeToReboot=0; State->State|=mcsReboot;
+            State->NeedUpdate=true;
         }
+        State->UnLock();
     }
-    // Позиционируем окно программы
-    if ( Width!=Screen->Width ) { Left=0; Width=Screen->Width; }
-    if ( Height!=Screen->Height ) { Top=0; Height=Screen->Height; }
+
     // Блокируем CTRL+ALT+DEL
 //    ::SystemParametersInfo(SPI_SCREENSAVERRUNNING,1,NULL,0);
     // Корректируем поведение программы в соответствии с режимом работы
     State->Lock();
-    if ( State->NeedUpdate ) { State->NeedUpdate=false; SetState(); }
     unsigned int st=State->State;
     if ( (st&(mcsFree|mcsFine|mcsLock|mcsPause|mcsNotUse))&&(!(st&mcsAuto)) ) HideWindows(true);
     else HideWindows(false);
+    if ( State->NeedUpdate ) { State->NeedUpdate=false; SetState(); }
     State->UnLock();
-    // Показываем сообщение
-    if ( MessageTimer&&message_bitmap ) DrawMessage(message_bitmap,bitmap);
 }
 //---------------------------------------------------------------------------
 void __fastcall TFormMain::TreeViewGamesDeletion(TObject *Sender,
@@ -190,9 +190,7 @@ void __fastcall TFormMain::TreeViewGamesDblClick(TObject *Sender)
 //---------------------------------------------------------------------------
 void __fastcall TFormMain::SpeedButtonRebootClick(TObject *Sender)
 {
-    if ( !::ExitWindowsEx(EWX_REBOOT,0) ) return;
-    Tag=true;
-    Close();
+    Tag=Exit(EWX_REBOOT);
 }
 //---------------------------------------------------------------------------
 void __fastcall TFormMain::AddGamesToTree(MGames *Games_, TTreeNode *TreeNode_, TImageList *ImageList_)
@@ -305,9 +303,11 @@ void __fastcall TFormMain::SetState()
     ShowGames(showgames);
     ShowImageMessage(ImageMessage);
     //
+    SpeedButtonOptions->Enabled=state&mcsAuto;
+    //
     if ( state&mcsWtLocker )
     {
-        char file_name[MAX_PATH];
+/*        char file_name[MAX_PATH];
         strcpy(file_name,win_dir);
         strcat(file_name,"SYSTEM.INI");
         TIniFile *IniFile=new TIniFile(file_name);
@@ -316,67 +316,28 @@ void __fastcall TFormMain::SetState()
         strcat(file_name,"EXPLORER.EXE");
         IniFile->WriteString("boot","shell",file_name);
         IniFile->UpdateFile();
-        delete IniFile;
+        delete IniFile;*/
         State->State&=~mcsWtLocker;
         StateSave(State);
-        if ( ::ExitWindowsEx(EWX_REBOOT|EWX_FORCE,0) ) Tag=true;
+//        Tag=Exit(EWX_REBOOT);
     } else if ( state&mcsReboot )
     {
         State->State&=~mcsReboot;
         StateSave(State);
-        if ( ::ExitWindowsEx(EWX_REBOOT|EWX_FORCE,0) ) Tag=true;
+        Tag=Exit(EWX_REBOOT);
+//        Tag=Exit(EWX_REBOOT|EWX_FORCE);
     } else if ( state&mcsShutdown )
     {
         State->State&=~mcsShutdown;
         StateSave(State);
 //        Tag=true; Close();
-        if ( ::ExitWindowsEx(EWX_SHUTDOWN|EWX_FORCE,0) ) Tag=true;
+        Tag=Exit(EWX_SHUTDOWN);
     }
 }
 //---------------------------------------------------------------------------
 void __fastcall TFormMain::SpeedButtonOptionsClick(TObject *Sender)
 {
-//    if ( Options->NoPassword )
-//    {
-//        FormOptions->Left=Left+(Width-FormOptions->Width)/2;
-//        FormOptions->Top=Top+(Height-FormOptions->Height)/2;
-//        FormOptions->ShowModal();
-//    } else
-    {
-        ImageLogo->Hide();
-        PanelPassword->Show();
-        PanelPassword->Tag=1;
-        EditPassword->SetFocus();
-    }
-}
-//---------------------------------------------------------------------------
-void __fastcall TFormMain::EditPasswordKeyPress(TObject *Sender, char &Key)
-{
-    PanelPassword->Tag=1;
-}
-//---------------------------------------------------------------------------
-void __fastcall TFormMain::SpeedButtonPasswordOkClick(TObject *Sender)
-{
-//    if ( EditPassword->Text!=Options->Password )
-    {
-        PanelPassword->Tag=1;
-        EditPassword->Text=""; EditPassword->ClearUndo();
-        EditPassword->SetFocus();
-        return;
-    }
-//    PanelPassword->Tag=0;
-//    EditPassword->Text=""; EditPassword->ClearUndo();
-//    PanelPassword->Hide(); ImageLogo->Show();
-//    FormOptions->Left=Left+(Width-FormOptions->Width)/2;
-//    FormOptions->Top=Top+(Height-FormOptions->Height)/2;
-//    FormOptions->ShowModal();
-}
-//---------------------------------------------------------------------------
-void __fastcall TFormMain::SpeedButtonPasswordCancelClick(TObject *Sender)
-{
-    EditPassword->Text=""; EditPassword->ClearUndo();
-    PanelPassword->Hide(); ImageLogo->Show();
-    PanelPassword->Tag=0;
+    Tag=Exit(EWX_LOGOFF);
 }
 //---------------------------------------------------------------------------
 void __fastcall TFormMain::HideWindows(bool Hide_)

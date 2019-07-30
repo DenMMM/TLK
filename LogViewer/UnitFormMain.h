@@ -16,7 +16,6 @@
 class TFormMain : public TForm
 {
 __published:	// IDE-managed Components
-    TListView *ListViewEvents;
     TLabel *Label1;
     TEdit *EditName;
     TLabel *Label2;
@@ -41,6 +40,11 @@ __published:	// IDE-managed Components
     TSaveDialog *SaveDialog;
     TLabel *Label4;
     TLabel *LabelSelPayMany;
+    TPanel *PanelLog;
+    TListView *ListViewEvents;
+    TListView *ListViewFiles;
+    TSplitter *SplitterLog;
+    TButton *ButtonShowFiles;
     void __fastcall ButtonSelectClick(TObject *Sender);
     void __fastcall ListViewEventsInsert(TObject *Sender, TListItem *Item);
     void __fastcall BitBtnCloseClick(TObject *Sender);
@@ -51,8 +55,12 @@ __published:	// IDE-managed Components
           TListItem *Item);
     void __fastcall ListViewEventsSelectItem(TObject *Sender,
           TListItem *Item, bool Selected);
+    void __fastcall ButtonShowFilesClick(TObject *Sender);
+    void __fastcall ListViewFilesSelectItem(TObject *Sender,
+          TListItem *Item, bool Selected);
 private:	// User declarations
-    void __fastcall SetListViewEventsLine(TListItem *Item_, MEvent *Event_);
+    bool ShowFiles(AnsiString FilePath_);
+    bool ShowLog(AnsiString FileName_);
 public:		// User declarations
     __fastcall TFormMain(TComponent* Owner);
 };

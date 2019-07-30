@@ -53,11 +53,6 @@ __published:	// IDE-managed Components
     TTreeView *TreeViewGames;
     TImage *ImageMessage;
     TLabel *LabelComputerNumber;
-    TPanel *PanelPassword;
-    TImage *ImageEnterPassword;
-    TSpeedButton *SpeedButtonPasswordOk;
-    TSpeedButton *SpeedButtonPasswordCancel;
-    TEdit *EditPassword;
     TSpeedButton *SpeedButtonOptions;
     void __fastcall TimerTimer(TObject *Sender);
     void __fastcall FormShow(TObject *Sender);
@@ -68,9 +63,6 @@ __published:	// IDE-managed Components
     void __fastcall TreeViewGamesDblClick(TObject *Sender);
     void __fastcall FormCloseQuery(TObject *Sender, bool &CanClose);
     void __fastcall SpeedButtonOptionsClick(TObject *Sender);
-    void __fastcall SpeedButtonPasswordOkClick(TObject *Sender);
-    void __fastcall SpeedButtonPasswordCancelClick(TObject *Sender);
-    void __fastcall EditPasswordKeyPress(TObject *Sender, char &Key);
 private:	// User declarations
     int TimeToReboot;
     int MessageTimer;
