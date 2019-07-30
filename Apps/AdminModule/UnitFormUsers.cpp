@@ -4,11 +4,11 @@
 
 #include "UnitFormUsers.h"
 #include "UnitFormMain.h"
-#include "UnitFormUserPassword.h"
+#include "UnitFormUserPass.h"
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
 #pragma resource "*.dfm"
-TFormUsers *FormUsers;
+//TFormUsers *FormUsers;
 //---------------------------------------------------------------------------
 __fastcall TFormUsers::TFormUsers(TComponent* Owner)
     : TForm(Owner)
@@ -17,19 +17,23 @@ __fastcall TFormUsers::TFormUsers(TComponent* Owner)
 //---------------------------------------------------------------------------
 void __fastcall TFormUsers::FormShow(TObject *Sender)
 {
-    // Формируем список пользователей и попутно определяем
-    // максимальное значение ID-кода, использованного с их описателями
-    for ( MUser *User=(MUser*)Users->First;
-        User; User=(MUser*)User->Next )
-    {
-        TListItem *NewItem;
-        NewItem=ListViewUsers->Items->Add();
-        ((MUser*)NewItem->Data)->Copy(User);
-        SetListViewUsersLine(NewItem);
-    }
+    // Копируем пользователей в буфер
+    TmpUsers.Copy(Users);
 
-    EditLogin->MaxLength=MAX_UserLoginLength;
-    EditName->MaxLength=MAX_UserNameLength;
+    // Формируем их список
+    for ( MUser *user=(MUser*)TmpUsers.gFirst();
+        user; user=(MUser*)user->gNext() )
+    {
+        TListItem *item;
+        item=ListViewUsers->Items->Add();
+        item->Data=user;
+        SetListViewUsersLine(item);
+    }
+    // Сортируем для красоты
+    ListViewUsers->AlphaSort();
+
+    EditLogin->MaxLength=MAX_UserLoginLen;
+    EditName->MaxLength=MAX_UserNameLen;
 
     SetEdit(false);
     ActiveControl=ListViewUsers;
@@ -38,45 +42,44 @@ void __fastcall TFormUsers::FormShow(TObject *Sender)
 void __fastcall TFormUsers::FormClose(TObject *Sender,
       TCloseAction &Action)
 {
+    // Чистим интерфейсные элементы
     ListViewUsers->Items->Clear();
     EditLogin->Text="";
     EditName->Text="";
+    // Чистим буфер
+    TmpUsers.Clear();
 }
 //---------------------------------------------------------------------------
 void __fastcall TFormUsers::ListViewUsersInsert(TObject *Sender,
       TListItem *Item)
 {
     Item->ImageIndex=-1;
-    Item->Data=new MUser;
     Item->SubItems->Add("");
     Item->SubItems->Add("");
-}
-//---------------------------------------------------------------------------
-void __fastcall TFormUsers::ListViewUsersDeletion(TObject *Sender,
-      TListItem *Item)
-{
-    delete (MUser*)Item->Data;
 }
 //---------------------------------------------------------------------------
 void __fastcall TFormUsers::ListViewUsersSelectItem(TObject *Sender,
       TListItem *Item, bool Selected)
 {
-    if ( ((TListView*)Sender)->SelCount!=1 ) { SetEdit(false); return; }
-    else SetEdit(true);
+    if ( ((TListView*)Sender)->SelCount!=1 )
+    {
+        SetEdit(false);
+        return;
+    } else
+        SetEdit(true);
 
-    MUser *User=(MUser*)ListViewUsers->Selected->Data;
-    //
-    EditLogin->Text=User->Login;
-    EditName->Text=User->Name;
+    MUser *user=(MUser*)ListViewUsers->Selected->Data;
+    EditLogin->Text=user->Login;
+    EditName->Text=user->Name;
 }
 //---------------------------------------------------------------------------
 void __fastcall TFormUsers::EditLoginExit(TObject *Sender)
 {
     if ( ListViewUsers->Selected==NULL ) return;
 
-    MUser *User=(MUser*)ListViewUsers->Selected->Data;
-    User->SetLogin(EditLogin->Text.Trim().c_str());
-    EditLogin->Text=User->Login;
+    MUser *user=(MUser*)ListViewUsers->Selected->Data;
+    user->SetLogin(EditLogin->Text.Trim().c_str());
+    EditLogin->Text=user->Login;
     SetListViewUsersLine(ListViewUsers->Selected);
 }
 //---------------------------------------------------------------------------
@@ -84,11 +87,11 @@ void __fastcall TFormUsers::BitBtnActiveClick(TObject *Sender)
 {
     bool Active=Sender==BitBtnActive? true: false;
     TItemStates is=TItemStates()<<isSelected;
-    for ( TListItem *Item=ListViewUsers->Selected; Item;
-        Item=ListViewUsers->GetNextItem(Item,sdAll,is) )
+    for ( TListItem *item=ListViewUsers->Selected; item;
+        item=ListViewUsers->GetNextItem(item,sdAll,is) )
     {
-        ((MUser*)Item->Data)->Active=Active;
-        SetListViewUsersLine(Item);
+        ((MUser*)item->Data)->Active=Active;
+        SetListViewUsersLine(item);
     }
 }
 //---------------------------------------------------------------------------
@@ -96,42 +99,53 @@ void __fastcall TFormUsers::EditNameExit(TObject *Sender)
 {
     if ( ListViewUsers->Selected==NULL ) return;
 
-    MUser *User=(MUser*)ListViewUsers->Selected->Data;
-    User->SetName(EditName->Text.Trim().c_str());
-    EditName->Text=User->Name;
+    MUser *user=(MUser*)ListViewUsers->Selected->Data;
+    user->SetName(EditName->Text.Trim().c_str());
+    EditName->Text=user->Name;
     SetListViewUsersLine(ListViewUsers->Selected);
 }
 //---------------------------------------------------------------------------
 void __fastcall TFormUsers::ButtonPasswordClick(TObject *Sender)
 {
-    MUser *User=(MUser*)ListViewUsers->Selected->Data;
-
+    MUser *user=(MUser*)ListViewUsers->Selected->Data;
+    // Подготавливаем координаты
     TPoint dialog_coord;
     dialog_coord.x=ButtonPassword->Left+10;
     dialog_coord.y=ButtonPassword->Top+10;
     dialog_coord=ClientToScreen(dialog_coord);
-
-    FormUserPassword->Execute(User,dialog_coord.x,dialog_coord.y,false);
+    // Открываем окно смены пароля
+    try
+    {
+        Munique_ptr <TFormUserPass> form;
+        form(new TFormUserPass(0));
+        form.get()->Execute(user,dialog_coord.x,dialog_coord.y,false);
+    }
+    catch (Exception &ex)
+    {
+        Application->ShowException(&ex);
+    }
 }
 //---------------------------------------------------------------------------
 void __fastcall TFormUsers::ButtonAddClick(TObject *Sender)
 {
     if ( ListViewUsers->Items->Count>=MAX_Users )
     {
-        ::MessageBox(Handle,"Большее количество пользователей не поддерживается.",
-            "Сообщение",MB_OK|MB_ICONWARNING|MB_APPLMODAL);
+        ResMessageBox(Handle,0,23,MB_APPLMODAL|MB_OK|MB_ICONINFORMATION);
         return;
     }
 
-    TListItem *NewItem=ListViewUsers->Items->Add();
-    MUser *NewUser=(MUser*)NewItem->Data;
-    NewUser->SetLogin("NewUser");
-    NewUser->SetName("Новый пользователь");
-    SetListViewUsersLine(NewItem);
-    //
-    ListViewUsers->ItemFocused=NewItem;
+    // Добавили в буфер нового пользователя
+    MUser *user=(MUser*)TmpUsers.Add();
+    user->SetLogin("NewUser");
+    user->SetName("Новый пользователь");
+    // Добавили строку в список и связали с ним
+    TListItem *item=ListViewUsers->Items->Add();
+    item->Data=user;
+    SetListViewUsersLine(item);
+    // Обновили интерфейс
+    ListViewUsers->ItemFocused=item;
     ListViewUsers->Selected=NULL;
-    ListViewUsers->Selected=NewItem;
+    ListViewUsers->Selected=item;
     ActiveControl=EditLogin;
 }
 //---------------------------------------------------------------------------
@@ -139,10 +153,15 @@ void __fastcall TFormUsers::ButtonDelClick(TObject *Sender)
 {
     // Удаляем пользователей из списка
     TItemStates is=TItemStates()<<isSelected;
-    for ( TListItem *Item=ListViewUsers->Selected, *NewItem; Item; )
+    TListItem *item=ListViewUsers->Selected, *next;
+    while(item)
     {
-        NewItem=ListViewUsers->GetNextItem(Item,sdAll,is);
-        Item->Delete(); Item=NewItem;
+        // Удаляем пользователя из буфера
+        TmpUsers.Del((MUser*)item->Data);
+        // Удаляем строку из списка
+        next=ListViewUsers->GetNextItem(item,sdAll,is);
+        item->Delete();
+        item=next;
     }
     //
     ListViewUsers->Selected=ListViewUsers->ItemFocused;
@@ -150,20 +169,24 @@ void __fastcall TFormUsers::ButtonDelClick(TObject *Sender)
 //---------------------------------------------------------------------------
 void __fastcall TFormUsers::ButtonSaveClick(TObject *Sender)
 {
-    Users->Clear();
-    TListItems *Items=ListViewUsers->Items;
-    for ( int i=0, j=Items->Count; i<j; i++ )
+    // Замещаем актуальных пользователями из буфера
+    Users->Move(&TmpUsers);
+    // Задаем ID-номера для новых
+    Users->SetIDs();                        /// проверить чья смена открыта
+    // Сохраняем в файле
+    if ( !Users->Save() )
     {
-        MUser *NewUser;
-        NewUser=(MUser*)Users->Add();
-        NewUser->Copy((MUser*)Items->Item[i]->Data);
+        ShellState->State|=mssErrorConfig; FormMain->SetShell();
+        ResMessageBox(Handle,1,3,MB_APPLMODAL|MB_OK|MB_ICONERROR,Users->gLastErr());
+        return;
     }
-    //
-    Users->SetIDs();
     // Запись в логах
-    Log->AddUsers(Users);
-    //
-    Users->Save();
+    if ( !Log->AddUsers(Users) )
+    {
+        // Настройки сохранили, но без отображения их в логе работать не дадим
+        ShellState->State|=mssErrorLog|mssErrorConfig; FormMain->SetShell();
+        ResMessageBox(Handle,1,5,MB_APPLMODAL|MB_OK|MB_ICONERROR,Log->gLastErr());
+    }
 }
 //---------------------------------------------------------------------------
 void TFormUsers::SetEdit(bool Edit_)
@@ -181,11 +204,11 @@ void TFormUsers::SetEdit(bool Edit_)
 //---------------------------------------------------------------------------
 void TFormUsers::SetListViewUsersLine(TListItem *Item_)
 {
-    MUser *User=(MUser*)Item_->Data;
-//    Item_->ImageIndex=User->Active?15:16;
-    Item_->ImageIndex=User->Active?-1:16;
-    Item_->Caption=User->Login;
-    Item_->SubItems->Strings[0]=User->Name;
+    MUser *user=(MUser*)Item_->Data;
+//    Item_->ImageIndex=user->Active?15:16;
+    Item_->ImageIndex=user->Active?-1:16;
+    Item_->Caption=user->Login;
+    Item_->SubItems->Strings[0]=user->Name;
 }
 //---------------------------------------------------------------------------
 

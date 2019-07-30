@@ -22,9 +22,9 @@ void __fastcall TFormMain::FormClose(TObject *Sender, TCloseAction &Action)
 //---------------------------------------------------------------------------
 void __fastcall TFormMain::NOpenClick(TObject *Sender)
 {
-    MLogFile *File;
-    TMenuItem *Menu;
+    MLogFile *File=NULL;
     char file_name[MAX_PATH+1];
+    TMenuItem *Menu;
 
     if ( !OpenDialog->Execute() ) return;
     //
@@ -41,11 +41,11 @@ void __fastcall TFormMain::NOpenClick(TObject *Sender)
     NWindows->Add(Menu);
     // Обрабатываем его записи
     FormEvents=new TFormEvents(this);
-    FormEvents->Open(File,(MLogRecord*)File->Records.First,
-        (MLogRecord*)File->Records.Last);
+    FormEvents->Open(File,(MLogRecord*)File->Records.gFirst(),
+        (MLogRecord*)File->Records.gLast());
     FormUsersUpTime=new TFormUsersUpTime(this);
-    if ( FormUsersUpTime->Open(File,(MLogRecord*)File->Records.First,
-        (MLogRecord*)File->Records.Last) )
+    if ( FormUsersUpTime->Open(File,(MLogRecord*)File->Records.gFirst(),
+        (MLogRecord*)File->Records.gLast()) )
     return;
 error:
     return;

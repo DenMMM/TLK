@@ -82,10 +82,11 @@ __published:	// IDE-managed Components
     void __fastcall PageControlChange(TObject *Sender);
     void __fastcall NLoadClick(TObject *Sender);
 private:	// User declarations
-    MSend Send;
-    MComputer **SendComputers;
-    MGames *Games;
-    MClOptions *Options;
+    MSendSrv Send;                      // TCP-рассыльщик объектов
+    Marray <MComputer*> SendComps;      // Массив указателей на компьютеры, куда рассылать
+    MGames TmpGames;                    // Буфер для списка игр
+    MClOptions TmpOptions;              // Буфер для настроек клиента
+    bool Sending;                       // Флаг отправки/приема данных
     void SetTreeViewGamesLine(TTreeNode *Node_);
     void AddGamesToTree(TTreeNode *Node_, MGames *Games_);
     void CreateGamesTree(MGames *Games_);
@@ -94,13 +95,11 @@ private:	// User declarations
     void OptionsToShell(MClOptions *Options_);
     void ShellToOptions(MClOptions *Options_);
     void SetEdit(bool Edit_, bool Full_);
-    void SetSend(bool Send_);
+    void SetNet(bool Process_, bool Sending_);
     void __fastcall Dispatch(void *Message);
 public:		// User declarations
     __fastcall TFormClient(TComponent* Owner);
 };
-//---------------------------------------------------------------------------
-extern PACKAGE TFormClient *FormClient;
 //---------------------------------------------------------------------------
 #endif
 

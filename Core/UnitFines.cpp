@@ -11,8 +11,7 @@
 
 MFine::MFine()
 {
-    ID=0;
-    *Description=0;
+    *Descr=0;
     Time=0;
 }
 
@@ -21,70 +20,55 @@ MFine::~MFine()
 //
 }
 
-bool MFine::Copy(MListItem *SrcItem_)
+void MFine::Copy(const MListItem *SrcItem_)
 {
     MFine *Fine_=(MFine*)SrcItem_;
-    ID=Fine_->ID;
-    strcpy(Description,Fine_->Description);
+    strcpy(Descr,Fine_->Descr);
     Time=Fine_->Time;
-    return true;
+    MIDListItem::Copy(SrcItem_);
 }
 
-unsigned int MFine::GetDataSize()
+unsigned MFine::GetDataSize() const
 {
     return
-        sizeof(ID)+             // ID-номер штрафа
-        strlen(Description)+1+  // Описание штрафа
-        sizeof(Time);           // Время штрафа
+        MIDListItem::GetDataSize()+     // ID-номер штрафа
+        strlen(Descr)+1+                // Описание штрафа
+        sizeof(Time);                   // Время штрафа
 }
 
-char *MFine::SetData(char *Data_)
+char *MFine::SetData(char *Data_) const
 {
-    Data_=MemSet(Data_,ID);
-    Data_=MemSetCLine(Data_,Description);
+    Data_=MIDListItem::SetData(Data_);
+    Data_=MemSetCLine(Data_,Descr);
     Data_=MemSet(Data_,Time);
     return Data_;
 }
 
-char *MFine::GetData(char *Data_, char *Limit_)
+const char *MFine::GetData(const char *Data_, const char *Limit_)
 {
-    if ( (Data_=MemGet(Data_,&ID,Limit_))==NULL ) goto error;
-    if ( (Data_=MemGetCLine(Data_,Description,MAX_FineDescLength,Limit_))==NULL ) goto error;
-    if ( (Data_=MemGet(Data_,&Time,Limit_))==NULL ) goto error;
-    return Data_;
-error:
-    return NULL;
+    return
+        (Data_=MIDListItem::GetData(Data_,Limit_))!=NULL &&
+        (Data_=MemGetCLine(Data_,Descr,MAX_FineDescrLen,Limit_))!=NULL &&
+        (Data_=MemGet(Data_,&Time,Limit_))!=NULL
+        ? Data_: NULL;
 }
 
-char *MFine::SetDescription(char *Description_)
+char *MFine::sDescr(char *Descr_)
 {
-    return strlen(Description_)>MAX_FineDescLength?
-        NULL: strcpy(Description,Description_);
+    return strlen(Descr_)>MAX_FineDescrLen?
+        NULL: strcpy(Descr,Descr_);
 }
 
-void MFine::GetFineData(MFineData *Data_)
+void MFine::GetFineData(MFineData *Data_) const
 {
-    Data_->ID=ID;
-    strcpy(Data_->Description,Description);
+    Data_->ID=ItemID;
+    strcpy(Data_->Descr,Descr);
 }
 
 void MFine::SetFineData(MFineData *Data_)
 {
-    ID=Data_->ID;
-    strcpy(Description,Data_->Description);
-}
-
-//---------------------------------------------------------------------------
-
-MFine *MFines::Search(unsigned ID_)
-{
-    MFine *Fine=(MFine*)First;
-    while(Fine)
-    {
-        if ( Fine->ID==ID_ ) break;
-        Fine=(MFine*)Fine->Next;
-    }
-    return Fine;
+    ItemID=Data_->ID;
+    strcpy(Descr,Data_->Descr);
 }
 
 //---------------------------------------------------------------------------

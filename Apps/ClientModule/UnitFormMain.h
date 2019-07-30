@@ -17,6 +17,7 @@
 #include "UnitStates.h"
 #include "UnitSync.h"
 #include "UnitSend.h"
+#include "UnitAuth.h"
 #include "UnitGames.h"
 #include "UnitMessage.h"
 //---------------------------------------------------------------------------
@@ -83,6 +84,7 @@ extern MClOptions *Options;
 extern MStateCl *State;
 extern MSyncCl *Sync;
 extern MSendCl *Send;
+extern MAuth *Auth;
 extern MMessage *Message;
 //---------------------------------------------------------------------------
 #endif

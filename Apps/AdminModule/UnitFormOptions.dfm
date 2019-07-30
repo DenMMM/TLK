@@ -3,7 +3,7 @@ object FormOptions: TFormOptions
   Top = 240
   BorderIcons = [biSystemMenu]
   BorderStyle = bsSingle
-  Caption = 'Общие настройки'
+  Caption = #1054#1073#1097#1080#1077' '#1085#1072#1089#1090#1088#1086#1081#1082#1080
   ClientHeight = 278
   ClientWidth = 461
   Color = clBtnFace
@@ -30,7 +30,7 @@ object FormOptions: TFormOptions
     Width = 270
     Height = 13
     Alignment = taRightJustify
-    Caption = 'Время использования диалогов расчета цен (минут):'
+    Caption = #1042#1088#1077#1084#1103' '#1080#1089#1087#1086#1083#1100#1079#1086#1074#1072#1085#1080#1103' '#1076#1080#1072#1083#1086#1075#1086#1074' '#1088#1072#1089#1095#1077#1090#1072' '#1094#1077#1085' ('#1084#1080#1085#1091#1090'):'
   end
   object Label2: TLabel
     Left = 221
@@ -38,7 +38,7 @@ object FormOptions: TFormOptions
     Width = 114
     Height = 13
     Alignment = taRightJustify
-    Caption = 'Точность расчета цен:'
+    Caption = #1058#1086#1095#1085#1086#1089#1090#1100' '#1088#1072#1089#1095#1077#1090#1072' '#1094#1077#1085':'
   end
   object Label3: TLabel
     Left = 51
@@ -46,7 +46,7 @@ object FormOptions: TFormOptions
     Width = 284
     Height = 13
     Alignment = taRightJustify
-    Caption = 'Время для попадания под фильтр "Свободные" (минут):'
+    Caption = #1042#1088#1077#1084#1103' '#1076#1083#1103' '#1087#1086#1087#1072#1076#1072#1085#1080#1103' '#1087#1086#1076' '#1092#1080#1083#1100#1090#1088' "'#1057#1074#1086#1073#1086#1076#1085#1099#1077'" ('#1084#1080#1085#1091#1090'):'
   end
   object Bevel1: TBevel
     Left = 12
@@ -68,7 +68,7 @@ object FormOptions: TFormOptions
     Width = 147
     Height = 13
     Alignment = taRightJustify
-    Caption = 'Период ведения файла лога:'
+    Caption = #1055#1077#1088#1080#1086#1076' '#1074#1077#1076#1077#1085#1080#1103' '#1092#1072#1081#1083#1072' '#1083#1086#1075#1072':'
   end
   object Bevel3: TBevel
     Left = 12
@@ -82,7 +82,7 @@ object FormOptions: TFormOptions
     Top = 248
     Width = 85
     Height = 25
-    Caption = 'Принять'
+    Caption = #1055#1088#1080#1085#1103#1090#1100
     ModalResult = 1
     TabOrder = 5
     OnClick = ButtonSaveClick
@@ -92,7 +92,7 @@ object FormOptions: TFormOptions
     Top = 248
     Width = 85
     Height = 25
-    Caption = 'Отмена'
+    Caption = #1054#1090#1084#1077#1085#1072
     ModalResult = 2
     TabOrder = 6
   end
@@ -101,7 +101,7 @@ object FormOptions: TFormOptions
     Top = 248
     Width = 85
     Height = 25
-    Caption = 'Справка'
+    Caption = #1057#1087#1088#1072#1074#1082#1072
     Enabled = False
     TabOrder = 7
   end
@@ -134,7 +134,7 @@ object FormOptions: TFormOptions
     Top = 152
     Width = 385
     Height = 17
-    Caption = 'Разрешить администраторам приостанавливать компьютеры'
+    Caption = #1056#1072#1079#1088#1077#1096#1080#1090#1100' '#1072#1076#1084#1080#1085#1080#1089#1090#1088#1072#1090#1086#1088#1072#1084' '#1087#1088#1080#1086#1089#1090#1072#1085#1072#1074#1083#1080#1074#1072#1090#1100' '#1082#1086#1084#1087#1100#1102#1090#1077#1088#1099
     TabOrder = 4
     OnExit = CheckBoxRightPauseExit
   end
@@ -148,10 +148,8 @@ object FormOptions: TFormOptions
     TabOrder = 0
     OnExit = ComboBoxLogPeriodExit
     Items.Strings = (
-      'Сутки'
-      'Неделя'
-      'Месяц'
-      'Квартал'
-      'Год')
+      #1057#1091#1090#1082#1080
+      #1053#1077#1076#1077#1083#1103
+      #1052#1077#1089#1103#1094)
   end
 end

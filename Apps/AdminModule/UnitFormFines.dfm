@@ -3,7 +3,7 @@ object FormFines: TFormFines
   Top = 216
   BorderIcons = [biSystemMenu]
   BorderStyle = bsSingle
-  Caption = 'Штрафы'
+  Caption = #1064#1090#1088#1072#1092#1099
   ClientHeight = 329
   ClientWidth = 549
   Color = clBtnFace
@@ -37,7 +37,7 @@ object FormFines: TFormFines
     Width = 53
     Height = 13
     Alignment = taRightJustify
-    Caption = 'Описание:'
+    Caption = #1054#1087#1080#1089#1072#1085#1080#1077':'
   end
   object LabelTime: TLabel
     Left = 22
@@ -45,14 +45,14 @@ object FormFines: TFormFines
     Width = 117
     Height = 13
     Alignment = taRightJustify
-    Caption = 'Время штрафа (минут):'
+    Caption = #1042#1088#1077#1084#1103' '#1096#1090#1088#1072#1092#1072' ('#1084#1080#1085#1091#1090'):'
   end
   object ButtonSave: TButton
     Left = 268
     Top = 300
     Width = 85
     Height = 25
-    Caption = 'Принять'
+    Caption = #1055#1088#1080#1085#1103#1090#1100
     ModalResult = 1
     TabOrder = 5
     OnClick = ButtonSaveClick
@@ -62,7 +62,7 @@ object FormFines: TFormFines
     Top = 300
     Width = 85
     Height = 25
-    Caption = 'Отмена'
+    Caption = #1054#1090#1084#1077#1085#1072
     ModalResult = 2
     TabOrder = 6
   end
@@ -71,7 +71,7 @@ object FormFines: TFormFines
     Top = 300
     Width = 85
     Height = 25
-    Caption = 'Справка'
+    Caption = #1057#1087#1088#1072#1074#1082#1072
     Enabled = False
     TabOrder = 7
   end
@@ -80,7 +80,7 @@ object FormFines: TFormFines
     Top = 234
     Width = 73
     Height = 22
-    Caption = 'Добавить'
+    Caption = #1044#1086#1073#1072#1074#1080#1090#1100
     TabOrder = 3
     OnClick = ButtonAddClick
   end
@@ -89,7 +89,7 @@ object FormFines: TFormFines
     Top = 258
     Width = 73
     Height = 22
-    Caption = 'Удалить'
+    Caption = #1059#1076#1072#1083#1080#1090#1100
     TabOrder = 4
     OnClick = ButtonDelClick
   end
@@ -101,12 +101,12 @@ object FormFines: TFormFines
     AllocBy = 20
     Columns = <
       item
-        Caption = 'Описание'
+        Caption = #1054#1087#1080#1089#1072#1085#1080#1077
         Width = 300
       end
       item
         Alignment = taRightJustify
-        Caption = 'Время'
+        Caption = #1042#1088#1077#1084#1103
         Width = 150
       end>
     HideSelection = False
@@ -116,7 +116,6 @@ object FormFines: TFormFines
     SortType = stText
     TabOrder = 0
     ViewStyle = vsReport
-    OnDeletion = ListViewFinesDeletion
     OnInsert = ListViewFinesInsert
     OnSelectItem = ListViewFinesSelectItem
   end

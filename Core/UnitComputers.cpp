@@ -8,74 +8,68 @@
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
 //---------------------------------------------------------------------------
-
 MComputer::MComputer()
 {
-    *Address=0;
     Number=0;
-    GroupColor=mgcNone;
+    Color=mgcNone;
+    *Address=0;
     NotUsed=false;
 }
 
 MComputer::~MComputer()
 {
-//
 }
 
-bool MComputer::Copy(MListItem *SrcItem_)
+void MComputer::Copy(const MListItem *SrcItem_)
 {
-    MComputer *Computer_=(MComputer*)SrcItem_;
-    strcpy(Address,Computer_->Address);
-    Number=Computer_->Number;
-    GroupColor=Computer_->GroupColor;
-    NotUsed=Computer_->NotUsed;
-    return true;
+    MComputer *comp_=(MComputer*)SrcItem_;
+    Number=comp_->Number;
+    Color=comp_->Color;
+    strcpy(Address,comp_->Address);
+    NotUsed=comp_->NotUsed;
 }
 
-unsigned int MComputer::GetDataSize()
+unsigned MComputer::GetDataSize() const
 {
     return
         sizeof(Number)+
+        sizeof(Color)+
         strlen(Address)+1+
-        sizeof(GroupColor)+
         sizeof(NotUsed);
 }
 
-char *MComputer::SetData(char *Data_)
+char *MComputer::SetData(char *Data_) const
 {
     Data_=MemSet(Data_,Number);
+    Data_=MemSet(Data_,Color);
     Data_=MemSetCLine(Data_,Address);
-    Data_=MemSet(Data_,GroupColor);
     Data_=MemSet(Data_,NotUsed);
     return Data_;
 }
 
-char *MComputer::GetData(char *Data_, char *Limit_)
+const char *MComputer::GetData(const char *Data_, const char *Limit_)
 {
-    if ( (Data_=MemGet(Data_,&Number,Limit_))==NULL ) goto error;
-    if ( (Data_=MemGetCLine(Data_,Address,MAX_ComputerAddressLength,Limit_))==NULL ) goto error;
-    if ( (Data_=MemGet(Data_,&GroupColor,Limit_))==NULL ) goto error;
-    if ( (Data_=MemGet(Data_,&NotUsed,Limit_))==NULL ) goto error;
-    return Data_;
-error:
-    return NULL;
+    return
+        (Data_=MemGet(Data_,&Number,Limit_))!=NULL &&
+        (Data_=MemGet(Data_,&Color,Limit_))!=NULL &&
+        (Data_=MemGetCLine(Data_,Address,MAX_CompAddrLen,Limit_))!=NULL &&
+        (Data_=MemGet(Data_,&NotUsed,Limit_))!=NULL
+        ? Data_: NULL;
 }
 
 char *MComputer::SetAddress(char *Address_)
 {
-    return strlen(Address_)>MAX_ComputerAddressLength?
+    return strlen(Address_)>MAX_CompAddrLen?
         NULL: strcpy(Address,Address_);
 }
-
 //---------------------------------------------------------------------------
-
-MComputer *MComputers::Search(int Number_)
+MComputer *MComputers::Search(char Number_) const
 {
-    MComputer *Computer=(MComputer*)First;
+    MComputer *Computer=(MComputer*)gFirst();
     while(Computer)
     {
         if ( Computer->Number==Number_ ) break;
-        Computer=(MComputer*)Computer->Next;
+        Computer=(MComputer*)Computer->gNext();
     }
     return Computer;
 }
@@ -85,21 +79,20 @@ void MComputers::Sort()
     MComputer *Computer, *NextComputer;
     bool Sorted;
 
-    if ( First==NULL ) return;
+    if ( gFirst()==NULL ) return;
 
     do
     {
-        Sorted=true; Computer=(MComputer*)First;
-        while((NextComputer=(MComputer*)Computer->Next)!=NULL)
+        Sorted=true; Computer=(MComputer*)gFirst();
+        while((NextComputer=(MComputer*)Computer->gNext())!=NULL)
         {
             if ( Computer->Number>NextComputer->Number )
             {
-                Exchange(Computer,NextComputer);
+                Exch(Computer,NextComputer);
                 Sorted=false;
             } else Computer=NextComputer;
         }
     } while(!Sorted);
 }
-
 //---------------------------------------------------------------------------
 

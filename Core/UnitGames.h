@@ -4,17 +4,23 @@
 //---------------------------------------------------------------------------
 #include "UnitSLList.h"
 //---------------------------------------------------------------------------
-#define MAX_PrgNameLength   32
-#define MAX_PrgCmdLength    128
-#define MAX_PrgIconLength   128
+#define MAX_PrgNameLength   32      // Длина названия игры
+#define MAX_PrgCmdLength    128     // Длина пути к файлу игры
+#define MAX_PrgIconLength   128     // Длина пути к файлу иконки
+#define MAX_PrgLevel        2       // Количество уровней в списке
 //---------------------------------------------------------------------------
 class MGame;
 class MGames;
 //---------------------------------------------------------------------------
 class MGame:public MSLListItem
 {
-public:
-    bool Copy(MListItem *SrcItem_);
+private:
+    // Функции механизма сохранения/загрузки данных
+    unsigned GetDataSize() const;
+    char *SetData(char *Data_) const;
+    const char *GetData(const char *Data_, const char *Limit_);
+
+
 public:
     char Name[MAX_PrgNameLength+1];
     char Command[MAX_PrgCmdLength+1];
@@ -24,11 +30,9 @@ public:
     bool SetName(char *Name_);
     bool SetCommand(char *Command_);
     bool SetIcon(char *Icon_);
-
-    // Функции механизма сохранения/загрузки данных
-    unsigned GetDataSize();
-    char *SetData(char *Data_);
-    char *GetData(char *Data_, char *Limit_);
+    MGames *AddSubGames();
+    void DelSubGames();
+    void Copy(const MListItem *SrcItem_);
 
     MGame();
     ~MGame();
@@ -37,11 +41,12 @@ public:
 class MGames:public MSLList
 {
 private:
-    MListItem *operator_new(unsigned Type_) { return (MListItem*)new MGame; }
-    void operator_delete(MListItem *DelItem_) { delete (MGame*)DelItem_; }
+    MListItem *item_new(unsigned char TypeID_) const { return (MListItem*)new MGame; }
+    void item_del(MListItem *Item_) const { delete (MGame*)Item_; }
+
 public:
-    MGames() { constructor(); }
-    ~MGames() { destructor(); }
+    MGames() {}
+    ~MGames() { Clear(); }
 };
 //---------------------------------------------------------------------------
 #endif

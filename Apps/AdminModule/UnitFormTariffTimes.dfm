@@ -29,7 +29,7 @@ object FormTariffTimes: TFormTariffTimes
     Width = 22
     Height = 13
     Alignment = taRightJustify
-    Caption = 'Тип:'
+    Caption = #1058#1080#1087':'
   end
   object LabelBeginText: TLabel
     Left = 34
@@ -37,7 +37,7 @@ object FormTariffTimes: TFormTariffTimes
     Width = 10
     Height = 13
     Alignment = taRightJustify
-    Caption = 'С:'
+    Caption = #1057':'
   end
   object LabelEndText: TLabel
     Left = 146
@@ -45,7 +45,7 @@ object FormTariffTimes: TFormTariffTimes
     Width = 18
     Height = 13
     Alignment = taRightJustify
-    Caption = 'До:'
+    Caption = #1044#1086':'
   end
   object LabelSizeText: TLabel
     Left = 266
@@ -53,7 +53,7 @@ object FormTariffTimes: TFormTariffTimes
     Width = 17
     Height = 13
     Alignment = taRightJustify
-    Caption = 'На:'
+    Caption = #1053#1072':'
   end
   object LabelCostText: TLabel
     Left = 386
@@ -61,7 +61,7 @@ object FormTariffTimes: TFormTariffTimes
     Width = 58
     Height = 13
     Alignment = taRightJustify
-    Caption = 'Стоимость:'
+    Caption = #1057#1090#1086#1080#1084#1086#1089#1090#1100':'
   end
   object ListViewTimes: TListView
     Left = 8
@@ -73,19 +73,19 @@ object FormTariffTimes: TFormTariffTimes
         Width = 0
       end
       item
-        Caption = 'С'
+        Caption = #1057
         Width = 90
       end
       item
-        Caption = 'До'
+        Caption = #1044#1086
         Width = 90
       end
       item
-        Caption = 'Время'
+        Caption = #1042#1088#1077#1084#1103
         Width = 140
       end
       item
-        Caption = 'Стоимость'
+        Caption = #1057#1090#1086#1080#1084#1086#1089#1090#1100
         Width = 140
       end>
     HideSelection = False
@@ -95,7 +95,6 @@ object FormTariffTimes: TFormTariffTimes
     TabOrder = 0
     ViewStyle = vsReport
     OnCompare = ListViewTimesCompare
-    OnDeletion = ListViewTimesDeletion
     OnInsert = ListViewTimesInsert
     OnSelectItem = ListViewTimesSelectItem
   end
@@ -109,9 +108,9 @@ object FormTariffTimes: TFormTariffTimes
     TabOrder = 1
     OnClick = ComboBoxTypeClick
     Items.Strings = (
-      'За каждый час'
-      '"Плавающий" пакет'
-      'Пакет в интервале времени')
+      #1047#1072' '#1082#1072#1078#1076#1099#1081' '#1095#1072#1089
+      '"'#1055#1083#1072#1074#1072#1102#1097#1080#1081'" '#1087#1072#1082#1077#1090
+      #1055#1072#1082#1077#1090' '#1074' '#1080#1085#1090#1077#1088#1074#1072#1083#1077' '#1074#1088#1077#1084#1077#1085#1080)
   end
   object EditCost: TEdit
     Left = 448
@@ -186,17 +185,16 @@ object FormTariffTimes: TFormTariffTimes
     Top = 316
     Width = 85
     Height = 25
-    Caption = 'Принять'
+    Caption = #1055#1088#1080#1085#1103#1090#1100
     ModalResult = 1
     TabOrder = 11
-    OnClick = ButtonSaveClick
   end
   object ButtonCancel: TButton
     Left = 392
     Top = 316
     Width = 85
     Height = 25
-    Caption = 'Отмена'
+    Caption = #1054#1090#1084#1077#1085#1072
     ModalResult = 2
     TabOrder = 12
   end
@@ -205,7 +203,7 @@ object FormTariffTimes: TFormTariffTimes
     Top = 316
     Width = 85
     Height = 25
-    Caption = 'Справка'
+    Caption = #1057#1087#1088#1072#1074#1082#1072
     Enabled = False
     TabOrder = 13
   end
@@ -214,7 +212,7 @@ object FormTariffTimes: TFormTariffTimes
     Top = 278
     Width = 73
     Height = 22
-    Caption = 'Добавить'
+    Caption = #1044#1086#1073#1072#1074#1080#1090#1100
     TabOrder = 9
     OnClick = ButtonAddClick
   end
@@ -223,7 +221,7 @@ object FormTariffTimes: TFormTariffTimes
     Top = 278
     Width = 73
     Height = 22
-    Caption = 'Удалить'
+    Caption = #1059#1076#1072#1083#1080#1090#1100
     TabOrder = 10
     OnClick = ButtonDelClick
   end

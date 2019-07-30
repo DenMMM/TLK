@@ -5,7 +5,7 @@ object FormFine: TFormFine
   Height = 316
   BorderIcons = []
   BorderStyle = bsSizeToolWin
-  Caption = 'Штрафование'
+  Caption = #1064#1090#1088#1072#1092#1086#1074#1072#1085#1080#1077
   Color = clBtnFace
   Constraints.MaxHeight = 500
   Constraints.MaxWidth = 473
@@ -17,8 +17,11 @@ object FormFine: TFormFine
   Font.Name = 'MS Sans Serif'
   Font.Style = []
   OldCreateOrder = False
-  OnHide = FormHide
+  OnClose = FormClose
   OnShow = FormShow
+  DesignSize = (
+    465
+    289)
   PixelsPerInch = 96
   TextHeight = 13
   object Bevel2: TBevel
@@ -50,7 +53,7 @@ object FormFine: TFormFine
     Width = 91
     Height = 13
     Anchors = [akLeft, akBottom]
-    Caption = 'Вернуть всего:'
+    Caption = #1042#1077#1088#1085#1091#1090#1100' '#1074#1089#1077#1075#1086':'
     Enabled = False
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clWindowText
@@ -82,7 +85,7 @@ object FormFine: TFormFine
     Height = 13
     Alignment = taRightJustify
     Anchors = [akLeft, akBottom]
-    Caption = 'Штраф:'
+    Caption = #1064#1090#1088#1072#1092':'
   end
   object CheckBoxWarn: TCheckBox
     Left = 76
@@ -90,7 +93,7 @@ object FormFine: TFormFine
     Width = 151
     Height = 17
     Anchors = [akLeft, akBottom]
-    Caption = 'Только предупреждение'
+    Caption = #1058#1086#1083#1100#1082#1086' '#1087#1088#1077#1076#1091#1087#1088#1077#1078#1076#1077#1085#1080#1077
     TabOrder = 3
     OnClick = ComboBoxTimeClick
   end
@@ -106,23 +109,23 @@ object FormFine: TFormFine
       end
       item
         Alignment = taRightJustify
-        Caption = '№'
+        Caption = #8470
         Width = 40
       end
       item
-        Caption = 'Штраф'
+        Caption = #1064#1090#1088#1072#1092
         Width = 170
       end
       item
         Alignment = taRightJustify
-        Caption = 'Время'
+        Caption = #1042#1088#1077#1084#1103
         Width = 70
       end
       item
-        Caption = 'Ожидание'
+        Caption = #1054#1078#1080#1076#1072#1085#1080#1077
       end
       item
-        Caption = 'Вернуть'
+        Caption = #1042#1077#1088#1085#1091#1090#1100
         Width = 90
       end>
     HideSelection = False
@@ -132,7 +135,6 @@ object FormFine: TFormFine
     SmallImages = FormMain.ImageListIcons
     TabOrder = 0
     ViewStyle = vsReport
-    OnDeletion = ListViewFinesDeletion
     OnInsert = ListViewFinesInsert
   end
   object BitBtn1: TBitBtn
@@ -141,7 +143,7 @@ object FormFine: TFormFine
     Width = 105
     Height = 25
     Anchors = [akLeft, akBottom]
-    Caption = 'Закрыть'
+    Caption = #1047#1072#1082#1088#1099#1090#1100
     TabOrder = 5
     Kind = bkCancel
   end
@@ -151,7 +153,7 @@ object FormFine: TFormFine
     Width = 105
     Height = 25
     Anchors = [akLeft, akBottom]
-    Caption = 'Штрафовать'
+    Caption = #1064#1090#1088#1072#1092#1086#1074#1072#1090#1100
     TabOrder = 4
     OnClick = BitBtnFineClick
     Glyph.Data = {
@@ -179,7 +181,7 @@ object FormFine: TFormFine
     Width = 95
     Height = 17
     Anchors = [akLeft, akBottom]
-    Caption = 'С ожиданием'
+    Caption = #1057' '#1086#1078#1080#1076#1072#1085#1080#1077#1084
     TabOrder = 2
     OnClick = ComboBoxTimeClick
   end

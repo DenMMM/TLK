@@ -6,22 +6,33 @@
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
 #pragma resource "*.dfm"
-TFormTariffTimes *FormTariffTimes;
 //---------------------------------------------------------------------------
 __fastcall TFormTariffTimes::TFormTariffTimes(TComponent* Owner)
     : TForm(Owner)
 {
 }
 //---------------------------------------------------------------------------
-void TFormTariffTimes::Execute(MTariffTimes *Times_, char *Name_)
+bool TFormTariffTimes::Execute(MTariffTimes *Times_, char *Name_, int Left_, int Top_)
 {
-    char line[MAX_TariffNameLength+19+1];
+    if ( Times_==NULL ) return false;
+
+    char line[MAX_TariffNameLen+19+1];
     strcpy(line,"Время для тарифа \'");
     strcat(line,Name_);
     strcat(line,"\'");
     Caption=line;
-    TariffTimes=Times_;
-    ShowModal();
+
+    Left=Left_;
+    Top=Top_;
+
+    // Копируем пакеты в буфер
+    TmpTimes.Copy(Times_);
+    // Открываем окно
+    if ( ShowModal()!=mrOk ) return false;
+    // Замещаем пакетами из буфера текущие
+    Times_->Move(&TmpTimes);
+
+    return true;
 }
 //---------------------------------------------------------------------------
 void __fastcall TFormTariffTimes::FormShow(TObject *Sender)
@@ -45,13 +56,13 @@ void __fastcall TFormTariffTimes::FormShow(TObject *Sender)
         ComboBoxSizeM->Items->Add(Line);
     }
     // Заносим время и цены в список
-    for ( MTariffTime *TariffTime=(MTariffTime*)TariffTimes->First;
-        TariffTime; TariffTime=(MTariffTime*)TariffTime->Next )
+    for ( MTariffTime *time=(MTariffTime*)TmpTimes.gFirst();
+        time; time=(MTariffTime*)time->gNext() )
     {
-        TListItem *NewItem;
-        NewItem=ListViewTimes->Items->Add();
-        ((MTariffTime*)NewItem->Data)->Copy(TariffTime);
-        SetListViewTimesLine(NewItem);
+        TListItem *item;
+        item=ListViewTimes->Items->Add();
+        item->Data=time;
+        SetListViewTimesLine(item);
     }
 
     SetEdit(false);
@@ -76,64 +87,70 @@ void __fastcall TFormTariffTimes::ListViewTimesInsert(TObject *Sender,
       TListItem *Item)
 {
     Item->ImageIndex=-1;
-    Item->Data=new MTariffTime;
     Item->SubItems->Add("");
     Item->SubItems->Add("");
     Item->SubItems->Add("");
     Item->SubItems->Add("");
-}
-//---------------------------------------------------------------------------
-void __fastcall TFormTariffTimes::ListViewTimesDeletion(TObject *Sender,
-      TListItem *Item)
-{
-    delete (MTariffTime*)Item->Data;
 }
 //---------------------------------------------------------------------------
 void __fastcall TFormTariffTimes::ListViewTimesSelectItem(TObject *Sender,
       TListItem *Item, bool Selected)
 {
-    if ( ((TListView*)Sender)->SelCount!=1 ) { SetEdit(false); return; }
-    else SetEdit(true);
+    if ( ((TListView*)Sender)->SelCount!=1 )
+    {
+        SetEdit(false);
+        return;
+    } else
+        SetEdit(true);
 
-    MTariffTime *SelTime=(MTariffTime*)ListViewTimes->Selected->Data;
+    MTariffTime *time=(MTariffTime*)ListViewTimes->Selected->Data;
     // Время начала действия
-    ComboBoxBeginH->ItemIndex=SelTime->BeginTime/60;
-    ComboBoxBeginM->ItemIndex=SelTime->BeginTime%60;
+    ComboBoxBeginH->ItemIndex=time->BeginTime/60;
+    ComboBoxBeginM->ItemIndex=time->BeginTime%60;
     // Время окончания действия
-    int EndTime=SelTime->EndTime>=(24*60)? SelTime->EndTime-(24*60): SelTime->EndTime;
+    int EndTime=
+        time->EndTime>=(24*60)?
+        time->EndTime-(24*60):
+        time->EndTime;
     ComboBoxEndH->ItemIndex=EndTime/60;
     ComboBoxEndM->ItemIndex=EndTime%60;
     // Время действия
-    switch ( SelTime->Type )
+    switch ( time->Type )
     {
         case mttHours:
             ComboBoxType->ItemIndex=0;
             LabelSizeText->Enabled=false;
-            ComboBoxSizeH->Enabled=false; ComboBoxSizeH->ItemIndex=1;
+            ComboBoxSizeH->Enabled=false;
+            ComboBoxSizeH->ItemIndex=1;
             ComboBoxSizeH->Color=clWindow;
-            ComboBoxSizeM->Enabled=false; ComboBoxSizeM->ItemIndex=0;
+            ComboBoxSizeM->Enabled=false;
+            ComboBoxSizeM->ItemIndex=0;
             ComboBoxSizeM->Color=clWindow;
             break;
         case mttFlyPacket:
             ComboBoxType->ItemIndex=1;
             LabelSizeText->Enabled=true;
-            ComboBoxSizeH->Enabled=true; ComboBoxSizeH->ItemIndex=SelTime->SizeTime/60;
+            ComboBoxSizeH->Enabled=true;
+            ComboBoxSizeH->ItemIndex=time->SizeTime/60;
             ComboBoxSizeH->Color=clWindow;
-            ComboBoxSizeM->Enabled=true; ComboBoxSizeM->ItemIndex=(SelTime->SizeTime%60)/5;
+            ComboBoxSizeM->Enabled=true;
+            ComboBoxSizeM->ItemIndex=(time->SizeTime%60)/5;
             ComboBoxSizeM->Color=clWindow;
             break;
         case mttPacket:
             ComboBoxType->ItemIndex=2;
             LabelSizeText->Enabled=false;
-            ComboBoxSizeH->Enabled=false; ComboBoxSizeH->ItemIndex=-1;
+            ComboBoxSizeH->Enabled=false;
+            ComboBoxSizeH->ItemIndex=-1;
             ComboBoxSizeH->Color=clBtnFace;
-            ComboBoxSizeM->Enabled=false; ComboBoxSizeM->ItemIndex=-1;
+            ComboBoxSizeM->Enabled=false;
+            ComboBoxSizeM->ItemIndex=-1;
             ComboBoxSizeM->Color=clBtnFace;
             break;
         default: break;
     }
     // Стоимость
-    EditCost->Text=FloatToStrF(SelTime->Cost,ffFixed,8,2);
+    EditCost->Text=FloatToStrF(time->Cost,ffFixed,8,2);
 }
 //---------------------------------------------------------------------------
 void __fastcall TFormTariffTimes::ListViewTimesCompare(TObject *Sender,
@@ -164,12 +181,12 @@ void __fastcall TFormTariffTimes::ComboBoxTypeClick(TObject *Sender)
 {
     if ( ListViewTimes->Selected==NULL ) return;
 
-    MTariffTime *SelTime=(MTariffTime*)ListViewTimes->Selected->Data;
+    MTariffTime *time=(MTariffTime*)ListViewTimes->Selected->Data;
     switch ( ((TComboBox*)Sender)->ItemIndex )
     {
-        case 0: SelTime->Type=mttHours; break;
-        case 1: SelTime->Type=mttFlyPacket; break;
-        case 2: SelTime->Type=mttPacket; break;
+        case 0: time->Type=mttHours; break;
+        case 1: time->Type=mttFlyPacket; break;
+        case 2: time->Type=mttPacket; break;
         default: break;
     }
     SetListViewTimesLine(ListViewTimes->Selected);
@@ -181,8 +198,10 @@ void __fastcall TFormTariffTimes::ComboBoxBeginHClick(TObject *Sender)
 {
     if ( ListViewTimes->Selected==NULL ) return;
 
-    MTariffTime *Time=(MTariffTime*)ListViewTimes->Selected->Data;
-    Time->BeginTime=ComboBoxBeginH->ItemIndex*60+ComboBoxBeginM->ItemIndex*5;
+    MTariffTime *time=(MTariffTime*)ListViewTimes->Selected->Data;
+    time->BeginTime=
+        ComboBoxBeginH->ItemIndex*60+
+        ComboBoxBeginM->ItemIndex*5;
     SetListViewTimesLine(ListViewTimes->Selected);
     ListViewTimes->AlphaSort();
 }
@@ -191,9 +210,11 @@ void __fastcall TFormTariffTimes::ComboBoxEndHClick(TObject *Sender)
 {
     if ( ListViewTimes->Selected==NULL ) return;
 
-    MTariffTime *Time=(MTariffTime*)ListViewTimes->Selected->Data;
-    Time->EndTime=ComboBoxEndH->ItemIndex*60+ComboBoxEndM->ItemIndex*5;
-    if ( Time->BeginTime>=Time->EndTime ) Time->EndTime+=24*60;
+    MTariffTime *time=(MTariffTime*)ListViewTimes->Selected->Data;
+    time->EndTime=
+        ComboBoxEndH->ItemIndex*60+
+        ComboBoxEndM->ItemIndex*5;
+    if ( time->BeginTime>=time->EndTime ) time->EndTime+=24*60;
     SetListViewTimesLine(ListViewTimes->Selected);
 }
 //---------------------------------------------------------------------------
@@ -201,8 +222,10 @@ void __fastcall TFormTariffTimes::ComboBoxSizeHClick(TObject *Sender)
 {
     if ( ListViewTimes->Selected==NULL ) return;
 
-    MTariffTime *Time=(MTariffTime*)ListViewTimes->Selected->Data;
-    Time->SizeTime=ComboBoxSizeH->ItemIndex*60+ComboBoxSizeM->ItemIndex*5;
+    MTariffTime *time=(MTariffTime*)ListViewTimes->Selected->Data;
+    time->SizeTime=
+        ComboBoxSizeH->ItemIndex*60+
+        ComboBoxSizeM->ItemIndex*5;
     SetListViewTimesLine(ListViewTimes->Selected);
     ListViewTimes->AlphaSort();
 }
@@ -211,15 +234,15 @@ void __fastcall TFormTariffTimes::EditCostExit(TObject *Sender)
 {
     if ( ListViewTimes->Selected==NULL ) return;
 
-    MTariffTime *SelTime=(MTariffTime*)ListViewTimes->Selected->Data;
+    MTariffTime *time=(MTariffTime*)ListViewTimes->Selected->Data;
     double Cost;
 
     try { Cost=StrToFloat(EditCost->Text); }
     catch ( EConvertError *Error ) { goto error; }
     if ( (Cost>=0)&&(Cost<=MAX_TariffTimeCost) )
-        SelTime->Cost=((int)(Cost*100.))/100.;
+        time->Cost=((int)(Cost*100.))/100.;
 error:
-    EditCost->Text=FloatToStrF(SelTime->Cost,ffFixed,8,2);
+    EditCost->Text=FloatToStrF(time->Cost,ffFixed,8,2);
     SetListViewTimesLine(ListViewTimes->Selected);
 }
 //---------------------------------------------------------------------------
@@ -227,45 +250,39 @@ void __fastcall TFormTariffTimes::ButtonAddClick(TObject *Sender)
 {
     if ( ListViewTimes->Items->Count>=MAX_TariffTimes )
     {
-        ::MessageBox(Handle,"Большее количество пакетов не поддерживается.",
-            "Сообщение",MB_OK|MB_ICONWARNING|MB_APPLMODAL);
+        ResMessageBox(Handle,0,21,MB_APPLMODAL|MB_OK|MB_ICONINFORMATION);
         return;
     }
 
-    TListItem *NewItem=ListViewTimes->Items->Add();
-    SetListViewTimesLine(NewItem);
+    // Добавляем пакет в буфер
+    MTariffTime *time=(MTariffTime*)TmpTimes.Add();
+    // Добавляем строку в список и связываем ее с пакетом
+    TListItem *item=ListViewTimes->Items->Add();
+    item->Data=time;
+    // Обновляем интерфейс
+    SetListViewTimesLine(item);
     ListViewTimes->AlphaSort();
-    //
-    ListViewTimes->ItemFocused=NewItem;
+    ListViewTimes->ItemFocused=item;
     ListViewTimes->Selected=NULL;
-    ListViewTimes->Selected=NewItem;
+    ListViewTimes->Selected=item;
     ActiveControl=ComboBoxType;
 }
 //---------------------------------------------------------------------------
 void __fastcall TFormTariffTimes::ButtonDelClick(TObject *Sender)
 {
-    // Удаляем времена и цены из списка
     TItemStates is=TItemStates()<<isSelected;
-    for ( TListItem *Item=ListViewTimes->Selected, *NewItem; Item; )
+    TListItem *item=ListViewTimes->Selected, *next;
+    while(item)
     {
-        NewItem=ListViewTimes->GetNextItem(Item,sdAll,is);
-        Item->Delete(); Item=NewItem;
+        // Удаляем пакет из буфера
+        TmpTimes.Del((MTariffTime*)item->Data);
+        // Удаляем строку из списка
+        next=ListViewTimes->GetNextItem(item,sdAll,is);
+        item->Delete();
+        item=next;
     }
     //
     ListViewTimes->Selected=ListViewTimes->ItemFocused;
-}
-//---------------------------------------------------------------------------
-void __fastcall TFormTariffTimes::ButtonSaveClick(TObject *Sender)
-{
-    TariffTimes->Clear();
-
-    TListItems *Items=ListViewTimes->Items;
-    for ( int i=0; i<Items->Count; i++ )
-    {
-        MTariffTime *NewTime;
-        NewTime=(MTariffTime*)TariffTimes->Add();
-        NewTime->Copy((MTariffTime*)Items->Item[i]->Data);
-    }
 }
 //---------------------------------------------------------------------------
 void TFormTariffTimes::SetEdit(bool Edit_)
@@ -297,20 +314,24 @@ void TFormTariffTimes::SetEdit(bool Edit_)
 //---------------------------------------------------------------------------
 void TFormTariffTimes::SetListViewTimesLine(TListItem *Item_)
 {
-    MTariffTime *SelTime=(MTariffTime*)Item_->Data;
+    MTariffTime *time=(MTariffTime*)Item_->Data;
 
-    Item_->SubItems->Strings[0]=((TDate)(SelTime->BeginTime/(24.*60))).FormatString("hh:nn");
-    int EndTime=SelTime->EndTime>=(24*60)? SelTime->EndTime-24*60: SelTime->EndTime;
+    Item_->SubItems->Strings[0]=((TDate)(time->BeginTime/(24.*60))).FormatString("hh:nn");
+
+    int EndTime=
+        time->EndTime>=(24*60)?
+        time->EndTime-24*60:
+        time->EndTime;
     Item_->SubItems->Strings[1]=((TDate)(EndTime/(24.*60))).FormatString("hh:nn");
 
     int h, m;
     AnsiString line;
-    switch ( SelTime->Type )
+    switch ( time->Type )
     {
         case mttHours: Item_->SubItems->Strings[2]="За каждый час"; break;
         case mttFlyPacket:
-            h=SelTime->SizeTime/60;
-            m=SelTime->SizeTime%60;
+            h=time->SizeTime/60;
+            m=time->SizeTime%60;
             if ( h ) line=IntToStr(h)+" час. ";
             line+=IntToStr(m/10)+IntToStr(m%10)+" мин.";
             Item_->SubItems->Strings[2]=line;
@@ -318,7 +339,9 @@ void TFormTariffTimes::SetListViewTimesLine(TListItem *Item_)
         case mttPacket: Item_->SubItems->Strings[2]=""; break;
         default: break;
     }
-    Item_->SubItems->Strings[3]=FloatToStrF(SelTime->Cost,ffCurrency,8,2);
+    Item_->SubItems->Strings[3]=FloatToStrF(time->Cost,ffCurrency,8,2);
 }
 //---------------------------------------------------------------------------
+
+
 

@@ -18,7 +18,7 @@ private:
     static DWORD WINAPI ThreadFunc(LPVOID Data);
     void ThreadProc();
 public:
-    bool SetFile(char *File_);
+    void SetFile(char *File_);
     bool Show(unsigned ShowTime_);
     void Stop();
 

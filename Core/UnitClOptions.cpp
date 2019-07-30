@@ -5,10 +5,8 @@
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
 //---------------------------------------------------------------------------
-
 MClOptions::MClOptions()
 {
-    constructor();
     ToEndTime=0;
     MessageTime=0;
     RebootWait=0;
@@ -17,7 +15,7 @@ MClOptions::MClOptions()
 
 MClOptions::~MClOptions()
 {
-    destructor();
+//
 }
 
 bool MClOptions::Copy(MClOptions *ClOptions_)
@@ -29,7 +27,7 @@ bool MClOptions::Copy(MClOptions *ClOptions_)
     return true;
 }
 
-unsigned MClOptions::GetDataSize()
+unsigned MClOptions::GetDataSize() const
 {
     return
         sizeof(ToEndTime)+
@@ -38,7 +36,7 @@ unsigned MClOptions::GetDataSize()
         sizeof(AutoLockTime);
 }
 
-char *MClOptions::SetData(char *Data_)
+char *MClOptions::SetData(char *Data_) const
 {
     Data_=MemSet(Data_,ToEndTime);
     Data_=MemSet(Data_,MessageTime);
@@ -47,15 +45,13 @@ char *MClOptions::SetData(char *Data_)
     return Data_;
 }
 
-char *MClOptions::GetData(char *Data_, char *Limit_)
+const char *MClOptions::GetData(const char *Data_, const char *Limit_)
 {
-    if ( (Data_=MemGet(Data_,&ToEndTime,Limit_))==NULL ) goto error;
-    if ( (Data_=MemGet(Data_,&MessageTime,Limit_))==NULL ) goto error;
-    if ( (Data_=MemGet(Data_,&RebootWait,Limit_))==NULL ) goto error;
-    if ( (Data_=MemGet(Data_,&AutoLockTime,Limit_))==NULL ) goto error;
-    return Data_;
-error:
-    return NULL;
+    return
+        (Data_=MemGet(Data_,&ToEndTime,Limit_))!=NULL &&
+        (Data_=MemGet(Data_,&MessageTime,Limit_))!=NULL &&
+        (Data_=MemGet(Data_,&RebootWait,Limit_))!=NULL &&
+        (Data_=MemGet(Data_,&AutoLockTime,Limit_))!=NULL
+        ? Data_: NULL;
 }
-
 //---------------------------------------------------------------------------

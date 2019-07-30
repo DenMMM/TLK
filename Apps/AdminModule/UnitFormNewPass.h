@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------
-#ifndef UnitFormNewPasswordH
-#define UnitFormNewPasswordH
+#ifndef UnitFormNewPassH
+#define UnitFormNewPassH
 //---------------------------------------------------------------------------
 #include <Classes.hpp>
 #include <Controls.hpp>
@@ -8,7 +8,7 @@
 #include <Forms.hpp>
 #include <ExtCtrls.hpp>
 //---------------------------------------------------------------------------
-class TFormNewPassword : public TForm
+class TFormNewPass : public TForm
 {
 __published:	// IDE-managed Components
     TLabel *LabelPassword;
@@ -31,11 +31,9 @@ private:	// User declarations
     int MaxLength;
     void SetCoord(int Left_, int Top_, bool LeftTop_);
 public:		// User declarations
-    __fastcall TFormNewPassword(TComponent* Owner);
+    __fastcall TFormNewPass(TComponent* Owner);
     bool Execute(char *Buffer_, int MinLength_, int MaxLength_,
         int Left_, int Top_, bool LeftTop_);
 };
-//---------------------------------------------------------------------------
-extern PACKAGE TFormNewPassword *FormNewPassword;
 //---------------------------------------------------------------------------
 #endif

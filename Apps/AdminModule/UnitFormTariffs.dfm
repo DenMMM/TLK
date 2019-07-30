@@ -3,7 +3,7 @@ object FormTariffs: TFormTariffs
   Top = 165
   BorderIcons = [biSystemMenu]
   BorderStyle = bsSingle
-  Caption = 'Тарифы'
+  Caption = #1058#1072#1088#1080#1092#1099
   ClientHeight = 382
   ClientWidth = 649
   Color = clBtnFace
@@ -44,7 +44,7 @@ object FormTariffs: TFormTariffs
     Width = 25
     Height = 13
     Alignment = taRightJustify
-    Caption = 'Имя:'
+    Caption = #1048#1084#1103':'
   end
   object LabelTariffName: TLabel
     Left = 235
@@ -52,21 +52,21 @@ object FormTariffs: TFormTariffs
     Width = 53
     Height = 13
     Alignment = taRightJustify
-    Caption = 'Название:'
+    Caption = #1053#1072#1079#1074#1072#1085#1080#1077':'
   end
   object LabelTariffApps: TLabel
     Left = 228
     Top = 112
     Width = 94
     Height = 13
-    Caption = 'Группы программ:'
+    Caption = #1043#1088#1091#1087#1087#1099' '#1087#1088#1086#1075#1088#1072#1084#1084':'
   end
   object LabelTariffComputers: TLabel
     Left = 410
     Top = 112
     Width = 96
     Height = 13
-    Caption = 'Для компьютеров:'
+    Caption = #1044#1083#1103' '#1082#1086#1084#1087#1100#1102#1090#1077#1088#1086#1074':'
   end
   object ListViewNames: TListView
     Left = 8
@@ -76,7 +76,7 @@ object FormTariffs: TFormTariffs
     Columns = <
       item
         AutoSize = True
-        Caption = 'Название'
+        Caption = #1053#1072#1079#1074#1072#1085#1080#1077
       end>
     HideSelection = False
     MultiSelect = True
@@ -85,7 +85,6 @@ object FormTariffs: TFormTariffs
     SortType = stText
     TabOrder = 0
     ViewStyle = vsReport
-    OnDeletion = ListViewNamesDeletion
     OnInsert = ListViewNamesInsert
     OnSelectItem = ListViewNamesSelectItem
   end
@@ -121,7 +120,7 @@ object FormTariffs: TFormTariffs
     Top = 318
     Width = 73
     Height = 22
-    Caption = 'Добавить'
+    Caption = #1044#1086#1073#1072#1074#1080#1090#1100
     TabOrder = 1
     OnClick = ButtonAddClick
   end
@@ -130,7 +129,7 @@ object FormTariffs: TFormTariffs
     Top = 318
     Width = 73
     Height = 22
-    Caption = 'Удалить'
+    Caption = #1059#1076#1072#1083#1080#1090#1100
     TabOrder = 2
     OnClick = ButtonDelClick
   end
@@ -139,7 +138,7 @@ object FormTariffs: TFormTariffs
     Top = 70
     Width = 89
     Height = 24
-    Caption = 'Время...'
+    Caption = #1042#1088#1077#1084#1103'...'
     TabOrder = 5
     OnClick = ButtonTimesClick
   end
@@ -148,7 +147,7 @@ object FormTariffs: TFormTariffs
     Top = 60
     Width = 177
     Height = 17
-    Caption = 'Перезагрузка после запуска'
+    Caption = #1055#1077#1088#1077#1079#1072#1075#1088#1091#1079#1082#1072' '#1087#1086#1089#1083#1077' '#1079#1072#1087#1091#1089#1082#1072
     TabOrder = 4
     OnExit = CheckBoxRebootExit
   end
@@ -157,7 +156,7 @@ object FormTariffs: TFormTariffs
     Top = 352
     Width = 85
     Height = 25
-    Caption = 'Принять'
+    Caption = #1055#1088#1080#1085#1103#1090#1100
     ModalResult = 1
     TabOrder = 12
     OnClick = ButtonSaveClick
@@ -167,7 +166,7 @@ object FormTariffs: TFormTariffs
     Top = 352
     Width = 85
     Height = 25
-    Caption = 'Отмена'
+    Caption = #1054#1090#1084#1077#1085#1072
     ModalResult = 2
     TabOrder = 13
   end
@@ -176,7 +175,7 @@ object FormTariffs: TFormTariffs
     Top = 352
     Width = 85
     Height = 25
-    Caption = 'Справка'
+    Caption = #1057#1087#1088#1072#1074#1082#1072
     Enabled = False
     TabOrder = 14
   end
@@ -230,15 +229,15 @@ object FormTariffs: TFormTariffs
     Top = 80
     Width = 177
     Height = 17
-    Caption = 'Выход в Internet'
+    Caption = #1042#1099#1093#1086#1076' '#1074' Internet'
     TabOrder = 15
     OnExit = CheckBoxRouteExit
   end
   object OpenPictureDialog: TOpenPictureDialog
     DefaultExt = '*.ico'
-    Filter = 'Иконки (*.ico)|*.ico'
+    Filter = #1048#1082#1086#1085#1082#1080' (*.ico)|*.ico'
     Options = [ofHideReadOnly, ofPathMustExist, ofFileMustExist, ofNoNetworkButton, ofEnableSizing]
-    Title = 'Иконка для тарифа'
+    Title = #1048#1082#1086#1085#1082#1072' '#1076#1083#1103' '#1090#1072#1088#1080#1092#1072
     Left = 2
     Top = 4
   end

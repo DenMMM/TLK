@@ -46,6 +46,14 @@ void __fastcall TFormEvents::ListViewComputersInsert(TObject *Sender,
     Item->SubItems->Add("");
 }
 //---------------------------------------------------------------------------
+void __fastcall TFormEvents::ListViewComputersCompare(TObject *Sender,
+      TListItem *Item1, TListItem *Item2, int Data, int &Compare)
+{
+    int num1=(int)Item1->Data;
+    int num2=(int)Item2->Data;
+    Compare = num1==num2? 0: (num1<num2? -1: +1);
+}
+//---------------------------------------------------------------------------
 void __fastcall TFormEvents::ListViewEventsSelectItem(TObject *Sender,
       TListItem *Item, bool Selected)
 {
@@ -59,7 +67,7 @@ void __fastcall TFormEvents::ListViewEventsSelectItem(TObject *Sender,
     for ( TListItem *Item=ListViewEvents->Selected; Item;
         Item=ListViewEvents->GetNextItem(Item,sdAll,is) )
     {
-        switch(((MLogRecord*)Item->Data)->TypeID())
+        switch(((MLogRecord*)Item->Data)->gTypeID())
         {
             case mlrRun:
                 Time+=((MLogRecordRun*)Item->Data)->WorkTime;
@@ -92,11 +100,11 @@ void __fastcall TFormEvents::ListViewEventsCompare(TObject *Sender,
     MLogRecordRun *RecordRun1, *RecordRun2;
     unsigned Type1, Type2;
     unsigned CompCmds[]={mlrRun,mlrFine,mlrExchange,
-        mlrLock,mlrPause,mlrOpen,mlrWtLocker,
+        mlrLock,mlrPause,mlrOpen,
         mlrPowerOn,mlrReboot,mlrShutdown};
 
-    Type1=((MLogRecord*)Item1->Data)->TypeID(); RecordRun1=(MLogRecordRun*)Item1->Data;
-    Type2=((MLogRecord*)Item2->Data)->TypeID(); RecordRun2=(MLogRecordRun*)Item2->Data;
+    Type1=((MLogRecord*)Item1->Data)->gTypeID(); RecordRun1=(MLogRecordRun*)Item1->Data;
+    Type2=((MLogRecord*)Item2->Data)->gTypeID(); RecordRun2=(MLogRecordRun*)Item2->Data;
     switch(SortMode)
     {
         case 1:
@@ -222,8 +230,7 @@ void TFormEvents::SetListViewComputersLine(TListItem *Item_, MStateInfo *Info_,
     if ( Info_->Changes&mdcState )
     {
         unsigned int State=Info_->State;
-        if ( State&mcsWtTLK ) { icon=6; strcpy(line,"Без TLK"); }
-        else if ( State&mcsOpen ) { icon=5; strcpy(line,"настройка"); }
+        if ( State&mcsOpen ) { icon=5; strcpy(line,"настройка"); }
         else if ( State&mcsPause ) { icon=4; strcpy(line,"приостановлен"); }
         else if ( State&mcsLock ) { icon=3; strcpy(line,"Прикрыт !"); }
         else if ( State&mcsFine ) { icon=2; strcpy(line,"Штраф !!!"); }
@@ -236,7 +243,7 @@ void TFormEvents::SetListViewComputersLine(TListItem *Item_, MStateInfo *Info_,
     // Название тарифа
     if ( Info_->Changes&mdcTariff )
     {
-        MTariff *Tariff=Tariffs_->Search(Info_->TariffID);
+        MTariff *Tariff=(MTariff*)Tariffs_->SrchID(Info_->TariffID);
         if ( Tariff ) SubItems->Strings[2]=Tariff->Name;
         else SubItems->Strings[2]="";
     }
@@ -300,7 +307,8 @@ void TFormEvents::UpdateListViewComputers(bool Full_, MStates *States_, MTariffs
     }
 
     // Убираем из списка компьютеры, не подходящие под фильтр, и добавляем новые
-    for ( State=(MState*)States_->First; State; State=(MState*)State->Next )
+    for ( State=(MState*)States_->gFirst(); State;
+        State=(MState*)State->gNext() )
     {
         //
         State->StateInfo(&Info);
@@ -336,7 +344,8 @@ bool TFormEvents::Open(MLogFile *File_, MLogRecord *Begin_, MLogRecord *End_)
     ListViewComputers->Items->Clear();
     //
     if ( Begin_==NULL ) goto error;
-    for ( ; Begin_!=End_->Next; Begin_=(MLogRecord*)Begin_->Next )
+    for ( ; Begin_!=End_->gNext();
+        Begin_=(MLogRecord*)Begin_->gNext() )
     {
         // Общие данные
         Item=ListViewEvents->Items->Add();
@@ -350,7 +359,7 @@ bool TFormEvents::Open(MLogFile *File_, MLogRecord *Begin_, MLogRecord *End_)
         else *line=0;
         Item->SubItems->Add(line);
         // Описание
-        switch(Begin_->TypeID())
+        switch(Begin_->gTypeID())
         {
             case mlrBegin:
                 Item->SubItems->Add("");
@@ -363,10 +372,6 @@ bool TFormEvents::Open(MLogFile *File_, MLogRecord *Begin_, MLogRecord *End_)
             case mlrStart:
                 Item->SubItems->Add("");
                 Item->SubItems->Add("Модуль управления запущен");
-                break;
-            case mlrWork:
-                Item->SubItems->Add("");
-                Item->SubItems->Add("Модуль управления работает");
                 break;
             case mlrStop:
                 Item->SubItems->Add("");
@@ -400,11 +405,13 @@ bool TFormEvents::Open(MLogFile *File_, MLogRecord *Begin_, MLogRecord *End_)
                 break;
 
             case mlrLogIn:
+            {
                 Item->SubItems->Add("");
                 MUser *usr;
-                usr=Users.Search(((MLogRecordLogIn*)Begin_)->User);
+                usr=(MUser*)Users.SrchID(((MLogRecordLogIn*)Begin_)->User);
                 sprintf(line,"Смену начал(а) '%s'",usr?usr->Name:"???");
                 Item->SubItems->Add(line);
+            }
                 break;
             case mlrLogOut:
                 Item->SubItems->Add("");
@@ -412,10 +419,11 @@ bool TFormEvents::Open(MLogFile *File_, MLogRecord *Begin_, MLogRecord *End_)
                 break;
 
             case mlrRun:
+            {
                 MLogRecordRun *rcdr;
                 MTariff *trf;
                 rcdr=(MLogRecordRun*)Begin_;
-                trf=Tariffs.Search(rcdr->Tariff);
+                trf=(MTariff*)Tariffs.SrchID(rcdr->Tariff);
                 Item->SubItems->Add(IntToStr(rcdr->Number));
                 Item->SubItems->Add(trf?trf->Name:"???");
                 switch(rcdr->Type)
@@ -440,67 +448,82 @@ bool TFormEvents::Open(MLogFile *File_, MLogRecord *Begin_, MLogRecord *End_)
                 }
                 Item->SubItems->Add(line);
                 Item->SubItems->Add(FloatToStrF(rcdr->Cost,ffCurrency,8,2));
+            }
                 break;
             case mlrFine:
+            {
                 MLogRecordFine *rcdf;
                 MFine *fn;
                 rcdf=(MLogRecordFine*)Begin_;
                 Item->SubItems->Add(IntToStr(rcdf->Number));
-                fn=Fines.Search(rcdf->Fine);
-                sprintf(line,"Штраф '%s'",fn?fn->Description:"???");
+                fn=(MFine*)Fines.SrchID(rcdf->Fine);
+                sprintf(line,"Штраф '%s'",fn?fn->Descr:"???");
                 Item->SubItems->Add(line);
                 if ( rcdf->Time==(24*60) ) sprintf(line,"Все время");
                 else if ( rcdf->Time<0 ) sprintf(line,"Снято %i мин.",-rcdf->Time);
                 else sprintf(line,"Ожидание %i мин.",rcdf->Time);
                 Item->SubItems->Add(line);
+            }
                 break;
             case mlrExchange:
+            {
                 MLogRecordExchange *rcde;
                 rcde=(MLogRecordExchange*)Begin_;
                 Item->SubItems->Add(IntToStr(rcde->From));
                 sprintf(line,"Пересадка на №%i",rcde->To);
                 Item->SubItems->Add(line);
+            }
                 break;
             case mlrLock:
+            {
                 MLogRecordLock *rcdl;
                 rcdl=(MLogRecordLock*)Begin_;
                 Item->SubItems->Add(IntToStr(rcdl->Number));
                 Item->SubItems->Add(rcdl->Apply?"Прикрыт":"Открыт");
+            }
                 break;
             case mlrPause:
+            {
                 MLogRecordPause *rcdp;
                 rcdp=(MLogRecordPause*)Begin_;
                 Item->SubItems->Add(IntToStr(rcdp->Number));
-                Item->SubItems->Add(rcdl->Apply?"Время приостановлено":"Время запущено");
+                Item->SubItems->Add(rcdp->Apply?"Время приостановлено":"Время запущено");
+            }
                 break;
             case mlrOpen:
+            {
                 MLogRecordOpen *rcdo;
                 rcdo=(MLogRecordOpen*)Begin_;
                 Item->SubItems->Add(IntToStr(rcdo->Number));
-                Item->SubItems->Add(rcdl->Apply?"Открыт для настройки":"Закрыт после настройки");
-                break;
-            case mlrWtLocker:
+                Item->SubItems->Add(rcdo->Apply?"Открыт для настройки":"Закрыт после настройки");
+            }
                 break;
             case mlrPowerOn:
+            {
                 MLogRecordPowerOn *rcdpwr;
                 rcdpwr=(MLogRecordPowerOn*)Begin_;
                 Item->SubItems->Add(IntToStr(rcdpwr->Number));
                 Item->SubItems->Add("Команда на включение");
+            }
                 break;
             case mlrReboot:
+            {
                 MLogRecordReboot *rcdprb;
                 rcdprb=(MLogRecordReboot*)Begin_;
                 Item->SubItems->Add(IntToStr(rcdprb->Number));
                 Item->SubItems->Add("Команда на перезагрузку");
+            }
                 break;
             case mlrShutdown:
+            {
                 MLogRecordShutdown *rcdpsd;
                 rcdpsd=(MLogRecordShutdown*)Begin_;
                 Item->SubItems->Add(IntToStr(rcdpsd->Number));
                 Item->SubItems->Add("Команда на выключение");
+            }
                 break;
 
-            case mlrDataShellState:
+            case mlrDataShState:
                 Item->SubItems->Add("");
                 Item->SubItems->Add("Данные по модулю управления");
                 break;
@@ -509,40 +532,49 @@ bool TFormEvents::Open(MLogFile *File_, MLogRecord *Begin_, MLogRecord *End_)
                 Item->SubItems->Add("Данные по компьютерам");
                 break;
             case mlrDataTariffs:
+            {
                 Item->SubItems->Add("");
                 Item->SubItems->Add("Данные по тарифам");
                 MLogRecordDataTariffs *rcddtrf;
                 rcddtrf=(MLogRecordDataTariffs*)Begin_;
                 Tariffs.Clear();
-                for ( unsigned i=0; i<rcddtrf->NumTariffs; i++ )
+                for ( unsigned i=0; i<rcddtrf->Tariffs.Count(); i++ )
                 {
+                    MTariff *trf;
                     trf=(MTariff*)Tariffs.Add();
-                    trf->SetTariffData(rcddtrf->Tariffs+i);
+                    trf->SetTariffData(&rcddtrf->Tariffs[i]);
                 }
+            }
                 break;
             case mlrDataFines:
+            {
                 Item->SubItems->Add("");
                 Item->SubItems->Add("Данные по штрафам");
                 MLogRecordDataFines *rcddfn;
                 rcddfn=(MLogRecordDataFines*)Begin_;
                 Fines.Clear();
-                for ( unsigned i=0; i<rcddfn->NumFines; i++ )
+                for ( unsigned i=0; i<rcddfn->Fines.Count(); i++ )
                 {
+                    MFine *fn;
                     fn=(MFine*)Fines.Add();
-                    fn->SetFineData(rcddfn->Fines+i);
+                    fn->SetFineData(&rcddfn->Fines[i]);
                 }
+            }
                 break;
             case mlrDataUsers:
+            {
                 Item->SubItems->Add("");
                 Item->SubItems->Add("Данные по пользователям");
                 MLogRecordDataUsers *rcddusr;
                 rcddusr=(MLogRecordDataUsers*)Begin_;
                 Users.Clear();
-                for ( unsigned i=0; i<rcddusr->NumUsers; i++ )
+                for ( unsigned i=0; i<rcddusr->Users.Count(); i++ )
                 {
+                    MUser *usr;
                     usr=(MUser*)Users.Add();
-                    usr->SetUserData(rcddusr->Users+i);
+                    usr->SetUserData(&rcddusr->Users[i]);
                 }
+            }
                 break;
             default: break;
         }
@@ -557,10 +589,4 @@ error:
     return false;
 }
 //---------------------------------------------------------------------------
-
-
-
-
-
-
 

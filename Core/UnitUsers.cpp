@@ -7,12 +7,9 @@
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
 //---------------------------------------------------------------------------
-
 MUser::MUser()
 {
-    ID=0;
     *Login=0;
-    *Password=0;
     *Name=0;
     Active=true;
 }
@@ -22,106 +19,82 @@ MUser::~MUser()
 //
 }
 
-bool MUser::Copy(MListItem *SrcItem_)
+void MUser::Copy(const MListItem *SrcItem_)
 {
     MUser *User_=(MUser*)SrcItem_;
-    ID=User_->ID;
+
     strcpy(Login,User_->Login);
-    strcpy(Password,User_->Password);
     strcpy(Name,User_->Name);
     Active=User_->Active;
-    return true;
+    Pass.Copy(&User_->Pass);
+    MIDListItem::Copy(SrcItem_);
 }
 
-unsigned MUser::GetDataSize()
+unsigned MUser::GetDataSize() const
 {
     return
-        sizeof(ID)+
         strlen(Login)+1+
-        strlen(Password)+1+
         strlen(Name)+1+
-        sizeof(Active);
+        sizeof(Active)+
+        Pass.GetDataSize()+
+        MIDListItem::GetDataSize();     // ID-номер пользователя
 }
 
-char *MUser::SetData(char *Data_)
+char *MUser::SetData(char *Data_) const
 {
-    Data_=MemSet(Data_,ID);
+    Data_=MIDListItem::SetData(Data_);
     Data_=MemSetCLine(Data_,Login);
-    Data_=MemSetCLine(Data_,Password);
     Data_=MemSetCLine(Data_,Name);
+    Data_=Pass.SetData(Data_);
     Data_=MemSet(Data_,Active);
     return Data_;
 }
 
-char *MUser::GetData(char *Data_, char *Limit_)
+const char *MUser::GetData(const char *Data_, const char *Limit_)
 {
-    if ( (Data_=MemGet(Data_,&ID,Limit_))==NULL ) goto error;
-    if ( (Data_=MemGetCLine(Data_,Login,MAX_UserLoginLength,Limit_))==NULL ) goto error;
-    if ( (Data_=MemGetCLine(Data_,Password,MAX_UserPasswordLength,Limit_))==NULL ) goto error;
-    if ( (Data_=MemGetCLine(Data_,Name,MAX_UserNameLength,Limit_))==NULL ) goto error;
-    if ( (Data_=MemGet(Data_,&Active,Limit_))==NULL ) goto error;
-    return Data_;
-error:
-    return NULL;
+    return
+        (Data_=MIDListItem::GetData(Data_,Limit_))!=NULL &&
+        (Data_=MemGetCLine(Data_,Login,MAX_UserLoginLen,Limit_))!=NULL &&
+        (Data_=MemGetCLine(Data_,Name,MAX_UserNameLen,Limit_))!=NULL &&
+        (Data_=Pass.GetData(Data_,Limit_))!=NULL &&
+        (Data_=MemGet(Data_,&Active,Limit_))!=NULL
+        ? Data_: NULL;
 }
 
 bool MUser::SetLogin(char *Login_)
 {
-    return strlen(Login_)>MAX_UserLoginLength?
+    return strlen(Login_)>MAX_UserLoginLen?
         false: (bool)strcpy(Login,Login_);
-}
-
-bool MUser::SetPassword(char *Password_)
-{
-    return strlen(Password_)>MAX_UserPasswordLength?
-        false: (bool)strcpy(Password,Password_);
 }
 
 bool MUser::SetName(char *Name_)
 {
-    return strlen(Name_)>MAX_UserNameLength?
+    return strlen(Name_)>MAX_UserNameLen?
         false: (bool)strcpy(Name,Name_);
 }
 
-bool MUser::CheckPassword(char *Password_)
+void MUser::GetUserData(MUserData *Data_) const
 {
-    return strcmp(Password,Password_)==0;
-}
-
-void MUser::GetUserData(MUserData *Data_)
-{
-    Data_->ID=ID;
+    Data_->ID=ItemID;
     strcpy(Data_->Login,Login);
     strcpy(Data_->Name,Name);
 }
 
 void MUser::SetUserData(MUserData *Data_)
 {
-    ID=Data_->ID;
+    ItemID=Data_->ID;
     strcpy(Login,Data_->Login);
     strcpy(Name,Data_->Name);
 }
-
 //---------------------------------------------------------------------------
-
-unsigned MUsers::NextID()
+unsigned MUsers::ActiveCount() const
 {
-    do { LastID+=random(10)+1; } while(!LastID);
-    return LastID;
-}
+    unsigned num=0;
 
-void MUsers::SetIDs()
-{
-    for ( MUser *User=(MUser*)First; User;
-        User=(MUser*)User->Next ) if ( User->ID==0 ) User->ID=NextID();
-}
+    for ( MUser *User=(MUser*)gFirst(); User;
+        User=(MUser*)User->gNext() ) if ( User->Active ) num++;
 
-MUser *MUsers::Search(unsigned ID_)
-{
-    MUser *User=(MUser*)First;
-    for ( ; User; User=(MUser*)User->Next ) if ( User->ID==ID_ ) break;
-    return User;
+    return num;
 }
-
 //---------------------------------------------------------------------------
 

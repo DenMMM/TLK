@@ -33,26 +33,25 @@ __published:	// IDE-managed Components
     TButton *ButtonPassword;
     void __fastcall FormShow(TObject *Sender);
     void __fastcall ListViewUsersInsert(TObject *Sender, TListItem *Item);
-    void __fastcall ListViewUsersDeletion(TObject *Sender,
-          TListItem *Item);
     void __fastcall EditLoginExit(TObject *Sender);
     void __fastcall EditNameExit(TObject *Sender);
     void __fastcall ListViewUsersSelectItem(TObject *Sender,
           TListItem *Item, bool Selected);
-    void __fastcall ButtonSaveClick(TObject *Sender);
     void __fastcall ButtonAddClick(TObject *Sender);
     void __fastcall ButtonDelClick(TObject *Sender);
     void __fastcall FormClose(TObject *Sender, TCloseAction &Action);
     void __fastcall ButtonPasswordClick(TObject *Sender);
     void __fastcall BitBtnActiveClick(TObject *Sender);
+    void __fastcall ButtonSaveClick(TObject *Sender);
 private:	// User declarations
+    MUsers  TmpUsers;
     void SetEdit(bool Edit_);
     void SetListViewUsersLine(TListItem *Item_);
 public:		// User declarations
     __fastcall TFormUsers(TComponent* Owner);
 };
 //---------------------------------------------------------------------------
-extern PACKAGE TFormUsers *FormUsers;
+//extern PACKAGE TFormUsers *FormUsers;
 //---------------------------------------------------------------------------
 #endif
 

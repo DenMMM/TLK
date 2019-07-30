@@ -11,16 +11,10 @@
 #include <ExtCtrls.hpp>
 #include <ImgList.hpp>
 //---------------------------------------------------------------------------
+#include "UnitStates.h"
 #include "UnitComputers.h"
 #include "UnitFines.h"
-//---------------------------------------------------------------------------
-struct MApplyFine
-{
-    int Number;
-    MFine *Fine;
-    bool Wait;
-    bool Warn;
-};
+#include "UnitLog.h"
 //---------------------------------------------------------------------------
 class TFormFine : public TForm
 {
@@ -38,13 +32,21 @@ __published:	// IDE-managed Components
     TCheckBox *CheckBoxWait;
     TComboBox *ComboBoxTime;
     void __fastcall FormShow(TObject *Sender);
-    void __fastcall FormHide(TObject *Sender);
     void __fastcall BitBtnFineClick(TObject *Sender);
     void __fastcall ListViewFinesInsert(TObject *Sender, TListItem *Item);
-    void __fastcall ListViewFinesDeletion(TObject *Sender,
-          TListItem *Item);
     void __fastcall ComboBoxTimeClick(TObject *Sender);
+    void __fastcall FormClose(TObject *Sender, TCloseAction &Action);
 private:	// User declarations
+    struct MApplyFine
+    {
+        MState *State;
+        MFine *Fine;
+        int Number;
+        bool Wait;
+        bool Warn;
+    };
+    
+    Marray <MApplyFine> ApplyFines;
     void __fastcall SetListViewFinesLine(TListItem *Item_);
 public:		// User declarations
     __fastcall TFormFine(TComponent* Owner);

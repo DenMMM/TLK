@@ -2,102 +2,273 @@
 #ifndef UnitSendH
 #define UnitSendH
 //---------------------------------------------------------------------------
-#include <winsock2.h>
-//#include <windows.h>
+struct MSendHello;
+struct MSendRequest;
+
+class MSend;
+class MSendSrv;
+class MSendCl;
 //---------------------------------------------------------------------------
+#include <winsock2.h>
 #include "UnitStates.h"
 #include "UnitComputers.h"
 #include "UnitGames.h"
 #include "UnitClOptions.h"
+#include "UnitAuth.h"
+#include "UnitSLList.h"
 //---------------------------------------------------------------------------
 #define SEND_Version        0x31    // Версия сетевого интерфейса
 #define SEND_Port           7005    // Номер порта клиента
-#define SEND_MinData        8       // Ограничения на размер данных
-#define SEND_MaxData        32768   // в процессе обмена 
+// Ограничения на размер данных в процессе обмена (MSendRequest.Size)
+#define SEND_MinData        (sizeof(unsigned)+MAC_Size)
+#define SEND_MaxData        (MAX_SLFileSize+MAC_Size)   // Размер упакованного объекта+MAC
 //---------------------------------------------------------------------------
-// Что сервер хочет отправить клиенту/скачать с него
-#define mstAccept           0x01020304  // Подтверждение клиентом успешной доставки
-//#define mstDeny             0x04030201
-#define mstGames            1       // Список игр для клиента
-#define mstConfig           2       // Настройки для клиента
+// Что сервер хочет отправить клиенту/скачать с него (MSendRequest.Type)
+#define mstSendGames        1       // Список игр для клиента
+#define mstSendConfig       2       // Настройки для клиента
 #define mstGetGames         3       // Запрос списка игр
 #define mstGetConfig        4       // Запрос настроек клиента
+#define mstAccept           5       // Подтверждение клиентом успешной доставки
 //---------------------------------------------------------------------------
-#define mssWait             0
-#define mssSend             1
-#define mssGetGames         2
-#define mssGetConfig        3
+// Main Send State
+#define mssNone             0
+#define mssSendGames        1
+#define mssSendConfig       2
+#define mssGetGames         3
+#define mssGetConfig        4
 //---------------------------------------------------------------------------
-// Main Send Event
+// События, посылаемые MSendSrv оболочке для индикации процесса
 #define mseConnecting       1   // Устанавливается соединение
 #define mseSending          2   // Отправка данных
 #define mseReceiving        3   // Прием данных
 #define mseDisconnecting    4   // Разъединение
 #define mseExecute          5   // Сеанс завершился успешно
 #define mseNotConnect       6   // Не удалось соединиться с клиентом
-#define msePrclError        7   // Ошибка протокола (разные версии или партнер не клиент TLK)
+#define mseProtError        7   // Ошибка протокола
 #define mseFreeParam        8   // Можно удалить поданные для групповой обработки данные
+//---------------------------------------------------------------------------
+/*
+ сервер               =>      клиент
+ ===================================================
+ MSendHello.Version=SEND_Version
+ MSendHello.Seed=random1;
+ MSendHello.MAC=hmac(MSendHello-MSendHello.MAC,MAuth);
+ encode(MSendHello,ENC_Net1);
+                             check:
+                                    Version,
+                                    MAC
+
+ сервер               <=      клиент
+ ===================================================
+ MSendHello.Version=SEND_Version
+ MSendHello.Seed=random2;
+ MSendHello.MAC=hmac(MSendHello-MSendHello.MAC,MAuth);
+ encode(MSendHello,ENC_Net1);
+    check:
+            Version,
+            MAC
+
+            
+ [mssSendGames/mssSendConfig]
+
+ сервер               =>      клиент
+ ===================================================
+ MSendRequest.Type=mstSendGames/mstSendConfig;
+ MSendRequest.Seed=mix(random1,random2);
+ MSendRequest.Size=MSLList::GetAllDataSize()+sizeof(Seed)+MAC_Size;
+ MSendRequest.MAC=hmac(MSendRequest-MSendRequest.MAC,MAuth);
+ encode(MSendRequest,ENC_Net1);
+                             check:
+                                    Type,
+                                    Seed,
+                                    Size,
+                                    MAC
+                             attempt:
+                                    new char[Size]
+
+ сервер               =>      клиент
+ ===================================================
+ Seed=mix(random1,random2);
+ Data[]=MSLList::SetAllData();
+ MAC=hmac(Seed+Data,MAuth);
+ encode(Seed+Data+MAC,ENC_Net1);
+                             check:
+                                    Seed,
+                                    MAC
+                             attempt:
+                                    MSLList::GetAllData();
+                                    MStateCl::New...();
+
+ сервер               <=      клиент
+ ===================================================
+ MSendRequest.Type=mstAccept;
+ MSendRequest.Seed=mix(random1,random2);
+ MSendRequest.Size=0;
+ MSendRequest.MAC=hmac(MSendRequest-MSendRequest.MAC,MAuth);
+ encode(MSendRequest,ENC_Net1);
+    check:
+            Type,
+            Seed,
+            Size,
+            MAC
+    attempt:
+            Event(*Computer,mseExecute);
+
+
+ [mssGetGames/mssGetConfig]
+
+ сервер               =>      клиент
+ ===================================================
+ MSendRequest.Type=mstGetGames/mstGetConfig;
+ MSendRequest.Seed=mix(random1,random2);
+ MSendRequest.Size=0;
+ MSendRequest.MAC=hmac(MSendRequest-MSendRequest.MAC,MAuth);
+                             check:
+                                    Type,
+                                    Seed,
+                                    Size,
+                                    MAC
+
+ сервер               <=      клиент
+ ===================================================
+ MSendRequest.Type=mstAccept;
+ MSendRequest.Seed=mix(random1,random2);
+ MSendRequest.Size=MSLList::GetAllDataSize()+sizeof(Seed)+MAC_Size;
+ MSendRequest.MAC=hmac(MSendRequest-MSendRequest.MAC,MAuth);
+ encode(MSendRequest,ENC_Net1);
+    check:
+            Type,
+            Seed,
+            Size,
+            MAC
+    attempt:
+            new char[Size]
+
+ сервер               <=      клиент
+ ===================================================
+ Seed=mix(random1,random2);
+ Data[]=MSLList::SetAllData();
+ MAC=hmac(Seed+Data,MAuth);
+ encode(Seed+Data+MAC,ENC_Net1);
+    check:
+            Seed,
+            MAC
+    attempt:
+            MSLList::GetAllData();
+
+*/
+//---------------------------------------------------------------------------
+#pragma pack(push, 1)
+
+struct MSendHello
+{
+    unsigned char Version;      // Версия сетевого интерфейса
+    unsigned int Seed;          // random сервера/клиента
+    unsigned char MAC[MAC_Size];// MAC пакета
+};
+
+struct MSendRequest
+{
+    unsigned char Type;         // Тип запроса
+    unsigned int Seed;          // Сеансовый ID (функция от random сервера и клиента)
+    unsigned int Size;          // Размер последующих данных для приема
+    unsigned char MAC[MAC_Size];// MAC пакета
+};
+
+#pragma pack(pop)
 //---------------------------------------------------------------------------
 class MSend
 {
 private:
-    HWND Window;                // Окно для обработки сообщений о процессе отправки
-    UINT MinMsg;                //
+    SOCKET lSocket;             // Сокет для ожидания соединений
+    SOCKET rSocket;             // Сокет для соединения с клиентом
     HANDLE Thread;              // Дескриптор потока, осуществляющего отправку/прием
-    DWORD ThreadID;             // Идентификатор потока
-    SOCKET Socket;              // Сокет для соединения с клиентом
-    int Mode;
-    MComputer **Computers;
-    MGames *Games;
-    MClOptions *Options;
-    char *Data;                 // Данные для отправки
-    unsigned DataSize;          // Размер данных
-    bool Break;
+    DWORD ThreadID;             // ID потока
+    unsigned NetCode;           // Ключ шифрования данных
+    MAuth *NetMAC;              // Объект для вычисления и проверки MAC
+    bool Init;                  // Флаг выполненной инициализации WinSock,NetCode,NetMAC
 
-    inline void Event(MComputer *Computer_, int Event_);
-    bool Create();
-    bool Connect(char *IP_, unsigned Time_);
-    bool Send(char *Data_, unsigned Size_, unsigned Time_);
-    bool Recv(char *Data_, unsigned Size_, unsigned Time_);
-    bool Disconnect(unsigned Time_);
-    void Close();
-    static DWORD WINAPI ThreadFunc(LPVOID Data);
-    void ThreadSend();
-    void ThreadGet();
-public:
-    void SetShell(HWND Window_, UINT MinMsg_);
-    bool Send(MComputer **Computers_, MGames *Games_, MClOptions *Options_);
-    bool Get(MComputer *Computer_, MGames *Games_, MClOptions *Options_);
+    union MPacket
+    {
+        MSendHello Hello;
+        MSendRequest Request;
+    } Packet;                   // Буфер для отправки/приема запросов
+
+protected:
+    bool Break;                 // Флаг прерывания сетевых операций
+
+    // Операции с сокетами
+    bool NetInit(unsigned Code_, MAuth *MAC_);  // Инициализация WinSocket
+    bool NetFree();                             // Освобождение WinSocket
+    bool Create(bool Srv_);
+    bool Listen();      // Ожидать входящее соединения
+    bool Accept();      // Принять входящее соединение
+    bool Connect(char *IP_, unsigned Time_);    // Создать исходящее соединение
+    bool Snd(char *Data_, unsigned Size_, unsigned Time_);
+    bool Rcv(char *Data_, unsigned Size_, unsigned Time_);
+    bool Disconnect(unsigned Time_);            // Закрыть исходящее соединение
+    void lClose();          // Закрыть слушающий сокет
+    void rClose();          // Закрыть сокет удаленного соединения
+
+    // Примитивы протокола
+    bool SndHello(unsigned Seed_);
+    bool RcvHello(unsigned *Seed_);
+    bool SndRequest(unsigned char Type_, unsigned Seed_, unsigned Size_);
+    bool RcvRequest(unsigned char *Type_, unsigned Seed_, unsigned *Size_);
+    bool SndObject(MSLList *Obj_, unsigned Type_, unsigned Seed_);
+    bool RcvObject(MSLList *Obj_, unsigned Size_, unsigned Seed_);
+
+    // Операции с потоком отправки/приема
+    static DWORD WINAPI ThreadF(LPVOID Data);
+    virtual void ThreadP()=0;
+
+    bool Start();
     void Stop();
 
+public:
     MSend();
     ~MSend();
 };
 //---------------------------------------------------------------------------
-class MSendCl
+class MSendSrv:public MSend
 {
 private:
-    HANDLE Thread;              // Дескриптор потока, осуществляющего отправку/прием
-    DWORD ThreadID;             // Идентификатор потока
-    SOCKET Socket;              // Сокет для ожидания соединений
-    SOCKET RemoteSocket;        // Сокет для примема/отправки после принятия соединения
-    char *Data;                 // Данные для приема/отправки
-    MStateCl *State;            // Кому сообщать об обновлении списка игр, настроек  
+    HWND Window;                // Окно для обработки сообщений о процессе отправки
+    UINT MinMsg;                //
 
-    bool Create();
-    bool Listen();
-    bool Accept();
-    bool Send(char *Data_, unsigned Size_, unsigned Time_);
-    bool Recv(char *Data_, unsigned Size_, unsigned Time_);
-    bool Disconnect(unsigned Time_);
-    void CloseRemote();
-    void Close();
-    static DWORD WINAPI ThreadFunc(LPVOID Data);
-    void ThreadProc();
-    bool ProcessRecv(unsigned Type_);
-    bool ProcessSend(unsigned Type_);
+    int Mode;                   // Режим (что отправляем/запрашиваем)
+    Marray <MComputer*> *Comps; // Массив со списком компьютеров для рассылки
+    MComputer *Comp;            // Указатель на компьютер, для загрузки
+    MSLList *DataObject;        // Объект для отправки/приема
+
+    void ThreadP();
+    void ThreadSend();
+    void ThreadGet();
+    void Event(MComputer *Computer_, int Event_);
+
 public:
-    void Associate(MStateCl *State_);
+    bool NetInit(HWND Window_, UINT MinMsg_, unsigned Code_, MAuth *MAC_);
+    bool NetFree();
+    bool Send(Marray <MComputer*> *Computers_, MGames *Games_, MClOptions *Options_);
+    bool Get(MComputer *Computer_, MGames *Games_, MClOptions *Options_);
+    void Stop();
+
+    MSendSrv();
+    ~MSendSrv();
+};
+//---------------------------------------------------------------------------
+class MSendCl:public MSend
+{
+private:
+    MStateCl *State;            // Кому сообщать об обновлении списка игр, настроек
+    MClOptions Options;         // Буферные объекты
+    MGames Games;               // для приема/отправки
+
+    void ThreadP();
+
+public:
+    bool NetInit(MStateCl *State_, unsigned Code_, MAuth *MAC_);
+    bool NetFree();
     bool Start();
     void Stop();
 

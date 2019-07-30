@@ -1154,7 +1154,7 @@ object FormMain: TFormMain
           Caption = #1055#1086#1083#1100#1079#1086#1074#1072#1090#1077#1083#1080'...'
           OnClick = NComputersClick
         end
-        object N8: TMenuItem
+        object N9: TMenuItem
           Caption = '-'
         end
         object NCommon: TMenuItem
@@ -1162,8 +1162,15 @@ object FormMain: TFormMain
           OnClick = NComputersClick
         end
       end
+      object N8: TMenuItem
+        Caption = '-'
+      end
       object NClient: TMenuItem
         Caption = #1053#1072#1089#1090#1088#1086#1081#1082#1072' '#1082#1086#1084#1087#1100#1102#1090#1077#1088#1086#1074'...'
+        OnClick = NComputersClick
+      end
+      object NAuth: TMenuItem
+        Caption = #1057#1077#1090#1077#1074#1086#1081' '#1082#1083#1102#1095'...'
         OnClick = NComputersClick
       end
       object N4: TMenuItem
@@ -1185,7 +1192,7 @@ object FormMain: TFormMain
       Caption = #1055#1072#1088#1086#1083#1080
       object NOptionsPassword: TMenuItem
         Caption = #1053#1072' '#1085#1072#1089#1090#1088#1086#1081#1082#1080'...'
-        OnClick = NUsersPasswordsClick
+        OnClick = NOptionsPasswordClick
       end
       object N1: TMenuItem
         Caption = '-'
@@ -1283,19 +1290,6 @@ object FormMain: TFormMain
     object NClose: TMenuItem
       Caption = #1053#1086#1088#1084#1072#1083#1100#1085#1099#1081' '#1088#1077#1078#1080#1084
       OnClick = NOpenClick
-    end
-    object MenuItem9: TMenuItem
-      Caption = '-'
-    end
-    object NWithoutLocker: TMenuItem
-      Caption = #1054#1090#1082#1083#1102#1095#1080#1090#1100' TLK'
-      ImageIndex = 10
-      OnClick = NWithoutLockerClick
-    end
-    object NWithLocker: TMenuItem
-      Caption = #1042#1082#1083#1102#1095#1080#1090#1100' TLK'
-      ImageIndex = 4
-      OnClick = NWithoutLockerClick
     end
   end
 end

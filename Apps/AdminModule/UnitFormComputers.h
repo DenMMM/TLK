@@ -39,15 +39,12 @@ __published:	// IDE-managed Components
     TBitBtn *BitBtnNotUsed;
     TLabel *Label1;
     void __fastcall FormShow(TObject *Sender);
-    void __fastcall ListViewComputersDeletion(TObject *Sender,
-          TListItem *Item);
     void __fastcall ListViewComputersInsert(TObject *Sender,
           TListItem *Item);
     void __fastcall EditNumberExit(TObject *Sender);
     void __fastcall EditAddressExit(TObject *Sender);
     void __fastcall ButtonAddClick(TObject *Sender);
     void __fastcall ButtonDelClick(TObject *Sender);
-    void __fastcall ButtonSaveClick(TObject *Sender);
     void __fastcall BitBtnNoneClick(TObject *Sender);
     void __fastcall BitBtnUsedClick(TObject *Sender);
     void __fastcall ListViewComputersSelectItem(TObject *Sender,
@@ -55,14 +52,14 @@ __published:	// IDE-managed Components
     void __fastcall FormClose(TObject *Sender, TCloseAction &Action);
     void __fastcall ListViewComputersCompare(TObject *Sender,
           TListItem *Item1, TListItem *Item2, int Data, int &Compare);
+    void __fastcall ButtonSaveClick(TObject *Sender);
 private:	// User declarations
+    MComputers TmpComputers;
     void SetEdit(bool Edit_);
     void SetListViewComputersLine(TListItem *Item_);
 public:		// User declarations
     __fastcall TFormComputers(TComponent* Owner);
 };
-//---------------------------------------------------------------------------
-extern PACKAGE TFormComputers *FormComputers;
 //---------------------------------------------------------------------------
 #endif
 

@@ -2,55 +2,55 @@
 #ifndef UnitFinesH
 #define UnitFinesH
 //---------------------------------------------------------------------------
-#include "UnitSLList.h"
-//---------------------------------------------------------------------------
-#define MAX_Fines           20      //
-#define MAX_FineDescLength  30      //
-//---------------------------------------------------------------------------
+struct MFineData;
 class MFine;
 class MFines;
-struct MFineData;
 //---------------------------------------------------------------------------
-class MFine:public MSLListItem
+#include "UnitIDList.h"
+//---------------------------------------------------------------------------
+#define MAX_Fines           20      // Предел количества штрафов
+#define MAX_FineDescrLen    50      // Допустимая длина описания штрафа
+//---------------------------------------------------------------------------
+struct MFineData
 {
-public:
-    bool Copy(MListItem *SrcItem_);
-public:
     unsigned ID;                                // ID-номер штрафа
-    char Description[MAX_FineDescLength+1];     // Описание штрафа
-    int Time;                                   // Время штрафа
+    char Descr[MAX_FineDescrLen+1];             // Описание штрафа
+};
+//---------------------------------------------------------------------------
+class MFine:public MIDListItem
+{
+private:
+    // Функции механизма сохранения/загрузки данных
+    unsigned GetDataSize() const;
+    char *SetData(char *Data_) const;
+    const char *GetData(const char *Data_, const char *Limit_);
 
-    char *SetDescription(char *Description_);
+public:
+    short Time;                             // Время штрафа
+    char Descr[MAX_FineDescrLen+1];         // Описание штрафа
+
+    // Доступ к элементам класса
+      char *sDescr(char *Descr_);
+
+    void Copy(const MListItem *SrcItem_);
 
     // Поддержка логов
-    void GetFineData(MFineData *Data_);
+    void GetFineData(MFineData *Data_) const;
     void SetFineData(MFineData *Data_);
-
-    // Функции механизма сохранения/загрузки данных
-    unsigned GetDataSize();
-    char *SetData(char *Data_);
-    char *GetData(char *Data_, char *Limit_);
 
     MFine();
     ~MFine();
 };
 //---------------------------------------------------------------------------
-class MFines:public MSLList
+class MFines:public MIDList
 {
 private:
-    MListItem *operator_new(unsigned Type_) { return (MListItem*)new MFine; }
-    void operator_delete(MListItem *DelItem_) { delete (MFine*)DelItem_; }
-public:
-    MFine *Search(unsigned ID_);
+    MListItem *item_new(unsigned char TypeID_) const { return (MListItem*)new MFine; }
+    void item_del(MListItem *Item_) const { delete (MFine*)Item_; }
 
-    MFines() { constructor(); }
-    ~MFines() { destructor(); }
-};
-//---------------------------------------------------------------------------
-struct MFineData
-{
-    unsigned ID;                                // ID-номер штрафа
-    char Description[MAX_FineDescLength+1];     // Описание штрафа
+public:
+    MFines() {}
+    ~MFines() { Clear(); }
 };
 //---------------------------------------------------------------------------
 #endif

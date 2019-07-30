@@ -3,7 +3,7 @@ object FormUsers: TFormUsers
   Top = 188
   BorderIcons = [biSystemMenu]
   BorderStyle = bsSingle
-  Caption = 'Пользователи'
+  Caption = #1055#1086#1083#1100#1079#1086#1074#1072#1090#1077#1083#1080
   ClientHeight = 342
   ClientWidth = 541
   Color = clBtnFace
@@ -37,7 +37,7 @@ object FormUsers: TFormUsers
     Width = 64
     Height = 13
     Alignment = taRightJustify
-    Caption = 'Полное имя:'
+    Caption = #1055#1086#1083#1085#1086#1077' '#1080#1084#1103':'
   end
   object LabelLogin: TLabel
     Left = 56
@@ -45,7 +45,7 @@ object FormUsers: TFormUsers
     Width = 34
     Height = 13
     Alignment = taRightJustify
-    Caption = 'Логин:'
+    Caption = #1051#1086#1075#1080#1085':'
   end
   object LabelActive: TLabel
     Left = 247
@@ -53,7 +53,7 @@ object FormUsers: TFormUsers
     Width = 45
     Height = 13
     Alignment = taRightJustify
-    Caption = 'Активен:'
+    Caption = #1040#1082#1090#1080#1074#1077#1085':'
   end
   object ListViewUsers: TListView
     Left = 8
@@ -62,11 +62,11 @@ object FormUsers: TFormUsers
     Height = 201
     Columns = <
       item
-        Caption = 'Логин'
+        Caption = #1051#1086#1075#1080#1085
         Width = 150
       end
       item
-        Caption = 'Полное имя'
+        Caption = #1055#1086#1083#1085#1086#1077' '#1080#1084#1103
         Width = 300
       end>
     HideSelection = False
@@ -77,7 +77,6 @@ object FormUsers: TFormUsers
     SortType = stText
     TabOrder = 0
     ViewStyle = vsReport
-    OnDeletion = ListViewUsersDeletion
     OnInsert = ListViewUsersInsert
     OnSelectItem = ListViewUsersSelectItem
   end
@@ -102,7 +101,7 @@ object FormUsers: TFormUsers
     Top = 312
     Width = 85
     Height = 25
-    Caption = 'Принять'
+    Caption = #1055#1088#1080#1085#1103#1090#1100
     ModalResult = 1
     TabOrder = 8
     OnClick = ButtonSaveClick
@@ -112,7 +111,7 @@ object FormUsers: TFormUsers
     Top = 312
     Width = 85
     Height = 25
-    Caption = 'Отмена'
+    Caption = #1054#1090#1084#1077#1085#1072
     ModalResult = 2
     TabOrder = 9
   end
@@ -121,7 +120,7 @@ object FormUsers: TFormUsers
     Top = 312
     Width = 85
     Height = 25
-    Caption = 'Справка'
+    Caption = #1057#1087#1088#1072#1074#1082#1072
     Enabled = False
     TabOrder = 10
   end
@@ -130,7 +129,7 @@ object FormUsers: TFormUsers
     Top = 278
     Width = 73
     Height = 22
-    Caption = 'Добавить'
+    Caption = #1044#1086#1073#1072#1074#1080#1090#1100
     TabOrder = 6
     OnClick = ButtonAddClick
   end
@@ -139,7 +138,7 @@ object FormUsers: TFormUsers
     Top = 278
     Width = 73
     Height = 22
-    Caption = 'Удалить'
+    Caption = #1059#1076#1072#1083#1080#1090#1100
     TabOrder = 7
     OnClick = ButtonDelClick
   end
@@ -148,7 +147,7 @@ object FormUsers: TFormUsers
     Top = 222
     Width = 57
     Height = 21
-    Caption = 'Да'
+    Caption = #1044#1072
     TabOrder = 2
     OnClick = BitBtnActiveClick
     Glyph.Data = {
@@ -177,7 +176,7 @@ object FormUsers: TFormUsers
     Top = 222
     Width = 57
     Height = 21
-    Caption = 'Нет'
+    Caption = #1053#1077#1090
     TabOrder = 3
     OnClick = BitBtnActiveClick
     Glyph.Data = {
@@ -206,7 +205,7 @@ object FormUsers: TFormUsers
     Top = 234
     Width = 89
     Height = 24
-    Caption = 'Пароль...'
+    Caption = #1055#1072#1088#1086#1083#1100'...'
     TabOrder = 5
     OnClick = ButtonPasswordClick
   end

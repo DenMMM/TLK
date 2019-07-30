@@ -5,7 +5,7 @@ object FormRun: TFormRun
   Height = 316
   BorderIcons = []
   BorderStyle = bsSizeToolWin
-  Caption = 'Запуск компьютеров'
+  Caption = #1047#1072#1087#1091#1089#1082' '#1082#1086#1084#1087#1100#1102#1090#1077#1088#1086#1074
   Color = clBtnFace
   Constraints.MaxHeight = 500
   Constraints.MaxWidth = 474
@@ -19,6 +19,9 @@ object FormRun: TFormRun
   OldCreateOrder = False
   OnClose = FormClose
   OnShow = FormShow
+  DesignSize = (
+    466
+    289)
   PixelsPerInch = 96
   TextHeight = 13
   object Bevel1: TBevel
@@ -57,7 +60,7 @@ object FormRun: TFormRun
     Width = 112
     Height = 13
     Anchors = [akLeft, akBottom]
-    Caption = 'Общая стоимость:'
+    Caption = #1054#1073#1097#1072#1103' '#1089#1090#1086#1080#1084#1086#1089#1090#1100':'
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clWindowText
     Font.Height = -11
@@ -87,7 +90,7 @@ object FormRun: TFormRun
     Height = 13
     Alignment = taRightJustify
     Anchors = [akLeft, akBottom]
-    Caption = 'Остаток:'
+    Caption = #1054#1089#1090#1072#1090#1086#1082':'
     Enabled = False
   end
   object LabelRemaindTime: TLabel
@@ -119,21 +122,21 @@ object FormRun: TFormRun
       end
       item
         Alignment = taRightJustify
-        Caption = '№'
+        Caption = #8470
         Width = 40
       end
       item
-        Caption = 'Услуга'
+        Caption = #1059#1089#1083#1091#1075#1072
         Width = 180
       end
       item
         Alignment = taRightJustify
-        Caption = 'Время'
+        Caption = #1042#1088#1077#1084#1103
         Width = 110
       end
       item
         Alignment = taRightJustify
-        Caption = 'Стоимость'
+        Caption = #1057#1090#1086#1080#1084#1086#1089#1090#1100
         Width = 90
       end>
     HideSelection = False
@@ -143,7 +146,6 @@ object FormRun: TFormRun
     SmallImages = FormMain.ImageListIcons
     TabOrder = 0
     ViewStyle = vsReport
-    OnDeletion = ListViewComputersDeletion
     OnInsert = ListViewComputersInsert
     OnSelectItem = ListViewComputersSelectItem
   end
@@ -177,7 +179,7 @@ object FormRun: TFormRun
     Width = 105
     Height = 25
     Anchors = [akLeft, akBottom]
-    Caption = 'Закрыть'
+    Caption = #1047#1072#1082#1088#1099#1090#1100
     TabOrder = 9
     Kind = bkCancel
   end
@@ -187,7 +189,7 @@ object FormRun: TFormRun
     Width = 73
     Height = 17
     Anchors = [akLeft, akBottom]
-    Caption = 'Наличные'
+    Caption = #1053#1072#1083#1080#1095#1085#1099#1077
     Checked = True
     TabOrder = 3
     TabStop = True
@@ -198,7 +200,7 @@ object FormRun: TFormRun
     Width = 77
     Height = 17
     Anchors = [akLeft, akBottom]
-    Caption = 'По записи'
+    Caption = #1055#1086' '#1079#1072#1087#1080#1089#1080
     Enabled = False
     TabOrder = 4
   end
@@ -220,7 +222,7 @@ object FormRun: TFormRun
     Width = 81
     Height = 17
     Anchors = [akLeft, akBottom]
-    Caption = 'Абонемент'
+    Caption = #1040#1073#1086#1085#1077#1084#1077#1085#1090
     Enabled = False
     TabOrder = 5
   end
@@ -252,7 +254,7 @@ object FormRun: TFormRun
     Width = 105
     Height = 25
     Anchors = [akLeft, akBottom]
-    Caption = 'Запустить'
+    Caption = #1047#1072#1087#1091#1089#1090#1080#1090#1100
     TabOrder = 8
     OnClick = BitBtnRunClick
     Glyph.Data = {

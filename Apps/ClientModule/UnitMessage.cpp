@@ -62,13 +62,11 @@ next:
     ::DeleteObject(hBitmap); hBitmap=NULL;
 }
 //---------------------------------------------------------------------------
-bool MMessage::SetFile(char *File_)
+void MMessage::SetFile(char *File_)
 {
     delete[] File;
     File=new char[strlen(File_)+1];
-    if ( File==NULL ) return false;
     strcpy(File,File_);
-    return true;
 }
 //---------------------------------------------------------------------------
 bool MMessage::Show(unsigned ShowTime_)

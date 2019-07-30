@@ -37,13 +37,13 @@ bool TFormUsersUpTime::Open(MLogFile *File_, MLogRecord *Begin_, MLogRecord *End
 
     ProcessUsersUpTime(Begin_,End_,&Users,&Times);
     ListViewUpTimes->Items->Clear();
-    for ( MUserUpTime *Time=(MUserUpTime*)Times.First;
-        Time; Time=(MUserUpTime*)Time->Next )
+    for ( MUserUpTime *Time=(MUserUpTime*)Times.gFirst();
+        Time; Time=(MUserUpTime*)Time->gNext() )
     {
         Item=ListViewUpTimes->Items->Add();
         Item->ImageIndex=-1;
         Item->Data=(void*)Time;
-        if ( (user=Users.Search(Time->User))==NULL ) Item->SubItems->Add("");
+        if ( (user=(MUser*)Users.SrchID(Time->User))==NULL ) Item->SubItems->Add("");
         else Item->SubItems->Add(user->Name);
         // Время
         if ( Int64ToSystemTime(&Time->BeginTime,&ss_time_b) )

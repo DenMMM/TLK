@@ -3,7 +3,7 @@ object FormLogIn: TFormLogIn
   Top = 287
   BorderIcons = [biSystemMenu]
   BorderStyle = bsSingle
-  Caption = 'Новая смена'
+  Caption = #1053#1086#1074#1072#1103' '#1089#1084#1077#1085#1072
   ClientHeight = 198
   ClientWidth = 350
   Color = clBtnFace
@@ -32,7 +32,7 @@ object FormLogIn: TFormLogIn
     Width = 34
     Height = 13
     Alignment = taRightJustify
-    Caption = 'Логин:'
+    Caption = #1051#1086#1075#1080#1085':'
   end
   object LabelPassword: TLabel
     Left = 55
@@ -40,7 +40,7 @@ object FormLogIn: TFormLogIn
     Width = 41
     Height = 13
     Alignment = taRightJustify
-    Caption = 'Пароль:'
+    Caption = #1055#1072#1088#1086#1083#1100':'
   end
   object Bevel2: TBevel
     Left = 12
@@ -56,8 +56,8 @@ object FormLogIn: TFormLogIn
     Height = 47
     AutoSize = False
     Caption = 
-      'Выберите логин и введите пароль. Если вашего логина нет в списке' +
-      ', возможно, он временно отключен сисадмином.'
+      #1042#1099#1073#1077#1088#1080#1090#1077' '#1083#1086#1075#1080#1085' '#1080' '#1074#1074#1077#1076#1080#1090#1077' '#1087#1072#1088#1086#1083#1100'. '#1045#1089#1083#1080' '#1074#1072#1096#1077#1075#1086' '#1083#1086#1075#1080#1085#1072' '#1085#1077#1090' '#1074' '#1089#1087#1080#1089#1082#1077 +
+      ', '#1074#1086#1079#1084#1086#1078#1085#1086', '#1086#1085' '#1074#1088#1077#1084#1077#1085#1085#1086' '#1086#1090#1082#1083#1102#1095#1077#1085' '#1089#1080#1089#1072#1076#1084#1080#1085#1086#1084'.'
     Layout = tlCenter
     WordWrap = True
   end
@@ -83,7 +83,7 @@ object FormLogIn: TFormLogIn
     Top = 168
     Width = 85
     Height = 25
-    Caption = 'Принять'
+    Caption = #1055#1088#1080#1085#1103#1090#1100
     Default = True
     ModalResult = 1
     TabOrder = 2
@@ -94,7 +94,7 @@ object FormLogIn: TFormLogIn
     Width = 85
     Height = 25
     Cancel = True
-    Caption = 'Отмена'
+    Caption = #1054#1090#1084#1077#1085#1072
     ModalResult = 2
     TabOrder = 3
   end

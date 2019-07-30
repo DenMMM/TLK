@@ -11,7 +11,6 @@
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
 #pragma resource "*.dfm"
-TFormTariffs *FormTariffs;
 //---------------------------------------------------------------------------
 __fastcall TFormTariffs::TFormTariffs(TComponent* Owner)
     : TForm(Owner)
@@ -20,30 +19,33 @@ __fastcall TFormTariffs::TFormTariffs(TComponent* Owner)
 //---------------------------------------------------------------------------
 void __fastcall TFormTariffs::FormShow(TObject *Sender)
 {
+    // Копируем список тарифов в буфер
+    TmpTariffs.Copy(Tariffs);
+
+    // Формируем их список
+    for ( MTariff *tariff=(MTariff*)TmpTariffs.gFirst();
+        tariff; tariff=(MTariff*)tariff->gNext() )
+    {
+        TListItem *item;
+        item=ListViewNames->Items->Add();
+        item->Data=tariff;
+        SetListViewNamesLine(item);
+    }
+
     // Заполняем список групп программ
     for ( int i=1; i<=8; i++ ) CheckListBoxApps->Items->Add(IntToStr(i));
     // Формируем список компьютеров
-    for ( MComputer *Computer=(MComputer*)Computers->First;
-        Computer; Computer=(MComputer*)Computer->Next )
+    for ( MComputer *comp=(MComputer*)Computers->gFirst();
+        comp; comp=(MComputer*)comp->gNext() )
     {
-        TListItem *NewItem;
-        NewItem=ListViewComputers->Items->Add();
-        NewItem->Data=Computer;
-        NewItem->Caption=IntToStr(Computer->Number);
-        NewItem->ImageIndex=Computer->GroupColor;
+        TListItem *item;
+        item=ListViewComputers->Items->Add();
+        item->Data=comp;
+        item->Caption=IntToStr(comp->Number);
+        item->ImageIndex=FormMain->GetCompColorIcon(comp);
     }
 
-    // Формируем список тарифов
-    for ( MTariff *Tariff=(MTariff*)Tariffs->First;
-        Tariff; Tariff=(MTariff*)Tariff->Next )
-    {
-        TListItem *NewItem;
-        NewItem=ListViewNames->Items->Add();
-        ((MTariff*)NewItem->Data)->Copy(Tariff);
-        SetListViewNamesLine(NewItem);
-    }
-
-    EditName->MaxLength=MAX_TariffNameLength;
+    EditName->MaxLength=MAX_TariffNameLen;
     SetEdit(false);
     ActiveControl=ListViewNames;
 }
@@ -57,32 +59,30 @@ void __fastcall TFormTariffs::FormClose(TObject *Sender,
     CheckBoxReboot->Checked=false;
     CheckListBoxApps->Items->Clear();
     ListViewComputers->Items->Clear();
+    // Чистим буфер
+    TmpTariffs.Clear();
 }
 //---------------------------------------------------------------------------
 void __fastcall TFormTariffs::ListViewNamesInsert(TObject *Sender,
       TListItem *Item)
 {
     Item->ImageIndex=-1;
-    Item->Data=new MTariff;
-}
-//---------------------------------------------------------------------------
-void __fastcall TFormTariffs::ListViewNamesDeletion(TObject *Sender,
-      TListItem *Item)
-{
-    delete (MTariff*)Item->Data;
 }
 //---------------------------------------------------------------------------
 void __fastcall TFormTariffs::ListViewNamesSelectItem(TObject *Sender,
       TListItem *Item, bool Selected)
 {
-    if ( ((TListView*)Sender)->SelCount!=1 ) { SetEdit(false); return; }
-    else SetEdit(true);
+    if ( ((TListView*)Sender)->SelCount!=1 )
+    {
+        SetEdit(false);
+        return;
+    } else
+        SetEdit(true);
 
-    MTariff *SelTariff=(MTariff*)ListViewNames->Selected->Data;
-    //
-    EditName->Text=SelTariff->Name;
-    //
-    unsigned int Programs=SelTariff->Programs;
+    MTariff *tariff=(MTariff*)ListViewNames->Selected->Data;
+    EditName->Text=tariff->Name;
+    // Проставляем группы программ
+    unsigned Programs=tariff->Programs;
     CheckListBoxApps->Checked[0]=Programs&mgp1;
     CheckListBoxApps->Checked[1]=Programs&mgp2;
     CheckListBoxApps->Checked[2]=Programs&mgp3;
@@ -92,15 +92,16 @@ void __fastcall TFormTariffs::ListViewNamesSelectItem(TObject *Sender,
     CheckListBoxApps->Checked[6]=Programs&mgp7;
     CheckListBoxApps->Checked[7]=Programs&mgp8;
     //
-    CheckBoxReboot->Checked=SelTariff->Reboot;
-    CheckBoxRoute->Checked=SelTariff->Programs&mgpRoute;
+    CheckBoxReboot->Checked=tariff->Reboot;
+    CheckBoxRoute->Checked=tariff->Programs&mgpRoute;
     // Проставляем для каких компьютеров используется тариф
     int i=0;
-    for ( MComputer *Computer=(MComputer*)Computers->First;
-        Computer; Computer=(MComputer*)Computer->Next, i++ )
+    for ( MComputer *comp=(MComputer*)Computers->gFirst();
+        comp; comp=(MComputer*)comp->gNext() )
     {
         ListViewComputers->Items->Item[i]->Checked=
-            SelTariff->CheckForComputer(Computer->Number);
+            tariff->CheckForComp(comp->Number);
+        i++;
     }
 }
 //---------------------------------------------------------------------------
@@ -108,19 +109,21 @@ void __fastcall TFormTariffs::ButtonAddClick(TObject *Sender)
 {
     if ( ListViewNames->Items->Count>=MAX_Tariffs )
     {
-        ::MessageBox(Handle,"Большее количество тарифов не поддерживается.",
-            "Сообщение",MB_OK|MB_ICONWARNING|MB_APPLMODAL);
+        ResMessageBox(Handle,0,20,MB_APPLMODAL|MB_OK|MB_ICONINFORMATION);
         return;
     }
 
-    TListItem *Item=ListViewNames->Items->Add();
-    MTariff *Tariff=(MTariff*)Item->Data;
-    Tariff->SetName("Новый тариф");
-    SetListViewNamesLine(Item);
-    //
-    ListViewNames->ItemFocused=Item;
+    // Добавляем новый тариф в буфер
+    MTariff *tariff=(MTariff*)TmpTariffs.Add();
+    tariff->SetName("Новый тариф");
+    // Добавляем строку в список и связываем ее с тарифом
+    TListItem *item=ListViewNames->Items->Add();
+    item->Data=tariff;
+    SetListViewNamesLine(item);
+    // Обновляем интерфейс
+    ListViewNames->ItemFocused=item;
     ListViewNames->Selected=NULL;
-    ListViewNames->Selected=Item;
+    ListViewNames->Selected=item;
     ActiveControl=EditName;
 }
 //---------------------------------------------------------------------------
@@ -128,10 +131,15 @@ void __fastcall TFormTariffs::ButtonDelClick(TObject *Sender)
 {
     // Удаляем тарифы из списка
     TItemStates is=TItemStates()<<isSelected;
-    for ( TListItem *Item=ListViewNames->Selected, *NewItem; Item; )
+    TListItem *item=ListViewNames->Selected, *next;
+    while(item)
     {
-        NewItem=ListViewNames->GetNextItem(Item,sdAll,is);
-        Item->Delete(); Item=NewItem;
+        // Удаляем тариф из буфера
+        TmpTariffs.Del((MTariff*)item->Data);
+        // Удаляем строку из списка
+        next=ListViewNames->GetNextItem(item,sdAll,is);
+        item->Delete();
+        item=next;
     }
     //
     ListViewComputers->Selected=ListViewComputers->ItemFocused;
@@ -141,9 +149,9 @@ void __fastcall TFormTariffs::EditNameExit(TObject *Sender)
 {
     if ( ListViewNames->Selected==NULL ) return;
 
-    MTariff *Tariff=(MTariff*)ListViewNames->Selected->Data;
-    Tariff->SetName(((TEdit*)Sender)->Text.Trim().c_str());
-    ((TEdit*)Sender)->Text=Tariff->Name;
+    MTariff *tariff=(MTariff*)ListViewNames->Selected->Data;
+    tariff->SetName(((TEdit*)Sender)->Text.Trim().c_str());
+    ((TEdit*)Sender)->Text=tariff->Name;
     SetListViewNamesLine(ListViewNames->Selected);
 }
 //---------------------------------------------------------------------------
@@ -168,16 +176,16 @@ void __fastcall TFormTariffs::CheckListBoxAppsExit(TObject *Sender)
 {
     if ( ListViewNames->Selected==NULL ) return;
 
-    unsigned int Programs=0;
-    if ( CheckListBoxApps->Checked[0] ) Programs|=mgp1;
-    if ( CheckListBoxApps->Checked[1] ) Programs|=mgp2;
-    if ( CheckListBoxApps->Checked[2] ) Programs|=mgp3;
-    if ( CheckListBoxApps->Checked[3] ) Programs|=mgp4;
-    if ( CheckListBoxApps->Checked[4] ) Programs|=mgp5;
-    if ( CheckListBoxApps->Checked[5] ) Programs|=mgp6;
-    if ( CheckListBoxApps->Checked[6] ) Programs|=mgp7;
-    if ( CheckListBoxApps->Checked[7] ) Programs|=mgp8;
-    ((MTariff*)ListViewNames->Selected->Data)->Programs=Programs;
+    unsigned progs=0;
+    if ( CheckListBoxApps->Checked[0] ) progs|=mgp1;
+    if ( CheckListBoxApps->Checked[1] ) progs|=mgp2;
+    if ( CheckListBoxApps->Checked[2] ) progs|=mgp3;
+    if ( CheckListBoxApps->Checked[3] ) progs|=mgp4;
+    if ( CheckListBoxApps->Checked[4] ) progs|=mgp5;
+    if ( CheckListBoxApps->Checked[5] ) progs|=mgp6;
+    if ( CheckListBoxApps->Checked[6] ) progs|=mgp7;
+    if ( CheckListBoxApps->Checked[7] ) progs|=mgp8;
+    ((MTariff*)ListViewNames->Selected->Data)->Programs=progs;
 
     ((TCheckListBox*)Sender)->ItemIndex=-1;
 }
@@ -191,83 +199,89 @@ void __fastcall TFormTariffs::ListViewComputersKeyPress(TObject *Sender,
 //---------------------------------------------------------------------------
 void __fastcall TFormTariffs::ListViewComputersExit(TObject *Sender)
 {
-    MTariff *Tariff;
-    int CompNum, *Computers, *Comps;
-    TListItems *Items;
-    TListItem *Item;
-
     if ( ListViewNames->Selected==NULL ) return;
-    Tariff=(MTariff*)ListViewNames->Selected->Data;
-    Items=ListViewComputers->Items;
-    // Считаем сколько компьютеров выделено
-    CompNum=0;
-    for ( int i=0; i<Items->Count; i++ ) if ( Items->Item[i]->Checked ) CompNum++;
-    if ( (Computers=new int[CompNum])==NULL ) return;
     // Заполняем массив номеров компьютеров
-    Comps=Computers;
-    for ( int i=0; i<Items->Count; i++ )
+    int count=0;
+    TListItems *items=ListViewComputers->Items;
+    for ( int i=0; (i<items->Count)&&(i<sizeof(TmpComps)); i++ )
     {
-        Item=Items->Item[i];
-        if ( Item->Checked ) { *Comps=((MComputer*)Item->Data)->Number; Comps++; }
+        TListItem *item=items->Item[i];
+        if ( item->Checked )
+            TmpComps[count++]=((MComputer*)item->Data)->Number;
     }
-    // Сохраняем копию этого массива для тарифа
-    Tariff->SetComputers(Computers,CompNum);
-    delete[] Computers;
+    // Сохраняем копию этого массива в тарифе
+    MTariff *tariff=(MTariff*)ListViewNames->Selected->Data;
+    tariff->SetComps(TmpComps,count);
 }
 //---------------------------------------------------------------------------
 void __fastcall TFormTariffs::ButtonSetSelCompClick(TObject *Sender)
 {
-    bool Checked;
-    if ( Sender==ButtonSetSelComp ) Checked=true;
-    else if ( Sender==ButtonResSelComp ) Checked=false;
+    bool checked;
+    if ( Sender==ButtonSetSelComp ) checked=true;
+    else if ( Sender==ButtonResSelComp ) checked=false;
     else return;
 
-    TListItems *ListItems=ListViewComputers->Items;
-    for ( int i=0, j=ListItems->Count; i<j; i++ )
-        if ( ListItems->Item[i]->Selected ) ListItems->Item[i]->Checked=Checked;
+    TListItems *items=ListViewComputers->Items;
+    for ( int i=0, j=items->Count; i<j; i++ )
+        if ( items->Item[i]->Selected ) items->Item[i]->Checked=checked;
+        
     ListViewComputersExit(ListViewComputers);
 }
 //---------------------------------------------------------------------------
 void __fastcall TFormTariffs::ButtonSetAllCompClick(TObject *Sender)
 {
-    bool Checked;
-    if ( Sender==ButtonSetAllComp ) Checked=true;
-    else if ( Sender==ButtonResAllComp ) Checked=false;
+    bool checked;
+    if ( Sender==ButtonSetAllComp ) checked=true;
+    else if ( Sender==ButtonResAllComp ) checked=false;
     else return;
 
-    TListItems *ListItems=ListViewComputers->Items;
-    for ( int i=0, j=ListItems->Count; i<j; i++ ) ListItems->Item[i]->Checked=Checked;
+    TListItems *items=ListViewComputers->Items;
+    for ( int i=0, j=items->Count; i<j; i++ )
+        items->Item[i]->Checked=checked;
+    
     ListViewComputersExit(ListViewComputers);
 }
 //---------------------------------------------------------------------------
 void __fastcall TFormTariffs::ButtonTimesClick(TObject *Sender)
 {
+    Munique_ptr <TFormTariffTimes> form;
+
     if ( ListViewNames->Selected==NULL ) return;
 
-    MTariff *Tariff=(MTariff*)ListViewNames->Selected->Data;
-    FormTariffTimes->Left=Left+30;
-    FormTariffTimes->Top=Top+30;
-    FormTariffTimes->Execute(&Tariff->Times,Tariff->Name);
+    try
+    {
+        MTariff *tariff=(MTariff*)ListViewNames->Selected->Data;
+        // Открываем диалог редактирования
+        form(new TFormTariffTimes(0));
+        form.get()->Execute(&tariff->Times,tariff->Name,Left+30,Top+30);
+    }
+    catch (Exception &ex)
+    {
+        Application->ShowException(&ex);
+    }
 }
 //---------------------------------------------------------------------------
 void __fastcall TFormTariffs::ButtonSaveClick(TObject *Sender)
 {
-    Tariffs->Clear();
-
-    TListItems *Items=ListViewNames->Items;
-    for ( int i=0; i<Items->Count; i++ )
-    {
-        MTariff *NewTariff;
-        NewTariff=(MTariff*)Tariffs->Add();
-        NewTariff->Copy((MTariff*)Items->Item[i]->Data);
-    }
+    // Замещаем тарифы записями из буфера
+    Tariffs->Move(&TmpTariffs);
     // Задаем ID-номера для новых тарифов
     Tariffs->SetIDs();
+    // Сохраняем в файле
+    if ( !Tariffs->Save() )
+    {
+        ShellState->State|=mssErrorConfig; FormMain->SetShell();
+        ResMessageBox(Handle,1,3,MB_APPLMODAL|MB_OK|MB_ICONERROR,Tariffs->gLastErr());
+        return;
+    }
     // Запись в логах
-    Log->AddTariffs(Tariffs);
-    // Сохраняем тарифы
-    Tariffs->Save();
-    //
+    if ( !Log->AddTariffs(Tariffs) )
+    {
+        // Настройки сохранили, но без отображения их в логе работать не дадим
+        ShellState->State|=mssErrorLog|mssErrorConfig; FormMain->SetShell();
+        ResMessageBox(Handle,1,5,MB_APPLMODAL|MB_OK|MB_ICONERROR,Log->gLastErr());
+    }
+    // Обновляем список компьютеров в главном окне
     FormMain->UpdateListViewComputers(true);
 }
 //---------------------------------------------------------------------------
@@ -278,28 +292,15 @@ void TFormTariffs::SetEdit(bool Edit_)
     LabelTariffName->Enabled=Edit_;
     EditName->Enabled=Edit_;
     EditName->Color=Color;
-//    if ( !Edit_ ) EditName->Text="";
     CheckBoxReboot->Enabled=Edit_;
     CheckBoxRoute->Enabled=Edit_;
     ButtonTimes->Enabled=Edit_;
-//    if ( !Edit_ ) CheckBoxReboot->Checked=false;
     LabelTariffApps->Enabled=Edit_;
     CheckListBoxApps->Enabled=Edit_;
     CheckListBoxApps->Color=Color;
-//    if ( !Edit_ )
-//    {
-//        for ( int i=0, j=CheckListBoxApps->Items->Count; i<j; i++ )
-//            CheckListBoxApps->Checked[i]=false;
-//    }
-
     LabelTariffComputers->Enabled=Edit_;
     ListViewComputers->Enabled=Edit_;
     ListViewComputers->Color=Color;
-//    if ( !Edit_ )
-//    {
-//        TListItems *Items=ListViewComputers->Items;
-//        for ( int i=0; i<Items->Count; i++ ) Items->Item[i]->Checked=false;
-//    }
     ButtonSetSelComp->Enabled=Edit_;
     ButtonSetAllComp->Enabled=Edit_;
     ButtonResSelComp->Enabled=Edit_;

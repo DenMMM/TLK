@@ -29,6 +29,4 @@ public:		// User declarations
     bool Execute(MOptions *Options_, int Left_, int Top_, bool LeftTop_);
 };
 //---------------------------------------------------------------------------
-extern PACKAGE TFormOpenConfig *FormOpenConfig;
-//---------------------------------------------------------------------------
 #endif

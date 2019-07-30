@@ -1,9 +1,9 @@
-object FormNewPassword: TFormNewPassword
+object FormNewPass: TFormNewPass
   Left = 376
   Top = 332
   BorderIcons = []
   BorderStyle = bsToolWindow
-  Caption = 'Новый пароль'
+  Caption = #1053#1086#1074#1099#1081' '#1087#1072#1088#1086#1083#1100
   ClientHeight = 165
   ClientWidth = 325
   Color = clBtnFace
@@ -50,7 +50,7 @@ object FormNewPassword: TFormNewPassword
     Width = 36
     Height = 13
     Alignment = taRightJustify
-    Caption = 'Длина:'
+    Caption = #1044#1083#1080#1085#1072':'
   end
   object Bevel2: TBevel
     Left = 12
@@ -64,7 +64,7 @@ object FormNewPassword: TFormNewPassword
     Top = 16
     Width = 53
     Height = 21
-    Caption = 'Новый'
+    Caption = #1053#1086#1074#1099#1081
     TabOrder = 0
     OnClick = ButtonNewClick
   end
@@ -82,7 +82,7 @@ object FormNewPassword: TFormNewPassword
     Top = 60
     Width = 145
     Height = 17
-    Caption = 'ЗАГЛАВНЫЕ буквы'
+    Caption = #1047#1040#1043#1051#1040#1042#1053#1067#1045' '#1073#1091#1082#1074#1099
     TabOrder = 2
   end
   object CheckBoxSmall: TCheckBox
@@ -90,7 +90,7 @@ object FormNewPassword: TFormNewPassword
     Top = 80
     Width = 145
     Height = 17
-    Caption = 'строчные буквы'
+    Caption = #1089#1090#1088#1086#1095#1085#1099#1077' '#1073#1091#1082#1074#1099
     TabOrder = 3
   end
   object CheckBoxNum: TCheckBox
@@ -98,7 +98,7 @@ object FormNewPassword: TFormNewPassword
     Top = 100
     Width = 145
     Height = 17
-    Caption = 'Цифры'
+    Caption = #1062#1080#1092#1088#1099
     TabOrder = 4
   end
   object ButtonUse: TButton
@@ -106,7 +106,7 @@ object FormNewPassword: TFormNewPassword
     Top = 136
     Width = 85
     Height = 25
-    Caption = 'Принять'
+    Caption = #1055#1088#1080#1085#1103#1090#1100
     Default = True
     ModalResult = 1
     TabOrder = 5
@@ -117,7 +117,7 @@ object FormNewPassword: TFormNewPassword
     Width = 85
     Height = 25
     Cancel = True
-    Caption = 'Отмена'
+    Caption = #1054#1090#1084#1077#1085#1072
     ModalResult = 2
     TabOrder = 6
   end

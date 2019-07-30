@@ -6,7 +6,6 @@
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
 #pragma resource "*.dfm"
-TFormOpenConfig *FormOpenConfig;
 //---------------------------------------------------------------------------
 __fastcall TFormOpenConfig::TFormOpenConfig(TComponent* Owner)
     : TForm(Owner)
@@ -29,8 +28,8 @@ void TFormOpenConfig::SetCoord(int Left_, int Top_, bool LeftTop_)
 //---------------------------------------------------------------------------
 void __fastcall TFormOpenConfig::FormShow(TObject *Sender)
 {
-    EditPassword->MaxLength=MAX_UserPasswordLength;
-    EditPassword->PasswordChar='*';
+    EditPassword->MaxLength=MAX_OptPassLen;
+    EditPassword->PasswordChar=PASS_Char;
 }
 //---------------------------------------------------------------------------
 void __fastcall TFormOpenConfig::FormCloseQuery(TObject *Sender,
@@ -38,7 +37,7 @@ void __fastcall TFormOpenConfig::FormCloseQuery(TObject *Sender,
 {
     if ( ModalResult!=mrOk ) return;
     // Проверяем пароль
-    if ( !Options->CheckPassword(EditPassword->Text.c_str()) )
+    if ( !Options->CheckPass(EditPassword->Text.c_str()) )
         { ActiveControl=EditPassword; CanClose=false; }
     return;
 }

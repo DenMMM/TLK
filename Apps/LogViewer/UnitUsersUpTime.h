@@ -6,13 +6,16 @@
 //---------------------------------------------------------------------------
 class MUserUpTime:public MListItem
 {
-public:
-    bool Copy(MListItem *SrcItem_);
+private:
+    unsigned char gTypeID() const { return 0; }
+
 public:
     unsigned User;
     __int64 BeginTime;
     __int64 EndTime;
     double Gains;
+
+    void Copy(const MListItem *SrcItem_) {};
 
     MUserUpTime();
     ~MUserUpTime();
@@ -21,11 +24,13 @@ public:
 class MUsersUpTime:public MList
 {
 private:
-    MListItem *operator_new(unsigned Type_) { return (MListItem*)new MUserUpTime; }
-    void operator_delete(MListItem *DelItem_) { delete (MUserUpTime*)DelItem_; }
+    bool Typed() const { return false; }
+    MListItem *item_new(unsigned char TypeID_) const { return (MListItem*)new MUserUpTime; }
+    void item_del(MListItem *Item_) const { delete (MUserUpTime*)Item_; }
+    
 public:
-    MUsersUpTime() { constructor(); }
-    ~MUsersUpTime() { destructor(); }
+    MUsersUpTime() {}
+    ~MUsersUpTime() { Clear(); }
 };
 //---------------------------------------------------------------------------
 #endif

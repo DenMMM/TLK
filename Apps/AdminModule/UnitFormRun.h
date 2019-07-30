@@ -10,7 +10,10 @@
 #include <ExtCtrls.hpp>
 #include <Buttons.hpp>
 //---------------------------------------------------------------------------
+#include "UnitStates.h"
+#include "UnitComputers.h"
 #include "UnitTariffs.h"
+#include "UnitLog.h"
 //---------------------------------------------------------------------------
 class TFormRun : public TForm
 {
@@ -40,8 +43,6 @@ __published:	// IDE-managed Components
     void __fastcall FormClose(TObject *Sender, TCloseAction &Action);
     void __fastcall ListViewComputersInsert(TObject *Sender,
           TListItem *Item);
-    void __fastcall ListViewComputersDeletion(TObject *Sender,
-          TListItem *Item);
     void __fastcall ComboBoxTariffClick(TObject *Sender);
     void __fastcall ComboBoxTimeClick(TObject *Sender);
     void __fastcall ComboBoxTimeChange(TObject *Sender);
@@ -51,17 +52,18 @@ __published:	// IDE-managed Components
           TListItem *Item, bool Selected);
 private:	// User declarations
     __int64 OpenDialogTime;
-    MTariffsInfo *UseTariffs;
-    MRunTimes *UseTimes;
-    unsigned int SelTariffID;
+    MTariffsInfo UseTariffs;    // Список тарифов, доступных на время открытия диалога
+    MRunTimes UseTimes;         // Список пакетов для выбранного тарифа
+    MRunTimes CompTimes;        // Буфер для хранения времени и стоимости по каждому компьютеру
+    unsigned SelTariffID;
     void SetListViewComputersLine(TListItem *Item_);
     void UpdateFullCost();
 public:		// User declarations
-    bool RunMode;
+    bool RunMode;               // Диалог открыт в режиме "запуска", а не добавления времени
     __fastcall TFormRun(TComponent* Owner);
 };
 //---------------------------------------------------------------------------
-extern PACKAGE TFormRun *FormRun;
+//extern PACKAGE TFormRun *FormRun;
 //---------------------------------------------------------------------------
 #endif
 

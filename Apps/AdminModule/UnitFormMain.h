@@ -22,10 +22,10 @@
 #include "UnitSync.h"
 #include "UnitLog.h"
 //---------------------------------------------------------------------------
-// Main Computers Filter
-#define mcfAll ((int)1)     // Все компьютеры
-#define mcfFree ((int)2)    // Свободные компьютеры
-#define mcfService ((int)3) // Открытые для обслуживания
+// Какие компьютеры отображать в основном окне
+#define mcfAll                  1       // Все компьютеры
+#define mcfFree                 2       // Свободные и скоро освобождающиеся
+#define mcfService              3       // Открытые для обслуживания
 //---------------------------------------------------------------------------
 class TFormMain : public TForm
 {
@@ -95,9 +95,6 @@ __published:	// IDE-managed Components
     TPopupMenu *PopupMenuSystem;
     TMenuItem *NOpen;
     TMenuItem *NClose;
-    TMenuItem *MenuItem9;
-    TMenuItem *NWithoutLocker;
-    TMenuItem *NWithLocker;
     TBitBtn *BitBtnSystem;
     TBevel *Bevel7;
     TMenuItem *NFilterService;
@@ -112,6 +109,8 @@ __published:	// IDE-managed Components
     TMenuItem *NLogReset;
     TMenuItem *N3;
     TMenuItem *NClient;
+    TMenuItem *NAuth;
+    TMenuItem *N9;
     TMenuItem *N8;
     void __fastcall TimerTimer(TObject *Sender);
     void __fastcall BitBtnRunClick(TObject *Sender);
@@ -123,7 +122,6 @@ __published:	// IDE-managed Components
     void __fastcall FormClose(TObject *Sender, TCloseAction &Action);
     void __fastcall BitBtnLockClick(TObject *Sender);
     void __fastcall NOpenClick(TObject *Sender);
-    void __fastcall NWithoutLockerClick(TObject *Sender);
     void __fastcall NPauseClick(TObject *Sender);
     void __fastcall ListViewComputersInsert(TObject *Sender,
           TListItem *Item);
@@ -138,19 +136,20 @@ __published:	// IDE-managed Components
     void __fastcall NUsersPasswordsClick(TObject *Sender);
     void __fastcall NConfigOpenClick(TObject *Sender);
     void __fastcall NLogResetClick(TObject *Sender);
+    void __fastcall NOptionsPasswordClick(TObject *Sender);
 private:	// User declarations
     bool EnableConfig;          // Настройка модуля
     bool EnableLogReSet;        // Ручное заведение нового файла лога
     bool EnableCompCmd;         // Команды для компьютеров
     bool EnableCommon;
-    int Filter;  // Режим фильтрации показываемых в списке компьютеров
+    int Filter;                 // Режим фильтрации показываемых в списке компьютеров
     bool CheckFilter(MStateInfo *Info_, int FreeTime_);
     void SetListViewComputersLine(TListItem *Item_, MStateInfo *Info_);
 public:		// User declarations
     void UpdateListViewComputers(bool Full_);
         __fastcall TFormMain(TComponent* Owner);
     void SetShell();
-    bool MessageBoxError(UINT uCaption, UINT uMessage);
+    int GetCompColorIcon(MComputer *Comp_);
 };
 //---------------------------------------------------------------------------
 extern PACKAGE TFormMain *FormMain;
@@ -163,6 +162,7 @@ extern MFines *Fines;
 extern MUsers *Users;
 extern MStates *States;
 extern MSync *Sync;
+extern MAuth *Auth;
 extern MLog *Log;
 //---------------------------------------------------------------------------
 #endif

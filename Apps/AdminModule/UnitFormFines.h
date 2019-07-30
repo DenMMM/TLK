@@ -29,24 +29,22 @@ __published:	// IDE-managed Components
     TLabel *LabelTime;
     void __fastcall FormShow(TObject *Sender);
     void __fastcall FormClose(TObject *Sender, TCloseAction &Action);
-    void __fastcall ButtonSaveClick(TObject *Sender);
     void __fastcall ButtonAddClick(TObject *Sender);
     void __fastcall ButtonDelClick(TObject *Sender);
     void __fastcall EditDescriptionExit(TObject *Sender);
     void __fastcall ListViewFinesInsert(TObject *Sender, TListItem *Item);
-    void __fastcall ListViewFinesDeletion(TObject *Sender,
-          TListItem *Item);
     void __fastcall ListViewFinesSelectItem(TObject *Sender,
           TListItem *Item, bool Selected);
     void __fastcall ComboBoxTimeClick(TObject *Sender);
+    void __fastcall ButtonSaveClick(TObject *Sender);
 private:	// User declarations
+    MFines TmpFines;
     void SetEdit(bool Edit_);
     void SetListViewFinesLine(TListItem *Item_);
 public:		// User declarations
+    bool Execute(MFines *Fines_, int Left_, int Top_);
     __fastcall TFormFines(TComponent* Owner);
 };
-//---------------------------------------------------------------------------
-extern PACKAGE TFormFines *FormFines;
 //---------------------------------------------------------------------------
 #endif
 

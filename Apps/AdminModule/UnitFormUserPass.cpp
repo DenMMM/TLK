@@ -2,19 +2,18 @@
 #include <vcl.h>
 #pragma hdrstop
 
-#include "UnitFormUserPassword.h"
-#include "UnitFormNewPassword.h"
+#include "UnitFormUserPass.h"
+#include "UnitFormNewPass.h"
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
 #pragma resource "*.dfm"
-TFormUserPassword *FormUserPassword;
 //---------------------------------------------------------------------------
-__fastcall TFormUserPassword::TFormUserPassword(TComponent* Owner)
+__fastcall TFormUserPass::TFormUserPass(TComponent* Owner)
     : TForm(Owner)
 {
 }
 //---------------------------------------------------------------------------
-bool TFormUserPassword::Execute(MUser *User_, int Left_, int Top_, bool LeftTop_)
+bool TFormUserPass::Execute(MUser *User_, int Left_, int Top_, bool LeftTop_)
 {
     Users=false;
     ComboBoxLogin->Enabled=false;
@@ -26,12 +25,13 @@ bool TFormUserPassword::Execute(MUser *User_, int Left_, int Top_, bool LeftTop_
     return ShowModal()==mrOk;
 }
 //---------------------------------------------------------------------------
-bool TFormUserPassword::Execute(MUsers *Users_, int Left_, int Top_, bool LeftTop_)
+bool TFormUserPass::Execute(MUsers *Users_, int Left_, int Top_, bool LeftTop_)
 {
     Users=true;
     ComboBoxLogin->Enabled=true;
     SetEdit(false,false);
-    for ( MUser *User=(MUser*)Users_->First; User; User=(MUser*)User->Next )
+    for ( MUser *User=(MUser*)Users_->gFirst(); User;
+        User=(MUser*)User->gNext() )
     {
         if ( !User->Active ) continue;
         ComboBoxLogin->Items->AddObject(User->Login,(TObject*)User);
@@ -41,13 +41,13 @@ bool TFormUserPassword::Execute(MUsers *Users_, int Left_, int Top_, bool LeftTo
     return ShowModal()==mrOk;
 }
 //---------------------------------------------------------------------------
-void TFormUserPassword::SetCoord(int Left_, int Top_, bool LeftTop_)
+void TFormUserPass::SetCoord(int Left_, int Top_, bool LeftTop_)
 {
     if ( LeftTop_ ) { Left=Left_; Top=Top_; }
     else { Left=Left_-Width; Top=Top_-Height; }
 }
 //---------------------------------------------------------------------------
-void TFormUserPassword::SetEdit(bool Current_, bool New_)
+void TFormUserPass::SetEdit(bool Current_, bool New_)
 {
     TColor color;
 
@@ -66,17 +66,17 @@ void TFormUserPassword::SetEdit(bool Current_, bool New_)
     EditConfirm->Color=color;
 }
 //---------------------------------------------------------------------------
-void __fastcall TFormUserPassword::FormShow(TObject *Sender)
+void __fastcall TFormUserPass::FormShow(TObject *Sender)
 {
-    EditPassword->MaxLength=MAX_UserPasswordLength;
-    EditPassword->PasswordChar='*';
-    EditNew->MaxLength=MAX_UserPasswordLength;
-    EditNew->PasswordChar='*';
-    EditConfirm->MaxLength=MAX_UserPasswordLength;
-    EditConfirm->PasswordChar='*';
+    EditPassword->MaxLength=MAX_UserPassLen;
+    EditPassword->PasswordChar=PASS_Char;
+    EditNew->MaxLength=MAX_UserPassLen;
+    EditNew->PasswordChar=PASS_Char;
+    EditConfirm->MaxLength=MAX_UserPassLen;
+    EditConfirm->PasswordChar=PASS_Char;
 }
 //---------------------------------------------------------------------------
-void __fastcall TFormUserPassword::FormCloseQuery(TObject *Sender,
+void __fastcall TFormUserPass::FormCloseQuery(TObject *Sender,
       bool &CanClose)
 {
     int Index;
@@ -88,13 +88,13 @@ void __fastcall TFormUserPassword::FormCloseQuery(TObject *Sender,
         { ActiveControl=ComboBoxLogin; goto error; }
     User=(MUser*)ComboBoxLogin->Items->Objects[Index];
     // Проверяем текущий пароль
-    if ( Users&&(!User->CheckPassword(EditPassword->Text.c_str())) )
+    if ( Users&&(!User->CheckPass(EditPassword->Text.c_str())) )
         { ActiveControl=EditPassword; goto error; }
     // Проверяем новый пароль
     if ( EditNew->Text!=EditConfirm->Text )
         { ActiveControl=EditNew; goto error; }
     //
-    User->SetPassword(EditNew->Text.c_str());
+    User->SetPass(EditNew->Text.c_str());
 
     return;
 error:
@@ -102,7 +102,7 @@ error:
     return;
 }
 //---------------------------------------------------------------------------
-void __fastcall TFormUserPassword::FormClose(TObject *Sender,
+void __fastcall TFormUserPass::FormClose(TObject *Sender,
       TCloseAction &Action)
 {
     ComboBoxLogin->Clear();
@@ -111,20 +111,28 @@ void __fastcall TFormUserPassword::FormClose(TObject *Sender,
     EditConfirm->Text=""; EditConfirm->ClearUndo();
 }
 //---------------------------------------------------------------------------
-void __fastcall TFormUserPassword::ButtonGenerateClick(TObject *Sender)
+void __fastcall TFormUserPass::ButtonGenerateClick(TObject *Sender)
 {
-    char buffer[MAX_UserPasswordLength+1];
+    Munique_ptr <TFormNewPass> form;
+    char buffer[MAX_UserPassLen+1];
 
-    if ( FormNewPassword->Execute(buffer,5,MAX_UserPasswordLength,
-        Left+20,Top+30,true) )
+    try
     {
+        form(new TFormNewPass(0));
+        if ( !form.get()->Execute(buffer,5,sizeof(buffer),
+            Left+20,Top+30,true) ) return;
         EditNew->Text=buffer;
         EditConfirm->Text=""; EditConfirm->ClearUndo();
         ActiveControl=EditConfirm;
     }
+    catch (Exception &ex)
+    {
+        Application->ShowException(&ex);
+        return;
+    }
 }
 //---------------------------------------------------------------------------
-void __fastcall TFormUserPassword::ComboBoxLoginClick(TObject *Sender)
+void __fastcall TFormUserPass::ComboBoxLoginClick(TObject *Sender)
 {
     SetEdit(true,true);
 }

@@ -1,11 +1,12 @@
 //---------------------------------------------------------------------------
 #include <stdlib.h>
 #include <winsock2.h>
-//#include <windows.h>
 #include <iphlpapi.h>
+#include <stdexcept.h>
 #pragma hdrstop
 
 #include "UnitSync.h"
+#include "UnitAuth.h"
 #include "UnitCommon.h"
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
@@ -16,10 +17,10 @@ MSyncState::MSyncState()
     IP=INADDR_NONE;
     KnownMAC=false;
     Process=mspNone;
+    PacketSize=0;
     SendCount=0;
     LastSendTime=0;
-    SNumber=0;
-    PacketSize=0;
+    Seed=0;
 }
 //---------------------------------------------------------------------------
 MSyncState::~MSyncState()
@@ -27,56 +28,43 @@ MSyncState::~MSyncState()
 //
 }
 //---------------------------------------------------------------------------
-unsigned MSyncState::GetDataSize()
+unsigned MSyncState::GetDataSize() const
 {
-    return KnownMAC? sizeof(IP)+sizeof(MAC): 0;
+    return KnownMAC?
+        sizeof(IP)+
+        sizeof(MAC): 0;
 }
 //---------------------------------------------------------------------------
-char *MSyncState::SetData(char *Data_)
+char *MSyncState::SetData(char *Data_) const
 {
     if ( !KnownMAC ) return Data_;
     Data_=MemSet(Data_,IP);
-    Data_=((char*)memcpy(Data_,MAC,sizeof(MAC)))+sizeof(MAC);
+    Data_=MemSetBLine(Data_,MAC,sizeof(MAC));
     return Data_;
 }
 //---------------------------------------------------------------------------
-char *MSyncState::GetData(char *Data_, char *Limit_)
+const char *MSyncState::GetData(const char *Data_, const char *Limit_)
 {
     if ( (Data_=MemGet(Data_,&IP,Limit_))==NULL ) goto error;
-    if ( (Data_+sizeof(MAC))>Limit_ ) goto error;
-    memcpy(MAC,Data_,sizeof(MAC)); Data_+=sizeof(MAC); KnownMAC=true;
-    return Data_;
+    if ( (Data_=MemGetBLine(Data_,MAC,sizeof(MAC),Limit_))==NULL ) goto error;
+    KnownMAC=true;
 error:
-    return NULL;
-}
-//---------------------------------------------------------------------------
-unsigned int MSyncState::NextSNumber()
-{
-    static unsigned SNumber=0;
-    // Младший байт счетчика уникален между запусками программы
-    if ( SNumber==0 ) SNumber=random(0xFF)+1;
-    // Увеличиваем старшие байты счетчика
-    SNumber=((SNumber+0x100)&~0xFF)|(SNumber&0xFF);
-    return SNumber;
+    return Data_;
 }
 //---------------------------------------------------------------------------
 void MSyncState::Associate(MState *State_, u_long IP_)
 {
     State=State_;
-    KnownMAC=(IP==IP_); IP=IP_;
+    KnownMAC=(IP==IP_);
+    IP=IP_;
     Process=mspNone;
-}
-//---------------------------------------------------------------------------
-u_long MSyncState::GetIP()
-{
-    return IP;
 }
 //---------------------------------------------------------------------------
 bool MSyncState::UpdateMAC(unsigned char *MAC_)
 {
     bool NeedSave;
     // Проверяем нужно ли обновить MAC-адрес
-    NeedSave=(!KnownMAC)||memcmp(MAC,MAC_,MAC_AddrLength);
+    NeedSave=(!KnownMAC)||(memcmp(MAC,MAC_,MAC_AddrLength)!=0);
     // При необходимости обновляем MAC-адрес
     if ( NeedSave ) { memcpy(MAC,MAC_,MAC_AddrLength); KnownMAC=true; }
     return NeedSave;
@@ -85,8 +73,8 @@ bool MSyncState::UpdateMAC(unsigned char *MAC_)
 bool MSyncState::Start()
 {
     if ( (State==NULL)||(IP==INADDR_NONE) ) return false;
-    Process=mspWait; LastSendTime=::GetTickCount()-SYNC_WaitInterval;
-    SNumber=NextSNumber();
+    Process=mspWait;
+    LastSendTime=::GetTickCount()-SYNC_WaitInterval;
     return true;
 }
 //---------------------------------------------------------------------------
@@ -95,15 +83,19 @@ bool MSyncState::Stop()
     bool NeedSave=false;
     switch(Process)
     {
-        case mspSend1: case mspMagic:
-            NeedSave=State->NetEnd(); break;
-        default: break;
+        case mspMagic:
+        case mspHello:
+        case mspSyncData:
+            NeedSave=State->NetEnd();
+            break;
+        default:
+            break;
     }
     Process=mspNone;
     return NeedSave;
 }
 //---------------------------------------------------------------------------
-bool MSyncState::Send(SOCKET Socket_, SOCKET SocketBC_, unsigned Code_)
+bool MSyncState::Send(SOCKET Socket_, SOCKET SocketBC_, unsigned Code_, MAuth *MAC_)
 {
     bool NeedSave=false;
 
@@ -113,56 +105,57 @@ bool MSyncState::Send(SOCKET Socket_, SOCKET SocketBC_, unsigned Code_)
             if ( !State->NetBegin() ) break;
             if ( KnownMAC&&State->NetPwrOnNeed() )
             {
+                // Задаем широковещательный адрес
                 memset(&Address,0,sizeof(Address));
                 Address.sin_family=AF_INET;
                 Address.sin_port=::htons(0);
                 Address.sin_addr.s_addr=INADDR_BROADCAST;
-                //
-                Packet.PacketWOL.ZeroFirst=0;
-                // Заполняем синхронизационную последовательность
-                memset(Packet.PacketWOL.Sync,0xFF,MAC_AddrLength);
-                // Заполняем цепочку из повторяющегося 16 раз MAC-адреса
+                // Заполняем magic-пакет
+                Packet.WOL.ZeroFirst=0;
+                memset(Packet.WOL.Sync,0xFF,MAC_AddrLength);
                 for ( int i=0; i<16; i++ )
-                    memcpy(Packet.PacketWOL.Magic[i],MAC,MAC_AddrLength);
-                // Задаем размер пакета
-                PacketSize=sizeof(Packet.PacketWOL);
-                // Включаем режим отправки "Magic Packet"
+                    memcpy(Packet.WOL.Magic[i],MAC,MAC_AddrLength);
+                // Задаем размер пакета и включаем его отправку
+                PacketSize=sizeof(Packet.WOL);
                 LastSendTime=::GetTickCount()-SYNC_SendInterval;
-                SendCount=0; Process=mspMagic; 
-//            } else if ( (Sync&&State->NetSyncNewData())||
+                SendCount=0; Process=mspMagic;
             } else if ( State->NetSyncNewData()||
                 ((::GetTickCount()-LastSendTime)>=SYNC_WaitInterval) )
             {
-                // Задаем новый номер сеанса
-                SNumber=NextSNumber();
-                //
+                // Заполняем адрес получателя для всех пакетов в сеансе
                 memset(&Address,0,sizeof(Address));
                 Address.sin_family=AF_INET;
                 Address.sin_port=::htons(SYNC_Port);
                 Address.sin_addr.s_addr=IP;
-                // Заполняем заголовок пакета
-                Packet.PacketData.Header.Version=SYNC_Version;
-                Packet.PacketData.Header.SNumber=SNumber;
-                Packet.PacketData.Header.Type=mptSyncData;
-                // Запрашиваем новые данные для синхронизации
-                State->NetSyncData(&Packet.PacketData.Data);
-                // Шифруем пакет
-                BasicEncode((char*)&Packet.PacketData,sizeof(Packet.PacketData),Code_);
-                // Задаем размер пакета
-                PacketSize=sizeof(Packet.PacketData);
-                // Включаем режим отправки данных о состоянии
-                LastSendTime=::GetTickCount()-SYNC_SendInterval;
-                SendCount=0; Process=mspSend1; 
+                // Запрашиваем новые данные для синхронизации после обмена hello
+                State->NetSyncData(&SyncData);
+                //
+                Seed=BasicRand();
+                // Заполняем заголовок hello-пакета со своим random
+                Packet.Hello.Header.Version=SYNC_Version;
+                Packet.Hello.Header.Type=mptHello;
+                Packet.Hello.Header.Seed=Seed;
+                // Добавляем MAC
+                MAC_->Calc((char*)&Packet.Hello,
+                    sizeof(Packet.Hello)-sizeof(Packet.Hello.MAC),
+                    Packet.Hello.MAC,sizeof(Packet.Hello.MAC));
+                // Задаем размер пакета для отправки и шифруем его
+                PacketSize=sizeof(Packet.Hello);
+                BasicEncode((char*)&Packet,PacketSize,Code_);
+                // Включаем отправку, отложив ее на случайное время
+                LastSendTime=::GetTickCount()-Seed%SYNC_SendInterval;
+                SendCount=0; Process=mspHello;
             } else NeedSave=State->NetEnd();
             break;
-        case mspSend1:
         case mspMagic:
+        case mspHello:
+        case mspSyncData:
             // Проверяем не пора ли отправить следующий пакет
             if ( (::GetTickCount()-LastSendTime)<SYNC_SendInterval ) break;
             // Проверяем не отправлено ли заданное количество пакетов
             if ( SendCount>=SYNC_SendRetryes )
             {
-                // Завершаем сетевые операции с компьютером
+                // Завершаем сетевые операции с компьютером (WOL-успешно, SYNC-нет)
                 if ( Process==mspMagic ) State->NetPwrOnExecuted();
                 else State->NetSyncExecuted(false);
                 NeedSave=State->NetEnd();
@@ -171,9 +164,10 @@ bool MSyncState::Send(SOCKET Socket_, SOCKET SocketBC_, unsigned Code_)
             } else
             {
                 // Отправляем пакет
-                ::sendto(Process==mspMagic?SocketBC_:Socket_,(char*)&Packet,PacketSize,
-                    0,(sockaddr*)&Address,sizeof(Address));
-                // Сохраняем время отправки пакета и увеличиваем счетчик пакетов
+                ::sendto(Process==mspMagic?SocketBC_:Socket_,
+                    (char*)&Packet,PacketSize,0,
+                    (sockaddr*)&Address,sizeof(Address));
+                // Сохраняем время отправки пакета и увеличиваем счетчик
                 LastSendTime=::GetTickCount(); SendCount++;
             }
             break;
@@ -183,28 +177,59 @@ bool MSyncState::Send(SOCKET Socket_, SOCKET SocketBC_, unsigned Code_)
     return NeedSave;
 }
 //---------------------------------------------------------------------------
-bool MSyncState::Recv(char *Packet_, int PacketSize_, unsigned Code_)
+bool MSyncState::Recv(char *Packet_, int PacketSize_, unsigned Code_, MAuth *MAC_)
 {
-    MPacketBasic *RecvPacket=(MPacketBasic*)Packet_;
+    MSyncPHeader *RecvHeader=(MSyncPHeader*)Packet_;
     bool NeedSave=false;
 
-    //
     if ( Process==mspNone ) goto error;
-    // Проверяем размер пакета
-    if ( PacketSize_!=sizeof(MPacketBasic) ) goto error;
-    // Расшифровываем пакет
+    // Проверяем допустимые размеры пакета
+    if ( (PacketSize_<SYNC_MinSize)||
+        (PacketSize_>SYNC_MaxSize) ) goto error;
+    // Расшифровываем его
     BasicDecode(Packet_,PacketSize_,Code_);
-    // Проверяем номера версий интерфейса и сеанса
-    if ( (RecvPacket->Header.Version!=SYNC_Version)||
-        (RecvPacket->Header.SNumber!=SNumber) ) goto error;
+    // Сверяем версию и MAC
+    if ( (RecvHeader->Version!=SYNC_Version)||
+        (!MAC_->Check(Packet_,PacketSize_-MAC_Size,
+        Packet_+PacketSize_-MAC_Size,MAC_Size)) ) goto error;
 
     // Обрабатываем пакет
-    switch((int)RecvPacket->Header.Type)
+    switch((int)RecvHeader->Type)
     {
-        case mptDataConfirm:
-            // Проверяем текущее состояние отправки данных
-            if ( Process!=mspSend1 ) break;
-            // Завершаем сетевые операции с компьютером
+        case mptHello:
+            // Ждем ли мы этот пакет и верный ли у него размер ?
+            if ( (Process!=mspHello)||
+                (PacketSize_!=sizeof(MSyncPHello)) ) break;
+            // Адрес получателя не трогаем, он заполнен для mspHello
+//            memset(&Address,0,sizeof(Address));
+//            Address.sin_family=AF_INET;
+//            Address.sin_port=::htons(SYNC_Port);
+//            Address.sin_addr.s_addr=::inet_addr(IP);
+            // Можем сгенерировать сеансовый ID из своего random и клиента
+            Seed=BasicMix(Seed,RecvHeader->Seed);
+            // Заполняем заголовок пакета
+            Packet.Data.Header.Version=SYNC_Version;
+            Packet.Data.Header.Type=mptSyncData;
+            Packet.Data.Header.Seed=Seed;
+            // Копируем в пакет запрошенные еще на этапе hello данные для синхронизации
+            Packet.Data.Data=SyncData;
+            // Добавляем MAC
+            MAC_->Calc((char*)&Packet.Data,
+                sizeof(Packet.Data)-sizeof(Packet.Data.MAC),
+                Packet.Data.MAC,sizeof(Packet.Data.MAC));
+            // Задаем размер пакета для отправки и шифруем его
+            PacketSize=sizeof(Packet.Data);
+            BasicEncode((char*)&Packet,PacketSize,Code_);
+            //  Включаем отправку
+            LastSendTime=::GetTickCount()-SYNC_SendInterval;
+            SendCount=0; Process=mspSyncData;
+            break;
+        case mptSyncConf:
+            // Ждем ли мы этот пакет, верный ли у него размер и seed ?
+            if ( (Process!=mspSyncData)||
+                (PacketSize_!=sizeof(MSyncPConf))||
+                (RecvHeader->Seed!=Seed) ) break;
+            // Завершаем сетевые операции с компьютером успешно
             State->NetSyncExecuted(true);
             NeedSave=State->NetEnd();
             // Переходим в режим ожидания новых данных
@@ -217,69 +242,66 @@ error:
     return NeedSave;
 }
 //---------------------------------------------------------------------------
-unsigned MSyncState::GetCounter()
+void MSyncStates::Associate(MStates *States_, MComputers *Computers_)
 {
-    return Process==mspWait? 0: SendCount+1;
-}
-//---------------------------------------------------------------------------
-MSyncState *MSyncStates::Search(u_long IP_)
-{
-    MSyncState *SyncState=(MSyncState*)First;
-    while(SyncState)
-    {
-        if ( SyncState->GetIP()==IP_ ) break;
-        SyncState=(MSyncState*)SyncState->Next;
-    }
-    return SyncState;
-}
-//---------------------------------------------------------------------------
-bool MSyncStates::Associate(MStates *States_, MComputers *Computers_)
-{
+    MSyncState *SyncState, *LastSyncState;
     MComputer *Computer;
     u_long IP;
-    MSyncState *SyncState, *LastSyncState=(MSyncState*)First;
 
-    for ( MState *State=(MState*)States_->First;
-        State; State=(MState*)State->Next )
+    LastSyncState=(MSyncState*)gFirst();
+    for ( MState *State=(MState*)States_->gFirst();
+        State; State=(MState*)State->gNext() )
     {
         // Ищем компьютер, с которым ассоциировано состояние
-        Computer=Computers_->Search(State->Associated()); if ( Computer==NULL ) continue;
-        // Оределяем его IP-адрес
-        IP=::inet_addr(Computer->Address); if ( IP==INADDR_NONE ) continue;
+        Computer=Computers_->Search(State->Associated());
+        if ( Computer==NULL ) continue;
+        // Конвертируем IP-адрес из текста в u_long
+        IP=::inet_addr(Computer->Address);
+        if ( IP==INADDR_NONE ) continue;
         // Ищем по этому адресу состояние синхронизации
-        // (чтобы сохранить возможно известный MAC-адрес) или добавляем новое
-        SyncState=Search(IP); if ( SyncState==NULL ) SyncState=(MSyncState*)Add();
+        // (чтобы сохранить возможно известный MAC-адрес)
+        // или добавляем новое
+        SyncState=(SyncState=Search(IP))!=NULL? SyncState: (MSyncState*)Add();
         // Ассоциируем состояние синхронизации с состоянием компьютера и его адресом
         SyncState->Associate(State,IP);
         // Если состояние не последнее в списке, переносим его к началу
-        if ( LastSyncState!=NULL ) Exchange(LastSyncState,SyncState);
-        LastSyncState=(MSyncState*)SyncState->Next;
+        if ( LastSyncState!=NULL ) Exch(LastSyncState,SyncState);
+        LastSyncState=(MSyncState*)SyncState->gNext();
     }
-    // Удаляем из списка не использованные записи
+    // Удаляем оставшиеся не нужными объекты
     while(LastSyncState)
     {
-        SyncState=(MSyncState*)LastSyncState->Next;
-        Delete(LastSyncState);
+        SyncState=(MSyncState*)LastSyncState->gNext();
+        Del(LastSyncState);
         LastSyncState=SyncState;
     }
-
-    return true;
 }
 //---------------------------------------------------------------------------
-bool MSyncStates::Start()
+bool MSyncStates::Start() const
 {
-    for ( MSyncState *SyncState=(MSyncState*)First;
-        SyncState; SyncState=(MSyncState*)SyncState->Next )
+    for ( MSyncState *SyncState=(MSyncState*)gFirst();
+        SyncState; SyncState=(MSyncState*)SyncState->gNext() )
         if ( !SyncState->Start() ) return false;
     return true;
 }
 //---------------------------------------------------------------------------
-bool MSyncStates::Stop()
+bool MSyncStates::Stop() const
 {
     bool NeedSave=false;
-    for ( MSyncState *SyncState=(MSyncState*)First; SyncState;
-        SyncState=(MSyncState*)SyncState->Next ) NeedSave|=SyncState->Stop();
+    for ( MSyncState *SyncState=(MSyncState*)gFirst(); SyncState;
+        SyncState=(MSyncState*)SyncState->gNext() ) NeedSave|=SyncState->Stop();
     return NeedSave;
+}
+//---------------------------------------------------------------------------
+MSyncState *MSyncStates::Search(u_long IP_) const
+{
+    MSyncState *SyncState=(MSyncState*)gFirst();
+    while(SyncState)
+    {
+        if ( SyncState->gIP()==IP_ ) break;
+        SyncState=(MSyncState*)SyncState->gNext();
+    }
+    return SyncState;
 }
 //---------------------------------------------------------------------------
 MSync::MSync()
@@ -289,39 +311,30 @@ MSync::MSync()
     Thread=NULL;
     ThreadID=0;
     NetCode=0;
+    NetMAC=NULL;
     States=NULL;
     Socket=INVALID_SOCKET;
     SocketBC=INVALID_SOCKET;
-    ::InitializeCriticalSection(&CS_PCounter);
-    Counter=0;
+    ::InitializeCriticalSection(&CS_PCount);
+    PCount=0;
 }
 //---------------------------------------------------------------------------
 MSync::~MSync()
 {
-    SyncStates.Clear();
-    ::DeleteCriticalSection(&CS_PCounter);
+    ::DeleteCriticalSection(&CS_PCount);
 }
 //---------------------------------------------------------------------------
-bool MSync::SetARPFile(char *File_, unsigned Code_, bool AutoSave_)
+void MSync::SetARPFile(char *File_, unsigned Code_, bool AutoSave_)
 {
     AutoSaveARP=AutoSave_;
-    return SyncStates.SetDefaultFile(File_,Code_);
+    SyncStates.SetDefaultFile(File_,Code_);
 }
 //---------------------------------------------------------------------------
-bool MSync::SaveARP()
-{
-    return SyncStates.Save();
-}
-//---------------------------------------------------------------------------
-bool MSync::LoadARP()
-{
-    return SyncStates.Load();
-}
-//---------------------------------------------------------------------------
-bool MSync::NetInit(unsigned Code_)
+bool MSync::NetInit(unsigned Code_, MAuth *MAC_)
 {
     WSADATA WSAData;
     NetCode=Code_;
+    NetMAC=MAC_;
     Init=!::WSAStartup(MAKEWORD(1,1),&WSAData);
     return Init;
 }
@@ -329,14 +342,14 @@ bool MSync::NetInit(unsigned Code_)
 bool MSync::NetFree()
 {
     Init=::WSACleanup();
-    return Init;
+    return !Init;
 }
 //---------------------------------------------------------------------------
 bool MSync::Associate(MStates *States_, MComputers *Computers_)
 {
     States=NULL;
-    if ( (!SyncStates.Associate(States_,Computers_))||
-        (!SyncStates.Save()) ) return false;
+    SyncStates.Associate(States_,Computers_);
+    if ( !SyncStates.Save() ) return false;
     States=States_;
     return true;
 }
@@ -361,7 +374,7 @@ bool MSync::Start()
     if ( ::bind(Socket,(sockaddr*)&Address,
         sizeof(Address))==SOCKET_ERROR ) goto error;
 
-    // Создаем сокет для отправки broadcast-датаграмм
+    // Создаем сокет для отправки широковещательных пакетов
     if ( (SocketBC=::socket(AF_INET,SOCK_DGRAM,
         IPPROTO_IP))==INVALID_SOCKET ) goto error;
     // Устанавливаем для него опцию broadcast
@@ -387,8 +400,8 @@ bool MSync::Start()
     return true;
 error:
     // Закрываем сокеты
-    if ( Socket!=INVALID_SOCKET ) ::closesocket(Socket);
-    if ( SocketBC!=INVALID_SOCKET ) ::closesocket(SocketBC);
+    if ( Socket!=INVALID_SOCKET ) { ::closesocket(Socket); Socket=INVALID_SOCKET; }
+    if ( SocketBC!=INVALID_SOCKET ) { ::closesocket(SocketBC); SocketBC=INVALID_SOCKET; }
     return false;
 }
 //---------------------------------------------------------------------------
@@ -400,23 +413,23 @@ void MSync::Stop()
     // Ждем завершения потока
     ::WaitForSingleObject(Thread,INFINITE);
     // Закрываем описатель потока
-    ::CloseHandle(Thread); Thread=NULL; ThreadID=0;
-    //
-    if ( SyncStates.Stop() ) States->Save();
+    ::CloseHandle(Thread);
+    Thread=NULL; ThreadID=0;
     // Закрываем сокеты
-    ::closesocket(Socket);
-    ::closesocket(SocketBC);
-    //
-    PCounterSet(0);
+    ::closesocket(Socket); Socket=INVALID_SOCKET;
+    ::closesocket(SocketBC); SocketBC=INVALID_SOCKET;
+    // При необходимости сохраняем состояния компьютеров
+    if ( SyncStates.Stop() ) States->Save();
 }
 //---------------------------------------------------------------------------
 DWORD WINAPI MSync::ThreadFunc(LPVOID Data)
 {
     // Создаем очередь сообщений для потока
     ::PeekMessage(NULL,(HANDLE)-1,0,0,PM_NOREMOVE);
-
+    // Запускаем обработчик
     ((MSync*)Data)->ThreadExecute();
-
+    // Сбрасываем индикатор - счетчик пакетов
+    ((MSync*)Data)->sPCount(0);
     // Завершаем работу потока
     ::ExitThread(0);
     return 0;
@@ -435,36 +448,53 @@ void MSync::ThreadExecute()
     {
         StartCycleTime=::GetTickCount();
 
-        // Проверяем очередь сообщений
-        if ( ::PeekMessage(&Message,(HANDLE)-1,0,0,PM_REMOVE) ) break;
         // Выполняем цикл отправки/приема данных
         NeedSave=false; Process=0;
-        for ( MSyncState *SyncState=(MSyncState*)SyncStates.First, *RecvState;
-            SyncState; SyncState=(MSyncState*)SyncState->Next )
+        for ( MSyncState *SyncState=(MSyncState*)SyncStates.gFirst(), *RecvState;
+            SyncState; SyncState=(MSyncState*)SyncState->gNext() )
         {
-            // Отправляем данные
-            NeedSave|=SyncState->Send(Socket,SocketBC,NetCode);
-            //
-            Process+=SyncState->GetCounter();
-            // Проверяем нет ли данных для чтения
-            if ( !PollData(Socket) ) continue;
-            // Читаем данные из сокета
-            memset(&FromAddr,0,sizeof(FromAddr)); AddrSize=sizeof(FromAddr);
-            RecvSize=::recvfrom(Socket,(char*)&Packet,sizeof(Packet),
-                0,(sockaddr*)&FromAddr,&AddrSize);
-            if ( (RecvSize==0)||(RecvSize==SOCKET_ERROR) ) continue;
-            // Ищем состояние синхронизации по адресу, с которого пришел пакет
-            RecvState=SyncStates.Search(FromAddr.sin_addr.s_addr);
-            // Передаем ему пакет для обработки
-            if ( RecvState!=NULL ) NeedSave|=RecvState->Recv((char*)&Packet,RecvSize,NetCode);
+            // Опустошаем очередь принятых пакетов
+            while(PollData(Socket))
+            {
+                // Читаем данные из сокета
+                memset(&FromAddr,0,sizeof(FromAddr)); AddrSize=sizeof(FromAddr);
+                RecvSize=::recvfrom(Socket,(char*)&Packet,sizeof(Packet),
+                    0,(sockaddr*)&FromAddr,&AddrSize);
+                if ( (RecvSize==0)||(RecvSize==SOCKET_ERROR) ) continue;
+                // Ищем состояние синхронизации по IP-адресу, с которого пришел пакет
+                RecvState=SyncStates.Search(FromAddr.sin_addr.s_addr);
+                // Передаем его для обработки и отправки ответа сразу же
+                if ( RecvState!=NULL )
+                {
+                    NeedSave|=RecvState->Recv((char*)&Packet,RecvSize,NetCode,NetMAC);
+                    NeedSave|=SyncState->Send(Socket,SocketBC,NetCode,NetMAC);
+                }
+            }
+            // Вяло отправляем данные "по-расписанию"
+            NeedSave|=SyncState->Send(Socket,SocketBC,NetCode,NetMAC);
+            Process+=SyncState->gPCount();
         }
         // Проверяем нужно ли сохранить обновленные состояния компьютеров
-        if ( NeedSave ) States->Save();
-        // Обновляем MAC-адреса и при необходимости сохраняем их на диск
-        if ( UpdateMAC(&SyncStates)&&AutoSaveARP ) SyncStates.Save();
+        if ( NeedSave )
+        {
+            // Скроем возможные ошибки выделения памяти
+            try { States->Save(); }
+            catch (std::bad_alloc &e) {}
+        }
+        // Обновляем MAC-адреса и при необходимости сохраняем на диск
+        if ( UpdateMAC(&SyncStates)&&AutoSaveARP )
+        {
+            // Скроем возможные ошибки выделения памяти
+            try { SyncStates.Save(); }
+            catch (std::bad_alloc &e) {}
+        }
         // Обновляем индикатор процесса синхронизации
-        PCounterSet(Process);
+        sPCount(Process);
 
+        // Проверяем не пора ли завершить работу
+        if ( ::PeekMessage(&Message,(HANDLE)-1,0,0,PM_REMOVE) ) return;
+
+        // Засыпаем, если пакеты быстро разослали
         if ( (::GetTickCount()-StartCycleTime)<(SYNC_SendInterval/4) )
             ::Sleep(SYNC_SendInterval/4);
     }
@@ -498,8 +528,8 @@ bool MSync::UpdateMAC(MSyncStates *States_)
     if ( ::GetIpNetTable(NULL,&TableSize,TRUE)!=
         ERROR_INSUFFICIENT_BUFFER ) goto error;
     // Выделяем память под таблицу
-    Table=(PMIB_IPNETTABLE)new char[TableSize];
-    if ( Table==NULL ) goto error;
+    try { Table=(PMIB_IPNETTABLE)new char[TableSize]; }
+    catch (std::bad_alloc &e) { goto error; }
     memset(Table,0,TableSize);
     // Берем таблицу
     if ( ::GetIpNetTable(Table,&TableSize,TRUE)!=0 ) goto error;
@@ -526,22 +556,24 @@ error:
     return false;
 }
 //---------------------------------------------------------------------------
-void MSync::PCounterSet(unsigned Value_)
+void MSync::sPCount(unsigned Value_)
 {
-    ::EnterCriticalSection(&CS_PCounter); Counter=Value_;
-    ::LeaveCriticalSection(&CS_PCounter);
+    ::EnterCriticalSection(&CS_PCount);
+    PCount=Value_;
+    ::LeaveCriticalSection(&CS_PCount);
 }
 //---------------------------------------------------------------------------
-unsigned MSync::GetCounterMax()
+unsigned MSync::gPCountMax() const
 {
-    return SyncStates.Count*SYNC_SendRetryes;
+    return SyncStates.gCount()*SYNC_SendRetryes;
 }
 //---------------------------------------------------------------------------
-unsigned MSync::GetCounter()
+unsigned MSync::gPCount() const
 {
     unsigned result;
-    ::EnterCriticalSection(&CS_PCounter); result=Counter;
-    ::LeaveCriticalSection(&CS_PCounter);
+    ::EnterCriticalSection(&CS_PCount);
+    result=PCount;
+    ::LeaveCriticalSection(&CS_PCount);
     return result;
 }
 //---------------------------------------------------------------------------
@@ -555,7 +587,8 @@ MSyncCl::MSyncCl()
     Process=mspNone;
     SendCount=0;
     LastSendTime=0;
-    SNumber=0;
+    NetCode=0;
+    NetMAC=NULL;
 }
 //---------------------------------------------------------------------------
 MSyncCl::~MSyncCl()
@@ -578,10 +611,11 @@ bool MSyncCl::PollData(SOCKET Socket_)
     return ::select(0,&WaitSockets,NULL,NULL,&WaitTimer)==1;
 }
 //---------------------------------------------------------------------------
-bool MSyncCl::NetInit(unsigned Code_)
+bool MSyncCl::NetInit(unsigned Code_, MAuth *MAC_)
 {
     WSADATA WSAData;
     NetCode=Code_;
+    NetMAC=MAC_;
     Init=!::WSAStartup(MAKEWORD(1,1),&WSAData);
     return Init;
 }
@@ -589,7 +623,7 @@ bool MSyncCl::NetInit(unsigned Code_)
 bool MSyncCl::NetFree()
 {
     Init=::WSACleanup();
-    return Init;
+    return !Init;
 }
 //---------------------------------------------------------------------------
 void MSyncCl::Associate(MStateCl *State_)
@@ -618,7 +652,8 @@ bool MSyncCl::Start()
         sizeof(Address))==SOCKET_ERROR ) goto error;
 
     //
-    Process=mspWait; LastSendTime=::GetTickCount();
+    LastSendTime=::GetTickCount();
+    Process=mspWait;
 
     // Создаем поток для выполнения отправки и приема данных
     Thread=::CreateThread(NULL,0,&ThreadFunc,(LPVOID)this,0,&ThreadID);
@@ -627,7 +662,7 @@ bool MSyncCl::Start()
     return true;
 error:
     // Закрываем сокет
-    if ( Socket!=INVALID_SOCKET ) ::closesocket(Socket);
+    if ( Socket!=INVALID_SOCKET ) { ::closesocket(Socket); Socket=INVALID_SOCKET; }
     return false;
 }
 //---------------------------------------------------------------------------
@@ -640,8 +675,8 @@ void MSyncCl::Stop()
     ::WaitForSingleObject(Thread,INFINITE);
     // Закрываем описатель потока
     ::CloseHandle(Thread); Thread=NULL; ThreadID=0;
-    // Закрываем сокеты
-    ::closesocket(Socket);
+    // Закрываем сокет
+    ::closesocket(Socket); Socket=INVALID_SOCKET;
 }
 //---------------------------------------------------------------------------
 DWORD WINAPI MSyncCl::ThreadFunc(LPVOID Data)
@@ -668,25 +703,31 @@ void MSyncCl::ThreadExecute()
     {
         StartCycleTime=::GetTickCount();
 
-        // Проверяем очередь сообщений
-        if ( ::PeekMessage(&Message,(HANDLE)-1,0,0,PM_REMOVE) ) break;
         NeedSave=false;
-        // Проверяем нет ли данных для чтения
-        if ( PollData(Socket) )
+        // Опустошаем буфер пакетов
+        while(PollData(Socket))
         {
             // Читаем данные из сокета
             memset(&FromAddr,0,sizeof(FromAddr)); AddrSize=sizeof(FromAddr);
             RecvSize=::recvfrom(Socket,(char*)&RcvPacket,sizeof(RcvPacket),
                 0,(sockaddr*)&FromAddr,&AddrSize);
-            // Если что-то считали и без ошибок, передаем для обработки
-            if ( !((RecvSize==0)||(RecvSize==SOCKET_ERROR)) )
-                NeedSave|=Recv(&FromAddr,(char*)&RcvPacket,RecvSize);
+            if ( (RecvSize==0)||(RecvSize==SOCKET_ERROR) ) continue;
+            // Передаем для обработки и отправки ответа
+            NeedSave|=Recv(&FromAddr,(char*)&RcvPacket,RecvSize);
         }
-        // Отправляем данные
         NeedSave|=Send(Socket);
-        // Проверяем нужно ли сохранить обновленное состояние
-        if ( NeedSave ) State->Save();
+        // Сохраняем обновленное состояние, если нужно
+        if ( NeedSave )
+        {
+            // Скроем возможные ошибки выделения памяти
+            try { State->Save(); }
+            catch (std::bad_alloc &e) {}
+        }
 
+        // Проверяем очередь сообщений
+        if ( ::PeekMessage(&Message,(HANDLE)-1,0,0,PM_REMOVE) ) break;
+
+        // Засыпаем, если быстро управились
         if ( (::GetTickCount()-StartCycleTime)<(SYNC_SendInterval/4) )
             ::Sleep(SYNC_SendInterval/4);
     }
@@ -694,49 +735,76 @@ void MSyncCl::ThreadExecute()
 //---------------------------------------------------------------------------
 bool MSyncCl::Recv(sockaddr_in *From_, char *Packet_, int PacketSize_)
 {
-    MPacketBasic *RecvPacket=(MPacketBasic*)Packet_;
+    MSyncPHeader *RecvHeader=(MSyncPHeader*)Packet_;
     bool NeedSave=false;
 
-    //
     if ( Process==mspNone ) goto error;
-    // Если начат обмен, игнорируем пакеты с других IP
+    // Если сеанс начат, игнорируем пакеты с других IP
     if ( (Process!=mspWait)&&
         (SndAddr.sin_addr.s_addr!=From_->sin_addr.s_addr) ) goto error;
-    // Проверяем минимальный размер пакета
-    if ( PacketSize_<sizeof(MPacketBasic) ) goto error;
-    // Расшифровываем пакет
+    // Проверяем допустимые размеры пакета
+    if ( (PacketSize_<SYNC_MinSize)||
+        (PacketSize_>SYNC_MaxSize) ) goto error;
+    // Расшифровываем его
     BasicDecode(Packet_,PacketSize_,NetCode);
-    // Сверяем номера версий и сеанса
-    if ( (RecvPacket->Header.Version!=SYNC_Version)||
-        ((Process!=mspWait)&&(RecvPacket->Header.SNumber!=SNumber)) ) goto error;
+    // Сверяем версию и MAC
+    if ( (RecvHeader->Version!=SYNC_Version)||
+        (!NetMAC->Check(Packet_,PacketSize_-MAC_Size,
+        Packet_+PacketSize_-MAC_Size,MAC_Size)) ) goto error;
 
     // Обрабатываем пакет
-    switch((int)RecvPacket->Header.Type)
+    switch((int)RecvHeader->Type)
     {
-        case mptSyncData:
-            // Проверяем текущее состояние отправки данных
-            if ( Process!=mspWait ) break;
-            // Проверяем размер пакета
-            if ( PacketSize_!=sizeof(MPacketData) ) break;
-            //
-            SyncData=((MPacketData*)RecvPacket)->Data;
-            // Запоминаем номер сеанса для дальнейших проверок пакетов
-            // и откуда пришел пакет с данными, чтобы вернуть ответ
-            SNumber=RecvPacket->Header.SNumber;
+        case mptHello:
+            // Ждем ли мы этот пакет и верный ли у него размер ?
+            if ( (Process!=mspWait)||
+                (PacketSize_!=sizeof(MSyncPHello)) ) break;
+            // Запоминаем адрес сервера, с которым начали обмен
             SndAddr=*From_;
 //            memset(&SndAddr,0,sizeof(SndAddr));
 //            SndAddr.sin_family=AF_INET;
 //            SndAddr.sin_port=From_->sin_port;
 //            SndAddr.sin_addr.s_addr=From_->sin_addr.s_addr;
-            // Заполняем заголовок пакета
-            SndPacket.Header.Version=SYNC_Version;
-            SndPacket.Header.SNumber=SNumber;
-            SndPacket.Header.Type=mptDataConfirm;
-            // Шифруем пакет
-            BasicEncode((char*)&SndPacket,sizeof(SndPacket),NetCode);
-            // Включаем отправку подтверждения о получении
+            // Заполняем заголовок hello-пакета со своим random
+            SndPacket.Hello.Header.Version=SYNC_Version;
+            SndPacket.Hello.Header.Type=mptHello;
+            SndPacket.Hello.Header.Seed=BasicRand();
+            // И сразу генерируем сеансовый ID, т.к. random сервера уже приняли
+            Seed=BasicMix(SndPacket.Hello.Header.Seed,RecvHeader->Seed);
+            // Добавляем к пакету MAC
+            NetMAC->Calc((char*)&SndPacket.Hello,
+                sizeof(SndPacket.Hello)-sizeof(SndPacket.Hello.MAC),
+                SndPacket.Hello.MAC,sizeof(SndPacket.Hello.MAC));
+            // Задаем размер пакета для отправки и шифруем его
+            SndPacketSize=sizeof(SndPacket.Hello);
+            BasicEncode((char*)&SndPacket,SndPacketSize,NetCode);
+            // Включаем отправку
             LastSendTime=::GetTickCount()-SYNC_SendInterval;
-            SendCount=0; Process=mspSend1;
+            SendCount=0; Process=mspHello;
+            break;
+        case mptSyncData:
+            // Ждем ли мы этот пакет и верный ли у него размер ?
+            if ( (Process!=mspHello)||
+                (SendCount==0)||            // защита от replay brute-force 
+                (PacketSize_!=sizeof(MSyncPData))||
+                (RecvHeader->Seed!=Seed) ) break;
+            // Извлекаем новый режим работы клиента, но применим его
+            // только после отправки подтверждения серверу
+            SyncData=((MSyncPData*)Packet_)->Data;
+            // Заполняем пакет c ответом серверу
+            SndPacket.Conf.Header.Version=SYNC_Version;
+            SndPacket.Conf.Header.Type=mptSyncConf;
+            SndPacket.Conf.Header.Seed=Seed;
+            // Добавляем к пакету MAC
+            NetMAC->Calc((char*)&SndPacket.Conf,
+                sizeof(SndPacket.Conf)-sizeof(SndPacket.Conf.MAC),
+                SndPacket.Conf.MAC,sizeof(SndPacket.Conf.MAC));
+            // Задаем размер пакета для отправки и шифруем его
+            SndPacketSize=sizeof(SndPacket.Conf);
+            BasicEncode((char*)&SndPacket,SndPacketSize,NetCode);
+            // Включаем отправку
+            LastSendTime=::GetTickCount()-SYNC_SendInterval;
+            SendCount=0; Process=mspSyncConf;
             break;
         default: break;
     }
@@ -751,23 +819,25 @@ bool MSyncCl::Send(SOCKET Socket_)
 
     switch(Process)
     {
-        case mspWait: break;
-        case mspSend1:
+        case mspHello:
+        case mspSyncConf:
             // Проверяем не пора ли отправить следующий пакет
             if ( (::GetTickCount()-LastSendTime)<SYNC_SendInterval ) break;
             // Проверяем не отправлено ли заданное количество пакетов
             if ( SendCount>=SYNC_SendRetryes )
             {
-                // Применяем новое состояние
-                NeedSave=State->NewSyncData(&SyncData);
+                // Применяем новое состояние/выполняем команду (reboot, shutdown),
+                // если данные были получены и клиент отправлял подтверждение серверу
+                if ( Process==mspSyncConf )
+                    NeedSave=State->NewSyncData(&SyncData);
                 // Переходим в режим ожидания новых данных
                 Process=mspWait;
             } else
             {
                 // Отправляем пакет
-                ::sendto(Socket_,(char*)&SndPacket,sizeof(SndPacket),
+                ::sendto(Socket_,(char*)&SndPacket,SndPacketSize,
                     0,(sockaddr*)&SndAddr,sizeof(SndAddr));
-                // Сохраняем время отправки пакета и увеличиваем счетчик пакетов
+                // Сохраняем время отправки пакета и увеличиваем счетчик
                 LastSendTime=::GetTickCount(); SendCount++;
             }
             break;

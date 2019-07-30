@@ -6,7 +6,9 @@
     <PROJECT value="TLKRte.exe"/>
     <OBJFILES value="UnitMain.obj UnitService.obj ..\..\Core\UnitCommon.obj 
       ..\..\Core\UnitStates.obj ..\..\Core\UnitTariffs.obj 
-      ..\..\Core\UnitSLList.obj ..\..\Core\UnitList.obj"/>
+      ..\..\Core\UnitSLList.obj ..\..\Core\UnitList.obj 
+      ..\..\Ext\BrianGladman\SHA\hmac.obj ..\..\Ext\BrianGladman\SHA\sha1.obj 
+      ..\..\Ext\BrianGladman\SHA\sha2.obj"/>
     <RESFILES value=""/>
     <IDLFILES value=""/>
     <IDLGENFILES value=""/>
@@ -19,7 +21,7 @@
       vcldbx.bpi ibxpress.bpi cds.bpi dsnap.bpi bdecds.bpi qrpt.bpi teeui.bpi 
       teedb.bpi tee.bpi dss.bpi teeqr.bpi visualclx.bpi visualdbclx.bpi 
       dsnapcrba.bpi dsnapcon.bpi bcbsmp.bpi"/>
-    <PATHCPP value=".;..\..\Core;..\..\Core;..\..\Core;..\..\Core;..\..\Core"/>
+    <PATHCPP value=".;..\..\Core;..\..\Core;..\..\Core;..\..\Core;..\..\Core;..\..\Ext\BrianGladman\SHA;..\..\Ext\BrianGladman\SHA;..\..\Ext\BrianGladman\SHA"/>
     <PATHPAS value=".;"/>
     <PATHRC value=".;"/>
     <PATHASM value=".;"/>
@@ -29,14 +31,15 @@
     <USERDEFINES value=""/>
     <SYSDEFINES value="NO_STRICT;_NO_VCL"/>
     <MAINSOURCE value="TLKRte.bpf"/>
-    <INCLUDEPATH value="..\..\Core;$(BCB)\include;$(BCB)\include\vcl"/>
-    <LIBPATH value="..\..\Core;$(BCB)\lib\obj;$(BCB)\lib"/>
+    <INCLUDEPATH value="..\..\Ext\BrianGladman\SHA;..\..\Core;$(BCB)\include;$(BCB)\include\vcl"/>
+    <LIBPATH value="..\..\Ext\BrianGladman\SHA;..\..\Core;$(BCB)\lib\obj;$(BCB)\lib"/>
     <WARNINGS value="-w-par"/>
     <OTHERFILES value=""/>
   </MACROS>
   <OPTIONS>
-    <IDLCFLAGS value="-I..\..\Core -I$(BCB)\include -I$(BCB)\include\vcl -src_suffix cpp -boa"/>
-    <CFLAG1 value="-O2 -Vx -Ve -X- -a1 -b- -k- -vi -tW -tWM -c"/>
+    <IDLCFLAGS value="-I..\..\Ext\BrianGladman\SHA -I..\..\Core -I$(BCB)\include 
+      -I$(BCB)\include\vcl -src_suffix cpp -boa"/>
+    <CFLAG1 value="-O2 -Vx -Ve -X- -pr -a8 -6 -b- -k- -vi -tW -tWM -c"/>
     <PFLAGS value="-$Y- -$L- -$D- -$A8 -v -JPHNE -M"/>
     <RFLAGS value=""/>
     <AFLAGS value="/mx /w2 /zn"/>
@@ -59,6 +62,9 @@
       <FILE FILENAME="..\..\Core\UnitTariffs.cpp" FORMNAME="" UNITNAME="UnitTariffs" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="..\..\Core\UnitSLList.cpp" FORMNAME="" UNITNAME="UnitSLList" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="..\..\Core\UnitList.cpp" FORMNAME="" UNITNAME="UnitList" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="..\..\Ext\BrianGladman\SHA\hmac.c" FORMNAME="" UNITNAME="hmac.c" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="..\..\Ext\BrianGladman\SHA\sha1.c" FORMNAME="" UNITNAME="sha1.c" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="..\..\Ext\BrianGladman\SHA\sha2.c" FORMNAME="" UNITNAME="sha2.c" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
   </FILELIST>
   <BUILDTOOLS>
   </BUILDTOOLS>
@@ -70,7 +76,7 @@ AutoIncBuild=1
 MajorVer=1
 MinorVer=0
 Release=0
-Build=12
+Build=11
 Debug=0
 PreRelease=0
 Special=0
@@ -81,27 +87,29 @@ CodePage=1251
 
 [Version Info Keys]
 CompanyName=MMM Groups
-FileDescription=управление маршрутизацией
-FileVersion=1.0.0.12
-InternalName=RouteSupport
+FileDescription=TLK Route Support
+FileVersion=1.0.0.11
+InternalName=
 LegalCopyright=
 LegalTrademarks=
 OriginalFilename=TLKRte.exe
-ProductName=TLK
-ProductVersion=3.1.0.0
+ProductName=Time Locker
+ProductVersion=1.0.0.0
 Comments=
 
 [HistoryLists\hlIncludePath]
-Count=3
-Item0=..\..\Core;$(BCB)\include;$(BCB)\include\vcl
-Item1=$(BCB)\include;$(BCB)\include\vcl
-Item2=D:\Program Files\Borland\CBuilder5\Projects\;$(BCB)\include;$(BCB)\include\vcl
+Count=4
+Item0=..\..\Ext\BrianGladman\SHA;..\..\Core;$(BCB)\include;$(BCB)\include\vcl
+Item1=..\..\Core;$(BCB)\include;$(BCB)\include\vcl
+Item2=$(BCB)\include;$(BCB)\include\vcl
+Item3=D:\Program Files\Borland\CBuilder5\Projects\;$(BCB)\include;$(BCB)\include\vcl
 
 [HistoryLists\hlLibraryPath]
-Count=3
-Item0=..\..\Core;$(BCB)\lib\obj;$(BCB)\lib
-Item1=$(BCB)\lib\obj;$(BCB)\lib
-Item2=D:\Program Files\Borland\CBuilder5\Projects\;$(BCB)\lib\obj;$(BCB)\lib
+Count=4
+Item0=..\..\Ext\BrianGladman\SHA;..\..\Core;$(BCB)\lib\obj;$(BCB)\lib
+Item1=..\..\Core;$(BCB)\lib\obj;$(BCB)\lib
+Item2=$(BCB)\lib\obj;$(BCB)\lib
+Item3=D:\Program Files\Borland\CBuilder5\Projects\;$(BCB)\lib\obj;$(BCB)\lib
 
 [HistoryLists\hlDebugSourcePath]
 Count=1

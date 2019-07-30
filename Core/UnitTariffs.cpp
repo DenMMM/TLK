@@ -9,7 +9,6 @@
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
 //---------------------------------------------------------------------------
-
 MRunTime::MRunTime()
 {
     TariffID=0;
@@ -26,24 +25,22 @@ MRunTime::~MRunTime()
 //
 }
 
-bool MRunTime::Copy(MListItem *SrcItem_)
+void MRunTime::Copy(const MListItem *SrcItem_)
 {
-    MRunTime *RunTime_=(MRunTime*)SrcItem_;
-    TariffID=RunTime_->TariffID;
-    Number=RunTime_->Number;
-    StartTime=RunTime_->StartTime;
-    Type=RunTime_->Type;
-    BeginTime=RunTime_->BeginTime;
-    EndTime=RunTime_->EndTime;
-    SizeTime=RunTime_->SizeTime;
-    WorkTime=RunTime_->WorkTime;
-    MaxTime=RunTime_->MaxTime;
-    Cost=RunTime_->Cost;
-    return true;
+    MRunTime *RTime_=(MRunTime*)SrcItem_;
+
+    TariffID=RTime_->TariffID;
+    Number=RTime_->Number;
+    StartTime=RTime_->StartTime;
+    Type=RTime_->Type;
+    BeginTime=RTime_->BeginTime;
+    EndTime=RTime_->EndTime;
+    SizeTime=RTime_->SizeTime;
+    WorkTime=RTime_->WorkTime;
+    MaxTime=RTime_->MaxTime;
+    Cost=RTime_->Cost;
 }
-
 //---------------------------------------------------------------------------
-
 MTariffTime::MTariffTime()
 {
     Type=mttHours;
@@ -58,18 +55,18 @@ MTariffTime::~MTariffTime()
 //
 }
 
-bool MTariffTime::Copy(MListItem *SrcItem_)
+void MTariffTime::Copy(const MListItem *SrcItem_)
 {
-    MTariffTime *TariffTime_=(MTariffTime*)SrcItem_;
-    Type=TariffTime_->Type;
-    BeginTime=TariffTime_->BeginTime;
-    EndTime=TariffTime_->EndTime;
-    SizeTime=TariffTime_->SizeTime;
-    Cost=TariffTime_->Cost;
-    return true;
+    MTariffTime *TTime_=(MTariffTime*)SrcItem_;
+
+    Type=TTime_->Type;
+    BeginTime=TTime_->BeginTime;
+    EndTime=TTime_->EndTime;
+    SizeTime=TTime_->SizeTime;
+    Cost=TTime_->Cost;
 }
 
-unsigned MTariffTime::GetDataSize()
+unsigned MTariffTime::GetDataSize() const
 {
     return
         sizeof(Type)+
@@ -79,7 +76,7 @@ unsigned MTariffTime::GetDataSize()
         sizeof(Cost);
 }
 
-char *MTariffTime::SetData(char *Data_)
+char *MTariffTime::SetData(char *Data_) const
 {
     Data_=MemSet(Data_,Type);
     Data_=MemSet(Data_,BeginTime);
@@ -89,19 +86,18 @@ char *MTariffTime::SetData(char *Data_)
     return Data_;
 }
 
-char *MTariffTime::GetData(char *Data_, char *Limit_)
+const char *MTariffTime::GetData(const char *Data_, const char *Limit_)
 {
-    if ( (Data_=MemGet(Data_,&Type,Limit_))==NULL ) goto error;
-    if ( (Data_=MemGet(Data_,&BeginTime,Limit_))==NULL ) goto error;
-    if ( (Data_=MemGet(Data_,&EndTime,Limit_))==NULL ) goto error;
-    if ( (Data_=MemGet(Data_,&SizeTime,Limit_))==NULL ) goto error;
-    if ( (Data_=MemGet(Data_,&Cost,Limit_))==NULL ) goto error;
-    return Data_;
-error:
-    return NULL;
+    return
+        (Data_=MemGet(Data_,&Type,Limit_))!=NULL &&
+        (Data_=MemGet(Data_,&BeginTime,Limit_))!=NULL &&
+        (Data_=MemGet(Data_,&EndTime,Limit_))!=NULL &&
+        (Data_=MemGet(Data_,&SizeTime,Limit_))!=NULL &&
+        (Data_=MemGet(Data_,&Cost,Limit_))!=NULL
+        ? Data_: NULL;
 }
 
-int MTariffTime::MaxWorkTime(int Time_)
+int MTariffTime::MaxWorkTime(int Time_) const
 {
     int WorkTime;
 
@@ -111,80 +107,112 @@ int MTariffTime::MaxWorkTime(int Time_)
 
     return WorkTime;
 }
-
 //---------------------------------------------------------------------------
-
-MTariff::MTariff()
+MTariffInfo::MTariffInfo()
 {
     ID=0;
     *Name=0;
+}
+
+MTariffInfo::~MTariffInfo()
+{
+//
+}
+
+void MTariffInfo::Copy(const MListItem *SrcItem_)
+{
+    MTariffInfo *TariffInfo_=(MTariffInfo*)SrcItem_;
+    ID=TariffInfo_->ID;
+    strcpy(Name,TariffInfo_->Name);
+}
+
+char *MTariffInfo::SetName(const char *Name_)
+{
+    return strlen(Name_)>MAX_TariffNameLen?
+        NULL: strcpy(Name,Name_);
+}
+//---------------------------------------------------------------------------
+MTariffInfo *MTariffsInfo::Search(unsigned ID_) const
+{
+    MTariffInfo *TariffInfo=(MTariffInfo*)gFirst();
+    while(TariffInfo)
+    {
+        if ( TariffInfo->ID==ID_ ) return TariffInfo;
+        TariffInfo=(MTariffInfo*)TariffInfo->gNext();
+    }
+    return NULL;
+}
+//---------------------------------------------------------------------------
+MTariff::MTariff()
+{
+    *Name=0;
     Programs=0;
     Reboot=false;
-    ComputersNum=0;
-    Computers=NULL;
+    CompsCnt=0;
 }
 
 MTariff::~MTariff()
 {
-    Times.Clear();
-    delete[] Computers;
+//
 }
 
-bool MTariff::Copy(MListItem *SrcItem_)
+void MTariff::Copy(const MListItem *SrcItem_)
 {
     MTariff *Tariff_=(MTariff*)SrcItem_;
-    ID=Tariff_->ID;
+
     strcpy(Name,Tariff_->Name);
     Programs=Tariff_->Programs;
     Reboot=Tariff_->Reboot;
+    CompsCnt=Tariff_->CompsCnt;
+    for (int i=0; i<CompsCnt; i++) Comps[i]=Tariff_->Comps[i];
     Times.Copy(&Tariff_->Times);
-    ComputersNum=Tariff_->ComputersNum;
-    delete[] Computers; Computers=new int[ComputersNum];
-    memcpy(Computers,Tariff_->Computers,sizeof(int)*ComputersNum);
-    return true;
+    MIDListItem::Copy(SrcItem_);
 }
 
-unsigned MTariff::GetDataSize()
+unsigned MTariff::GetDataSize() const
 {
     return
-        sizeof(ID)+
+        MIDListItem::GetDataSize()+
         strlen(Name)+1+
         sizeof(Programs)+
         sizeof(Reboot)+
-        Times.GetAllDataSize(true)+
-        sizeof(ComputersNum)+
-        sizeof(*Computers)*ComputersNum;
+        sizeof(CompsCnt)+
+        sizeof(*Comps)*CompsCnt+
+        Times.GetAllDataSize();
 }
 
-char *MTariff::SetData(char *Data_)
+char *MTariff::SetData(char *Data_) const
 {
-    Data_=MemSet(Data_,ID);
+    Data_=MIDListItem::SetData(Data_);
     Data_=MemSetCLine(Data_,Name);
     Data_=MemSet(Data_,Programs);
     Data_=MemSet(Data_,Reboot);
-    Data_=Times.SetAllData(Data_,true);
-    Data_=MemSet(Data_,ComputersNum);
-    for ( int i=0; i<ComputersNum; i++ ) Data_=MemSet(Data_,Computers[i]);
+    Data_=MemSet(Data_,CompsCnt);
+    for (int i=0; i<CompsCnt; i++) Data_=MemSet(Data_,Comps[i]);
+    Data_=Times.SetAllData(Data_);
     return Data_;
 }
 
-char *MTariff::GetData(char *Data_, char *Limit_)
+const char *MTariff::GetData(const char *Data_, const char *Limit_)
 {
-    if ( (Data_=MemGet(Data_,&ID,Limit_))==NULL ) goto error;
-    if ( (Data_=MemGetCLine(Data_,Name,MAX_TariffNameLength,Limit_))==NULL ) goto error;
-    if ( (Data_=MemGet(Data_,&Programs,Limit_))==NULL ) goto error;
-    if ( (Data_=MemGet(Data_,&Reboot,Limit_))==NULL ) goto error;
+    if (
+        (Data_=MIDListItem::GetData(Data_,Limit_))==NULL ||
+        (Data_=MemGetCLine(Data_,Name,sizeof(Name)-1,Limit_))==NULL ||
+        (Data_=MemGet(Data_,&Programs,Limit_))==NULL ||
+        (Data_=MemGet(Data_,&Reboot,Limit_))==NULL ||
+        (Data_=MemGet(Data_,&CompsCnt,Limit_))==NULL ||
+        (CompsCnt<0)||(CompsCnt>sizeof(Comps))
+        ) goto error;
+    for ( int i=0; i<CompsCnt; i++ )
+        if ( (Data_=MemGet(Data_,&Comps[i],Limit_))==NULL ) goto error;
     if ( (Data_=Times.GetAllData(Data_,Limit_))==NULL ) goto error;
-    if ( (Data_=MemGet(Data_,&ComputersNum,Limit_))==NULL ) goto error;
-    delete[] Computers; if ( (Computers=new int[ComputersNum])==NULL ) goto error;
-    for ( int i=0; i<ComputersNum; i++ )
-        if ( (Data_=MemGet(Data_,Computers+i,Limit_))==NULL ) return NULL;
+
     return Data_;
 error:
     return NULL;
 }
 
-void MTariff::CostPacket(MRunTime *RunTime_)
+void MTariff::CostPacket(MRunTime *RunTime_) const
 {
     int StartTime, WorkTime;
     double Cost;
@@ -194,8 +222,8 @@ void MTariff::CostPacket(MRunTime *RunTime_)
     //
     WorkTime=0; Cost=0.;
 
-    for ( MTariffTime *TariffTime=(MTariffTime*)Times.First;
-        TariffTime; TariffTime=(MTariffTime*)TariffTime->Next )
+    for ( MTariffTime *TariffTime=(MTariffTime*)Times.gFirst();
+        TariffTime; TariffTime=(MTariffTime*)TariffTime->gNext() )
     {
         if ( (TariffTime->Type!=mttPacket)||
             (TariffTime->BeginTime!=RunTime_->BeginTime)||
@@ -211,7 +239,7 @@ void MTariff::CostPacket(MRunTime *RunTime_)
     RunTime_->Cost=Cost;
 }
 
-void MTariff::CostFlyPacket(MRunTime *RunTime_)
+void MTariff::CostFlyPacket(MRunTime *RunTime_) const
 {
     int StartTime, SizeTime, WorkTime, MaxTime, NeedTime, RealTime;
     double Cost, LastCost;
@@ -226,8 +254,8 @@ void MTariff::CostFlyPacket(MRunTime *RunTime_)
     while(true)
     {
         // Ищем подходящую запись для пакета с ненулевым временем работы
-        for ( TariffTime=(MTariffTime*)Times.First;
-            TariffTime; TariffTime=(MTariffTime*)TariffTime->Next )
+        for ( TariffTime=(MTariffTime*)Times.gFirst(); TariffTime;
+            TariffTime=(MTariffTime*)TariffTime->gNext() )
         {
             if ( (TariffTime->Type!=mttFlyPacket)||
                 (TariffTime->SizeTime!=SizeTime) ) continue;
@@ -260,7 +288,7 @@ void MTariff::CostFlyPacket(MRunTime *RunTime_)
     RunTime_->Cost=Cost;
 }
 
-void MTariff::CostHours(MRunTime *RunTime_)
+void MTariff::CostHours(MRunTime *RunTime_) const
 {
     int StartTime, SizeTime, WorkTime, MaxTime, NeedTime, RealTime;
     double Cost;
@@ -277,8 +305,8 @@ void MTariff::CostHours(MRunTime *RunTime_)
     while(true)
     {
         // Ищем подходящую запись с ненулевым временем работы
-        for ( TariffTime=(MTariffTime*)Times.First;
-            TariffTime; TariffTime=(MTariffTime*)TariffTime->Next )
+        for ( TariffTime=(MTariffTime*)Times.gFirst();
+            TariffTime; TariffTime=(MTariffTime*)TariffTime->gNext() )
         {
             if ( (TariffTime->Type==mttHours)&&
                 ((MaxTime=TariffTime->MaxWorkTime(StartTime))!=0) ) break;
@@ -302,9 +330,9 @@ void MTariff::CostHours(MRunTime *RunTime_)
     RunTime_->Cost=Cost;
 }
 
-void MTariff::Cost(MRunTime *RunTime_, double Prec_)
+void MTariff::Cost(MRunTime *RunTime_, double Prec_) const
 {
-    if ( !CheckForComputer(RunTime_->Number) )
+    if ( !CheckForComp(RunTime_->Number) )
     {
         RunTime_->WorkTime=0; RunTime_->Cost=0.;
         return;
@@ -321,45 +349,44 @@ void MTariff::Cost(MRunTime *RunTime_, double Prec_)
     RunTime_->Cost=ceil(RunTime_->Cost/Prec_)*Prec_;
 }
 
-char *MTariff::SetName(char *Name_)
+char *MTariff::SetName(const char *Name_)
 {
-    return strlen(Name_)>MAX_TariffNameLength?
+    return strlen(Name_)>MAX_TariffNameLen?
         NULL: strcpy(Name,Name_);
 }
 
-int *MTariff::SetComputers(int *Computers_, int Num_)
+bool MTariff::SetComps(char *Comps_, int Count_)
 {
-    delete[] Computers;
-    ComputersNum=(Computers=new int[Num_])==NULL?0:Num_;
-    memcpy(Computers,Computers_,sizeof(int)*Num_);
-    return Computers;
+    if ( (Count_<0)||(Count_>sizeof(Comps)) ) return false;
+    CompsCnt=Count_;
+    for ( int i=0; i<Count_; i++ ) Comps[i]=Comps_[i];
+    return true;
 }
 
-bool MTariff::CheckForTime(__int64 &Time_)
+bool MTariff::CheckForTime(__int64 &Time_) const
 {
     int Time;
 
     // Выделяем количество минут с начала суток
     Time=ExtractHoursMin(Time_);
 
-    for ( MTariffTime *TariffTime=(MTariffTime*)Times.First;
-        TariffTime; TariffTime=(MTariffTime*)TariffTime->Next )
-        if ( TariffTime->MaxWorkTime(Time) ) return true;
+    for ( MTariffTime *TariffTime=(MTariffTime*)Times.gFirst();
+        TariffTime; TariffTime=(MTariffTime*)TariffTime->gNext() )
+        if ( TariffTime->MaxWorkTime(Time)>0 ) return true;
 
     return false;
 }
 
-bool MTariff::CheckForComputer(int Number_)
+bool MTariff::CheckForComp(char Num_) const
 {
-    int *Current=Computers, *End=Computers+ComputersNum;
-    while(Current<End) if ( (*(Current++))==Number_ ) return true;
+    for ( int i=0; i<CompsCnt; i++ )
+        if ( Comps[i]==Num_ ) return true;
     return false;
 }
 
-void MTariff::GetRunTimes(__int64 &Time_, MRunTimes *RunTimes_)
+bool MTariff::GetRunTimes(__int64 &Time_, MRunTimes *RunTimes_) const
 {
     int SysTime;
-    MTariffTime *TariffTime;
 
     // Выделяем количество минут с начала суток
     SysTime=ExtractHoursMin(Time_);
@@ -367,88 +394,67 @@ void MTariff::GetRunTimes(__int64 &Time_, MRunTimes *RunTimes_)
     RunTimes_->Clear();
 
     // Проверяем возможность запуска на почасовой основе
-    for ( TariffTime=(MTariffTime*)Times.First;
-        TariffTime; TariffTime=(MTariffTime*)TariffTime->Next )
+    for ( MTariffTime *TTime=(MTariffTime*)Times.gFirst();
+        TTime; TTime=(MTariffTime*)TTime->gNext() )
     {
-        if ( (TariffTime->Type!=mttHours)||
-            (TariffTime->MaxWorkTime(SysTime)==0) ) continue;
-        MRunTime *NewTime=(MRunTime*)RunTimes_->Add();
-        NewTime->Type=mttHours;
+        if ( (TTime->Type!=mttHours)||
+            (TTime->MaxWorkTime(SysTime)==0) ) continue;
+        MRunTime *RTime=(MRunTime*)RunTimes_->Add();
+        RTime->Type=mttHours;
         break;
     }
     // Ищем подходящие "плавающие" пакеты
-    for ( TariffTime=(MTariffTime*)Times.First;
-        TariffTime; TariffTime=(MTariffTime*)TariffTime->Next )
+    for ( MTariffTime *TTime=(MTariffTime*)Times.gFirst();
+        TTime; TTime=(MTariffTime*)TTime->gNext() )
     {
-        if ( (TariffTime->Type!=mttFlyPacket)||
-            (TariffTime->MaxWorkTime(SysTime)==0) ) continue;
-        MRunTime *NewTime=(MRunTime*)RunTimes_->Add();
-        NewTime->Type=mttFlyPacket;
-        NewTime->SizeTime=TariffTime->SizeTime;
+        if ( (TTime->Type!=mttFlyPacket)||
+            (TTime->MaxWorkTime(SysTime)==0) ) continue;
+        MRunTime *RTime=(MRunTime*)RunTimes_->Add();
+        RTime->Type=mttFlyPacket;
+        RTime->SizeTime=TTime->SizeTime;
     }
     // Ищем подходящие пакеты
-    for ( TariffTime=(MTariffTime*)Times.First;
-        TariffTime; TariffTime=(MTariffTime*)TariffTime->Next )
+    for ( MTariffTime *TTime=(MTariffTime*)Times.gFirst();
+        TTime; TTime=(MTariffTime*)TTime->gNext() )
     {
-        if ( (TariffTime->Type!=mttPacket)||
-            (TariffTime->MaxWorkTime(SysTime)==0) ) continue;
-        MRunTime *NewTime=(MRunTime*)RunTimes_->Add();
-        NewTime->Type=mttPacket;
-        NewTime->BeginTime=TariffTime->BeginTime;
-        NewTime->EndTime=TariffTime->EndTime;
+        if ( (TTime->Type!=mttPacket)||
+            (TTime->MaxWorkTime(SysTime)==0) ) continue;
+        MRunTime *RTime=(MRunTime*)RunTimes_->Add();
+        RTime->Type=mttPacket;
+        RTime->BeginTime=TTime->BeginTime;
+        RTime->EndTime=TTime->EndTime;
     }
+
+    return true;
+error:
+    RunTimes_->Clear();
+    return false;
 }
 
-bool MTariff::GetInfo(MTariffInfo *Info_)
+bool MTariff::GetInfo(MTariffInfo *Info_) const
 {
-    Info_->ID=ID;
+    Info_->ID=gItemID();
     return Info_->SetName(Name);
 }
 
-void MTariff::GetTariffData(MTariffData *Data_)
+void MTariff::GetTariffData(MTariffData *Data_) const 
 {
-    Data_->ID=ID;
+    Data_->ID=ItemID;
     strcpy(Data_->Name,Name);
 }
 
 void MTariff::SetTariffData(MTariffData *Data_)
 {
-    ID=Data_->ID;
+    ItemID=Data_->ID;
     strcpy(Name,Data_->Name);
 }
-
 //---------------------------------------------------------------------------
-
-MTariff *MTariffs::Search(unsigned ID_)
-{
-    MTariff *Tariff=(MTariff*)First;
-    while(Tariff)
-    {
-        if ( Tariff->ID==ID_ ) break;
-        Tariff=(MTariff*)Tariff->Next;
-    }
-    return Tariff;
-}
-
-unsigned MTariffs::NextID()
-{
-    do { LastID+=random(10)+1; } while(!LastID);
-    return LastID;
-}
-
-void MTariffs::SetIDs()
-{
-    for ( MTariff *Tariff=(MTariff*)First;
-        Tariff; Tariff=(MTariff*)Tariff->Next )
-        if ( Tariff->ID==0 ) Tariff->ID=NextID();
-}
-
-void MTariffs::GetForTime(__int64 &Time_, MTariffsInfo *TariffsInfo_)
+void MTariffs::GetForTime(__int64 &Time_, MTariffsInfo *TariffsInfo_) const
 {
     TariffsInfo_->Clear();
 
-    for ( MTariff *Tariff=(MTariff*)First;
-        Tariff; Tariff=(MTariff*)Tariff->Next )
+    for ( MTariff *Tariff=(MTariff*)gFirst();
+        Tariff; Tariff=(MTariff*)Tariff->gNext() )
     {
         if ( !Tariff->CheckForTime(Time_) ) continue;
         MTariffInfo *Info;
@@ -456,45 +462,5 @@ void MTariffs::GetForTime(__int64 &Time_, MTariffsInfo *TariffsInfo_)
         Tariff->GetInfo(Info);
     }
 }
-
-//---------------------------------------------------------------------------
-
-MTariffInfo::MTariffInfo()
-{
-    ID=0;
-    *Name=0;
-}
-
-MTariffInfo::~MTariffInfo()
-{
-//
-}
-
-bool MTariffInfo::Copy(MListItem *SrcItem_)
-{
-    MTariffInfo *TariffInfo_=(MTariffInfo*)SrcItem_;
-    ID=TariffInfo_->ID;
-    strcpy(Name,TariffInfo_->Name);
-    return true;
-}
-
-char *MTariffInfo::SetName(char *Name_)
-{
-    return strlen(Name_)>MAX_TariffNameLength? NULL: strcpy(Name,Name_);
-}
-
-//---------------------------------------------------------------------------
-
-MTariffInfo *MTariffsInfo::Search(unsigned ID_)
-{
-    MTariffInfo *TariffInfo=(MTariffInfo*)First;
-    while(TariffInfo)
-    {
-        if ( TariffInfo->ID==ID_ ) return TariffInfo;
-        TariffInfo=(MTariffInfo*)TariffInfo->Next;
-    }
-    return NULL;
-}
-
 //---------------------------------------------------------------------------
 

@@ -18,35 +18,41 @@ __fastcall TFormFine::TFormFine(TComponent* Owner)
 //---------------------------------------------------------------------------
 void __fastcall TFormFine::FormShow(TObject *Sender)
 {
-    MState *State;
-    MApplyFine *ApplyFine;
-    // Заносим выбранные компьютеры в список для штрафования
+    // Выделим буфер сразу под все выбранные компьютеры
+    ApplyFines.Alloc(FormMain->ListViewComputers->SelCount);
+
+    unsigned i=0;
     TItemStates is=TItemStates()<<isSelected;
-    for ( TListItem *Item=FormMain->ListViewComputers->Selected; Item;
-        Item=FormMain->ListViewComputers->GetNextItem(Item,sdAll,is) )
+    for ( TListItem *item=FormMain->ListViewComputers->Selected; item;
+        item=FormMain->ListViewComputers->GetNextItem(item,sdAll,is) )
     {
-        TListItem *NewItem;
-        // Проверяем применим ли к компьютеру штраф
-        State=States->Search((int)Item->Data);
-        if ( !State->CmdFine(0,true) ) continue;
-        //
-        NewItem=ListViewFines->Items->Add();
-        ApplyFine=(MApplyFine*)NewItem->Data;
-        ApplyFine->Number=State->Associated();
-        ApplyFine->Fine=NULL;
-        ApplyFine->Wait=false;
-        ApplyFine->Warn=false;
-        NewItem->Selected=true;
-        SetListViewFinesLine(NewItem);
+        // Проверим применим ли к компьютеру штраф
+        MState *state=(MState*)item->Data;
+        if ( !state->CmdFine(0,true) ) continue;
+        // Заполним доп. атрибуты
+        ApplyFines[i].State=state;
+        ApplyFines[i].Number=state->Associated();
+        ApplyFines[i].Fine=NULL;
+        ApplyFines[i].Wait=false;
+        ApplyFines[i].Warn=false;
+        // Добавим строку в список компьютеров и свяжем с атрибутами
+        TListItem *newitem=ListViewFines->Items->Add();
+        newitem->Data=&ApplyFines[i];
+        // Выберем ее для удобства
+        newitem->Selected=true;
+        SetListViewFinesLine(newitem);
+        i++;
     }
+
     // Заполняем список времен штрафов
-    for ( MFine *Fine=(MFine*)Fines->First; Fine; Fine=(MFine*)Fine->Next )
+    for ( MFine *fine=(MFine*)Fines->gFirst(); fine;
+        fine=(MFine*)fine->gNext() )
     {
-        char line[MAX_FineDescLength+13+1]; *line=0;
-        strcat(line,Fine->Description);
+        char line[MAX_FineDescrLen+13+1]; *line=0;
+        strcat(line,fine->Descr);
         strcat(line,"  (");
-        if ( Fine->Time==(24*60) ) strcat(line,"все время)");
-        else sprintf(line+strlen(line),"%.2i мин.)",Fine->Time);
+        if ( fine->Time==(24*60) ) strcat(line,"все время)");
+        else sprintf(line+strlen(line),"%.2i мин.)",fine->Time);
         ComboBoxTime->Items->Add(line);
     }
 
@@ -55,29 +61,24 @@ void __fastcall TFormFine::FormShow(TObject *Sender)
     ActiveControl=ComboBoxTime;
 }
 //---------------------------------------------------------------------------
-void __fastcall TFormFine::FormHide(TObject *Sender)
+void __fastcall TFormFine::FormClose(TObject *Sender, TCloseAction &Action)
 {
     // Чистим интерфейсные элементы
     ListViewFines->Items->Clear();
     ComboBoxTime->Items->Clear();
+    // Чистим буфер
+    ApplyFines.Alloc(0);
 }
 //---------------------------------------------------------------------------
 void __fastcall TFormFine::ListViewFinesInsert(TObject *Sender,
       TListItem *Item)
 {
     Item->ImageIndex=-1;  // Устранение ошибки VCL
-    Item->Data=new MApplyFine;
     Item->SubItems->Add("");
     Item->SubItems->Add("");
     Item->SubItems->Add("");
     Item->SubItems->Add("");
     Item->SubItems->Add("");
-}
-//---------------------------------------------------------------------------
-void __fastcall TFormFine::ListViewFinesDeletion(TObject *Sender,
-      TListItem *Item)
-{
-    delete (MApplyFine*)Item->Data;
 }
 //---------------------------------------------------------------------------
 void __fastcall TFormFine::ComboBoxTimeClick(TObject *Sender)
@@ -116,44 +117,44 @@ void __fastcall TFormFine::ComboBoxTimeClick(TObject *Sender)
 //---------------------------------------------------------------------------
 void __fastcall TFormFine::BitBtnFineClick(TObject *Sender)
 {
-    MApplyFine *ApplyFine;
-    int Time;
-    MState *State;
-
     // Удаляем оштрафованые компьютеры из списка
     TItemStates is=TItemStates()<<isSelected;
-    TListItem *Item=ListViewFines->Selected, *NextItem;
-    while(Item)
+    TListItem *item=ListViewFines->Selected, *next;
+    while(item)
     {
-        NextItem=ListViewFines->GetNextItem(Item,sdAll,is);
-        ApplyFine=(MApplyFine*)Item->Data;
-        if ( ApplyFine->Fine!=NULL )
+        next=ListViewFines->GetNextItem(item,sdAll,is);
+        MApplyFine *appfine=(MApplyFine*)item->Data;
+        if ( appfine->Fine!=NULL )
         {
-            State=States->Search(ApplyFine->Number);
+            MState *state=appfine->State;
             // Проверяем возможно ли применить команду
-            if ( State->CmdFine(0,true) )
+            if ( state->CmdFine(0,true) )
             {
-                Time=ApplyFine->Wait||(ApplyFine->Fine->Time==(24*60))?
-                    ApplyFine->Fine->Time: -ApplyFine->Fine->Time;
+                int time=
+                        appfine->Wait||
+                       (appfine->Fine->Time==(24*60))?
+                        appfine->Fine->Time:
+                       -appfine->Fine->Time;
                 // Добавляем запись в лог
-                if ( !Log->AddFine(State->Associated(),ApplyFine->Fine->ID,Time) )
+                if ( !Log->AddFine(appfine->Number,appfine->Fine->gItemID(),time) )
                 {
                     ShellState->State|=mssErrorLog; FormMain->SetShell();
-                    FormMain->MessageBoxError(1,2); break;
+                    ResMessageBox(Handle,1,5,MB_APPLMODAL|MB_OK|MB_ICONERROR,Log->gLastErr());
+                    break;
                 }
                 // Применяем команду
-                State->CmdFine(Time,false);
+                state->CmdFine(time,false);
                 // Удаляем строку из списка
-                Item->Delete();
+                item->Delete();
             }
         }
-        Item=NextItem;
+        item=next;
     }
     // Сохраняем новые состояния
     if ( !States->Save() )
     {
         ShellState->State|=mssErrorState; FormMain->SetShell();
-        FormMain->MessageBoxError(1,3);
+        ResMessageBox(Handle,1,8,MB_APPLMODAL|MB_OK|MB_ICONERROR,States->gLastErr());
     }
     // Обновляем список компьютеров
     FormMain->UpdateListViewComputers(false);
@@ -161,30 +162,29 @@ void __fastcall TFormFine::BitBtnFineClick(TObject *Sender)
 //---------------------------------------------------------------------------
 void __fastcall TFormFine::SetListViewFinesLine(TListItem *Item_)
 {
-    MApplyFine *SelFine=(MApplyFine*)Item_->Data;
-    MComputer *Computer=Computers->Search(SelFine->Number);
+    MApplyFine *selfine=(MApplyFine*)Item_->Data;
+    MComputer *comp=Computers->Search(selfine->Number);
 
     // Номер компьютера и цвет его группы
-    Item_->SubItemImages[0]=Computer->GroupColor;
-    Item_->SubItems->Strings[0]=IntToStr(SelFine->Number);
-    //
-    if ( SelFine->Fine!=NULL )
+    Item_->SubItemImages[0]=FormMain->GetCompColorIcon(comp);
+    Item_->SubItems->Strings[0]=IntToStr(selfine->Number);
+
+    if ( selfine->Fine==NULL ) return;
+
+    // Описание штрафа
+    Item_->SubItems->Strings[1]=selfine->Fine->Descr;
+    // Время штрафа
+    if ( selfine->Warn ) Item_->SubItems->Strings[2]="";
+    else
     {
-        // Описание штрафа
-        Item_->SubItems->Strings[1]=SelFine->Fine->Description;
-        // Время штрафа
-        if ( SelFine->Warn ) Item_->SubItems->Strings[2]="";
-        else
-        {
-            int Time=SelFine->Fine->Time;
-            if ( Time==(24*60) ) Item_->SubItems->Strings[2]="Все время";
-            else Item_->SubItems->Strings[2]=IntToStr(Time);
-        }
-        // Ожидание
-        if ( (SelFine->Fine->Time==(24*60))||SelFine->Warn||
-            (!SelFine->Wait) ) Item_->SubItems->Strings[3]="";
-        else Item_->SubItems->Strings[3]="Да";
+        int Time=selfine->Fine->Time;
+        if ( Time==(24*60) ) Item_->SubItems->Strings[2]="Все время";
+        else Item_->SubItems->Strings[2]=IntToStr(Time);
     }
+    // Ожидание
+    if ( (selfine->Fine->Time==(24*60))||selfine->Warn||
+        (!selfine->Wait) ) Item_->SubItems->Strings[3]="";
+    else Item_->SubItems->Strings[3]="Да";
 }
 //---------------------------------------------------------------------------
 

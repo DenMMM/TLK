@@ -7,12 +7,18 @@ class MList;
 //---------------------------------------------------------------------------
 class MListItem
 {
-public:
-    virtual unsigned TypeID() { return 0; }
-    virtual bool Copy(MListItem *SrcItem_)=0;
-public:
+private:
     MListItem *Prev;    // Указатель на предыдущий элемент списка
     MListItem *Next;    // Указатель на следующий элемент списка
+    friend class MList; // Разрешим MList работать с MListItem напрямую
+
+public:
+    // Доступ к элементам класса
+    MListItem *gPrev() const { return Prev; }
+    MListItem *gNext() const { return Next; }
+
+    virtual unsigned char gTypeID() const { return 0; }
+    virtual void Copy(const MListItem *SrcItem_)=0;
 
     MListItem();
     ~MListItem();
@@ -21,43 +27,51 @@ public:
 class MList
 {
 private:
-    // В производном классе реализует оператор 'new' для производного от MListItem класса
-    virtual MListItem *operator_new(unsigned Type_)=0;
-    // В производном классе реализует оператор 'delete' для производного от MListItem класса
-    virtual void operator_delete(MListItem *DelItem_)=0;
-protected:
-    virtual bool Typed() { return false; }
-public:
-    // Присоединяет к списку уже созданный в памяти элемент
-    void attach(MListItem *AtchItem_);
-    // Вставляет в список уже созданный в памяти элемент после AfterItem_
-    void insert(MListItem *InsItem_, MListItem *AfterItem_);
-    // Отсоединяет от списка элемент без удаления его из памяти
-    void detach(MListItem *DtchItem_);
-private:
-    //
-//    void attach(MList *AtchList_);
-protected:
-    void constructor();
-    void destructor();
-public:
     MListItem *First;   // Указатель на первый элемент списка
     MListItem *Last;    // Указатель на последний элемент списка
     unsigned Count;     // Количество элементов в списке
 
-    // Операции над элементами списка
-    MListItem *Add(unsigned Type_=0);
-    MListItem *Insert(MListItem *AfterItem_, unsigned Type_=0);
-    MListItem *Item(unsigned Number_);
-    MListItem *Search(unsigned Type_, MListItem *Start_, bool Forward_);
-    void Exchange(MListItem *Item1_, MListItem *Item2_);
-    void Delete(MListItem *DelItem_);
+    // Операторы 'new' и 'delete' для производного от MListItem класса
+    virtual MListItem *item_new(unsigned char TypeID_) const=0;
+    virtual void item_del(MListItem *Item_) const=0;
 
-    // Операции над списком
-    bool Add(MList *SrcList_);
-    bool Copy(MList *SrcList_);
-    void Move(MList *SrcList_);
-    void Clear();
+protected:
+/*
+    /// Так было бы правильнее, чем длинные switch/case...
+    struct MItemFunc
+    {
+        unsigned char type;
+        MListItem *(*item_new)(unsigned char Type_);
+        void (*item_del)(MListItem *Item_);
+    } item_f[sizeof(MItemFunc::type)*8];
+*/
+
+    // Определяет могут ли элементы списка быть разных типов
+    // Для 'true' MListItem::TypeID() должна быть переопределена
+    virtual bool Typed() const { return false; }
+
+public:
+    // Доступ к атрибутам списка
+    MListItem *gFirst() const { return First; }
+    MListItem *gLast() const { return Last; }
+    unsigned gCount() const { return Count; }
+
+    // Операции над отдельными элементами _одного_ списка
+    MListItem *Add(unsigned char TypeID_=0);
+    MListItem *Item(unsigned Number_) const;
+    void Exch(MListItem *Item1_, MListItem *Item2_);
+    void Del(MListItem *DelItem_);
+//    MListItem *Insert(MListItem *AfterItem_, unsigned Type_=0);
+//    MListItem *Search(unsigned Type_, MListItem *Start_, bool Forward_);
+
+    // Операции над списком целиком (не трогая атрибуты наследника MList)
+    void Clear();                       // Удалить все элементы списка
+    void Copy(const MList *SrcList_);   // Создать копию элементов исходного списка
+    void Move(MList *SrcList_);         // Заместить элементы списка исходными
+    void Attach(MList *AtchList_);      // Присоединить элементы исходного списка
+
+    MList();
+    ~MList();
 };
 //---------------------------------------------------------------------------
 #endif

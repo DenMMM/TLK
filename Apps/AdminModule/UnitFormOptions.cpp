@@ -7,7 +7,6 @@
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
 #pragma resource "*.dfm"
-TFormOptions *FormOptions;
 //---------------------------------------------------------------------------
 __fastcall TFormOptions::TFormOptions(TComponent* Owner)
     : TForm(Owner)
@@ -16,6 +15,7 @@ __fastcall TFormOptions::TFormOptions(TComponent* Owner)
 //---------------------------------------------------------------------------
 void __fastcall TFormOptions::FormShow(TObject *Sender)
 {
+    // Копируем настройки в буфер
     TmpOptions.Copy(Options);
 
     {
@@ -25,8 +25,6 @@ void __fastcall TFormOptions::FormShow(TObject *Sender)
             case mlpDay: Index=0; break;
             case mlpWeek: Index=1; break;
             case mlpMonth: Index=2; break;
-            case mlpQuarter: Index=3; break;
-            case mlpYear: Index=4; break;
             default: Index=-1; break;
         }
         ComboBoxLogPeriod->ItemIndex=Index;
@@ -57,8 +55,6 @@ void __fastcall TFormOptions::ComboBoxLogPeriodExit(TObject *Sender)
         case 0: TmpOptions.LogPeriod=mlpDay; break;
         case 1: TmpOptions.LogPeriod=mlpWeek; break;
         case 2: TmpOptions.LogPeriod=mlpMonth; break;
-        case 3: TmpOptions.LogPeriod=mlpQuarter; break;
-        case 4: TmpOptions.LogPeriod=mlpYear; break;
         default: break;
     }
 }
@@ -105,11 +101,22 @@ void __fastcall TFormOptions::CheckBoxRightPauseExit(TObject *Sender)
 //---------------------------------------------------------------------------
 void __fastcall TFormOptions::ButtonSaveClick(TObject *Sender)
 {
+    // Копируем из буфера назад
     Options->Copy(&TmpOptions);
+    // Сохраняем в файле
+    if ( !Options->Save() )
+    {
+        ShellState->State|=mssErrorConfig; FormMain->SetShell();
+        ResMessageBox(Handle,1,31,MB_APPLMODAL|MB_OK|MB_ICONERROR,Options->gLastErr());
+        return;
+    }
     // Запись в логах
-    Log->AddOptions();
-    // Сохраняем настройки
-    Options->Save();
+    if ( !Log->AddOptions() )
+    {
+        // Настройки сохранили, но без отметки об их изменении (надо ли ?) работать не дадим
+        ShellState->State|=mssErrorLog|mssErrorConfig; FormMain->SetShell();
+        ResMessageBox(Handle,1,5,MB_APPLMODAL|MB_OK|MB_ICONERROR,Log->gLastErr());
+    }
 }
 //---------------------------------------------------------------------------
 

@@ -2,36 +2,36 @@
 #ifndef UnitComputersH
 #define UnitComputersH
 //---------------------------------------------------------------------------
-#include "UnitSLList.h"
-//---------------------------------------------------------------------------
-#define MAX_Computers               100     //
-#define MAX_ComputerAddressLength   15      //
-//---------------------------------------------------------------------------
-#define mgcNone ((int)-1)   //
-#define mgcAqua ((int)0)    //
-#define mgcLime ((int)1)    //
-#define mgcRed ((int)2)     //
-#define mgcYellow ((int)3)  //
-//---------------------------------------------------------------------------
 class MComputer;
 class MComputers;
 //---------------------------------------------------------------------------
+#include "UnitSLList.h"
+//---------------------------------------------------------------------------
+#define MAX_Comps                   50      // Сколько компьютеров разрешено обслуживать TLK
+#define MAX_CompAddrLen             15      // Длина IP-адреса
+//---------------------------------------------------------------------------
+#define mgcNone                     0       // Без цветовой метки
+#define mgcAqua                     1       // Голубой
+#define mgcGreen                    2       // Зеленый
+#define mgcRed                      3       // Красный
+#define mgcYellow                   4       // Желтый
+//---------------------------------------------------------------------------
 class MComputer:public MSLListItem
 {
+private:
+    // Функции механизма сохранения/загрузки данных
+    unsigned GetDataSize() const;
+    char *SetData(char *Data_) const;
+    const char *GetData(const char *Data_, const char *Limit_);
+
 public:
-    bool Copy(MListItem *SrcItem_);
-public:
-    int Number;                                 // Номер компьютера
-    char Address[MAX_ComputerAddressLength+1];  // IP-адрес компьютера
-    int GroupColor;                             // Цвет группы
-    bool NotUsed;                               // Маркер не использования
+    char Number;                                // Номер компьютера
+    char Color;                                 // Цвет группы
+    char Address[MAX_CompAddrLen+1];            // IP-адрес компьютера
+    bool NotUsed;                               // Игнорировать компьютер
 
     char *SetAddress(char *Address_);
-
-    // Функции механизма сохранения/загрузки данных
-    unsigned GetDataSize();
-    char *SetData(char *Data_);
-    char *GetData(char *Data_, char *Limit_);
+    void Copy(const MListItem *SrcItem_);
 
     MComputer();
     ~MComputer();
@@ -40,14 +40,15 @@ public:
 class MComputers:public MSLList
 {
 private:
-    MListItem *operator_new(unsigned Type_) { return (MListItem*)new MComputer; }
-    void operator_delete(MListItem *DelItem_) { delete (MComputer*)DelItem_; }
+    MListItem *item_new(unsigned char TypeID_) const { return (MListItem*)new MComputer; }
+    void item_del(MListItem *Item_) const { delete (MComputer*)Item_; }
+
 public:
-    MComputer *Search(int Number_);
+    MComputer *Search(char Number_) const;
     void Sort();
 
-    MComputers() { constructor(); }
-    ~MComputers() { destructor(); }
+    MComputers() {}
+    ~MComputers() { Clear(); }
 };
 //---------------------------------------------------------------------------
 #endif

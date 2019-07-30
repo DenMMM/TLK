@@ -3,7 +3,7 @@ object FormUsersUpTime: TFormUsersUpTime
   Top = 187
   Width = 743
   Height = 472
-  Caption = 'Смены'
+  Caption = #1057#1084#1077#1085#1099
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -15,6 +15,9 @@ object FormUsersUpTime: TFormUsersUpTime
   Position = poDefaultPosOnly
   Visible = True
   OnClose = FormClose
+  DesignSize = (
+    735
+    445)
   PixelsPerInch = 96
   TextHeight = 13
   object Bevel2: TBevel
@@ -39,7 +42,7 @@ object FormUsersUpTime: TFormUsersUpTime
     Width = 95
     Height = 13
     Alignment = taRightJustify
-    Caption = 'Выбранное время:'
+    Caption = #1042#1099#1073#1088#1072#1085#1085#1086#1077' '#1074#1088#1077#1084#1103':'
   end
   object LabelSelTime: TLabel
     Left = 116
@@ -65,7 +68,7 @@ object FormUsersUpTime: TFormUsersUpTime
     Width = 37
     Height = 13
     Alignment = taRightJustify
-    Caption = 'Сумма:'
+    Caption = #1057#1091#1084#1084#1072':'
   end
   object ListViewUpTimes: TListView
     Left = 4
@@ -78,27 +81,27 @@ object FormUsersUpTime: TFormUsersUpTime
         Width = 0
       end
       item
-        Caption = 'Пользователь'
+        Caption = #1055#1086#1083#1100#1079#1086#1074#1072#1090#1077#1083#1100
         Width = 250
       end
       item
         Alignment = taRightJustify
-        Caption = 'Начало смены'
+        Caption = #1053#1072#1095#1072#1083#1086' '#1089#1084#1077#1085#1099
         Width = 120
       end
       item
         Alignment = taRightJustify
-        Caption = 'Окончание'
+        Caption = #1054#1082#1086#1085#1095#1072#1085#1080#1077
         Width = 120
       end
       item
         Alignment = taRightJustify
-        Caption = 'Длительность'
+        Caption = #1044#1083#1080#1090#1077#1083#1100#1085#1086#1089#1090#1100
         Width = 100
       end
       item
         Alignment = taRightJustify
-        Caption = 'Выручка'
+        Caption = #1042#1099#1088#1091#1095#1082#1072
         Width = 100
       end>
     HideSelection = False

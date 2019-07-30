@@ -9,45 +9,48 @@
 #include "UnitFines.h"
 #include "UnitUsers.h"
 //---------------------------------------------------------------------------
-// Main Log Period
-#define mlpDay          1   // Суточный лог
-#define mlpWeek         2   // Недельный лог
-#define mlpMonth        3   // Месячный лог
-#define mlpQuarter      4   // Квартальный лог
-#define mlpYear         5   // Годовой лог
+// Минимальный период ведения файла лога
+#define mlpDay          1   // Суточный
+#define mlpWeek         2   // Недельный
+#define mlpMonth        3   // На месяц
 //---------------------------------------------------------------------------
 class MLog
 {
 private:
     __int64 SystemTime;     // Системное время для синхронизации с описателями состояний компьютеров
-    __int64 BeginTime;      // Время начала заполнения файла лога
+    __int64 BeginTime;      // Время, когда лог был начат
     char *Directory;        // Директория для хранения файлов логов
-    MLogRecords Records;    // Записи лога, еще не добавленные к файлу
-    unsigned User;          // Пользователь, чья смена была открыта
+    bool Opened;            // Лог был успешно открыт/начат
+//    bool Transaction;       // Флаг-не очищать буфер записей до "сброса" на диск
+    MLogRecords Records;    // Буфер для записей
+    unsigned User;          // Пользователь, открывший смену последним
+    DWORD LastError;
 
-    bool AddSimpleEvent(unsigned Type_);
-    bool AddEvent(unsigned Type_);
-    bool AddMode(unsigned Type_, int Number_, bool Apply_);
-    bool AddCmd(unsigned Type_, int Number_);
-    bool AddStatesData(MStates *States_);
-    bool AddTariffsData(MTariffs *Tariffs_);
-    bool AddFinesData(MFines *Fines_);
-    bool AddUsersData(MUsers *Users_);
+    // Добавить в буфер событие/данные
+    void AddSimpleEvent(unsigned char Type_);
+    void AddStatesData(MStates *States_);
+    void AddTariffsData(MTariffs *Tariffs_);
+    void AddFinesData(MFines *Fines_);
+    void AddUsersData(MUsers *Users_);
+    // Записать в лог простое событие/команду
+    bool AddEvent(unsigned char Type_);
+    bool AddMode(unsigned char Type_, char Number_, bool Apply_);
+    bool AddCmd(unsigned char Type_, char Number_);
+    //
+    bool Rename() const;
+
 public:
-    void Timer(__int64 SystemTime_);
-    bool SetDefault(char *Dir_, unsigned Code_);
-
     // Работа с файлом лога
     bool Begin(
         MShellState *ShellState_,
         MStates *States_,
         MTariffs *Tariffs_,
         MFines *Fines_,
-        MUsers *Users_);    // Создать файл и сохранить первоначальные данные
-    bool Open();            // Открыть существующий файл
-    unsigned LastUser();
-    bool CheckPeriod(int Period_);     // Проверить не пора ли сменить файл лога
-    bool End();             // Закончить заполнение файла
+        MUsers *Users_);                    // Создать файл и сохранить первоначальные данные
+    bool Open();                            // Открыть существующий файл
+    bool End();                             // Закончить заполнение файла
+    bool CheckPeriod(int Period_) const;    // Проверить не пора ли сменить файл лога
+    unsigned LastUser() const;              // Вернуть ID последнего залогиненного пользователя
 
     // Админский модуль
     bool AddStart(
@@ -55,11 +58,10 @@ public:
         MStates *States_,
         MTariffs *Tariffs_,
         MFines *Fines_,
-        MUsers *Users_);        // Запуск админского модуля
-    bool AddWork();             // Админский модуль работает
-    bool AddStop();             // Остановка админского модуля
+        MUsers *Users_);                    // Запуск модуля управления
+    bool AddStop();                         // Остановка модуля управления
 
-    // Настройки админского модуля
+    // Настройки модуля управления
     bool AddConfig(bool Open_);             // Настройки открыты/закрыты
     bool AddComputers(MStates *States_);    // Изменен список компьютеров
     bool AddTariffs(MTariffs *Tariffs_);    // Изменен список тарифов
@@ -68,20 +70,26 @@ public:
     bool AddOptions();                      // Изменены общие настройки
 
     // Пользователи
-    bool AddLogIn(unsigned ID_);            // Пользователь начал работу
-    bool AddLogOut();                       // Пользователь закончил работу
+    bool AddLogIn(unsigned UserID_);        // Пользователь начал смену
+    bool AddLogOut();                       // Пользователь закончил смену
 
+    // Управление буферизацией следующих ниже команд
+//    bool Transact();        
+//    bool Apply();
     // Команды, применяемые к компьютерам
     bool AddRun(MRunTime *Time_);
-    bool AddFine(int Number_, unsigned Fine_, int Time_);
-    bool AddExchange(int From_, int To_);
-    bool AddLock(int Number_, bool Apply_);
-    bool AddPause(int Number_, bool Apply_);
-    bool AddOpen(int Number_, bool Apply_);
-    bool AddWtLocker(int Number_, bool Apply_);
-    bool AddPowerOn(int Number_);
-    bool AddReboot(int Number_);
-    bool AddShutdown(int Number_);
+    bool AddFine(char Number_, unsigned FineID_, short Time_);
+    bool AddExchange(char From_, char To_);
+    bool AddLock(char Number_, bool Apply_);
+    bool AddPause(char Number_, bool Apply_);
+    bool AddOpen(char Number_, bool Apply_);
+    bool AddPowerOn(char Number_);
+    bool AddReboot(char Number_);
+    bool AddShutdown(char Number_);
+
+    void SetDefault(char *Dir_, unsigned Code_);
+    void Timer(__int64 SystemTime_);
+    DWORD gLastErr() const { return Records.gLastErr(); }
 
     MLog();
     ~MLog();

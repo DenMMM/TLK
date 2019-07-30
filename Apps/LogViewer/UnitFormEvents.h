@@ -18,17 +18,17 @@
 #include "UnitFormMain.h"
 //---------------------------------------------------------------------------
 // Main Events Sort
-#define mesNone 0
-#define mesTime 1
-#define mesNumber 2
-#define mesDesc 3
-#define mesSize 4
-#define mesMoney 5
+#define mesNone         0
+#define mesTime         1
+#define mesNumber       2
+#define mesDesc         3
+#define mesSize         4
+#define mesMoney        5
 //---------------------------------------------------------------------------
 // Main Computers Filter
-#define mcfAll ((int)1)     // Все компьютеры
-#define mcfFree ((int)2)    // Свободные компьютеры
-#define mcfService ((int)3) // Открытые для обслуживания
+#define mcfAll          1       // Все компьютеры
+#define mcfFree         2       // Свободные компьютеры
+#define mcfService      3       // Открытые для обслуживания
 //---------------------------------------------------------------------------
 class TFormEvents : public TForm
 {
@@ -56,6 +56,8 @@ __published:	// IDE-managed Components
     void __fastcall ListViewEventsColumnClick(TObject *Sender,
           TListColumn *Column);
     void __fastcall ListViewEventsCompare(TObject *Sender,
+          TListItem *Item1, TListItem *Item2, int Data, int &Compare);
+    void __fastcall ListViewComputersCompare(TObject *Sender,
           TListItem *Item1, TListItem *Item2, int Data, int &Compare);
 private:	// User declarations
     int Filter;

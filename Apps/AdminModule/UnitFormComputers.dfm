@@ -104,7 +104,6 @@ object FormComputers: TFormComputers
     TabOrder = 0
     ViewStyle = vsReport
     OnCompare = ListViewComputersCompare
-    OnDeletion = ListViewComputersDeletion
     OnInsert = ListViewComputersInsert
     OnSelectItem = ListViewComputersSelectItem
   end

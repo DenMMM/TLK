@@ -2,48 +2,45 @@
 #ifndef UnitOptionsH
 #define UnitOptionsH
 //---------------------------------------------------------------------------
+class MOptions;
+//---------------------------------------------------------------------------
 #include "UnitCommon.h"
 #include "UnitSLList.h"
 #include "UnitLog.h"
+#include "UnitPassword.h"
 //---------------------------------------------------------------------------
-#define MAX_OptionsPasswordLength   16
-#define MAX_DialogTime              30
-#define MAX_FilterFreeTime          (24*60)
+#define MAX_OptPassLen          16          // Длина пароля на настройки
+#define MAX_DialogTime          30          // Options.CostDialogTime
+#define MAX_FilterFreeTime      60          // Options.FilterFreeTime
 //---------------------------------------------------------------------------
 // Main Users Rights
-#define murPause        1   // Разрешить приостанавливать компьютеры
+#define murPause                1           // Разрешить админам приостанавливать компьютеры
 //---------------------------------------------------------------------------
 class MOptions:public MSLList
 {
 private:
-    MListItem *operator_new(unsigned Type_) { return NULL; }
-    void operator_delete(MListItem *DelItem_) { }
-public:
-    bool Copy(MOptions *Options_);
-private:
-    char Password[MAX_OptionsPasswordLength+1]; // Пароль на изменение настроек
-public:
-    int LogPeriod;              // Период ведения лога в одном файле
-    int CostDialogTime;         // Время пользования диалогами, где производится расчет цен по тарифам (в минутах)
-    double CostPrecision;       // Точность расчета цен
-    int FilterFreeTime;         // Время до окончания работы компьютера, когда он подпадает под фильтр свободных (в минутах)
-    unsigned UsersRights;       // Права пользователей (администраторов)
-
-    bool SetPassword(char *Password_);
-    bool CheckPassword(char *Password_);
+    // Заглушки, т.к. списка на самом деле нет - только "заголовок"
+    MListItem *item_new(unsigned char TypeID_) const { return NULL; }
+    void item_del(MListItem *Item_) const {}
 
     // Функции механизма сохранения/загрузки данных
-    unsigned GetDataSize();
-    char *SetData(char *Data_);
-    char *GetData(char *Data_, char *Limit_);
+    unsigned GetDataSize() const;
+    char *SetData(char *Data_) const;
+    const char *GetData(const char *Data_, const char *Limit_);
 
-    // Переадресуем обращения для загрузки/сохранения к методам базового класса MSLList
-/*    bool SaveTo(char *File_, unsigned Code_) { return MSLList::SaveTo(File_,Code_); }
-    bool LoadFrom(char *File_, unsigned Code_) { return MSLList::LoadFrom(File_,Code_); }
-    bool SetDefaultFile(char *File_, unsigned Code_) { return MSLList::SetDefaultFile(File_,Code_); }
-    bool Save() { return MSLList::Save(); }
-    bool Load() { return MSLList::Load(); }
-*/
+    MPassword Pass;             // Пароль на изменение настроек
+
+public:
+    char LogPeriod;             // Период ведения файла лога
+    short FilterFreeTime;       // Время до окончания работы компьютера, когда он подпадает под фильтр свободных (в минутах)
+    short CostDialogTime;       // Время использования диалогов с расчетом цен (в минутах)
+    double CostPrecision;       // Точность расчета цен
+    unsigned UsersRights;       // Права пользователей (администраторов)
+
+    void SetPass(char *Pass_) { Pass.Set(Pass_); }
+    bool CheckPass(char *Pass_) { return Pass.Check(Pass_); }
+    bool Copy(MOptions *Opt_);
+
     MOptions();
     ~MOptions();
 };

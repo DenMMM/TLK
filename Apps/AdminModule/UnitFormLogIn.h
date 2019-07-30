@@ -33,7 +33,5 @@ public:		// User declarations
     __fastcall TFormLogIn(TComponent* Owner);
 };
 //---------------------------------------------------------------------------
-extern PACKAGE TFormLogIn *FormLogIn;
-//---------------------------------------------------------------------------
 #endif
 

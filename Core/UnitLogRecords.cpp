@@ -6,19 +6,17 @@
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
 //---------------------------------------------------------------------------
-
-MListItem *MLogRecords::operator_new(unsigned Type_)
+MListItem *MLogRecords::item_new(unsigned char TypeID_) const
 {
     MListItem *Item=NULL;
 
-    switch(Type_)
+    switch(TypeID_)
     {
         // Файл лога
         case mlrBegin: Item=new MLogRecordBegin; break;
         case mlrEnd: Item=new MLogRecordEnd; break;
         // Админский модуль
         case mlrStart: Item=new MLogRecordStart; break;
-        case mlrWork: Item=new MLogRecordWork; break;
         case mlrStop: Item=new MLogRecordStop; break;
         // Настройки админского модуля
         case mlrConfig: Item=new MLogRecordConfig; break;
@@ -37,12 +35,11 @@ MListItem *MLogRecords::operator_new(unsigned Type_)
         case mlrLock: Item=new MLogRecordLock; break;
         case mlrPause: Item=new MLogRecordPause; break;
         case mlrOpen: Item=new MLogRecordOpen; break;
-        case mlrWtLocker: Item=new MLogRecordWtLocker; break;
         case mlrPowerOn: Item=new MLogRecordPowerOn; break;
         case mlrReboot: Item=new MLogRecordReboot; break;
         case mlrShutdown: Item=new MLogRecordShutdown; break;
         // Служебные данные
-        case mlrDataShellState: Item=new MLogRecordDataShellState; break;
+        case mlrDataShState: Item=new MLogRecordDataShState; break;
         case mlrDataStates: Item=new MLogRecordDataStates; break;
         case mlrDataTariffs: Item=new MLogRecordDataTariffs; break;
         case mlrDataFines: Item=new MLogRecordDataFines; break;
@@ -53,50 +50,46 @@ MListItem *MLogRecords::operator_new(unsigned Type_)
     return Item;
 }
 
-void MLogRecords::operator_delete(MListItem *DelItem_)
+void MLogRecords::item_del(MListItem *Item_) const
 {
-    switch(DelItem_->TypeID())
+    switch(Item_->gTypeID())
     {
         // Файл лога
-        case mlrBegin: delete (MLogRecordBegin*)DelItem_; break;
-        case mlrEnd: delete (MLogRecordEnd*)DelItem_; break;
+        case mlrBegin: delete (MLogRecordBegin*)Item_; break;
+        case mlrEnd: delete (MLogRecordEnd*)Item_; break;
         // Админский модуль
-        case mlrStart: delete (MLogRecordStart*)DelItem_; break;
-        case mlrWork: delete (MLogRecordWork*)DelItem_; break;
-        case mlrStop: delete (MLogRecordStop*)DelItem_; break;
+        case mlrStart: delete (MLogRecordStart*)Item_; break;
+        case mlrStop: delete (MLogRecordStop*)Item_; break;
         // Настройки админского модуля
-        case mlrConfig: delete (MLogRecordConfig*)DelItem_; break;
-        case mlrComputers: delete (MLogRecordComputers*)DelItem_; break;
-        case mlrTariffs: delete(MLogRecordTariffs*)DelItem_; break;
-        case mlrFines: delete (MLogRecordFines*)DelItem_; break;
-        case mlrUsers: delete (MLogRecordUsers*)DelItem_; break;
-        case mlrOptions: delete (MLogRecordOptions*)DelItem_; break;
+        case mlrConfig: delete (MLogRecordConfig*)Item_; break;
+        case mlrComputers: delete (MLogRecordComputers*)Item_; break;
+        case mlrTariffs: delete(MLogRecordTariffs*)Item_; break;
+        case mlrFines: delete (MLogRecordFines*)Item_; break;
+        case mlrUsers: delete (MLogRecordUsers*)Item_; break;
+        case mlrOptions: delete (MLogRecordOptions*)Item_; break;
         // Пользователи
-        case mlrLogIn: delete (MLogRecordLogIn*)DelItem_; break;
-        case mlrLogOut: delete (MLogRecordLogOut*)DelItem_; break;
+        case mlrLogIn: delete (MLogRecordLogIn*)Item_; break;
+        case mlrLogOut: delete (MLogRecordLogOut*)Item_; break;
         // Команды компьютерам
-        case mlrRun: delete (MLogRecordRun*)DelItem_; break;
-        case mlrFine: delete (MLogRecordFine*)DelItem_; break;
-        case mlrExchange: delete (MLogRecordExchange*)DelItem_; break;
-        case mlrLock: delete (MLogRecordLock*)DelItem_; break;
-        case mlrPause: delete (MLogRecordPause*)DelItem_; break;
-        case mlrOpen: delete (MLogRecordOpen*)DelItem_; break;
-        case mlrWtLocker: delete (MLogRecordWtLocker*)DelItem_; break;
-        case mlrPowerOn: delete (MLogRecordPowerOn*)DelItem_; break;
-        case mlrReboot: delete (MLogRecordReboot*)DelItem_; break;
-        case mlrShutdown: delete (MLogRecordShutdown*)DelItem_; break;
+        case mlrRun: delete (MLogRecordRun*)Item_; break;
+        case mlrFine: delete (MLogRecordFine*)Item_; break;
+        case mlrExchange: delete (MLogRecordExchange*)Item_; break;
+        case mlrLock: delete (MLogRecordLock*)Item_; break;
+        case mlrPause: delete (MLogRecordPause*)Item_; break;
+        case mlrOpen: delete (MLogRecordOpen*)Item_; break;
+        case mlrPowerOn: delete (MLogRecordPowerOn*)Item_; break;
+        case mlrReboot: delete (MLogRecordReboot*)Item_; break;
+        case mlrShutdown: delete (MLogRecordShutdown*)Item_; break;
         // Служебные данные
-        case mlrDataShellState: delete (MLogRecordDataShellState*)DelItem_; break;
-        case mlrDataStates: delete (MLogRecordDataStates*)DelItem_; break;
-        case mlrDataTariffs: delete (MLogRecordDataTariffs*)DelItem_; break;
-        case mlrDataFines: delete (MLogRecordDataFines*)DelItem_; break;
-        case mlrDataUsers: delete (MLogRecordDataUsers*)DelItem_; break;
+        case mlrDataShState: delete (MLogRecordDataShState*)Item_; break;
+        case mlrDataStates: delete (MLogRecordDataStates*)Item_; break;
+        case mlrDataTariffs: delete (MLogRecordDataTariffs*)Item_; break;
+        case mlrDataFines: delete (MLogRecordDataFines*)Item_; break;
+        case mlrDataUsers: delete (MLogRecordDataUsers*)Item_; break;
         default: break;
     }
 }
-
 //---------------------------------------------------------------------------
-
 MLogRecordEvent::MLogRecordEvent()
 {
     SystemTime=0;
@@ -104,37 +97,34 @@ MLogRecordEvent::MLogRecordEvent()
 
 MLogRecordEvent::~MLogRecordEvent()
 {
+//
 }
 
-bool MLogRecordEvent::Copy(MListItem *SrcItem_)
+void MLogRecordEvent::Copy(const MListItem *SrcItem_)
 {
-    MLogRecordEvent *RecordEvent_=(MLogRecordEvent*)SrcItem_;
-    SystemTime=RecordEvent_->SystemTime;
-    return true;
+    MLogRecordEvent *record=(MLogRecordEvent*)SrcItem_;
+    SystemTime=record->SystemTime;
 }
 
-unsigned MLogRecordEvent::GetDataSize()
+unsigned MLogRecordEvent::GetDataSize() const
 {
     return
         sizeof(SystemTime);
 }
 
-char *MLogRecordEvent::SetData(char *Data_)
+char *MLogRecordEvent::SetData(char *Data_) const
 {
     Data_=MemSet(Data_,SystemTime);
     return Data_;
 }
 
-char *MLogRecordEvent::GetData(char *Data_, char *Limit_)
+const char *MLogRecordEvent::GetData(const char *Data_, const char *Limit_)
 {
-    if ( (Data_=MemGet(Data_,&SystemTime,Limit_))==NULL ) goto error;
-    return Data_;
-error:
-    return NULL;
+    return
+        (Data_=MemGet(Data_,&SystemTime,Limit_))!=NULL
+        ? Data_: NULL;
 }
-
 //---------------------------------------------------------------------------
-
 MLogRecordConfig::MLogRecordConfig()
 {
     SystemTime=0;
@@ -143,39 +133,42 @@ MLogRecordConfig::MLogRecordConfig()
 
 MLogRecordConfig::~MLogRecordConfig()
 {
+//
 }
 
-bool MLogRecordConfig::Copy(MListItem *SrcItem_)
+void MLogRecordConfig::Copy(const MListItem *SrcItem_)
 {
-    MLogRecordConfig *RecordConfig_=(MLogRecordConfig*)SrcItem_;
-    SystemTime=RecordConfig_->SystemTime;
-    Open=RecordConfig_->Open;
-    return true;
+    MLogRecordConfig *record=(MLogRecordConfig*)SrcItem_;
+
+    SystemTime=record->SystemTime;
+    Open=record->Open;
 }
 
-unsigned MLogRecordConfig::GetDataSize()
+unsigned MLogRecordConfig::GetDataSize() const
 {
     return
         sizeof(SystemTime)+
         sizeof(Open);
 }
 
-char *MLogRecordConfig::SetData(char *Data_)
+char *MLogRecordConfig::SetData(char *Data_) const
 {
     Data_=MemSet(Data_,SystemTime);
+    Data_=MemSet(Data_,Open);
+
     return Data_;
 }
 
-char *MLogRecordConfig::GetData(char *Data_, char *Limit_)
+const char *MLogRecordConfig::GetData(const char *Data_, const char *Limit_)
 {
     if ( (Data_=MemGet(Data_,&SystemTime,Limit_))==NULL ) goto error;
+    if ( (Data_=MemGet(Data_,&Open,Limit_))==NULL ) goto error;
+
     return Data_;
 error:
     return NULL;
 }
-
 //---------------------------------------------------------------------------
-
 MLogRecordLogIn::MLogRecordLogIn()
 {
     SystemTime=0;
@@ -184,34 +177,37 @@ MLogRecordLogIn::MLogRecordLogIn()
 
 MLogRecordLogIn::~MLogRecordLogIn()
 {
+//
 }
 
-bool MLogRecordLogIn::Copy(MListItem *SrcItem_)
+void MLogRecordLogIn::Copy(const MListItem *SrcItem_)
 {
-    MLogRecordLogIn *RecordLogIn_=(MLogRecordLogIn*)SrcItem_;
-    SystemTime=RecordLogIn_->SystemTime;
-    User=RecordLogIn_->User;
-    return true;
+    MLogRecordLogIn *record=(MLogRecordLogIn*)SrcItem_;
+
+    SystemTime=record->SystemTime;
+    User=record->User;
 }
 
-unsigned MLogRecordLogIn::GetDataSize()
+unsigned MLogRecordLogIn::GetDataSize() const
 {
     return
         sizeof(SystemTime)+
         sizeof(User);
 }
 
-char *MLogRecordLogIn::SetData(char *Data_)
+char *MLogRecordLogIn::SetData(char *Data_) const
 {
     Data_=MemSet(Data_,SystemTime);
     Data_=MemSet(Data_,User);
+
     return Data_;
 }
 
-char *MLogRecordLogIn::GetData(char *Data_, char *Limit_)
+const char *MLogRecordLogIn::GetData(const char *Data_, const char *Limit_)
 {
     if ( (Data_=MemGet(Data_,&SystemTime,Limit_))==NULL ) goto error;
     if ( (Data_=MemGet(Data_,&User,Limit_))==NULL ) goto error;
+
     return Data_;
 error:
     return NULL;
@@ -233,25 +229,26 @@ MLogRecordRun::MLogRecordRun()
 
 MLogRecordRun::~MLogRecordRun()
 {
+//
 }
 
-bool MLogRecordRun::Copy(MListItem *SrcItem_)
+void MLogRecordRun::Copy(const MListItem *SrcItem_)
 {
-    MLogRecordRun *RecordRun_=(MLogRecordRun*)SrcItem_;
-    SystemTime=RecordRun_->SystemTime;
-    Number=RecordRun_->Number;
-    Tariff=RecordRun_->Tariff;
-    StartTime=RecordRun_->StartTime;
-    Type=RecordRun_->Type;
-    BeginTime=RecordRun_->BeginTime;
-    EndTime=RecordRun_->EndTime;
-    SizeTime=RecordRun_->SizeTime;
-    WorkTime=RecordRun_->WorkTime;
-    Cost=RecordRun_->Cost;
-    return true;
+    MLogRecordRun *record=(MLogRecordRun*)SrcItem_;
+
+    SystemTime=record->SystemTime;
+    Number=record->Number;
+    Tariff=record->Tariff;
+    StartTime=record->StartTime;
+    Type=record->Type;
+    BeginTime=record->BeginTime;
+    EndTime=record->EndTime;
+    SizeTime=record->SizeTime;
+    WorkTime=record->WorkTime;
+    Cost=record->Cost;
 }
 
-unsigned MLogRecordRun::GetDataSize()
+unsigned MLogRecordRun::GetDataSize() const
 {
     return
         sizeof(SystemTime)+
@@ -266,7 +263,7 @@ unsigned MLogRecordRun::GetDataSize()
         sizeof(Cost);
 }
 
-char *MLogRecordRun::SetData(char *Data_)
+char *MLogRecordRun::SetData(char *Data_) const
 {
     Data_=MemSet(Data_,SystemTime);
     Data_=MemSet(Data_,Number);
@@ -278,10 +275,11 @@ char *MLogRecordRun::SetData(char *Data_)
     Data_=MemSet(Data_,SizeTime);
     Data_=MemSet(Data_,WorkTime);
     Data_=MemSet(Data_,Cost);
+
     return Data_;
 }
 
-char *MLogRecordRun::GetData(char *Data_, char *Limit_)
+const char *MLogRecordRun::GetData(const char *Data_, const char *Limit_)
 {
     if ( (Data_=MemGet(Data_,&SystemTime,Limit_))==NULL ) goto error;
     if ( (Data_=MemGet(Data_,&Number,Limit_))==NULL ) goto error;
@@ -293,6 +291,7 @@ char *MLogRecordRun::GetData(char *Data_, char *Limit_)
     if ( (Data_=MemGet(Data_,&SizeTime,Limit_))==NULL ) goto error;
     if ( (Data_=MemGet(Data_,&WorkTime,Limit_))==NULL ) goto error;
     if ( (Data_=MemGet(Data_,&Cost,Limit_))==NULL ) goto error;
+
     return Data_;
 error:
     return NULL;
@@ -310,19 +309,20 @@ MLogRecordFine::MLogRecordFine()
 
 MLogRecordFine::~MLogRecordFine()
 {
+//
 }
 
-bool MLogRecordFine::Copy(MListItem *SrcItem_)
+void MLogRecordFine::Copy(const MListItem *SrcItem_)
 {
-    MLogRecordFine *RecordFine_=(MLogRecordFine*)SrcItem_;
-    SystemTime=RecordFine_->SystemTime;
-    Number=RecordFine_->Number;
-    Fine=RecordFine_->Fine;
-    Time=RecordFine_->Time;
-    return true;
+    MLogRecordFine *record=(MLogRecordFine*)SrcItem_;
+
+    SystemTime=record->SystemTime;
+    Number=record->Number;
+    Fine=record->Fine;
+    Time=record->Time;
 }
 
-unsigned MLogRecordFine::GetDataSize()
+unsigned MLogRecordFine::GetDataSize() const
 {
     return
         sizeof(SystemTime)+
@@ -331,28 +331,28 @@ unsigned MLogRecordFine::GetDataSize()
         sizeof(Time);
 }
 
-char *MLogRecordFine::SetData(char *Data_)
+char *MLogRecordFine::SetData(char *Data_) const
 {
     Data_=MemSet(Data_,SystemTime);
     Data_=MemSet(Data_,Number);
     Data_=MemSet(Data_,Fine);
     Data_=MemSet(Data_,Time);
+
     return Data_;
 }
 
-char *MLogRecordFine::GetData(char *Data_, char *Limit_)
+const char *MLogRecordFine::GetData(const char *Data_, const char *Limit_)
 {
     if ( (Data_=MemGet(Data_,&SystemTime,Limit_))==NULL ) goto error;
     if ( (Data_=MemGet(Data_,&Number,Limit_))==NULL ) goto error;
     if ( (Data_=MemGet(Data_,&Fine,Limit_))==NULL ) goto error;
     if ( (Data_=MemGet(Data_,&Time,Limit_))==NULL ) goto error;
+
     return Data_;
 error:
     return NULL;
 }
-
 //---------------------------------------------------------------------------
-
 MLogRecordExchange::MLogRecordExchange()
 {
     SystemTime=0;
@@ -363,16 +363,16 @@ MLogRecordExchange::~MLogRecordExchange()
 {
 }
 
-bool MLogRecordExchange::Copy(MListItem *SrcItem_)
+void MLogRecordExchange::Copy(const MListItem *SrcItem_)
 {
-    MLogRecordExchange *RecordExchange_=(MLogRecordExchange*)SrcItem_;
-    SystemTime=RecordExchange_->SystemTime;
-    From=RecordExchange_->From;
-    To=RecordExchange_->To;
-    return true;
+    MLogRecordExchange *record=(MLogRecordExchange*)SrcItem_;
+
+    SystemTime=record->SystemTime;
+    From=record->From;
+    To=record->To;
 }
 
-unsigned MLogRecordExchange::GetDataSize()
+unsigned MLogRecordExchange::GetDataSize() const
 {
     return
         sizeof(SystemTime)+
@@ -380,19 +380,21 @@ unsigned MLogRecordExchange::GetDataSize()
         sizeof(To);
 }
 
-char *MLogRecordExchange::SetData(char *Data_)
+char *MLogRecordExchange::SetData(char *Data_) const
 {
     Data_=MemSet(Data_,SystemTime);
     Data_=MemSet(Data_,From);
     Data_=MemSet(Data_,To);
+
     return Data_;
 }
 
-char *MLogRecordExchange::GetData(char *Data_, char *Limit_)
+const char *MLogRecordExchange::GetData(const char *Data_, const char *Limit_)
 {
     if ( (Data_=MemGet(Data_,&SystemTime,Limit_))==NULL ) goto error;
     if ( (Data_=MemGet(Data_,&From,Limit_))==NULL ) goto error;
     if ( (Data_=MemGet(Data_,&To,Limit_))==NULL ) goto error;
+
     return Data_;
 error:
     return NULL;
@@ -411,16 +413,16 @@ MLogRecordMode::~MLogRecordMode()
 {
 }
 
-bool MLogRecordMode::Copy(MListItem *SrcItem_)
+void MLogRecordMode::Copy(const MListItem *SrcItem_)
 {
-    MLogRecordMode *RecordMode_=(MLogRecordMode*)SrcItem_;
-    SystemTime=RecordMode_->SystemTime;
-    Number=RecordMode_->Number;
-    Apply=RecordMode_->Apply;
-    return true;
+    MLogRecordMode *record=(MLogRecordMode*)SrcItem_;
+
+    SystemTime=record->SystemTime;
+    Number=record->Number;
+    Apply=record->Apply;
 }
 
-unsigned MLogRecordMode::GetDataSize()
+unsigned MLogRecordMode::GetDataSize() const
 {
     return
         sizeof(SystemTime)+
@@ -428,19 +430,21 @@ unsigned MLogRecordMode::GetDataSize()
         sizeof(Apply);
 }
 
-char *MLogRecordMode::SetData(char *Data_)
+char *MLogRecordMode::SetData(char *Data_) const
 {
     Data_=MemSet(Data_,SystemTime);
     Data_=MemSet(Data_,Number);
     Data_=MemSet(Data_,Apply);
+
     return Data_;
 }
 
-char *MLogRecordMode::GetData(char *Data_, char *Limit_)
+const char *MLogRecordMode::GetData(const char *Data_, const char *Limit_)
 {
     if ( (Data_=MemGet(Data_,&SystemTime,Limit_))==NULL ) goto error;
     if ( (Data_=MemGet(Data_,&Number,Limit_))==NULL ) goto error;
     if ( (Data_=MemGet(Data_,&Apply,Limit_))==NULL ) goto error;
+
     return Data_;
 error:
     return NULL;
@@ -458,29 +462,29 @@ MLogRecordCmd::~MLogRecordCmd()
 {
 }
 
-bool MLogRecordCmd::Copy(MListItem *SrcItem_)
+void MLogRecordCmd::Copy(const MListItem *SrcItem_)
 {
-    MLogRecordCmd *RecordCmd_=(MLogRecordCmd*)SrcItem_;
-    SystemTime=RecordCmd_->SystemTime;
-    Number=RecordCmd_->Number;
-    return true;
+    MLogRecordCmd *record=(MLogRecordCmd*)SrcItem_;
+
+    SystemTime=record->SystemTime;
+    Number=record->Number;
 }
 
-unsigned MLogRecordCmd::GetDataSize()
+unsigned MLogRecordCmd::GetDataSize() const
 {
     return
         sizeof(SystemTime)+
         sizeof(Number);
 }
 
-char *MLogRecordCmd::SetData(char *Data_)
+char *MLogRecordCmd::SetData(char *Data_) const
 {
     Data_=MemSet(Data_,SystemTime);
     Data_=MemSet(Data_,Number);
     return Data_;
 }
 
-char *MLogRecordCmd::GetData(char *Data_, char *Limit_)
+const char *MLogRecordCmd::GetData(const char *Data_, const char *Limit_)
 {
     if ( (Data_=MemGet(Data_,&SystemTime,Limit_))==NULL ) goto error;
     if ( (Data_=MemGet(Data_,&Number,Limit_))==NULL ) goto error;
@@ -491,27 +495,27 @@ error:
 
 //---------------------------------------------------------------------------
 
-MLogRecordDataShellState::MLogRecordDataShellState()
+MLogRecordDataShState::MLogRecordDataShState()
 {
     SystemTime=0;
     State=0;
     User=0;
 }
 
-MLogRecordDataShellState::~MLogRecordDataShellState()
+MLogRecordDataShState::~MLogRecordDataShState()
 {
 }
 
-bool MLogRecordDataShellState::Copy(MListItem *SrcItem_)
+void MLogRecordDataShState::Copy(const MListItem *SrcItem_)
 {
-    MLogRecordDataShellState *RecordDataShellState_=(MLogRecordDataShellState*)SrcItem_;
-    SystemTime=RecordDataShellState_->SystemTime;
-    State=RecordDataShellState_->State;
-    User=RecordDataShellState_->User;
-    return true;
+    MLogRecordDataShState *record=(MLogRecordDataShState*)SrcItem_;
+
+    SystemTime=record->SystemTime;
+    State=record->State;
+    User=record->User;
 }
 
-unsigned MLogRecordDataShellState::GetDataSize()
+unsigned MLogRecordDataShState::GetDataSize() const
 {
     return
         sizeof(SystemTime)+
@@ -519,7 +523,7 @@ unsigned MLogRecordDataShellState::GetDataSize()
         sizeof(User);
 }
 
-char *MLogRecordDataShellState::SetData(char *Data_)
+char *MLogRecordDataShState::SetData(char *Data_) const
 {
     Data_=MemSet(Data_,SystemTime);
     Data_=MemSet(Data_,State);
@@ -527,7 +531,7 @@ char *MLogRecordDataShellState::SetData(char *Data_)
     return Data_;
 }
 
-char *MLogRecordDataShellState::GetData(char *Data_, char *Limit_)
+const char *MLogRecordDataShState::GetData(const char *Data_, const char *Limit_)
 {
     if ( (Data_=MemGet(Data_,&SystemTime,Limit_))==NULL ) goto error;
     if ( (Data_=MemGet(Data_,&State,Limit_))==NULL ) goto error;
@@ -541,323 +545,319 @@ error:
 MLogRecordDataStates::MLogRecordDataStates()
 {
     SystemTime=0;
-    NumStates=0;
-    States=NULL;
 }
 
 MLogRecordDataStates::~MLogRecordDataStates()
 {
-    delete[] States; States=NULL;
+//
 }
 
-bool MLogRecordDataStates::Copy(MListItem *SrcItem_)
+void MLogRecordDataStates::Copy(const MListItem *SrcItem_)
 {
-    MLogRecordDataStates *RecordStates_=(MLogRecordDataStates*)SrcItem_;
-    SystemTime=RecordStates_->SystemTime;
-    NumStates=RecordStates_->NumStates;
-    delete[] States; if ( (States=new MStateData[NumStates])==NULL ) return false;
-    memcpy(States,RecordStates_->States,sizeof(MStateData)*NumStates);
-    return true;
+    MLogRecordDataStates *record=(MLogRecordDataStates*)SrcItem_;
+
+    SystemTime=record->SystemTime;
+    States=record->States;
 }
 
-unsigned MLogRecordDataStates::GetDataSize()
+unsigned MLogRecordDataStates::GetDataSize() const
 {
     unsigned Size;
 
-    Size=sizeof(SystemTime)+sizeof(NumStates);
-    if ( NumStates>0 )
+    Size=
+            sizeof(SystemTime)+
+            sizeof(unsigned);                   // Счетчик состояний
+
+    if ( States.Count()>0 )
+    {
         Size+=(
-            sizeof(States->Number)+
-            sizeof(States->State)+
-            sizeof(States->TariffID)+
-            sizeof(States->StartWorkTime)+
-            sizeof(States->SizeWorkTime)+
-            sizeof(States->StartFineTime)+
-            sizeof(States->SizeFineTime)+
-            sizeof(States->StopTimerTime))*NumStates;
+            sizeof(States[0].Number)+
+            sizeof(States[0].State)+
+            sizeof(States[0].TariffID)+
+            sizeof(States[0].StartWorkTime)+
+            sizeof(States[0].SizeWorkTime)+
+            sizeof(States[0].StartFineTime)+
+            sizeof(States[0].SizeFineTime)+
+            sizeof(States[0].StopTimerTime))*States.Count();
+    }
 
     return Size;
 }
 
-char *MLogRecordDataStates::SetData(char *Data_)
+char *MLogRecordDataStates::SetData(char *Data_) const
 {
-    MStateData *State=States;
+    unsigned Count;
 
     Data_=MemSet(Data_,SystemTime);
-    Data_=MemSet(Data_,NumStates);
-    for ( unsigned i=0; i<NumStates; i++, State++ )
+    Count=States.Count(); Data_=MemSet(Data_,Count);
+
+    for ( unsigned i=0; i<Count; i++)
     {
-        Data_=MemSet(Data_,State->Number);
-        Data_=MemSet(Data_,State->State);
-        Data_=MemSet(Data_,State->TariffID);
-        Data_=MemSet(Data_,State->StartWorkTime);
-        Data_=MemSet(Data_,State->SizeWorkTime);
-        Data_=MemSet(Data_,State->StartFineTime);
-        Data_=MemSet(Data_,State->SizeFineTime);
-        Data_=MemSet(Data_,State->StopTimerTime);
+        MStateData &state=States[i];
+        Data_=MemSet(Data_,state.Number);
+        Data_=MemSet(Data_,state.State);
+        Data_=MemSet(Data_,state.TariffID);
+        Data_=MemSet(Data_,state.StartWorkTime);
+        Data_=MemSet(Data_,state.SizeWorkTime);
+        Data_=MemSet(Data_,state.StartFineTime);
+        Data_=MemSet(Data_,state.SizeFineTime);
+        Data_=MemSet(Data_,state.StopTimerTime);
     }
 
     return Data_;
 }
 
-char *MLogRecordDataStates::GetData(char *Data_, char *Limit_)
+const char *MLogRecordDataStates::GetData(const char *Data_, const char *Limit_)
 {
-    MStateData *State;
+    unsigned Count;
 
     if ( (Data_=MemGet(Data_,&SystemTime,Limit_))==NULL ) goto error;
-    if ( (Data_=MemGet(Data_,&NumStates,Limit_))==NULL ) goto error;
-    if ( NumStates>MAX_Computers ) goto error;
+    if ( (Data_=MemGet(Data_,&Count,Limit_))==NULL ) goto error;
+    if ( Count>MAX_Comps ) goto error;
+    States.Alloc(Count);
 
-    delete[] States; if ( (States=new MStateData[NumStates])==NULL ) goto error;
-
-    State=States;
-    for ( unsigned i=0; i<NumStates; i++, State++ )
+    for ( unsigned i=0; i<Count; i++ )
     {
-        if ( (Data_=MemGet(Data_,&State->Number,Limit_))==NULL ) goto error;
-        if ( (Data_=MemGet(Data_,&State->State,Limit_))==NULL ) goto error;
-        if ( (Data_=MemGet(Data_,&State->TariffID,Limit_))==NULL ) goto error;
-        if ( (Data_=MemGet(Data_,&State->StartWorkTime,Limit_))==NULL ) goto error;
-        if ( (Data_=MemGet(Data_,&State->SizeWorkTime,Limit_))==NULL ) goto error;
-        if ( (Data_=MemGet(Data_,&State->StartFineTime,Limit_))==NULL ) goto error;
-        if ( (Data_=MemGet(Data_,&State->SizeFineTime,Limit_))==NULL ) goto error;
-        if ( (Data_=MemGet(Data_,&State->StopTimerTime,Limit_))==NULL ) goto error;
+        MStateData &state=States[i];
+        if ( (Data_=MemGet(Data_,&state.Number,Limit_))==NULL ) goto error;
+        if ( (Data_=MemGet(Data_,&state.State,Limit_))==NULL ) goto error;
+        if ( (Data_=MemGet(Data_,&state.TariffID,Limit_))==NULL ) goto error;
+        if ( (Data_=MemGet(Data_,&state.StartWorkTime,Limit_))==NULL ) goto error;
+        if ( (Data_=MemGet(Data_,&state.SizeWorkTime,Limit_))==NULL ) goto error;
+        if ( (Data_=MemGet(Data_,&state.StartFineTime,Limit_))==NULL ) goto error;
+        if ( (Data_=MemGet(Data_,&state.SizeFineTime,Limit_))==NULL ) goto error;
+        if ( (Data_=MemGet(Data_,&state.StopTimerTime,Limit_))==NULL ) goto error;
     }
 
     return Data_;
 error:
     return NULL;
 }
-
 //---------------------------------------------------------------------------
-
 MLogRecordDataTariffs::MLogRecordDataTariffs()
 {
     SystemTime=0;
-    NumTariffs=0;
-    Tariffs=NULL;
 }
 
 MLogRecordDataTariffs::~MLogRecordDataTariffs()
 {
-    delete[] Tariffs; Tariffs=NULL;
+//
 }
 
-bool MLogRecordDataTariffs::Copy(MListItem *SrcItem_)
+void MLogRecordDataTariffs::Copy(const MListItem *SrcItem_)
 {
-    MLogRecordDataTariffs *RecordTariffs_=(MLogRecordDataTariffs*)SrcItem_;
-    SystemTime=RecordTariffs_->SystemTime;
-    NumTariffs=RecordTariffs_->NumTariffs;
-    delete[] Tariffs; if ( (Tariffs=new MTariffData[NumTariffs])==NULL ) return false;
-    memcpy(Tariffs,RecordTariffs_->Tariffs,sizeof(MTariffData)*NumTariffs);
-    return true;
+    MLogRecordDataTariffs *record=(MLogRecordDataTariffs*)SrcItem_;
+
+    SystemTime=record->SystemTime;
+    Tariffs=record->Tariffs;
 }
 
-unsigned MLogRecordDataTariffs::GetDataSize()
+unsigned MLogRecordDataTariffs::GetDataSize() const
 {
-    unsigned Size; MTariffData *Tariff=Tariffs;
+    unsigned Size;
 
-    Size=sizeof(SystemTime)+sizeof(NumTariffs);
-    for ( unsigned i=0; i<NumTariffs; i++, Tariff++ )
+    Size=
+            sizeof(SystemTime)+
+            sizeof(unsigned);                   // Счетчик тарифов
+
+    for ( unsigned i=0, Count=Tariffs.Count(); i<Count; i++ )
     {
+        MTariffData &tariff=Tariffs[i];
         Size+=
-            sizeof(Tariff->ID)+
-            strlen(Tariff->Name)+1;
+            sizeof(tariff.ID)+
+            strlen(tariff.Name)+1;
     }
 
     return Size;
 }
 
-char *MLogRecordDataTariffs::SetData(char *Data_)
+char *MLogRecordDataTariffs::SetData(char *Data_) const
 {
-    MTariffData *Tariff=Tariffs;
+    unsigned Count;
 
     Data_=MemSet(Data_,SystemTime);
-    Data_=MemSet(Data_,NumTariffs);
-    for ( unsigned i=0; i<NumTariffs; i++, Tariff++ )
+    Count=Tariffs.Count(); Data_=MemSet(Data_,Count);
+
+    for ( unsigned i=0; i<Count; i++ )
     {
-        Data_=MemSet(Data_,Tariff->ID);
-        Data_=MemSetCLine(Data_,Tariff->Name);
+        MTariffData &tariff=Tariffs[i];
+        Data_=MemSet(Data_,tariff.ID);
+        Data_=MemSetCLine(Data_,tariff.Name);
     }
 
     return Data_;
 }
 
-char *MLogRecordDataTariffs::GetData(char *Data_, char *Limit_)
+const char *MLogRecordDataTariffs::GetData(const char *Data_, const char *Limit_)
 {
-    MTariffData *Tariff;
+    unsigned Count;
 
     if ( (Data_=MemGet(Data_,&SystemTime,Limit_))==NULL ) goto error;
-    if ( (Data_=MemGet(Data_,&NumTariffs,Limit_))==NULL ) goto error;
-    if ( NumTariffs>MAX_Tariffs ) goto error;
+    if ( (Data_=MemGet(Data_,&Count,Limit_))==NULL ) goto error;
+    if ( Count>MAX_Tariffs ) goto error;
+    Tariffs.Alloc(Count);
 
-    delete[] Tariffs; if ( (Tariffs=new MTariffData[NumTariffs])==NULL ) goto error;
-
-    Tariff=Tariffs;
-    for ( unsigned i=0; i<NumTariffs; i++, Tariff++ )
+    for ( unsigned i=0; i<Count; i++ )
     {
-        if ( (Data_=MemGet(Data_,&Tariff->ID,Limit_))==NULL ) goto error;
-        if ( (Data_=MemGetCLine(Data_,Tariff->Name,MAX_TariffNameLength,Limit_))==NULL ) goto error;
+        MTariffData &tariff=Tariffs[i];
+        if ( (Data_=MemGet(Data_,&tariff.ID,Limit_))==NULL ) goto error;
+        if ( (Data_=MemGetCLine(Data_,tariff.Name,MAX_TariffNameLen,Limit_))==NULL ) goto error;
     }
 
     return Data_;
 error:
     return NULL;
 }
-
 //---------------------------------------------------------------------------
-
 MLogRecordDataFines::MLogRecordDataFines()
 {
     SystemTime=0;
-    NumFines=0;
-    Fines=NULL;
 }
 
 MLogRecordDataFines::~MLogRecordDataFines()
 {
-    delete[] Fines; Fines=NULL;
 }
 
-bool MLogRecordDataFines::Copy(MListItem *SrcItem_)
+void MLogRecordDataFines::Copy(const MListItem *SrcItem_)
 {
-    MLogRecordDataFines *RecordFines_=(MLogRecordDataFines*)SrcItem_;
-    SystemTime=RecordFines_->SystemTime;
-    NumFines=RecordFines_->NumFines;
-    delete[] Fines; if ( (Fines=new MFineData[NumFines])==NULL ) return false;
-    memcpy(Fines,RecordFines_->Fines,sizeof(MFineData)*NumFines);
-    return true;
+    MLogRecordDataFines *record=(MLogRecordDataFines*)SrcItem_;
+
+    SystemTime=record->SystemTime;
+    Fines=record->Fines;
 }
 
-unsigned MLogRecordDataFines::GetDataSize()
+unsigned MLogRecordDataFines::GetDataSize() const
 {
-    unsigned Size; MFineData *Fine=Fines;
+    unsigned Size;
 
-    Size=sizeof(SystemTime)+sizeof(NumFines);
-    for ( unsigned i=0; i<NumFines; i++, Fine++ )
+    Size=
+            sizeof(SystemTime)+
+            sizeof(unsigned);                   // Счетчик массива
+
+    for ( unsigned i=0, cnt=Fines.Count(); i<cnt; i++ )
     {
+        MFineData &fine=Fines[i];
         Size+=
-            sizeof(Fine->ID)+
-            strlen(Fine->Description)+1;
+            sizeof(fine.ID)+
+            strlen(fine.Descr)+1;
     }
 
     return Size;
 }
 
-char *MLogRecordDataFines::SetData(char *Data_)
+char *MLogRecordDataFines::SetData(char *Data_) const
 {
-    MFineData *Fine=Fines;
+    unsigned Count;
 
     Data_=MemSet(Data_,SystemTime);
-    Data_=MemSet(Data_,NumFines);
-    for ( unsigned i=0; i<NumFines; i++, Fine++ )
+    Count=Fines.Count(); Data_=MemSet(Data_,Count);
+
+    for ( unsigned i=0; i<Count; i++ )
     {
-        Data_=MemSet(Data_,Fine->ID);
-        Data_=MemSetCLine(Data_,Fine->Description);
+        MFineData &fine=Fines[i];
+        Data_=MemSet(Data_,fine.ID);
+        Data_=MemSetCLine(Data_,fine.Descr);
     }
 
     return Data_;
 }
 
-char *MLogRecordDataFines::GetData(char *Data_, char *Limit_)
+const char *MLogRecordDataFines::GetData(const char *Data_, const char *Limit_)
 {
-    MFineData *Fine;
+    unsigned Count;
 
     if ( (Data_=MemGet(Data_,&SystemTime,Limit_))==NULL ) goto error;
-    if ( (Data_=MemGet(Data_,&NumFines,Limit_))==NULL ) goto error;
-    if ( NumFines>MAX_Fines ) goto error;
+    if ( (Data_=MemGet(Data_,&Count,Limit_))==NULL ) goto error;
+    if ( Count>MAX_Fines ) goto error;
+    Fines.Alloc(Count);
 
-    delete[] Fines; if ( (Fines=new MFineData[NumFines])==NULL ) goto error;
-
-    Fine=Fines;
-    for ( unsigned i=0; i<NumFines; i++, Fine++ )
+    for ( unsigned i=0; i<Count; i++ )
     {
-        if ( (Data_=MemGet(Data_,&Fine->ID,Limit_))==NULL ) goto error;
-        if ( (Data_=MemGetCLine(Data_,Fine->Description,MAX_FineDescLength,Limit_))==NULL ) goto error;
+        MFineData &fine=Fines[i];
+        if ( (Data_=MemGet(Data_,&fine.ID,Limit_))==NULL ) goto error;
+        if ( (Data_=MemGetCLine(Data_,fine.Descr,MAX_FineDescrLen,Limit_))==NULL ) goto error;
     }
 
     return Data_;
 error:
     return NULL;
 }
-
 //---------------------------------------------------------------------------
-
 MLogRecordDataUsers::MLogRecordDataUsers()
 {
     SystemTime=0;
-    NumUsers=0;
-    Users=NULL;
 }
 
 MLogRecordDataUsers::~MLogRecordDataUsers()
 {
-    delete[] Users; Users=NULL;
+//
 }
 
-bool MLogRecordDataUsers::Copy(MListItem *SrcItem_)
+void MLogRecordDataUsers::Copy(const MListItem *SrcItem_)
 {
-    MLogRecordDataUsers *RecordUsers_=(MLogRecordDataUsers*)SrcItem_;
-    SystemTime=RecordUsers_->SystemTime;
-    NumUsers=RecordUsers_->NumUsers;
-    delete[] Users; if ( (Users=new MUserData[NumUsers])==NULL ) return false;
-    memcpy(Users,RecordUsers_->Users,sizeof(MUserData)*NumUsers);
-    return true;
+    MLogRecordDataUsers *record=(MLogRecordDataUsers*)SrcItem_;
+
+    SystemTime=record->SystemTime;
+    Users=record->Users;
 }
 
-unsigned MLogRecordDataUsers::GetDataSize()
+unsigned MLogRecordDataUsers::GetDataSize() const
 {
-    unsigned Size; MUserData *User=Users;
+    unsigned Size;
 
-    Size=sizeof(SystemTime)+sizeof(NumUsers);
-    for ( unsigned i=0; i<NumUsers; i++, User++ )
+    Size=
+            sizeof(SystemTime)+
+            sizeof(unsigned);                       // Счетчик пользователей
+
+    for ( unsigned i=0, Count=Users.Count(); i<Count; i++ )
     {
+        MUserData &user=Users[i];
         Size+=
-            sizeof(User->ID)+
-            strlen(User->Login)+1+
-            strlen(User->Name)+1;
+            sizeof(user.ID)+
+            strlen(user.Login)+1+
+            strlen(user.Name)+1;
     }
 
     return Size;
 }
 
-char *MLogRecordDataUsers::SetData(char *Data_)
+char *MLogRecordDataUsers::SetData(char *Data_) const
 {
-    MUserData *User=Users;
+    unsigned Count;
 
     Data_=MemSet(Data_,SystemTime);
-    Data_=MemSet(Data_,NumUsers);
-    for ( unsigned i=0; i<NumUsers; i++, User++ )
+    Count=Users.Count(); Data_=MemSet(Data_,Count);
+    for ( unsigned i=0; i<Count; i++ )
     {
-        Data_=MemSet(Data_,User->ID);
-        Data_=MemSetCLine(Data_,User->Login);
-        Data_=MemSetCLine(Data_,User->Name);
+        MUserData &user=Users[i];
+        Data_=MemSet(Data_,user.ID);
+        Data_=MemSetCLine(Data_,user.Login);
+        Data_=MemSetCLine(Data_,user.Name);
     }
 
     return Data_;
 }
 
-char *MLogRecordDataUsers::GetData(char *Data_, char *Limit_)
+const char *MLogRecordDataUsers::GetData(const char *Data_, const char *Limit_)
 {
-    MUserData *User;
+    unsigned Count;
 
     if ( (Data_=MemGet(Data_,&SystemTime,Limit_))==NULL ) goto error;
-    if ( (Data_=MemGet(Data_,&NumUsers,Limit_))==NULL ) goto error;
-    if ( NumUsers>MAX_Users ) goto error;
+    if ( (Data_=MemGet(Data_,&Count,Limit_))==NULL ) goto error;
+    if ( Count>MAX_Users ) goto error;
+    Users.Alloc(Count);
 
-    delete[] Users; if ( (Users=new MUserData[NumUsers])==NULL ) goto error;
-
-    User=Users;
-    for ( unsigned i=0; i<NumUsers; i++, User++ )
+    for ( unsigned i=0; i<Count; i++ )
     {
-        if ( (Data_=MemGet(Data_,&User->ID,Limit_))==NULL ) goto error;
-        if ( (Data_=MemGetCLine(Data_,User->Login,MAX_UserLoginLength,Limit_))==NULL ) goto error;
-        if ( (Data_=MemGetCLine(Data_,User->Name,MAX_UserNameLength,Limit_))==NULL ) goto error;
+        MUserData &user=Users[i];
+        if ( (Data_=MemGet(Data_,&user.ID,Limit_))==NULL ) goto error;
+        if ( (Data_=MemGetCLine(Data_,user.Login,MAX_UserLoginLen,Limit_))==NULL ) goto error;
+        if ( (Data_=MemGetCLine(Data_,user.Name,MAX_UserNameLen,Limit_))==NULL ) goto error;
     }
 
     return Data_;
 error:
     return NULL;
 }
-
 //---------------------------------------------------------------------------
 

@@ -6,7 +6,6 @@
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
 #pragma resource "*.dfm"
-TFormLogIn *FormLogIn;
 //---------------------------------------------------------------------------
 __fastcall TFormLogIn::TFormLogIn(TComponent* Owner)
     : TForm(Owner)
@@ -18,8 +17,8 @@ unsigned TFormLogIn::Execute(MUsers *Users_)
     ID=0;
 
     // Заносим в список активные логины
-    for ( MUser *User=(MUser*)Users_->First;
-        User; User=(MUser*)User->Next )
+    for ( MUser *User=(MUser*)Users_->gFirst();
+        User; User=(MUser*)User->gNext() )
     {
         if ( !User->Active ) continue;
         ComboBoxLogin->Items->AddObject(User->Login,(TObject*)User);
@@ -30,8 +29,8 @@ unsigned TFormLogIn::Execute(MUsers *Users_)
 //---------------------------------------------------------------------------
 void __fastcall TFormLogIn::FormShow(TObject *Sender)
 {
-    EditPassword->MaxLength=MAX_UserPasswordLength;
-    EditPassword->PasswordChar='*';
+    EditPassword->MaxLength=MAX_UserPassLen;
+    EditPassword->PasswordChar=PASS_Char;
     LabelPassword->Enabled=false;
     EditPassword->Enabled=false;
     EditPassword->Color=clBtnFace;
@@ -57,10 +56,10 @@ void __fastcall TFormLogIn::FormCloseQuery(TObject *Sender, bool &CanClose)
         { ActiveControl=ComboBoxLogin; goto error; }
     User=(MUser*)ComboBoxLogin->Items->Objects[Index];
     // Проверяем пароль
-    if ( !User->CheckPassword(EditPassword->Text.c_str()) )
+    if ( !User->CheckPass(EditPassword->Text.c_str()) )
         { ActiveControl=EditPassword; goto error; }
     //
-    ID=User->ID;
+    ID=User->gItemID();
 
     return;
 error:

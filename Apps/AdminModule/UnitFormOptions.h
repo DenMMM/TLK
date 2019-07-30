@@ -35,15 +35,13 @@ __published:	// IDE-managed Components
     void __fastcall CheckBoxRightPauseExit(TObject *Sender);
     void __fastcall FormShow(TObject *Sender);
     void __fastcall FormClose(TObject *Sender, TCloseAction &Action);
-    void __fastcall ButtonSaveClick(TObject *Sender);
     void __fastcall ComboBoxLogPeriodExit(TObject *Sender);
+    void __fastcall ButtonSaveClick(TObject *Sender);
 private:	// User declarations
     MOptions TmpOptions;
 public:		// User declarations
     __fastcall TFormOptions(TComponent* Owner);
 };
-//---------------------------------------------------------------------------
-extern PACKAGE TFormOptions *FormOptions;
 //---------------------------------------------------------------------------
 #endif
 

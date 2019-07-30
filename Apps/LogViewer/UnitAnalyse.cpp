@@ -17,7 +17,6 @@ bool ProcessComputersState(MLogRecord *Position_,
     MLogRecordLock *rcdl;
     MLogRecordPause *rcdp;
     MLogRecordOpen *rcdo;
-    MLogRecordWtLocker *rcdwt;
     MLogRecordDataTariffs *rcddtrf;
     MLogRecordDataFines *rcddfn;
     MLogRecordDataUsers *rcddusr;
@@ -30,12 +29,12 @@ bool ProcessComputersState(MLogRecord *Position_,
     Tariffs_->Clear();
     // Ищем назад по логу ближайшие данные по состоянию компьютеров
     Record=Position_;
-    while(Record&&(Record->TypeID()!=mlrDataStates))
-        Record=(MLogRecord*)Record->Prev;
+    while(Record&&(Record->gTypeID()!=mlrDataStates))
+        Record=(MLogRecord*)Record->gPrev();
     if ( Record==NULL ) goto error;
     // Заполняем таблицу состояний начальными данными
     rcdds=(MLogRecordDataStates*)Record;
-    for ( unsigned i=0; i<rcdds->NumStates; i++ )
+    for ( unsigned i=0; i<rcdds->States.Count(); i++ )
     {
         if ( (state=(MState*)States_->Add())==NULL ) goto error;
         state->SetStateData(&rcdds->States[i]);
@@ -43,14 +42,14 @@ bool ProcessComputersState(MLogRecord *Position_,
     // Начинаем сбор данных за прошедшее время
     while(Record!=Position_)
     {
-        Record=(MLogRecord*)Record->Next;
+        Record=(MLogRecord*)Record->gNext();
 
-        switch(Record->TypeID())
+        switch(Record->gTypeID())
         {
             case mlrRun:
                 rcdr=(MLogRecordRun*)Record;
                 if ( (state=States_->Search(rcdr->Number))==NULL ) goto error;
-                if ( (tariff=Tariffs_->Search(rcdr->Tariff))==NULL ) goto error;
+                if ( (tariff=(MTariff*)Tariffs_->SrchID(rcdr->Tariff))==NULL ) goto error;
                 memset(&runtime,0,sizeof(runtime));
                 runtime.WorkTime=rcdr->WorkTime;
                 state->Timer(rcdr->SystemTime);
@@ -89,19 +88,13 @@ bool ProcessComputersState(MLogRecord *Position_,
                 state->Timer(rcdo->SystemTime);
                 state->CmdPause(rcdo->Apply,false);
                 break;
-            case mlrWtLocker:
-                rcdwt=(MLogRecordWtLocker*)Record;
-                if ( (state=States_->Search(rcdwt->Number))==NULL ) goto error;
-                state->Timer(rcdwt->SystemTime);
-                state->CmdWtLocker(rcdwt->Apply,false);
-                break;
             case mlrDataTariffs:
                 rcddtrf=(MLogRecordDataTariffs*)Record;
                 Tariffs_->Clear();
-                for ( unsigned i=0; i<rcddtrf->NumTariffs; i++ )
+                for ( unsigned i=0; i<rcddtrf->Tariffs.Count(); i++ )
                 {
                     tariff=(MTariff*)Tariffs_->Add();
-                    tariff->SetTariffData(rcddtrf->Tariffs+i);
+                    tariff->SetTariffData(&rcddtrf->Tariffs[i]);
                 }
                 break;
             default: break;
@@ -126,9 +119,9 @@ bool ProcessUsersUpTime(MLogRecord *Begin_, MLogRecord *End_,
     UpTimes_->Clear();
     if ( Begin_==NULL ) goto exit;
     uptime=NULL;
-    for ( ; Begin_!=End_->Next; Begin_=(MLogRecord*)Begin_->Next )
+    for ( ; Begin_!=End_->gNext(); Begin_=(MLogRecord*)Begin_->gNext() )
     {
-        switch(Begin_->TypeID())
+        switch(Begin_->gTypeID())
         {
             case mlrConfig: break;
             case mlrLogIn:
@@ -151,14 +144,14 @@ bool ProcessUsersUpTime(MLogRecord *Begin_, MLogRecord *End_,
             case mlrDataUsers:
                 // Добавляем новых пользователей в список
                 rcddusr=(MLogRecordDataUsers*)Begin_;
-                for ( unsigned i=0; i<rcddusr->NumUsers; i++ )
+                for ( unsigned i=0; i<rcddusr->Users.Count(); i++ )
                 {
-                    if ( (usr=Users_->Search(rcddusr->Users[i].ID))!=NULL )
+                    if ( (usr=(MUser*)Users_->SrchID(rcddusr->Users[i].ID))!=NULL )
                         strcpy(usr->Name,rcddusr->Users[i].Name);
                     else
                     {
                         usr=(MUser*)Users_->Add();
-                        usr->SetUserData(rcddusr->Users+i);
+                        usr->SetUserData(&rcddusr->Users[i]);
                     }
                 }
                 break;

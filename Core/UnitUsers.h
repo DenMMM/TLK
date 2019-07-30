@@ -2,77 +2,67 @@
 #ifndef UnitUsersH
 #define UnitUsersH
 //---------------------------------------------------------------------------
-#include "UnitSLList.h"
+struct MUserData;
+
+class MUser;
+class MUsers;
+//---------------------------------------------------------------------------
+#include "UnitPassword.h"
+#include "UnitIDList.h"
 #include "UnitCommon.h"
 //---------------------------------------------------------------------------
 #define MAX_Users               20
-#define MAX_UserLoginLength     16
-#define MAX_UserPasswordLength  8
-#define MAX_UserNameLength      40
+#define MAX_UserLoginLen        16
+#define MAX_UserPassLen         8
+#define MAX_UserNameLen         50
 //---------------------------------------------------------------------------
-class MUser;
-class MUsers;
-struct MUserData;
-//---------------------------------------------------------------------------
-class MUser:public MSLListItem
+struct MUserData
 {
-public:
-    bool Copy(MListItem *SrcItem_);
-private:
-    char Password[MAX_UserPasswordLength+1];
-public:
     unsigned ID;
-    char Login[MAX_UserLoginLength+1];
-    char Name[MAX_UserNameLength+1];
+    char Login[MAX_UserLoginLen+1];
+    char Name[MAX_UserNameLen+1];
+};
+//---------------------------------------------------------------------------
+class MUser:public MIDListItem
+{
+private:
+    // Функции механизма сохранения/загрузки данных
+    unsigned GetDataSize() const;
+    char *SetData(char *Data_) const;
+    const char *GetData(const char *Data_, const char *Limit_);
+
+    MPassword Pass;
+
+public:
+    char Login[MAX_UserLoginLen+1];
+    char Name[MAX_UserNameLen+1];
     bool Active;
 
     bool SetLogin(char *Login_);
-    bool SetPassword(char *Password_);
     bool SetName(char *Name_);
-    bool CheckPassword(char *Password_);
+    void SetPass(char *Pass_) { Pass.Set(Pass_); }
+    bool CheckPass(char *Pass_) const { return Pass.Check(Pass_); }
+    void Copy(const MListItem *SrcItem_);
 
     // Поддержка логов
-    void GetUserData(MUserData *Data_);
+    void GetUserData(MUserData *Data_) const;
     void SetUserData(MUserData *Data_);
-
-    // Функции механизма сохранения/загрузки данных
-    unsigned GetDataSize();
-    char *SetData(char *Data_);
-    char *GetData(char *Data_, char *Limit_);
 
     MUser();
     ~MUser();
 };
 //---------------------------------------------------------------------------
-class MUsers:public MSLList
+class MUsers:public MIDList
 {
 private:
-    MListItem *operator_new(unsigned Type_) { return (MListItem*)new MUser; }
-    void operator_delete(MListItem *DelItem_) { delete (MUser*)DelItem_; }
-public:
-    bool Copy(MList *SrcList_)
-        { LastID=((MUsers*)SrcList_)->LastID; return MList::Copy(SrcList_); }
-private:
-    unsigned LastID;
-    unsigned NextID();
-public:
-    void SetIDs();
-    MUser *Search(unsigned ID_);
+    MListItem *item_new(unsigned char TypeID_) const { return (MListItem*)new MUser; }
+    void item_del(MListItem *Item_) const { delete (MUser*)Item_; }
 
-    // Функции механизма сохранения/загрузки данных
-    unsigned GetDataSize() { return sizeof(LastID); }
-    char *SetData(char *Data_) { return MemSet(Data_,LastID); }
-    char *GetData(char *Data_, char *Limit_) { return MemGet(Data_,&LastID,Limit_); }
+public:
+    unsigned ActiveCount() const;
 
-    MUsers() { constructor(); LastID=0; }
-    ~MUsers() { destructor(); }
-};
-//---------------------------------------------------------------------------
-struct MUserData
-{
-    unsigned ID;
-    char Login[MAX_UserLoginLength+1];
-    char Name[MAX_UserNameLength+1];
+    MUsers() {}
+    ~MUsers() { Clear(); }
 };
 //---------------------------------------------------------------------------
 #endif

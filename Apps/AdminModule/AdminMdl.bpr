@@ -6,30 +6,33 @@
     <PROJECT value="AdminMdl.exe"/>
     <OBJFILES value="AdminMdl.obj UnitFormMain.obj UnitFormComputers.obj UnitFormTariffs.obj 
       UnitFormTariffTimes.obj UnitFormFines.obj UnitFormUsers.obj 
-      UnitFormRun.obj UnitFormFine.obj UnitFormUserPassword.obj 
-      UnitFormNewPassword.obj UnitLog.obj UnitOptions.obj UnitFormOptions.obj 
-      UnitShellState.obj UnitFormLogIn.obj UnitFormClient.obj 
-      UnitFormOptionsPassword.obj UnitFormOpenConfig.obj 
-      ..\..\Core\UnitClOptions.obj ..\..\Core\UnitCommon.obj 
-      ..\..\Core\UnitComputers.obj ..\..\Core\UnitFines.obj 
-      ..\..\Core\UnitList.obj ..\..\Core\UnitLogRecords.obj 
-      ..\..\Core\UnitSLList.obj ..\..\Core\UnitTariffs.obj 
-      ..\..\Core\UnitUsers.obj ..\..\Core\UnitGames.obj ..\..\Core\UnitSync.obj 
-      ..\..\Core\UnitStates.obj ..\..\Core\UnitSend.obj"/>
-    <RESFILES value="AdminMdl.res ErrorMessages.res"/>
+      UnitFormRun.obj UnitFormFine.obj UnitFormUserPass.obj UnitFormNewPass.obj 
+      UnitLog.obj UnitOptions.obj UnitFormOptions.obj UnitShellState.obj 
+      UnitFormLogIn.obj UnitFormClient.obj UnitFormOptionsPass.obj 
+      UnitFormOpenConfig.obj ..\..\Core\UnitClOptions.obj 
+      ..\..\Core\UnitCommon.obj ..\..\Core\UnitComputers.obj 
+      ..\..\Core\UnitFines.obj ..\..\Core\UnitList.obj 
+      ..\..\Core\UnitLogRecords.obj ..\..\Core\UnitSLList.obj 
+      ..\..\Core\UnitTariffs.obj ..\..\Core\UnitUsers.obj 
+      ..\..\Core\UnitGames.obj ..\..\Core\UnitSync.obj ..\..\Core\UnitStates.obj 
+      ..\..\Core\UnitSend.obj ..\..\Ext\BrianGladman\SHA\hmac.obj 
+      ..\..\Core\UnitAuth.obj ..\..\Ext\BrianGladman\SHA\sha1.obj 
+      ..\..\Ext\BrianGladman\SHA\sha2.obj UnitFormAuth.obj 
+      ..\..\Core\UnitIDList.obj ..\..\Core\UnitPassword.obj"/>
+    <RESFILES value="AdminMdl.res Messages.res"/>
     <IDLFILES value=""/>
     <IDLGENFILES value=""/>
     <DEFFILE value=""/>
     <RESDEPEN value="$(RESFILES) UnitFormMain.dfm UnitFormComputers.dfm UnitFormTariffs.dfm 
       UnitFormTariffTimes.dfm UnitFormFines.dfm UnitFormUsers.dfm 
-      UnitFormRun.dfm UnitFormFine.dfm UnitFormUserPassword.dfm 
-      UnitFormNewPassword.dfm UnitFormOptions.dfm UnitFormLogIn.dfm 
-      UnitFormClient.dfm UnitFormOptionsPassword.dfm UnitFormOpenConfig.dfm"/>
+      UnitFormRun.dfm UnitFormFine.dfm UnitFormUserPass.dfm UnitFormNewPass.dfm 
+      UnitFormOptions.dfm UnitFormLogIn.dfm UnitFormClient.dfm 
+      UnitFormOptionsPass.dfm UnitFormOpenConfig.dfm UnitFormAuth.dfm"/>
     <LIBFILES value="IPHLPAPI.LIB"/>
     <LIBRARIES value="bcbsmp.lib vclx.lib vcl.lib rtl.lib"/>
     <SPARELIBS value="rtl.lib vcl.lib vclx.lib bcbsmp.lib"/>
     <PACKAGES value="rtl.bpi vcl.bpi vclx.bpi ibxpress.bpi"/>
-    <PATHCPP value=".;..\..\Core;..\..\Core;..\..\Core;..\..\Core;..\..\Core;..\..\Core;..\..\Core;..\..\Core;..\..\Core;..\..\Core;..\..\Core;..\..\Core;..\..\Core"/>
+    <PATHCPP value=".;..\..\Core;..\..\Core;..\..\Core;..\..\Core;..\..\Core;..\..\Core;..\..\Core;..\..\Core;..\..\Core;..\..\Core;..\..\Core;..\..\Core;..\..\Core;..\..\Ext\BrianGladman\SHA;..\..\Core;..\..\Ext\BrianGladman\SHA;..\..\Ext\BrianGladman\SHA;..\..\Core;..\..\Core"/>
     <PATHPAS value=".;"/>
     <PATHRC value=".;"/>
     <PATHASM value=".;"/>
@@ -39,14 +42,15 @@
     <USERDEFINES value=""/>
     <SYSDEFINES value="NO_STRICT"/>
     <MAINSOURCE value="AdminMdl.cpp"/>
-    <INCLUDEPATH value="..\..\Core;$(BCB)\include;$(BCB)\include\vcl"/>
-    <LIBPATH value="..\..\Core;$(BCB)\lib\obj;$(BCB)\lib"/>
+    <INCLUDEPATH value="..\..\Ext\BrianGladman\SHA;..\..\Core;$(BCB)\include;$(BCB)\include\vcl"/>
+    <LIBPATH value="..\..\Ext\BrianGladman\SHA;..\..\Core;$(BCB)\lib\obj;$(BCB)\lib"/>
     <WARNINGS value="-w-par"/>
     <OTHERFILES value=""/>
   </MACROS>
   <OPTIONS>
-    <IDLCFLAGS value="-I..\..\Core -I$(BCB)\include -I$(BCB)\include\vcl -src_suffix cpp -boa"/>
-    <CFLAG1 value="-O2 -Vx -Ve -X- -a1 -b- -k- -vi -c -tW -tWM"/>
+    <IDLCFLAGS value="-I..\..\Ext\BrianGladman\SHA -I..\..\Core -I$(BCB)\include 
+      -I$(BCB)\include\vcl -src_suffix cpp -boa"/>
+    <CFLAG1 value="-O2 -Vx -Ve -X- -pr -a8 -6 -b- -k- -vi -c -tW -tWM"/>
     <PFLAGS value="-$Y- -$L- -$D- -$A8 -v -JPHNE -M"/>
     <RFLAGS value=""/>
     <AFLAGS value="/mx /w2 /zn"/>
@@ -71,16 +75,15 @@
       <FILE FILENAME="UnitFormRun.cpp" FORMNAME="FormRun" UNITNAME="UnitFormRun" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="UnitFormFine.cpp" FORMNAME="FormFine" UNITNAME="UnitFormFine" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="IPHLPAPI.LIB" FORMNAME="" UNITNAME="IPHLPAPI" CONTAINERID="LibTool" DESIGNCLASS="" LOCALCOMMAND=""/>
-      <FILE FILENAME="UnitFormUserPassword.cpp" FORMNAME="FormUserPassword" UNITNAME="UnitFormUserPassword" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
-      <FILE FILENAME="UnitFormNewPassword.cpp" FORMNAME="FormNewPassword" UNITNAME="UnitFormNewPassword" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="UnitFormUserPass.cpp" FORMNAME="FormUserPass" UNITNAME="UnitFormUserPass" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="UnitFormNewPass.cpp" FORMNAME="FormNewPass" UNITNAME="UnitFormNewPass" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="UnitLog.cpp" FORMNAME="" UNITNAME="UnitLog" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="UnitOptions.cpp" FORMNAME="" UNITNAME="UnitOptions" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="UnitFormOptions.cpp" FORMNAME="FormOptions" UNITNAME="UnitFormOptions" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="UnitShellState.cpp" FORMNAME="" UNITNAME="UnitShellState" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="UnitFormLogIn.cpp" FORMNAME="FormLogIn" UNITNAME="UnitFormLogIn" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
-      <FILE FILENAME="ErrorMessages.res" FORMNAME="" UNITNAME="ErrorMessages" CONTAINERID="ResTool" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="UnitFormClient.cpp" FORMNAME="FormClient" UNITNAME="UnitFormClient" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
-      <FILE FILENAME="UnitFormOptionsPassword.cpp" FORMNAME="FormOptionsPassword" UNITNAME="UnitFormOptionsPassword" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="UnitFormOptionsPass.cpp" FORMNAME="FormOptionsPass" UNITNAME="UnitFormOptionsPass" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="UnitFormOpenConfig.cpp" FORMNAME="FormOpenConfig" UNITNAME="UnitFormOpenConfig" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="..\..\Core\UnitClOptions.cpp" FORMNAME="" UNITNAME="UnitClOptions.cpp" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="..\..\Core\UnitCommon.cpp" FORMNAME="" UNITNAME="UnitCommon.cpp" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
@@ -95,6 +98,14 @@
       <FILE FILENAME="..\..\Core\UnitSync.cpp" FORMNAME="" UNITNAME="UnitSync" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="..\..\Core\UnitStates.cpp" FORMNAME="" UNITNAME="UnitStates" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="..\..\Core\UnitSend.cpp" FORMNAME="" UNITNAME="UnitSend" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="..\..\Ext\BrianGladman\SHA\hmac.c" FORMNAME="" UNITNAME="hmac" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="..\..\Core\UnitAuth.cpp" FORMNAME="" UNITNAME="UnitAuth" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="..\..\Ext\BrianGladman\SHA\sha1.c" FORMNAME="" UNITNAME="sha1.c" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="..\..\Ext\BrianGladman\SHA\sha2.c" FORMNAME="" UNITNAME="sha2.c" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="UnitFormAuth.cpp" FORMNAME="FormAuth" UNITNAME="UnitFormAuth" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="..\..\Core\UnitIDList.cpp" FORMNAME="" UNITNAME="UnitIDList" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="..\..\Core\UnitPassword.cpp" FORMNAME="" UNITNAME="UnitPassword" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="Messages.res" FORMNAME="" UNITNAME="Messages.res" CONTAINERID="ResTool" DESIGNCLASS="" LOCALCOMMAND=""/>
   </FILELIST>
   <BUILDTOOLS>
   </BUILDTOOLS>
@@ -106,7 +117,7 @@ AutoIncBuild=1
 MajorVer=1
 MinorVer=0
 Release=0
-Build=234
+Build=247
 Debug=0
 PreRelease=0
 Special=0
@@ -117,33 +128,35 @@ CodePage=1251
 
 [Version Info Keys]
 CompanyName=MMM Groups
-FileDescription=модуль управления
-FileVersion=1.0.0.234
+FileDescription=Модуль управления TLK
+FileVersion=1.0.0.247
 InternalName=AdminModule
 LegalCopyright=
 LegalTrademarks=
 OriginalFilename=AdminMdl.exe
 ProductName=TLK
-ProductVersion=3.1.0.0
+ProductVersion=3.10
 Comments=
 
 [HistoryLists\hlIncludePath]
-Count=6
-Item0=..\..\Core;$(BCB)\include;$(BCB)\include\vcl
-Item1=..\..\Core;..\Base;$(BCB)\include;$(BCB)\include\vcl
-Item2=$(BCB)\include;$(BCB)\include\vcl
-Item3=..\3.00 beta 4.8\AdminModule;$(BCB)\include;$(BCB)\include\vcl
-Item4=;$(BCB)\include;$(BCB)\include\vcl
-Item5=Graphics;$(BCB)\include;$(BCB)\include\vcl
+Count=7
+Item0=..\..\Ext\BrianGladman\SHA;..\..\Core;$(BCB)\include;$(BCB)\include\vcl
+Item1=..\..\Core;$(BCB)\include;$(BCB)\include\vcl
+Item2=..\..\Core;..\Base;$(BCB)\include;$(BCB)\include\vcl
+Item3=$(BCB)\include;$(BCB)\include\vcl
+Item4=..\3.00 beta 4.8\AdminModule;$(BCB)\include;$(BCB)\include\vcl
+Item5=;$(BCB)\include;$(BCB)\include\vcl
+Item6=Graphics;$(BCB)\include;$(BCB)\include\vcl
 
 [HistoryLists\hlLibraryPath]
-Count=6
-Item0=..\..\Core;$(BCB)\lib\obj;$(BCB)\lib
-Item1=..\..\Core;..\Base;$(BCB)\lib\obj;$(BCB)\lib
-Item2=$(BCB)\lib\obj;$(BCB)\lib
-Item3=..\3.00 beta 4.8\AdminModule;$(BCB)\lib\obj;$(BCB)\lib
-Item4=;$(BCB)\lib\obj;$(BCB)\lib
-Item5=Graphics;$(BCB)\lib\obj;$(BCB)\lib
+Count=7
+Item0=..\..\Ext\BrianGladman\SHA;..\..\Core;$(BCB)\lib\obj;$(BCB)\lib
+Item1=..\..\Core;$(BCB)\lib\obj;$(BCB)\lib
+Item2=..\..\Core;..\Base;$(BCB)\lib\obj;$(BCB)\lib
+Item3=$(BCB)\lib\obj;$(BCB)\lib
+Item4=..\3.00 beta 4.8\AdminModule;$(BCB)\lib\obj;$(BCB)\lib
+Item5=;$(BCB)\lib\obj;$(BCB)\lib
+Item6=Graphics;$(BCB)\lib\obj;$(BCB)\lib
 
 [HistoryLists\hlDebugSourcePath]
 Count=1

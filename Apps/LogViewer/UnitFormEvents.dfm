@@ -145,6 +145,7 @@ object FormEvents: TFormEvents
         SortType = stData
         TabOrder = 0
         ViewStyle = vsReport
+        OnCompare = ListViewComputersCompare
         OnInsert = ListViewComputersInsert
       end
       object CheckBoxCompAUpd: TCheckBox

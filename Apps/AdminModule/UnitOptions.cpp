@@ -6,79 +6,63 @@
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
 //---------------------------------------------------------------------------
-
 MOptions::MOptions()
 {
-    constructor();
-    *Password=0;
-    LogPeriod=mlpMonth;
+    LogPeriod=mlpDay;
+    FilterFreeTime=2;
     CostDialogTime=15;
     CostPrecision=0.50;
-    FilterFreeTime=2;
     UsersRights=murPause;
 }
 
 MOptions::~MOptions()
 {
-    destructor();
+//
 }
 
-bool MOptions::Copy(MOptions *Options_)
+bool MOptions::Copy(MOptions *Opt_)
 {
-    strcpy(Password,Options_->Password);
-    LogPeriod=Options_->LogPeriod;
-    CostDialogTime=Options_->CostDialogTime;
-    CostPrecision=Options_->CostPrecision;
-    FilterFreeTime=Options_->FilterFreeTime;
-    UsersRights=Options_->UsersRights;
+    LogPeriod=Opt_->LogPeriod;
+    FilterFreeTime=Opt_->FilterFreeTime;
+    CostDialogTime=Opt_->CostDialogTime;
+    CostPrecision=Opt_->CostPrecision;
+    UsersRights=Opt_->UsersRights;
+    Pass.Copy(&Opt_->Pass);
     return true;
 }
 
-unsigned MOptions::GetDataSize()
+unsigned MOptions::GetDataSize() const
 {
     return
-        strlen(Password)+1+
         sizeof(LogPeriod)+
+        sizeof(FilterFreeTime)+
         sizeof(CostDialogTime)+
         sizeof(CostPrecision)+
-        sizeof(FilterFreeTime)+
-        sizeof(UsersRights);
+        sizeof(UsersRights)+
+        Pass.GetDataSize();
 }
 
-char *MOptions::SetData(char *Data_)
+char *MOptions::SetData(char *Data_) const
 {
-    Data_=MemSetCLine(Data_,Password);
     Data_=MemSet(Data_,LogPeriod);
+    Data_=MemSet(Data_,FilterFreeTime);
     Data_=MemSet(Data_,CostDialogTime);
     Data_=MemSet(Data_,CostPrecision);
-    Data_=MemSet(Data_,FilterFreeTime);
     Data_=MemSet(Data_,UsersRights);
+    Data_=Pass.SetData(Data_);
     return Data_;
 }
 
-char *MOptions::GetData(char *Data_, char *Limit_)
+const char *MOptions::GetData(const char *Data_, const char *Limit_)
 {
-    if ( (Data_=MemGetCLine(Data_,Password,MAX_OptionsPasswordLength,Limit_))==NULL ) goto error;
-    if ( (Data_=MemGet(Data_,&LogPeriod,Limit_))==NULL ) goto error;
-    if ( (Data_=MemGet(Data_,&CostDialogTime,Limit_))==NULL ) goto error;
-    if ( (Data_=MemGet(Data_,&CostPrecision,Limit_))==NULL ) goto error;
-    if ( (Data_=MemGet(Data_,&FilterFreeTime,Limit_))==NULL ) goto error;
-    if ( (Data_=MemGet(Data_,&UsersRights,Limit_))==NULL ) goto error;
-    return Data_;
-error:
-    return NULL;
+    return
+        (Data_=MemGet(Data_,&LogPeriod,Limit_))!=NULL &&
+        (Data_=MemGet(Data_,&FilterFreeTime,Limit_))!=NULL &&
+        (Data_=MemGet(Data_,&CostDialogTime,Limit_))!=NULL &&
+        (Data_=MemGet(Data_,&CostPrecision,Limit_))!=NULL &&
+        (Data_=MemGet(Data_,&UsersRights,Limit_))!=NULL &&
+        (Data_=Pass.GetData(Data_,Limit_))!=NULL
+        ? Data_: NULL;
 }
-
-bool MOptions::SetPassword(char *Password_)
-{
-    return strlen(Password_)>MAX_OptionsPasswordLength?
-        false: (bool)strcpy(Password,Password_);
-}
-
-bool MOptions::CheckPassword(char *Password_)
-{
-    return strcmp(Password,Password_)==0;
-}
-
 //---------------------------------------------------------------------------
 

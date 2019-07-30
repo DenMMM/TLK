@@ -19,11 +19,5 @@ MUserUpTime::~MUserUpTime()
 {
 //
 }
-
-bool MUserUpTime::Copy(MListItem *SrcItem_)
-{
-    return false;
-}
-
 //---------------------------------------------------------------------------
 

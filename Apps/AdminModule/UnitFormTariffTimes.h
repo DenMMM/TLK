@@ -42,11 +42,8 @@ __published:	// IDE-managed Components
     void __fastcall ButtonAddClick(TObject *Sender);
     void __fastcall ButtonDelClick(TObject *Sender);
     void __fastcall ListViewTimesInsert(TObject *Sender, TListItem *Item);
-    void __fastcall ListViewTimesDeletion(TObject *Sender,
-          TListItem *Item);
     void __fastcall ListViewTimesSelectItem(TObject *Sender,
           TListItem *Item, bool Selected);
-    void __fastcall ButtonSaveClick(TObject *Sender);
     void __fastcall ComboBoxSizeHClick(TObject *Sender);
     void __fastcall ComboBoxBeginHClick(TObject *Sender);
     void __fastcall ComboBoxEndHClick(TObject *Sender);
@@ -54,15 +51,13 @@ __published:	// IDE-managed Components
     void __fastcall ListViewTimesCompare(TObject *Sender, TListItem *Item1,
           TListItem *Item2, int Data, int &Compare);
 private:	// User declarations
-    MTariffTimes *TariffTimes;
+    MTariffTimes TmpTimes;              // Буфер для списка пакетов тарифа
     void SetEdit(bool Edit_);
     void SetListViewTimesLine(TListItem *Item_);
 public:		// User declarations
-    void Execute(MTariffTimes *Times_, char *Name_);
+    bool Execute(MTariffTimes *Times_, char *Name_, int Left_, int Top_);
     __fastcall TFormTariffTimes(TComponent* Owner);
 };
-//---------------------------------------------------------------------------
-extern PACKAGE TFormTariffTimes *FormTariffTimes;
 //---------------------------------------------------------------------------
 #endif
 

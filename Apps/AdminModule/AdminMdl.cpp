@@ -1,6 +1,9 @@
 //---------------------------------------------------------------------------
 #include <vcl.h>
 #pragma hdrstop
+//---------------------------------------------------------------------------
+#include "UnitCommon.h"
+//---------------------------------------------------------------------------
 USEFORM("UnitFormMain.cpp", FormMain);
 USEFORM("UnitFormComputers.cpp", FormComputers);
 USEFORM("UnitFormTariffs.cpp", FormTariffs);
@@ -9,22 +12,22 @@ USEFORM("UnitFormFines.cpp", FormFines);
 USEFORM("UnitFormUsers.cpp", FormUsers);
 USEFORM("UnitFormRun.cpp", FormRun);
 USEFORM("UnitFormFine.cpp", FormFine);
-USEFORM("UnitFormUserPassword.cpp", FormUserPassword);
-USEFORM("UnitFormNewPassword.cpp", FormNewPassword);
+USEFORM("UnitFormUserPass.cpp", FormUserPass);
+USEFORM("UnitFormNewPass.cpp", FormNewPass);
 USEFORM("UnitFormOptions.cpp", FormOptions);
 USEFORM("UnitFormLogIn.cpp", FormLogIn);
 USEFORM("UnitFormClient.cpp", FormClient);
-USEFORM("UnitFormOptionsPassword.cpp", FormOptionsPassword);
+USEFORM("UnitFormOptionsPass.cpp", FormOptionsPass);
 USEFORM("UnitFormOpenConfig.cpp", FormOpenConfig);
+USEFORM("UnitFormAuth.cpp", FormAuth);
 //---------------------------------------------------------------------------
 WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 {
     HANDLE mutex=::CreateMutex(NULL,true,"TLK31RunMutex");
     if ( (mutex==NULL)||(::GetLastError()==ERROR_ALREADY_EXISTS) )
-    {
+    {            
         ::CloseHandle(mutex);
-        ::MessageBox(NULL,"TLK уже запущен или требуемый системный ресурс занят !",
-            "TLK - ошибка",MB_OK|MB_ICONERROR|MB_APPLMODAL);
+        ResMessageBox(NULL,1,24,MB_APPLMODAL|MB_OK|MB_ICONERROR);
         return 0;
     }
     // Инициализируем генератор случайных чисел
@@ -35,20 +38,6 @@ WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
          Application->Initialize();
          Application->Title = "TLK 3.10";
          Application->CreateForm(__classid(TFormMain), &FormMain);
-         Application->CreateForm(__classid(TFormComputers), &FormComputers);
-         Application->CreateForm(__classid(TFormTariffs), &FormTariffs);
-         Application->CreateForm(__classid(TFormTariffTimes), &FormTariffTimes);
-         Application->CreateForm(__classid(TFormFines), &FormFines);
-         Application->CreateForm(__classid(TFormUsers), &FormUsers);
-         Application->CreateForm(__classid(TFormRun), &FormRun);
-         Application->CreateForm(__classid(TFormFine), &FormFine);
-         Application->CreateForm(__classid(TFormUserPassword), &FormUserPassword);
-         Application->CreateForm(__classid(TFormNewPassword), &FormNewPassword);
-         Application->CreateForm(__classid(TFormOptions), &FormOptions);
-         Application->CreateForm(__classid(TFormLogIn), &FormLogIn);
-         Application->CreateForm(__classid(TFormClient), &FormClient);
-         Application->CreateForm(__classid(TFormOptionsPassword), &FormOptionsPassword);
-         Application->CreateForm(__classid(TFormOpenConfig), &FormOpenConfig);
          Application->Run();
         }
         catch (Exception &exception)

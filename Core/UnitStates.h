@@ -4,7 +4,6 @@
 //---------------------------------------------------------------------------
 struct MStateData;
 struct MStateInfo;
-
 class MState;
 class MStates;
 class MStateCl;
@@ -21,14 +20,12 @@ class MStateCl;
 #define MAX_TimeShift   20      // Максимальное расхождение времени сервера и клиента (секунд)
 //---------------------------------------------------------------------------
 // Состояние компьютера
-#define mcsWtTLK        1       // Режим без активного TLK
-#define mcsFree         2       // Свободен
-#define mcsWork         4       // В работе, время отсчитывается
-#define mcsFine         8       // В работе, но оштрафован (доп. флаг)
-#define mcsLock         16      // В работе, но прикрыт (доп. флаг)
-#define mcsPause        32      // Компьютер закрыт и время остановлено (доп. флаг)
-#define mcsOpen         64      // Компьютер открыт для обслуживания и время остановлено (доп. флаг)
-//#define mcsService      128     // Компьютер занят для обслуживания (доп. флаг)
+#define mcsFree         1       // Свободен
+#define mcsWork         2       // В работе, время отсчитывается
+#define mcsFine         4       // В работе, но оштрафован (доп. флаг)
+#define mcsLock         8       // В работе, но прикрыт (доп. флаг)
+#define mcsPause        16      // Компьютер закрыт и время остановлено (доп. флаг)
+#define mcsOpen         32      // Компьютер открыт для обслуживания и время остановлено (доп. флаг)
 //---------------------------------------------------------------------------
 // Команды для компьютера
 #define mccPowerOn      1       // Включить (WOL)
@@ -58,27 +55,27 @@ class MStateCl;
 //---------------------------------------------------------------------------
 struct MStateData
 {
-    int Number;                 // Номер компьютера
+    char Number;                // Номер компьютера
     unsigned State;             // Состояние компьютера (режимы работы)
     unsigned TariffID;          // ID-номер тарифа, по которому работает компьютер
     __int64 StartWorkTime;      // Время запуска компьютера в работу (абсолютное время)
-    int SizeWorkTime;           // На какое время запущен компьютер (в минутах)
+    short SizeWorkTime;         // На какое время запущен компьютер (в минутах)
     __int64 StartFineTime;      // Время, когда был применен штраф (абсолютное время)
-    int SizeFineTime;           // Время ожидания в режиме штрафа (в минутах)
+    short SizeFineTime;         // Время ожидания в режиме штрафа (в минутах)
     __int64 StopTimerTime;      // Время остановки отсчета времени (абсолютное время)
 };
 
 struct MStateInfo
 {
-    int Number;                 // Номер компьютера
+    char Number;                // Номер компьютера
     unsigned State;             // Состояние компьютера (режимы работы)
     unsigned TariffID;          // ID-номер тарифа, по которому работает компьютер
-    int WorkTime;               // На какое время был запущен компьютер (в минутах)
-    int ToEndWork;              // Оставшееся время работы (в минутах)
-    int EndWorkTime;            // До скольки еще ждать окончания работы (в минутах с начала суток)
-    int FineTime;               // Время ожидания в режиме штрафа (в минутах)
-    int ToEndFine;              // Оставшееся время штрафа (в минутах)
-    int EndFineTime;            // До скольки еще ждать окончания штрафа (в минутах с начала суток)
+    short WorkTime;             // На какое время был запущен компьютер (в минутах)
+    short ToEndWork;            // Оставшееся время работы (в минутах)
+    short EndWorkTime;          // До скольки еще ждать окончания работы (в минутах с начала суток)
+    short FineTime;             // Время ожидания в режиме штрафа (в минутах)
+    short ToEndFine;            // Оставшееся время штрафа (в минутах)
+    short EndFineTime;          // До скольки еще ждать окончания штрафа (в минутах с начала суток)
     unsigned Programs;          // Групы программ, разрешенных для запуска
     unsigned Commands;          // Дополнительные команды для компьютера
     unsigned NetState;          // Состояние сети
@@ -88,16 +85,22 @@ struct MStateInfo
 class MState:public MSLListItem
 {
 private:
-    CRITICAL_SECTION CS_Main;   // Объект для синхронизации доступа потоков к данным
+    void Copy(const MListItem *SrcItem_) {}
+    // Функции механизма сохранения/загрузки данных
+    unsigned GetDataSize() const;
+    char *SetData(char *Data_) const;
+    const char *GetData(const char *Data_, const char *Limit_);
+
+    mutable CRITICAL_SECTION CS_Main;   // Объект для синхронизации доступа потоков к данным
     __int64 SystemTime;         // Системное время, используемое при всех расчетах
 
-    int Number;                 // Номер компьютера, с которым ассоциировано состояние
+    char Number;                // Номер компьютера, с которым ассоциировано состояние
     unsigned State;             // Состояние компьютера (режимы работы)
     unsigned TariffID;          // ID-номер тарифа, по которому работает компьютер
     __int64 StartWorkTime;      // Время запуска компьютера в работу (абсолютное время)
-    int SizeWorkTime;           // На какое время запущен компьютер (в минутах)
+    short SizeWorkTime;         // На какое время запущен компьютер (в минутах)
     __int64 StartFineTime;      // Время, когда был применен штраф (абсолютное время)
-    int SizeFineTime;           // Время ожидания в режиме штрафа (в минутах)
+    short SizeFineTime;         // Время ожидания в режиме штрафа (в минутах)
     __int64 StopTimerTime;      // Время остановки отсчета времени (абсолютное время)
     unsigned Programs;          // Групы программ, разрешенных для запуска
     unsigned Commands;          // Дополнительные команды для компьютера
@@ -106,24 +109,21 @@ private:
     unsigned Changes;           // Изменения данных для оболочки со времени их последнего запроса
 
     // Функции синхронизации доступа разных потоков к данным
-    inline void Lock() { ::EnterCriticalSection(&CS_Main); }
-    inline void UnLock() { ::LeaveCriticalSection(&CS_Main); }
+    void Lock() const { ::EnterCriticalSection(&CS_Main); }
+    void UnLock() const { ::LeaveCriticalSection(&CS_Main); }
 
     // Функции проверки окончания времени работы и времени штрафа
     bool ControlWorkTime();
     bool ControlFineTime();
 
 public:
-    bool Copy(MListItem *SrcItem_);
-
     // Команды, применяемые к компьютерам
     bool CmdRun(MTariff *Tariff_, MRunTime *Time_, bool Check_);
-    bool CmdFine(int FineSize_, bool Check_);
+    bool CmdFine(short FineSize_, bool Check_);
     bool CmdExchange(MState *State_, bool Check_);
     bool CmdLock(bool Apply_, bool Check_);
     bool CmdPause(bool Apply_, bool Check_);
     bool CmdOpen(bool Apply_, bool Check_);
-    bool CmdWtLocker(bool Apply_, bool Check_);
     bool CmdPowerOn(bool Check_);
     bool CmdReboot(bool Check_);
     bool CmdShutdown(bool Check_);
@@ -134,7 +134,7 @@ public:
     bool Timer(__int64 SystemTime_);
 
     // Назначение и проверка связей с другими данными
-    int Associated();
+    int MState::Associated() const { return Number; }
     void Associate(int Number_);
 
     // Операции для сетевого интерфейса
@@ -152,11 +152,6 @@ public:
     void GetStateData(MStateData *Data_);
     void SetStateData(MStateData *Data_);
 
-    // Функции механизма сохранения/загрузки данных
-    unsigned GetDataSize();
-    char *SetData(char *Data_);
-    char *GetData(char *Data_, char *Limit_);
-
     MState();
     ~MState();
 };
@@ -164,14 +159,15 @@ public:
 class MStates:public MSLList
 {
 private:
-    MListItem *operator_new(unsigned Type_) { return (MListItem*)new MState; }
-    void operator_delete(MListItem *DelItem_) { delete (MState*)DelItem_; }
-private:
-    CRITICAL_SECTION CS_File;   // Объект для синхронизации доступа потоков к данным
+    MListItem *item_new(unsigned char TypeID_) const { return (MListItem*)new MState; }
+    void item_del(MListItem *Item_) const { delete (MState*)Item_; }
+
+    CRITICAL_SECTION CS_File;   // Объект для синхронизации
 
     // Функции синхронизации доступа разных потоков к данным
-    inline void Lock() { ::EnterCriticalSection(&CS_File); }
-    inline void UnLock() { ::LeaveCriticalSection(&CS_File); }
+    void Lock() { ::EnterCriticalSection(&CS_File); }
+    void UnLock() { ::LeaveCriticalSection(&CS_File); }
+
 public:
     // Вспомогательные функции
     MState *Search(int Number_);
@@ -181,31 +177,37 @@ public:
     // Переопределяем функцию сохранения списка в файл
     bool Save();
 
-    MStates() { constructor(); ::InitializeCriticalSection(&CS_File); }
-    ~MStates() { ::DeleteCriticalSection(&CS_File); destructor(); }
+    MStates() { ::InitializeCriticalSection(&CS_File); }
+    ~MStates() { ::DeleteCriticalSection(&CS_File); Clear(); }
 };
 //---------------------------------------------------------------------------
 class MStateCl:public MSLList
 {
 private:
-    MListItem *operator_new(unsigned Type_) { return NULL; }
-    void operator_delete(MListItem *DelItem_) { }
-private:
+    // Заглушки, т.к. списка на самом деле нет - только "заголовок"
+    MListItem *item_new(unsigned char TypeID_) const { return NULL; }
+    void item_del(MListItem *Item_) const { return; }
+
+    // Функции механизма сохранения/загрузки данных
+    unsigned GetDataSize() const;
+    char *SetData(char *Data_) const;
+    const char *GetData(const char *Data_, const char *Limit_);
+    
     HKEY OptKey;                //
     char *OptPath;              //
     char *OptValue;             //
     char *PrgFile;              // Файл для хранения списка программ
     unsigned AutoLockTime;      // Время отсутствия связи с сервером до автоблокировки
 
-    CRITICAL_SECTION CS_Main;   // Объект для синхронизации доступа потоков к данным
+    mutable CRITICAL_SECTION CS_Main;   // Объект для синхронизации доступа потоков к данным
     __int64 SystemTime;         // Системное время, используемое при всех расчетах
 
-    int Number;                 // Номер компьютера
+    char Number;                // Номер компьютера
     unsigned State;             // Состояние компьютера (режимы работы)
     __int64 StartWorkTime;      // Время запуска компьютера в работу (абсолютное время)
-    int SizeWorkTime;           // На какое время запущен компьютер (в минутах)
+    short SizeWorkTime;         // На какое время запущен компьютер (в минутах)
     __int64 StartFineTime;      // Время, когда был применен штраф (абсолютное время)
-    int SizeFineTime;           // Время ожидания в режиме штрафа (в минутах)
+    short SizeFineTime;         // Время ожидания в режиме штрафа (в минутах)
     __int64 StopTimerTime;      // Время остановки отсчета времени (абсолютное время)
     __int64 LastSyncTime;       // Время последнего поступления данных от админского модуля
     unsigned Programs;          // Групы программ, разрешенных для запуска
@@ -213,18 +215,13 @@ private:
     unsigned Changes;           // Изменения данных для оболочки со времени их последнего запроса
 
     // Функции синхронизации доступа разных потоков к данным
-    inline void Lock() { ::EnterCriticalSection(&CS_Main); }
-    inline void UnLock() { ::LeaveCriticalSection(&CS_Main); }
+    void Lock() const { ::EnterCriticalSection(&CS_Main); }
+    void UnLock() const { ::LeaveCriticalSection(&CS_Main); }
 
     // Функции проверки окончания времени работы и времени штрафа
     bool ControlWorkTime();
     bool ControlFineTime();
     bool ControlSyncTime();
-
-    // Функции механизма сохранения/загрузки данных
-    unsigned GetDataSize();
-    char *SetData(char *Data_);
-    char *GetData(char *Data_, char *Limit_);
 
 public:
     // Вспомогательные функции
@@ -240,7 +237,7 @@ public:
     bool NewOptions(MClOptions *Options_);
 
     // Переадресуем обращения для загрузки/сохранения к методам базового класса MSLList
-    bool SetDefault(HKEY RegKey_, char *RegPath_, char *RegValue_,
+    void SetDefault(HKEY RegKey_, char *RegPath_, char *RegValue_,
         HKEY OptKey_, char *OptPath_, char *OptValue_, char *PrgFile_, unsigned RegCode_);
 
     MStateCl();

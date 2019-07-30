@@ -1,5 +1,6 @@
 //---------------------------------------------------------------------------
 #include <mem.h>
+#include <stdexcept.h>
 #pragma hdrstop
 
 #include "UnitStates.h"
@@ -31,29 +32,7 @@ MState::~MState()
     ::DeleteCriticalSection(&CS_Main);
 }
 //---------------------------------------------------------------------------
-bool MState::Copy(MListItem *SrcItem_)
-{
-    MState *State_=(MState*)SrcItem_;
-    Lock(); State_->Lock();
-    SystemTime=State_->SystemTime;
-    Number=State_->Number;
-    State=State_->State;
-    TariffID=State_->TariffID;
-    StartWorkTime=State_->StartWorkTime;
-    SizeWorkTime=State_->SizeWorkTime;
-    StartFineTime=State_->StartFineTime;
-    SizeFineTime=State_->SizeFineTime;
-    StopTimerTime=State_->StopTimerTime;
-    Programs=State_->Programs;
-    Commands=State_->Commands;
-    CmdsToReset=State_->CmdsToReset;
-    NetState=State_->NetState;
-    Changes=State_->Changes;
-    State_->UnLock(); UnLock();
-    return true;
-}
-//---------------------------------------------------------------------------
-unsigned MState::GetDataSize()
+unsigned MState::GetDataSize() const
 {
     return
         sizeof(Number)+
@@ -68,7 +47,7 @@ unsigned MState::GetDataSize()
         sizeof(NetState);
 }
 //---------------------------------------------------------------------------
-char *MState::SetData(char *Data_)
+char *MState::SetData(char *Data_) const
 {
     Lock();
     Data_=MemSet(Data_,Number);
@@ -85,7 +64,7 @@ char *MState::SetData(char *Data_)
     return Data_;
 }
 //---------------------------------------------------------------------------
-char *MState::GetData(char *Data_, char *Limit_)
+const char *MState::GetData(const char *Data_, const char *Limit_)
 {
     if ( (Data_=MemGet(Data_,&Number,Limit_))==NULL ) goto error;
     if ( (Data_=MemGet(Data_,&State,Limit_))==NULL ) goto error;
@@ -142,7 +121,7 @@ bool MState::CmdRun(MTariff *Tariff_, MRunTime *Time_, bool Check_)
     {
         // Запуск компьютера в работу
         State=mcsWork;
-        TariffID=Tariff_->ID;
+        TariffID=Tariff_->gItemID();
         StartWorkTime=SystemTime;
         SizeWorkTime=Time_->WorkTime;
         Programs=Tariff_->Programs;
@@ -162,7 +141,7 @@ bool MState::CmdRun(MTariff *Tariff_, MRunTime *Time_, bool Check_)
     return true;
 }
 //---------------------------------------------------------------------------
-bool MState::CmdFine(int FineSize_, bool Check_)
+bool MState::CmdFine(short FineSize_, bool Check_)
 {
     Lock();
     if ( !(State&mcsWork) ) { UnLock(); return false; }
@@ -205,7 +184,7 @@ full:
             Programs=0;
             Changes|=mdcState|mdcTariff|mdcWorkTime|mdcFineTime;
             // Перезагружаем компьютер при закрытии
-//            if ( !(State&mcsOpen) ) { Commands|=mccReboot; Changes|=mdcCommands; }
+///            if ( !(State&mcsOpen) ) { Commands|=mccReboot; Changes|=mdcCommands; }
         }
     } else
     {
@@ -252,7 +231,7 @@ bool MState::CmdExchange(MState *State_, bool Check_)
     // Помечаем данные для отправки по сети
     NetState|=mnsSyncNeed|mnsSyncData; Changes|=mdcNetState;
     // Перезагружаем компьютер при закрытии
-//    if ( !(State&mcsOpen) ) { Commands|=mccReboot; Changes|=mdcCommands; }
+///    if ( !(State&mcsOpen) ) { Commands|=mccReboot; Changes|=mdcCommands; }
     State_->UnLock(); UnLock();
     return true;
 }
@@ -302,7 +281,7 @@ bool MState::CmdPause(bool Apply_, bool Check_)
         if ( !(State&mcsOpen) )
         {
             StartWorkTime+=SystemTime-StopTimerTime;
-//            StartFineTime+=SystemTime-StopTimerTime;
+///            StartFineTime+=SystemTime-StopTimerTime;  // Приостановка штрафа
             StopTimerTime=0;
         }
         // Снимаем пометку, что компьютер приостановлен
@@ -336,35 +315,13 @@ bool MState::CmdOpen(bool Apply_, bool Check_)
         if ( (State&(mcsWork|mcsPause))==mcsWork )
         {
             StartWorkTime+=SystemTime-StopTimerTime;
-//            StartFineTime+=SystemTime-StopTimerTime;
+///            StartFineTime+=SystemTime-StopTimerTime; // Приостановка штрафа
             StopTimerTime=0;
         }
         // Снимаем пометку, что компьютер открыт
         State&=~mcsOpen;
     }
     Changes|=mdcState;
-    // Помечаем данные для отправки по сети
-    NetState|=mnsSyncNeed|mnsSyncData; Changes|=mdcNetState;
-    UnLock();
-    return true;
-}
-//---------------------------------------------------------------------------
-bool MState::CmdWtLocker(bool Apply_, bool Check_)
-{
-    Lock();
-    if ( Apply_ )
-    {
-        if ( !(State&mcsFree) ) { UnLock(); return false; }
-        if ( Check_ ) { UnLock(); return true; }
-        State=mcsWtTLK;
-        Changes|=mdcState|mdcWorkTime|mdcFineTime;
-    } else
-    {
-        if ( !(State&mcsWtTLK) ) { UnLock(); return false; }
-        if ( Check_ ) { UnLock(); return true; }
-        State=mcsFree;
-        Changes|=mdcState;
-    }
     // Помечаем данные для отправки по сети
     NetState|=mnsSyncNeed|mnsSyncData; Changes|=mdcNetState;
     UnLock();
@@ -411,11 +368,11 @@ void MState::RunParam(MRunTime *RunTime_)
         RunTime_->TariffID=0;
         RunTime_->StartTime=SystemTime;
         RunTime_->MaxTime=24*60;
-//    } else if ( (State&mcsWork)&&(!(State&(mcsPause|mcsOpen))) )
+///    } else if ( (State&mcsWork)&&(!(State&(mcsPause|mcsOpen))) )
     } else if ( State&mcsWork )
     {
         RunTime_->TariffID=TariffID;
-//        RunTime_->StartTime=StartWorkTime+SizeWorkTime*60*10000000i64;
+///        RunTime_->StartTime=StartWorkTime+SizeWorkTime*60*10000000i64;
         RunTime_->StartTime=StartWorkTime+SizeWorkTime*60*10000000i64+
             (State&(mcsPause|mcsOpen)?SystemTime-StopTimerTime:0);
         RunTime_->MaxTime=24*60-SizeWorkTime;
@@ -469,11 +426,6 @@ bool MState::Timer(__int64 SystemTime_)
     return result;
 }
 //---------------------------------------------------------------------------
-int MState::Associated()
-{
-    return Number;
-}
-//---------------------------------------------------------------------------
 void MState::Associate(int Number_)
 {
     Number=Number_;
@@ -501,7 +453,7 @@ bool MState::NetBegin()
     // Сбрасываем флаг необходимости сохранения состояния на диск
     NetState&=~mnsNeedSave;
     // Задаем постоянную выдачу данных для несинхронизированного состояния
-//    if ( NetState&mnsSyncNeed ) NetState|=mnsSyncData;
+///    if ( NetState&mnsSyncNeed ) NetState|=mnsSyncData;
     UnLock();
     return true;
 }
@@ -625,69 +577,79 @@ void MState::SetStateData(MStateData *Data_)
 bool MStates::Save()
 {
     bool result;
-    Lock(); result=MSLList::Save(); UnLock();
+    // Сохраняем в файл с безопасной перезаписью и без кэширования
+    Lock(); result=MSLList::Save(true,true); UnLock();
     return result;
 }
 //---------------------------------------------------------------------------
 MState *MStates::Search(int Number_)
 {
-    MState *State=(MState*)First;
+    MState *State=(MState*)gFirst();
     while(State)
     {
         if ( State->Associated()==Number_ ) break;
-        State=(MState*)State->Next;
+        State=(MState*)State->gNext();
     }
     return State;
 }
 //---------------------------------------------------------------------------
 bool MStates::Update(MComputers *Computers_)
 {
+    bool result=false;
     MComputer *Computer;
     MState *State, *NextState;
 
     // Убираем состояния, ассоциированные с несуществующими
     // или неиспользуемыми компьютерами
-    State=(MState*)First;
+    State=(MState*)gFirst();
     while(State)
     {
-        NextState=(MState*)State->Next;
+        NextState=(MState*)State->gNext();
         Computer=Computers_->Search(State->Associated());
-        if ( (Computer==NULL)||(Computer->NotUsed) ) Delete(State);
+        if ( (Computer==NULL)||(Computer->NotUsed) )
+        {
+            result=true;
+            Del(State);
+        }
         State=NextState;
     }
     // Добавляем состояния для новых компьютеров
-    for ( Computer=(MComputer*)Computers_->First;
-        Computer; Computer=(MComputer*)Computer->Next )
+    for ( Computer=(MComputer*)Computers_->gFirst();
+        Computer; Computer=(MComputer*)Computer->gNext() )
     {
         if ( Computer->NotUsed||Search(Computer->Number) ) continue;
+        result=true;
         State=(MState*)Add();
         State->Associate(Computer->Number);
     }
     // Убираем лишние записи, ассоциированные с одним и тем же компьютером
-    State=(MState*)First;
+    State=(MState*)gFirst();
     while(State)
     {
-        NextState=(MState*)State->Next;
-        if ( Search(State->Associated())!=State ) Delete(State);
+        NextState=(MState*)State->gNext();
+        if ( Search(State->Associated())!=State )
+        {
+            result=true;
+            Del(State);
+        }
         State=NextState;
     }
 
-    return true;
+    return result;
 }
 //---------------------------------------------------------------------------
 bool MStates::Timer(__int64 SystemTime_)
 {
     bool result=false;
     //
-    for ( MState *State=(MState*)First; State;
-        State=(MState*)State->Next ) result|=State->Timer(SystemTime_);
+    for ( MState *State=(MState*)gFirst(); State;
+        State=(MState*)State->gNext() ) result|=State->Timer(SystemTime_);
     //
     return result;
 }
 //---------------------------------------------------------------------------
 MStateCl::MStateCl()
 {
-    constructor();
     OptKey=NULL;
     OptPath=OptValue=PrgFile=NULL;
 //    OptCode=PrgCode=0;
@@ -712,10 +674,9 @@ MStateCl::~MStateCl()
     delete[] OptPath;
     delete[] OptValue;
     delete[] PrgFile;
-    destructor();
 }
 //---------------------------------------------------------------------------
-unsigned MStateCl::GetDataSize()
+unsigned MStateCl::GetDataSize() const
 {
     return
         sizeof(Number)+
@@ -728,7 +689,7 @@ unsigned MStateCl::GetDataSize()
         sizeof(Programs);
 }
 //---------------------------------------------------------------------------
-char *MStateCl::SetData(char *Data_)
+char *MStateCl::SetData(char *Data_) const 
 {
     Lock();
     Data_=MemSet(Data_,Number);
@@ -743,7 +704,7 @@ char *MStateCl::SetData(char *Data_)
     return Data_;
 }
 //---------------------------------------------------------------------------
-char *MStateCl::GetData(char *Data_, char *Limit_)
+const char *MStateCl::GetData(const char *Data_, const char *Limit_)
 {
     if ( (Data_=MemGet(Data_,&Number,Limit_))==NULL ) goto error;
     if ( (Data_=MemGet(Data_,&State,Limit_))==NULL ) goto error;
@@ -896,9 +857,10 @@ bool MStateCl::NewSyncData(MSyncData *Data_)
 //---------------------------------------------------------------------------
 bool MStateCl::NewGames(MGames *Games_)
 {
-    bool result;
+    bool result=false;
     Lock();
-    result=Games_->SaveTo(PrgFile,DefaultCode);
+    try { result=Games_->SaveTo(PrgFile,DefaultCode); }
+    catch (std::bad_alloc &e) {}
     if ( result ) Changes|=mdcPrograms;
     UnLock();
     return result;
@@ -906,27 +868,29 @@ bool MStateCl::NewGames(MGames *Games_)
 //---------------------------------------------------------------------------
 bool MStateCl::NewOptions(MClOptions *Options_)
 {
-    bool result;
+    bool result=false;
     Lock();
-    result=Options_->StoreTo(OptKey,OptPath,OptValue,DefaultCode);
+    try { result=Options_->StoreTo(OptKey,OptPath,OptValue,DefaultCode); }
+    catch (std::bad_alloc &e) {}
     if ( result ) { AutoLockTime=Options_->AutoLockTime; Changes|=mdcOptions; }
     UnLock();
     return result;
 }
 //---------------------------------------------------------------------------
-bool MStateCl::SetDefault(HKEY RegKey_, char *RegPath_, char *RegValue_,
+void MStateCl::SetDefault(HKEY RegKey_, char *RegPath_, char *RegValue_,
         HKEY OptKey_, char *OptPath_, char *OptValue_, char *PrgFile_, unsigned RegCode_)
 {
-    delete[] OptPath; delete[] OptValue; delete[] PrgFile;
-    OptPath=OptValue=PrgFile=NULL;
-    if ( !(MSLList::SetDefaultKey(RegKey_,RegPath_,RegValue_,RegCode_)&&
-        ((OptPath=new char[strlen(OptPath_)+1])!=NULL)&&
-        ((OptValue=new char[strlen(OptValue_)+1])!=NULL)&&
-        ((PrgFile=new char[strlen(PrgFile_)+1])!=NULL)) ) return false;
+    delete[] OptPath; OptPath=NULL;
+    delete[] OptValue; OptValue=NULL;
+    delete[] PrgFile; PrgFile=NULL;
+    MSLList::SetDefaultKey(RegKey_,RegPath_,RegValue_,RegCode_);
+    OptPath=new char[strlen(OptPath_)+1];
+    OptValue=new char[strlen(OptValue_)+1];
+    PrgFile=new char[strlen(PrgFile_)+1];
     OptKey=OptKey_;
-    strcpy(OptPath,OptPath_); strcpy(OptValue,OptValue_);
+    strcpy(OptPath,OptPath_);
+    strcpy(OptValue,OptValue_);
     strcpy(PrgFile,PrgFile_);
-    return true;
 }
 //---------------------------------------------------------------------------
 

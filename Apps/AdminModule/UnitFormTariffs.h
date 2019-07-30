@@ -50,10 +50,7 @@ __published:	// IDE-managed Components
     void __fastcall ButtonAddClick(TObject *Sender);
     void __fastcall ButtonDelClick(TObject *Sender);
     void __fastcall ButtonTimesClick(TObject *Sender);
-    void __fastcall ButtonSaveClick(TObject *Sender);
     void __fastcall ListViewNamesInsert(TObject *Sender, TListItem *Item);
-    void __fastcall ListViewNamesDeletion(TObject *Sender,
-          TListItem *Item);
     void __fastcall ListViewNamesSelectItem(TObject *Sender,
           TListItem *Item, bool Selected);
     void __fastcall ListViewComputersExit(TObject *Sender);
@@ -63,14 +60,15 @@ __published:	// IDE-managed Components
     void __fastcall CheckBoxRebootExit(TObject *Sender);
     void __fastcall EditNameExit(TObject *Sender);
     void __fastcall CheckBoxRouteExit(TObject *Sender);
+    void __fastcall ButtonSaveClick(TObject *Sender);
 private:	// User declarations
+    MTariffs TmpTariffs;               // Буфер для списка тарифов
+    char TmpComps[MAX_Comps];          // Буфер для списка компьютеров редактируемого тарифа
     void SetEdit(bool Edit_);
     void SetListViewNamesLine(TListItem *Item_);
 public:		// User declarations
     __fastcall TFormTariffs(TComponent* Owner);
 };
-//---------------------------------------------------------------------------
-extern PACKAGE TFormTariffs *FormTariffs;
 //---------------------------------------------------------------------------
 #endif
 

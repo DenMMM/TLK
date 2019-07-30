@@ -119,7 +119,7 @@ void Route(MStateCl *State_)
     ULONG TableSize;
     PMIB_IFTABLE TableIF=NULL;
     PMIB_IFROW RecordIF;
-    PIP_PER_ADAPTER_INFO AdapterInfo;
+    PIP_PER_ADAPTER_INFO AdapterInfo=NULL;
     MIB_IPFORWARDROW Record;
     MStateInfo Info;
     bool Enable;
@@ -135,7 +135,8 @@ void Route(MStateCl *State_)
     TableSize=0;
     if ( ::GetIfTable(NULL,&TableSize,TRUE)!=ERROR_INSUFFICIENT_BUFFER ) goto error;
     // Выделяем память под таблицу
-    if ( (TableIF=(PMIB_IFTABLE)new char[TableSize])==NULL ) goto error;
+    try { TableIF=(PMIB_IFTABLE)new char[TableSize]; }
+    catch ( std::bad_alloc &e ) { goto error; }
     memset(TableIF,0,TableSize);
     // Берем таблицу
     if ( ::GetIfTable(TableIF,&TableSize,TRUE)!=0 ) goto error;
@@ -149,7 +150,8 @@ void Route(MStateCl *State_)
         TableSize=0;
         if ( ::GetPerAdapterInfo(RecordIF->dwIndex,NULL,&TableSize)!=
             ERROR_BUFFER_OVERFLOW ) continue;
-        if ( (AdapterInfo=(PIP_PER_ADAPTER_INFO)new char[TableSize])==NULL ) goto error2;
+        try { AdapterInfo=(PIP_PER_ADAPTER_INFO)new char[TableSize]; }
+        catch ( std::bad_alloc &e ) { goto error2; }
         if ( ::GetPerAdapterInfo(RecordIF->dwIndex,AdapterInfo,&TableSize)!=0 ) goto error2;
         // Подготавливаем запись для таблицы маршрутизации
         memset(&Record,0,sizeof(Record));
@@ -166,7 +168,7 @@ void Route(MStateCl *State_)
         if ( Enable ) ::CreateIpForwardEntry(&Record);
         else ::DeleteIpForwardEntry(&Record);
 error2:
-        delete[] AdapterInfo;
+        delete[] AdapterInfo; 
         break;
     }
 

@@ -1,6 +1,8 @@
 //---------------------------------------------------------------------------
 #include <winsock2.h>
 //#include <windows.h>
+#include <stdio.h>
+#include <stdexcept.h>
 #pragma hdrstop
 
 #include "UnitSLList.h"
@@ -8,52 +10,56 @@
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
 //---------------------------------------------------------------------------
-void MSLList::constructor()
+MSLList::MSLList()
 {
-    MList::constructor();
     DefaultKey=NULL;
     DefaultFile=NULL;
     DefaultValue=NULL;
     DefaultCode=0;
+    LastError=0;
 }
 //---------------------------------------------------------------------------
-void MSLList::destructor()
+MSLList::~MSLList()
 {
     delete[] DefaultFile;
     delete[] DefaultValue;
-    MList::destructor();
 }
 //---------------------------------------------------------------------------
-unsigned MSLList::GetAllDataSize(bool Header_)
+unsigned MSLList::GetAllDataSize(bool Header_) const
 {
     unsigned DataSize=0, Size;
+    bool typed=Typed();
+
     // Берем размер заголовка
-    if ( Header_ ) if ( (Size=GetDataSize())!=0 ) DataSize+=sizeof(unsigned)+Size;
+    if ( Header_&&((Size=GetDataSize())!=0) ) DataSize+=sizeof(unsigned)+Size;
     // Берем размер элементов списка (игнорируя элементы с нулевым размером данных)
-    for ( MSLListItem *Item=(MSLListItem*)First;
-        Item; Item=(MSLListItem*)Item->Next )
+    for ( MSLListItem *Item=(MSLListItem*)gFirst();
+        Item; Item=(MSLListItem*)Item->gNext() )
     {
         Size=Item->GetDataSize(); if ( Size==0 ) continue;
-        DataSize+=sizeof(unsigned)+Size;
-        // Если список типизированный, добавляем размер поля типа элемента
-        if ( Typed() ) DataSize+=sizeof(unsigned);
+        // Не забываем добавить поле для размера данных элемента
+        DataSize+=Size+sizeof(unsigned);
+        // Если список типизированный, добавляем размер поля типа
+        if ( typed ) DataSize+=sizeof(unsigned char);
     }
     // Маркер конца списка
     DataSize+=sizeof(unsigned);
     return DataSize;
 }
 //---------------------------------------------------------------------------
-char *MSLList::SetAllData(char *Data_, bool Header_)
+char *MSLList::SetAllData(char *Data_, bool Header_) const
 {
-    char *NextData;
+    const bool typed=Typed();
     unsigned BlockSize;
+    char *NextData;
 
     if ( Header_ )
     {
         // Оставляем поле для размера данных заголовка
         Data_+=sizeof(unsigned);
         // Сохраняем данные заголовка и вычисляем его реальный размер
-        NextData=SetData(Data_); BlockSize=(unsigned)(NextData-Data_);
+        NextData=SetData(Data_);
+        BlockSize=(unsigned)(NextData-Data_);
         // Проверяем нужно ли было сохранять заголовок (были ли записаны данные)
         if ( BlockSize==0 ) Data_-=sizeof(unsigned);
         else
@@ -65,22 +71,23 @@ char *MSLList::SetAllData(char *Data_, bool Header_)
         }
     }
 
-    for ( MSLListItem *Item=(MSLListItem*)First;
-        Item; Item=(MSLListItem*)Item->Next )
+    for ( MSLListItem *Item=(MSLListItem*)gFirst();
+        Item; Item=(MSLListItem*)Item->gNext() )
     {
         // Оставляем поле для размера данных блока
         Data_+=sizeof(unsigned);
         // Если список типизированный, то оставляем поле для типа элемента
-        NextData=Typed()? Data_+sizeof(unsigned): Data_;
+        NextData=typed? Data_+sizeof(unsigned char): Data_;
         // Сохраняем данные блока и вычисляем его реальный размер (включая поле типа)
-        NextData=Item->SetData(NextData); BlockSize=(unsigned)(NextData-Data_);
+        NextData=Item->SetData(NextData);
+        BlockSize=(unsigned)(NextData-Data_);
         // Проверяем нужно ли было сохранять блок (были ли записаны данные)
         if ( BlockSize!=0 )
         {
             // Сохраняем размер данных блока
             Data_=MemSet(Data_-sizeof(unsigned),BlockSize);
             // Если список типизированный, сохраняем тип элемента
-            if ( Typed() ) MemSet(Data_,Item->TypeID());
+            if ( typed ) MemSet(Data_,Item->gTypeID());
             // Переходим далее
             Data_=NextData;
         } else Data_-=sizeof(unsigned);
@@ -91,275 +98,448 @@ char *MSLList::SetAllData(char *Data_, bool Header_)
     return Data_;
 }
 //---------------------------------------------------------------------------
-char *MSLList::GetAllData(char *Data_, char *Limit_)
+const char *MSLList::GetAllData(const char *Data_, const char *Limit_)
 {
-    char *Limit;
-    unsigned DataSize, Type;
+    const bool typed=Typed();
+    const char *Limit;
+    unsigned DataSize;
+    unsigned char TypeID;
     MSLListItem *Item;
 
-    // Берем размер заголовка
-    Data_=MemGet(Data_,&DataSize,Limit_); if ( Data_==NULL ) return NULL;
+    // Очищаем список для профилактики
+    Clear();
+                                    /// возможно, стоит проверять bad_alloc
+    // Берем размер вроде бы заголовка списка
+    Data_=MemGet(Data_,&DataSize,Limit_);
+    if ( Data_==NULL ) goto error;
     // Вычисляем лимит для операций с памятью внутри этого блока
-    Limit=Data_+DataSize; if ( Limit>Limit_ ) return NULL;
+    Limit=Data_+DataSize;
+    // Проверим выход на установленную границу и на переполнение указателя
+    if ( (Limit>Limit_)||(Limit<Data_) ) goto error;
     // Берем данные
     {
-        char *result=GetData(Data_,Limit);
+        const char *result=GetData(Data_,Limit);
+        // Если ничего не считали, значит у списка нет заголовка
         if ( Data_==result ) Data_-=sizeof(unsigned);
-        else if ( result!=Limit ) return NULL;
+        else if ( result!=Limit ) goto error;
         else Data_=result;
     }
 
     while(true)
     {
         // Берем размер блока
-        Data_=MemGet(Data_,&DataSize,Limit_); if ( Data_==NULL ) return NULL;
+        Data_=MemGet(Data_,&DataSize,Limit_);
+        if ( Data_==NULL ) goto error;
         // Если размер блока равен нулю (маркер конца списка), то прекращаем заполнение списка
         if ( DataSize==0 ) break;
         // Вычисляем лимит для операций с памятью внутри этого блока
-        Limit=Data_+DataSize; if ( Limit>Limit_ ) return NULL;
+        Limit=Data_+DataSize;
+        // Проверим выход на установленную границу и на переполнение указателя
+        if ( (Limit>Limit_)||(Limit<Data_) ) goto error;
         // Если список типизированный, берем тип элемента
-        if ( Typed() )
-            { Data_=MemGet(Data_,&Type,Limit_); if ( Data_==NULL ) return NULL; }
-        else Type=0;
+        if ( typed )
+        {
+            Data_=MemGet(Data_,&TypeID,Limit_);
+            if ( Data_==NULL ) goto error;
+        } else TypeID=0;
         // Добавляем новый элемент в список
-        Item=(MSLListItem*)Add(Type); if ( Item==NULL ) return NULL;
+        Item=(MSLListItem*)Add(TypeID);
         // Берем данные
-        Data_=Item->GetData(Data_,Limit); if ( Data_!=Limit ) return NULL;
+        Data_=Item->GetData(Data_,Limit);
+        if ( Data_!=Limit ) goto error;
     }
 
     return Data_;
+error:
+    // Очищаем частично заполненный список
+    Clear();
+    return NULL;
 }
 //---------------------------------------------------------------------------
-bool MSLList::SaveTo(char *File_, unsigned Code_)
+bool MSLList::SaveTo(char *File_, unsigned Code_, bool Always_, bool Safe_) const
 {
     HANDLE file=INVALID_HANDLE_VALUE;
     DWORD data_size, rw_size;
-    char *all_data;
+    Marray <char> all_data;
 
-    // Определяем размер данных для сохранения
-    data_size=GetAllDataSize(true);
-    // Выделяем память под данные
-    if ( (all_data=new char[data_size])==NULL ) goto error;
-    // Сохраняем данные в памяти
-    if ( SetAllData(all_data,true)!=(all_data+data_size) ) goto error;
+    LastError=0;
+    // Определяем размер данных и проверяем на допустимость
+    data_size=GetAllDataSize();
+    if ( data_size>MAX_SLFileSize )
+    {
+        throw std::runtime_error (      /// заменить на return false ?
+        TEXT("MSLList::SaveTo()\n")
+        TEXT("Размер данных превышает ограничение MAX_SLFileSize.")
+        );
+    }
+    // Выделяем память под данные.
+    // bad_alloc не ловим, т.к. ничего еще не начали делать
+    all_data.Alloc(data_size);
+    // Сохраняем весть список в памяти и сверяем реальный размер данных
+    if ( SetAllData(&all_data[0])!=(&all_data[0]+data_size) )
+    {
+        throw std::runtime_error (
+        TEXT("MSLList::SaveTo()\n")
+        TEXT("Размер данных MSLList::SetAllData() не соответствует MSLList::GetAllDataSize().")
+        );
+    }
     // Шифруем данные
-    BasicEncode(all_data,data_size,Code_);
+    BasicEncode(&all_data[0],data_size,Code_);
 
-    // Создаем файл для сохранения
-    if ( (file=::CreateFile(File_,GENERIC_WRITE,0,NULL,CREATE_ALWAYS,
-        FILE_ATTRIBUTE_NORMAL,NULL))==INVALID_HANDLE_VALUE ) goto error;
-    // Сохраняем данные в файле
-    if ( (!::WriteFile(file,all_data,data_size,&rw_size,NULL))||
-        (rw_size!=data_size) ) goto error;
+    // Создаем файл
+    if ( (file=::CreateFile(File_,GENERIC_WRITE,0,NULL,
+        Always_? (Safe_?OPEN_ALWAYS:CREATE_ALWAYS) :CREATE_NEW,
+        Safe_?FILE_ATTRIBUTE_NORMAL|FILE_FLAG_WRITE_THROUGH:FILE_ATTRIBUTE_NORMAL,
+        NULL))==INVALID_HANDLE_VALUE ) goto api_error;
+
+    if ( Always_&&Safe_ )
+    {
+        // Задаем новый размер файла
+        if ( ::SetFilePointer(file,(LONG)data_size,NULL,FILE_BEGIN)==0xFFFFFFFF ) goto api_error;
+        if ( !SetEndOfFile(file) ) goto api_error;
+        // Возвращаем позицию к началу
+        if ( ::SetFilePointer(file,(LONG)0,NULL,FILE_BEGIN)==0xFFFFFFFF ) goto api_error;
+    }
+    // Записываем данные
+    if ( (!::WriteFile(file,&all_data[0],data_size,&rw_size,NULL))||
+        (rw_size!=data_size) ) goto api_error;
 
     ::CloseHandle(file);
-    delete[] all_data;
     return true;
-error:
+api_error:
+    LastError=::GetLastError();
     if ( file!=INVALID_HANDLE_VALUE ) ::CloseHandle(file);
-    if ( all_data!=NULL ) delete[] all_data;
     return false;
 }
 //---------------------------------------------------------------------------
-bool MSLList::AttachTo(char *File_, unsigned Code_)
+bool MSLList::AttachTo(char *File_, unsigned Code_, bool Safe_) const
 {
-    HANDLE file;
-    DWORD old_size, data_size, rw_size;
-    char *all_data=NULL;
+    HANDLE file=INVALID_HANDLE_VALUE;
+    DWORD file_sizel, file_sizeh;
+    DWORD read_size, data_size, rw_size;
+    Marray <char> all_data;
 
+    LastError=0;
     // Открываем файл
-    if ( (file=::CreateFile(File_,GENERIC_READ|GENERIC_WRITE,0,NULL,OPEN_EXISTING,
-        FILE_ATTRIBUTE_NORMAL,NULL))==INVALID_HANDLE_VALUE ) goto error;
-    // Опеределяем размер файла
-    if ( (old_size=::SetFilePointer(file,0,NULL,FILE_END))==0xFFFFFFFF ) goto error;
-    // Проверяем не короче ли файл, чем допустимо
-    if ( old_size<sizeof(unsigned) ) goto error;
-    //
-    if ( old_size>(sizeof(unsigned)*2) ) old_size=sizeof(unsigned)*2;
+    if ( (file=::CreateFile(File_,GENERIC_READ|GENERIC_WRITE,0,NULL,
+        OPEN_EXISTING,
+        Safe_?FILE_ATTRIBUTE_NORMAL|FILE_FLAG_WRITE_THROUGH:FILE_ATTRIBUTE_NORMAL,
+        NULL))==INVALID_HANDLE_VALUE ) goto api_error;
+    // Определяем размер файла и проверяем на допустимость
+    if ( (file_sizel=::GetFileSize(file,&file_sizeh))==0xFFFFFFFF ) goto api_error;
+    if ( (file_sizeh!=0)||
+         (file_sizel<sizeof(unsigned))||    // короче маркера конца списка быть не может
+         (file_sizel>=MAX_SLFileSize) ) goto error;
+    // Определяем размер данных для добавления к файлу, его допустимость
+    // и не превысит ли ограничение увеличившийся файл (иначе потом не откроем его)
+    data_size=GetAllDataSize(false);
+    if ( data_size>MAX_SLFileSize )
+    {
+        throw std::runtime_error (      /// заменить на return false ?
+        TEXT("MSLList::AttachTo()\n")
+        TEXT("Размер данных превышает ограничение MAX_SLFileSize.")
+        );
+    }
+    if ( (data_size+file_sizel)>MAX_SLFileSize ) goto error;
 
-    // Определяем общий размер данных для сохранения (без заголовка списка)
-    data_size=GetAllDataSize(false)+old_size-sizeof(unsigned);
+    read_size=file_sizel;
+    // Ограничиваем область чтения двойным размером
+    // блока шифрования (особенность алгоритма)
+    if ( read_size>(sizeof(unsigned)*2) ) read_size=sizeof(unsigned)*2;
+    // Определяем общий размер данных для записи
+    data_size+=read_size-sizeof(unsigned);
     // Выделяем память под новые данные и часть старых из файла
-    if ( (all_data=new char[data_size])==NULL ) goto error;
+    try { all_data.Alloc(data_size); }
+    catch(std::bad_alloc &e)
+    {
+        // Закрываем файл и передаем исключение выше
+        ::CloseHandle(file);
+        throw e;
+    }
 
-    //
-    if ( ::SetFilePointer(file,-(LONG)old_size,NULL,FILE_END)==0xFFFFFFFF ) goto error;
     // Читаем часть старых данных из файла
-    if ( (!::ReadFile(file,all_data,old_size,&rw_size,NULL))||
-        (rw_size!=old_size) ) goto error;
-    // Расшифровываем их
-    BasicDecode(all_data,old_size,Code_);
-    // Проверяем есть ли в данных маркер конца списка (0x00000000)
-    if ( ((unsigned*)(all_data+old_size))[-1]!=0 ) goto error;
+    if ( (::SetFilePointer(file,-(LONG)read_size,NULL,FILE_END)==0xFFFFFFFF)||
+        (!::ReadFile(file,&all_data[0],read_size,&rw_size,NULL))||
+        (rw_size!=read_size) ) goto api_error;  /// ошибка обработки rw_size ?
+    // Расшифровываем их и проверяем наличие маркера конца списка (0x00000000)
+    BasicDecode(&all_data[0],read_size,Code_);
+    if ( ((unsigned*)(&all_data[0]+read_size))[-1]!=0 ) goto error;
 
-    // Сохраняем новые данные в памяти (без заголовка списка)
-    if ( SetAllData(all_data+old_size-sizeof(unsigned),false)!=
-        (all_data+data_size) ) goto error;
-    // Шифруем данные
-    BasicEncode(all_data,data_size,Code_);
+    // Сохраняем список без заголовка в памяти и сверяем реальный размер данных
+    if ( SetAllData(&all_data[0]+read_size-sizeof(unsigned),false)!=
+        (&all_data[0]+data_size) )
+    {
+        throw std::runtime_error (
+        TEXT("MSLList::AttachTo()\n")
+        TEXT("Размер данных MSLList::SetAllData() не соответствует MSLList::GetAllDataSize().")
+        );
+    }
 
-    // Переводим указатель в конец файла
-    if ( ::SetFilePointer(file,-(LONG)old_size,NULL,FILE_END)==0xFFFFFFFF ) goto error;
+    // Шифруем
+    BasicEncode(&all_data[0],data_size,Code_);
+
+    if ( Safe_ )
+    {
+        // Резервируем место в файле
+        if ( (::SetFilePointer(file,(LONG)(data_size-read_size),NULL,FILE_END)==0xFFFFFFFF)||
+            (!SetEndOfFile(file)) ) goto api_error;
+        // Отступаем от конца файла так, чтобы перезаписать часть старых данных
+        if ( ::SetFilePointer(file,-(LONG)data_size,NULL,FILE_END)==0xFFFFFFFF ) goto api_error;
+    } else
+    {
+        // Отступаем от конца файла так, чтобы перезаписать часть старых данных
+        if ( ::SetFilePointer(file,-(LONG)read_size,NULL,FILE_END)==0xFFFFFFFF ) goto api_error;
+    }
     // Сохраняем данные в файле
-    if ( (!::WriteFile(file,all_data,data_size,&rw_size,NULL))||
-        (rw_size!=data_size) ) goto error;
+    if ( (!::WriteFile(file,&all_data[0],data_size,&rw_size,NULL))||
+        (rw_size!=data_size) ) goto api_error;    /// ошибка обработки rw_size ?
 
     ::CloseHandle(file);
-    delete[] all_data;
     return true;
+api_error:
+    LastError=::GetLastError();
 error:
     if ( file!=INVALID_HANDLE_VALUE ) ::CloseHandle(file);
-    if ( all_data!=NULL ) delete[] all_data;
     return false;
 }
 //---------------------------------------------------------------------------
 bool MSLList::LoadFrom(char *File_, unsigned Code_)
 {
-    HANDLE file;
-    DWORD data_size, rw_size;
-    char *all_data=NULL, *end_data;
+    HANDLE file=INVALID_HANDLE_VALUE;
+    DWORD file_sizel, file_sizeh, rw_size;
+    Marray <char> all_data;
+    char *end_data;
 
+    LastError=0;
     // Открываем файл
     if ( (file=::CreateFile(File_,GENERIC_READ,0,NULL,OPEN_EXISTING,
-        FILE_ATTRIBUTE_NORMAL,NULL))==INVALID_HANDLE_VALUE ) goto error;
-    // Определяем его размер
-    if ( (data_size=::GetFileSize(file,NULL))==0xFFFFFFFF ) goto error;
+        FILE_ATTRIBUTE_NORMAL,NULL))==INVALID_HANDLE_VALUE ) goto api_error;
+    // Определяем его размер и проверяем на допустимость
+    if ( (file_sizel=::GetFileSize(file,&file_sizeh))==0xFFFFFFFF ) goto api_error;
+    if ( (file_sizeh!=0)||
+         (file_sizel>MAX_SLFileSize) ) goto error;
     // Выделяем память под данные
-    if ( (all_data=new char[data_size])==NULL ) goto error;
-    end_data=all_data+data_size;
+    try { all_data.Alloc(file_sizel); }
+    catch(std::bad_alloc &e)
+    {
+        // Закрываем файл и передаем исключение выше
+        ::CloseHandle(file);
+        throw e;
+    }
     // Считываем данные из файла
-    if ( (!::ReadFile(file,all_data,data_size,&rw_size,NULL))||
-        (rw_size!=data_size) ) goto error;
-    ::CloseHandle(file); file=NULL;
+    if ( (!::ReadFile(file,&all_data[0],file_sizel,&rw_size,NULL))||
+        (rw_size!=file_sizel) ) goto api_error;
+    // Закрываем его
+    ::CloseHandle(file); file=INVALID_HANDLE_VALUE;
 
-    // Расшифровываем данные
-    BasicDecode(all_data,data_size,Code_);
-    // Заносим данные в список
-    if ( GetAllData(all_data,end_data)!=end_data ) goto error;
+    // Расшифровываем
+    BasicDecode(&all_data[0],file_sizel,Code_);
+    // Заносим в список (bad_alloc не ловим, т.к. уже безопасно)
+    end_data=&all_data[0]+file_sizel;
+    if ( GetAllData(&all_data[0],end_data)!=end_data ) goto error;
 
-    delete[] all_data;
     return true;
+api_error:
+    LastError=::GetLastError();
 error:
     if ( file!=INVALID_HANDLE_VALUE ) ::CloseHandle(file);
-    if ( all_data!=NULL ) delete[] all_data;
     return false;
 }
 //---------------------------------------------------------------------------
-bool MSLList::StoreTo(HKEY Key_, char *SubKey_, char *Value_, unsigned Code_)
+bool MSLList::StoreTo(HKEY Key_, char *SubKey_, char *Value_, unsigned Code_) const
 {
     HKEY key=NULL;
+    Marray <char> data;
     unsigned size;
-    char *data;
-//    char *data=NULL;
 
-    size=GetAllDataSize(true);
-    if ( (data=new char[size])==NULL ) goto error;
-    SetAllData(data,true);
-    BasicEncode(data,size,Code_);
+    LastError=0;
+    // Определяем размер данных и проверяем на допустимость
+    size=GetAllDataSize();
+    if ( size>MAX_SLRegSize )
+    {
+        throw std::runtime_error (      /// заменить на return false ?
+        TEXT("MSLList::StoreTo()\n")
+        TEXT("Размер данных превышает ограничение MAX_SLRegSize.")
+        );
+    }
+    // Выделяем память (bad_alloc не ловим, т.к. еще ничего не начали делать)
+    data.Alloc(size);
+    // Сохраняем весь список в памяти и сверяем реальный размер данных
+    if ( SetAllData(&data[0])!=(&data[0]+size) )
+    {
+        throw std::runtime_error (
+        TEXT("MSLList::StoreTo()\n")
+        TEXT("Размер данных MSLList::SetAllData() не соответствует MSLList::GetAllDataSize().")
+        );
+    }
+    // Шифруем
+    BasicEncode(&data[0],size,Code_);
 
     // Создаем ключ реестра
     if ( ::RegCreateKeyEx(Key_,SubKey_,NULL,NULL,REG_OPTION_NON_VOLATILE,
-        KEY_ALL_ACCESS,NULL,&key,NULL)!=ERROR_SUCCESS ) goto error;
+        KEY_ALL_ACCESS,NULL,&key,NULL)!=ERROR_SUCCESS ) goto api_error;
     // Сохраняем параметр
-    if ( ::RegSetValueEx(key,Value_,NULL,REG_BINARY,data,size)!=ERROR_SUCCESS )
-        goto error;
+    if ( ::RegSetValueEx(key,Value_,NULL,
+        REG_BINARY,&data[0],size)!=ERROR_SUCCESS ) goto api_error;
 
     ::RegCloseKey(key);
-    delete[] data;
     return true;
-error:
+api_error:
+    LastError=::GetLastError();
     if ( key!=NULL ) ::RegCloseKey(key);
-    delete[] data;
     return false;
 }
 //---------------------------------------------------------------------------
 bool MSLList::QueryFrom(HKEY Key_, char *SubKey_, char *Value_, unsigned Code_)
 {
     HKEY key=NULL;
-    unsigned long size;
-    char *data=NULL;
+    DWORD size;
+    Marray <char> data;
 
-    // Открываем раздел реестра
-    if ( ::RegOpenKeyEx(Key_,SubKey_,NULL,KEY_QUERY_VALUE,&key)!=ERROR_SUCCESS ) goto error;
-    // Определяем размер значения
-    if ( ::RegQueryValueEx(key,Value_,NULL,NULL,NULL,&size)!=ERROR_SUCCESS ) goto error;
-    // Выделяем память под данные
-    if ( (data=new char[size])==NULL ) goto error;
-    // Считываем данные
-    if ( ::RegQueryValueEx(key,Value_,NULL,NULL,data,&size)!=ERROR_SUCCESS ) goto error;
+    LastError=0;
+    // Открываем ключ реестра
+    if ( ::RegOpenKeyEx(Key_,SubKey_,NULL,KEY_QUERY_VALUE,&key)!=ERROR_SUCCESS ) goto api_error;
+    // Сразу выделяем память под данные (для реестра буфер маленький)
+    try { data.Alloc(MAX_SLRegSize); }
+    catch(std::bad_alloc &e)
+    {
+        // Закрываем ключ реестра и передаем исключение выше
+        ::RegCloseKey(key); key=NULL;
+        throw e;
+    }
+    // Считываем сколько есть по-факту данных
+    size=MAX_SLRegSize;
+    if ( ::RegQueryValueEx(key,Value_,NULL,NULL,&data[0],&size)!=ERROR_SUCCESS ) goto api_error;
+    // Закрываем ключ реестра
     ::RegCloseKey(key); key=NULL;
 
-    BasicDecode(data,size,Code_);
-    if ( GetAllData(data,data+size)==NULL ) goto error;
+    // Расшифровываем данные
+    BasicDecode(&data[0],size,Code_);
+    // Заносим данные в список (bad_alloc не ловим, т.к. уже безопасно)
+    if ( GetAllData(&data[0],&data[0]+size)==NULL ) goto error;
 
-    delete[] data;
     return true;
+api_error:
+    LastError=::GetLastError();    
 error:
     if ( key!=NULL ) ::RegCloseKey(key);
-    delete[] data;
     return false;
 }
 //---------------------------------------------------------------------------
-bool MSLList::SetDefaultFile(char *File_, unsigned Code_)
+bool MSLList::SaveAsReg(char *File_, HKEY Key_, char *SubKey_, char *Value_, unsigned Code_) const
 {
-    // Копируем новый путь к файлу
-    delete[] DefaultFile;
-    DefaultFile=new char[strlen(File_)+1];
-    if ( DefaultFile==NULL ) goto error;
-    strcpy(DefaultFile,File_);
-    // Параметра реестра нет
-    delete[] DefaultValue; DefaultValue=NULL;
-    // Сохраняем код шифрования
-    DefaultCode=Code_;
+    static const char hdr[]="REGEDIT4";
+    static const char hk1[]="HKEY_LOCAL_MACHINE";
+    static const char hk2[]="HKEY_CURRENT_USER";
+    static const char hk3[]="HKEY_USERS";
+    static const char hk4[]="HKEY_CLASSES_ROOT";
+    const char *hk;    Marray <char> data;    Marray <char> reg_data;    DWORD size, reg_size, rw_size;    HANDLE file;    LastError=0;    switch((int)Key_)    {        case HKEY_LOCAL_MACHINE: hk=hk1; break;        case HKEY_CURRENT_USER: hk=hk2; break;        case HKEY_USERS: hk=hk3; break;        case HKEY_CLASSES_ROOT: hk=hk4; break;        default:            throw std::runtime_error (            TEXT("MSLList::SaveAsReg()\n")
+            TEXT("Задан не верный тип HKEY.")
+            );
+    }
+
+    // Определяем размер данных и проверяем на допустимость
+    size=GetAllDataSize();
+    if ( size>MAX_SLRegSize )
+    {
+        throw std::runtime_error (      /// заменить на return false ?
+        TEXT("MSLList::SaveAsReg()\n")
+        TEXT("Размер данных превышает ограничение MAX_SLRegSize.")
+        );
+    }
+    // Выделяем память (bad_alloc не ловим, т.к. еще ничего не начали делать)
+    data.Alloc(size);
+    reg_size=
+        sizeof(hdr)+
+        sizeof(hk1)+
+        +16+1+
+        size*3+
+        strlen(SubKey_)+
+        strlen(Value_);
+    reg_data.Alloc(reg_size);
+    // Сохраняем весь список в памяти и сверяем реальный размер данных
+    if ( SetAllData(&data[0])!=(&data[0]+size) )
+    {
+        throw std::runtime_error (
+        TEXT("MSLList::SaveAsReg()\n")
+        TEXT("Размер данных MSLList::SetAllData() не соответствует MSLList::GetAllDataSize().")
+        );
+    }
+    // Шифруем
+    BasicEncode(&data[0],size,Code_);
+
+    // Формируем текстовую часть reg-файла
+    reg_size=sprintf(&reg_data[0],"%s\r\n\r\n[%s\\%s]\r\n\"%s\"=hex:",hdr,hk,SubKey_,Value_);
+    // Добавляем HEX-строку
+    reg_size+=ByteToHEX(&data[0],size,&reg_data[0]+reg_size,size*3,',');
+    reg_size+=sprintf(&reg_data[0]+reg_size,"\r\n");
+
+    // Создаем файл
+    if ( (file=::CreateFile(File_,GENERIC_WRITE,0,NULL,CREATE_ALWAYS,
+        FILE_ATTRIBUTE_NORMAL,NULL))==INVALID_HANDLE_VALUE ) goto api_error;
+    // Записываем данные
+    if ( (!::WriteFile(file,&reg_data[0],reg_size,&rw_size,NULL))||
+        (rw_size!=reg_size) ) goto api_error;
+
+    ::CloseHandle(file);
     return true;
-error:
+api_error:
+    LastError=::GetLastError();
+    if ( file!=INVALID_HANDLE_VALUE ) ::CloseHandle(file);
+    return false;
+}
+//---------------------------------------------------------------------------
+void MSLList::SetDefaultFile(char *File_, unsigned Code_)
+{
     delete[] DefaultFile; DefaultFile=NULL;
     delete[] DefaultValue; DefaultValue=NULL;
-    return false;
+    // Копируем новый путь к файлу (параметра реестра нет)
+    DefaultFile=new char[strlen(File_)+1];
+    strcpy(DefaultFile,File_);
+    // Сохраняем код шифрования
+    DefaultCode=Code_;
 }
 //---------------------------------------------------------------------------
-bool MSLList::SetDefaultKey(HKEY Key_, char *SubKey_, char *Value_, unsigned Code_)
+void MSLList::SetDefaultKey(HKEY Key_, char *SubKey_, char *Value_, unsigned Code_)
 {
+    delete[] DefaultFile; DefaultFile=NULL;
+    delete[] DefaultValue; DefaultValue=NULL;
     // Копируем имя раздела реестра
-    delete[] DefaultFile;
     DefaultFile=new char[strlen(SubKey_)+1];
-    if ( DefaultFile==NULL ) goto error;
     strcpy(DefaultFile,SubKey_);
     // Копируем имя параметра реестра
-    delete[] DefaultValue;
     DefaultValue=new char[strlen(Value_)+1];
-    if ( DefaultValue==NULL ) goto error;
     strcpy(DefaultValue,Value_);
     //
     DefaultKey=Key_;
     // Сохраняем код шифрования
     DefaultCode=Code_;
-    return true;
-error:
-    delete[] DefaultFile; DefaultFile=NULL;
-    delete[] DefaultValue; DefaultValue=NULL;
-    return false;
 }
 //---------------------------------------------------------------------------
-bool MSLList::Save()
+bool MSLList::Save(bool Always_, bool Safe_) const
 {
     if ( DefaultValue==NULL )
-        return DefaultFile==NULL? false: SaveTo(DefaultFile,DefaultCode);
+        return DefaultFile==NULL? false:
+        SaveTo(DefaultFile,DefaultCode,Always_,Safe_);
     else
-        return DefaultFile==NULL? false: StoreTo(DefaultKey,DefaultFile,DefaultValue,DefaultCode);
+        return DefaultFile==NULL? false:
+        StoreTo(DefaultKey,DefaultFile,DefaultValue,DefaultCode);
 }
 //---------------------------------------------------------------------------
-bool MSLList::Attach()
+bool MSLList::Attach(bool Safe_) const
 {
-    return (DefaultFile==NULL)||(DefaultValue!=NULL)? false: AttachTo(DefaultFile,DefaultCode);
+    return (DefaultFile==NULL)||(DefaultValue!=NULL)?
+        false: AttachTo(DefaultFile,DefaultCode,Safe_);
 }
 //---------------------------------------------------------------------------
 bool MSLList::Load()
 {
     if ( DefaultValue==NULL )
-        return DefaultFile==NULL? false: LoadFrom(DefaultFile,DefaultCode);
+        return DefaultFile==NULL?
+            false: LoadFrom(DefaultFile,DefaultCode);
     else
-        return DefaultFile==NULL? false: QueryFrom(DefaultKey,DefaultFile,DefaultValue,DefaultCode);
+        return DefaultFile==NULL?
+            false: QueryFrom(DefaultKey,DefaultFile,DefaultValue,DefaultCode);
 }
 //---------------------------------------------------------------------------
 

@@ -1,6 +1,7 @@
 //---------------------------------------------------------------------------
 #include <vcl.h>
 #include <stdio.h>
+#include <stdexcept.h>
 #pragma hdrstop
 
 #include "UnitFormMain.h"
@@ -12,12 +13,12 @@
 TFormMain *FormMain;
 //---------------------------------------------------------------------------
 char win_dir[MAX_PATH];
-double SystemTime;
-MClOptions *Options;
-MStateCl *State;
-MSyncCl *Sync;
-MSendCl *Send;
-MMessage *Message;
+MClOptions *Options=NULL;
+MStateCl *State=NULL;
+MSyncCl *Sync=NULL;
+MSendCl *Send=NULL;
+MAuth *Auth=NULL;
+MMessage *Message=NULL;
 //---------------------------------------------------------------------------
 __fastcall TFormMain::TFormMain(TComponent* Owner)
     : TForm(Owner)
@@ -26,20 +27,17 @@ __fastcall TFormMain::TFormMain(TComponent* Owner)
 //---------------------------------------------------------------------------
 void __fastcall TFormMain::FormShow(TObject *Sender)
 {
+    try
+    {
+
     Options=new MClOptions;
     State=new MStateCl;
     Sync=new MSyncCl;
     Send=new MSendCl;
+    Auth=new MAuth;
     Message=new MMessage;
 
-    if ( !Sync->NetInit(ENC_Net) )
-    {
-        ::MessageBox(Application->Handle,
-            "Не установлена требуемая версия библиотеки WinSock или протокол TCP/IP.\nПрограмма не может быть запущена !",
-            "TLK - ошибка",MB_OK|MB_ICONERROR|MB_APPLMODAL);
-        Close(); return;
-    }
-
+    // Настраиваем пути для файлов
     ::GetWindowsDirectory(win_dir,MAX_PATH);
     strcat(win_dir,"\\");
     {
@@ -49,9 +47,14 @@ void __fastcall TFormMain::FormShow(TObject *Sender)
             HKEY_LOCAL_MACHINE,"Software\\MMM Groups\\TLK\\3.0\\Client","State",    //path//
             HKEY_LOCAL_MACHINE,"Software\\MMM Groups\\TLK\\3.0\\Client","Options",  //path//
             file,ENC_Code);
+        Auth->SetDefaultKey(
+            HKEY_LOCAL_MACHINE,"Software\\MMM Groups\\TLK\\3.0\\Client","Auth",ENC_Code);    //path//
         strcpy(file,win_dir); strcat(file,"TIMEWARN.BMP");
         Message->SetFile(file);
     }
+
+    // Загружаем настройки, заменяя их "дефолтом" при необходимости
+    if ( !Auth->Load() ) Auth->Save();
     if ( !State->Load() ) State->Save();
     if ( !State->GetOptions(Options) )
     {
@@ -62,21 +65,47 @@ void __fastcall TFormMain::FormShow(TObject *Sender)
         State->NewOptions(Options);
     }
 
+    // Подготовка сети
+    if ( !(Sync->NetInit(ENC_Net,Auth)&&
+        Send->NetInit(State,ENC_Net,Auth)) )
+    {
+        ResMessageBox(Handle,1,2,MB_APPLMODAL|MB_OK|MB_ICONERROR);
+        Tag=true; Close();
+        return;
+    }
+
     TreeViewGames->Color=(TColor)0x0248422C;
     TreeViewGames->Font->Color=(TColor)0x02D2C66F;
     TimeToReboot=0;
     MessageAreShowed=false;
 
-    // Запускаем программы из раздела автозапуска
-    RegExecList(HKEY_LOCAL_MACHINE,"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run");
-//    RegExecList(HKEY_LOCAL_MACHINE,"SOFTWARE\\MMM Groups\\TLK\\3.0\\Client\\Run");
-
     Timer->Interval=500;
     TimerTimer(NULL);
     Timer->Enabled=true;
 
-    Sync->Associate(State); Sync->Start();
-    Send->Associate(State); Send->Start();
+    // Запуск сети
+    Sync->Associate(State);
+    Sync->Start();
+    Send->Start();
+
+    // Запускаем программы из раздела автозапуска
+    RegExecList(HKEY_LOCAL_MACHINE,"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run");
+//    RegExecList(HKEY_LOCAL_MACHINE,"SOFTWARE\\MMM Groups\\TLK\\3.0\\Client\\Run");
+
+    }
+    catch (std::bad_alloc &e)
+    {
+        ResMessageBox(Handle,1,3,MB_APPLMODAL|MB_OK|MB_ICONERROR);
+        Tag=true; Close();
+        return;
+    }
+    catch (std::exception &e)
+    {
+        ::MessageBox(Handle, e.what(),
+            "TLK - ошибка",MB_APPLMODAL|MB_OK|MB_ICONERROR);
+        Tag=true; Close();
+        return;
+    }
 }
 //---------------------------------------------------------------------------
 void __fastcall TFormMain::FormCloseQuery(TObject *Sender, bool &CanClose)
@@ -87,12 +116,11 @@ void __fastcall TFormMain::FormCloseQuery(TObject *Sender, bool &CanClose)
 void __fastcall TFormMain::FormClose(TObject *Sender, TCloseAction &Action)
 {
     Timer->Enabled=false;
-    Sync->Stop();
-    Sync->NetFree();
-    Send->Stop();
+    Send->Stop(); Send->NetFree();
+    Sync->Stop(); Sync->NetFree();
     Message->Stop();
-    delete Sync;
     delete Send;
+    delete Sync;
     delete State;
     delete Message;
     delete Options;
@@ -127,7 +155,7 @@ void __fastcall TFormMain::TimerTimer(TObject *Sender)
     State->StateInfo(&Info);
     SetState(&Info);
 
-    // Блокируем CTRL+ALT+DEL
+    // Блокируем CTRL+ALT+DEL (для Win98)
 //    ::ShowWindow(Handle,SW_HIDE);
 //    BOOL old;
 //    ::SystemParametersInfo(SPI_SCREENSAVERRUNNING,0,&old,0);
@@ -175,8 +203,8 @@ void __fastcall TFormMain::TreeViewGamesDblClick(TObject *Sender)
 //---------------------------------------------------------------------------
 void __fastcall TFormMain::SpeedButtonRebootClick(TObject *Sender)
 {
+    // Команда отработает в TFormMain::SetState()
     State->CmdReboot();
-//    Tag=Exit(EWX_REBOOT);
 }
 //---------------------------------------------------------------------------
 void __fastcall TFormMain::SpeedButtonOptionsClick(TObject *Sender)
@@ -195,13 +223,7 @@ void __fastcall TFormMain::SetState(MStateInfo *Info_)
     // Режим работы
     if ( Info_->Changes&mdcState )
     {
-        if ( Info_->State&mcsWtTLK )
-        {
-            // Клиент TLK отключен
-            TimeToReboot=0; Message->Stop();
-            ShowImageMessage(mimNone);
-            ShowGames(mgpNone);
-        } else if ( Info_->State&mcsOpen )
+        if ( Info_->State&mcsOpen )
         {
             // Открыт для настройки
             TimeToReboot=0; Message->Stop();
@@ -255,8 +277,9 @@ void __fastcall TFormMain::SetState(MStateInfo *Info_)
             }
         }
         SpeedButtonOptions->Enabled=Info_->State&mcsOpen;
-//        if ( Info_->State&mcsFree ) ::SystemParametersInfo(SPI_SCREENSAVERRUNNING,1,NULL,0);
-//        else ::SystemParametersInfo(SPI_SCREENSAVERRUNNING,0,NULL,0);
+        // Подавляем заставку на свободном компьютере
+//        ::SystemParametersInfo(SPI_SCREENSAVERRUNNING,    /// не работает...
+//            Info_->State&mcsFree?1:0,NULL,0);
     }
     //
     if ( Info_->Changes&mdcWorkTime ) MessageAreShowed=false;
@@ -267,7 +290,7 @@ void __fastcall TFormMain::SetState(MStateInfo *Info_)
         LabelWorkTime->Caption=line;
         // Если до окончания времени осталось менее двух минут, запускаем показ сообщения
         if ( Options->ToEndTime&&(!MessageAreShowed)&&
-            ((unsigned)Info_->ToEndWork<=Options->ToEndTime) )
+            (Info_->ToEndWork<=Options->ToEndTime) )
         {
             MessageAreShowed=true;
             Message->Show(Options->MessageTime);
@@ -286,44 +309,49 @@ void __fastcall TFormMain::SetState(MStateInfo *Info_)
         if ( Info_->Commands&mccShutdown )
         {
             State->Save();
-            Tag=WinExit(EWX_POWEROFF);        //
+            Tag=WinExit(EWX_POWEROFF);        ///
             return;
         } else if ( Info_->Commands&mccReboot )
         {
             State->Save();
-            Tag=WinExit(EWX_REBOOT);          //
-//            Tag=Exit(EWX_REBOOT|EWX_FORCE);
+            Tag=WinExit(EWX_REBOOT);          ///
             return;
         }
     }
     // Принудительно сворачиваем окна, как можем...
-    if ( (Info_->State&(mcsWtTLK|mcsFree|mcsFine|mcsLock|mcsPause))&&
+    if ( (Info_->State&(mcsFree|mcsFine|mcsLock|mcsPause))&&
         (!(Info_->State&mcsOpen)) ) HideWindows(true);
     else HideWindows(false);
 }
 //---------------------------------------------------------------------------
 void __fastcall TFormMain::AddGamesToTree(MGames *Games_, TTreeNode *TreeNode_, TImageList *ImageList_)
 {
-    static TTreeNode *NewTreeNode;
-    static HICON icon;
+    TTreeNode *NewTreeNode;
+    HICON icon;
+    char *cmdline;
 
     if ( Games_==NULL ) return;
-    for ( MGame *Game=(MGame*)Games_->First; Game; Game=(MGame*)Game->Next )
+    for ( MGame *Game=(MGame*)Games_->gFirst(); Game;
+        Game=(MGame*)Game->gNext() )
     {
         NewTreeNode=TreeViewGames->Items->AddChild(TreeNode_,Game->Name);
         // Иконка
         icon=::ExtractIcon(NULL,Game->Icon,0);
         if ( (icon==NULL)||(((int)icon)==1) )
         {
-            NewTreeNode->ImageIndex=-1; NewTreeNode->SelectedIndex=-1;
+            NewTreeNode->ImageIndex=-1;
+            NewTreeNode->SelectedIndex=-1;
         } else
         {
-            NewTreeNode->ImageIndex=::ImageList_ReplaceIcon((HIMAGELIST)ImageList_->Handle,-1,icon);
-            NewTreeNode->SelectedIndex=NewTreeNode->ImageIndex;
+            NewTreeNode->ImageIndex=
+                ::ImageList_ReplaceIcon((HIMAGELIST)ImageList_->Handle,-1,icon);
+            NewTreeNode->SelectedIndex=
+                NewTreeNode->ImageIndex;
         }
         // Командная строка для запуска
-        NewTreeNode->Data=(void*)new char[strlen(Game->Command)+1];
-        strcpy((char*)NewTreeNode->Data,Game->Command);
+        cmdline=new char[strlen(Game->Command)+1];
+        strcpy(cmdline,Game->Command);
+        NewTreeNode->Data=(void*)cmdline;
         // Подуровни дерева
         AddGamesToTree(Game->SubGames,NewTreeNode,ImageList_);
     }
@@ -394,14 +422,18 @@ void __fastcall TFormMain::HideWindows(bool Hide_)
     // Определяем текущее верхнее окно в системе
     Wnd=::GetForegroundWindow();
     // Провеяем можно ли это окно свернуть
-    if ( (Wnd==Handle)||(Wnd==Application->Handle)||(!::IsWindow(Wnd)) ) return;
-    if ( ::GetClassName(Wnd,buff,23)&&(!strcmp(buff,"WindowsScreenSaverClass")) ) return;
+    if ( (Wnd==Handle)||
+         (Wnd==Application->Handle)||
+         (!::IsWindow(Wnd)) ) return;
+    // Не заставка ли это
+    if ( ::GetClassName(Wnd,buff,23)&&
+        (!strcmp(buff,"WindowsScreenSaverClass")) ) return;
     // Сворачиваем окно
     if ( Hide_ )
     {
-        ::ShowWindow(Wnd,SW_MINIMIZE);
-        ::ShowWindow(Handle,SW_SHOWNORMAL);
-        ::SetForegroundWindow(Handle);
+        ::ShowWindow(Wnd,SW_MINIMIZE);      ///
+        ::ShowWindow(Handle,SW_SHOWNORMAL); ///
+        ::SetForegroundWindow(Handle);      ///
     }
 }
 //---------------------------------------------------------------------------

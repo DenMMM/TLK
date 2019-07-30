@@ -34,7 +34,7 @@
   </MACROS>
   <OPTIONS>
     <IDLCFLAGS value="-I$(BCB)\include -I$(BCB)\include\vcl -src_suffix cpp -boa"/>
-    <CFLAG1 value="-O2 -Vx -Ve -X- -a8 -b- -k- -vi -tW -tWM- -c"/>
+    <CFLAG1 value="-O2 -Vx -Ve -X- -pr -a8 -6 -b- -k- -vi -tW -tWM- -c"/>
     <PFLAGS value="-$Y- -$L- -$D- -$A8 -v -JPHNE -M"/>
     <RFLAGS value=""/>
     <AFLAGS value="/mx /w2 /zn"/>
@@ -62,7 +62,7 @@ AutoIncBuild=1
 MajorVer=1
 MinorVer=0
 Release=0
-Build=13
+Build=14
 Debug=0
 PreRelease=0
 Special=0
@@ -73,14 +73,14 @@ CodePage=1251
 
 [Version Info Keys]
 CompanyName=MMM Groups
-FileDescription=заглушка
-FileVersion=1.0.0.13
+FileDescription=Заглушка
+FileVersion=1.0.0.14
 InternalName=EXEReplacer
 LegalCopyright=MMM Groups
 LegalTrademarks=
 OriginalFilename=EXERepl.exe
 ProductName=TLK
-ProductVersion=3.1.0.0
+ProductVersion=3.10
 Comments=
 
 [HistoryLists\hlIncludePath]
