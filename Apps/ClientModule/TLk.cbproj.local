@@ -1,2 +1,12 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<BorlandProject/>
+<BorlandProject>
+  <Transactions>
+    <Transaction>2019.09.28 12:39:21.770,=D:\MMM\Desktop\TLK_3.12_d2_src\Core\UnitComputers.cpp</Transaction>
+    <Transaction>2019.09.28 12:42:48.246,D:\MMM\Desktop\TLK_3.12_d2_src\Core\iphlpapi.lib=</Transaction>
+    <Transaction>2019.09.28 12:52:59.975,=D:\MMM\Desktop\TLK_3.12_d2_src\Core\NTDLL.lib</Transaction>
+    <Transaction>2019.09.28 12:56:06.841,D:\MMM\Desktop\TLK_3.12_d2_src\Core\NTDLL.lib=</Transaction>
+    <Transaction>2019.09.28 12:56:36.368,=C:\Program Files (x86)\Embarcadero\Studio\20.0\lib\win32c\release\psdk\NTDLL.lib</Transaction>
+    <Transaction>2019.09.28 12:57:01.744,C:\Program Files (x86)\Embarcadero\Studio\20.0\lib\win32c\release\psdk\NTDLL.lib=</Transaction>
+    <Transaction>2019.09.28 12:57:24.301,=D:\MMM\Desktop\TLK_3.12_d2_src\Core\NTDLL.lib</Transaction>
+  </Transactions>
+</BorlandProject>

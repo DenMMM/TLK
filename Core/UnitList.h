@@ -37,13 +37,11 @@ public:
 	{
 	}
 
-	virtual ~MListItem()
-	{
-	}
+	virtual ~MListItem() = default;
 
 
 public:
-	// Прокси-класс. чтобы реже использовать 'dynamic_cast'
+	// Прокси-класс, чтобы реже использовать 'dynamic_cast'
 	template <
 		typename parent_item,	// Класс элемента, который будем расширять
 		typename base_type>     // Базовый класс элемента списка (например, MListItem)
@@ -59,8 +57,8 @@ public:
 		base_type* gNext() const {
 			return static_cast<base_type*>(parent_item::gNext()); }
 
-		Proxy() {}
-		virtual ~Proxy() {}
+		Proxy() = default;
+		virtual ~Proxy() override = default;
 	};
 
 	// Расширение базовых интерфейсов, зависящее от типа элемента списка
@@ -96,8 +94,8 @@ public:
 			return static_cast<MListItem*>(new_obj);
 		}
 */
-		Typed() {}
-		virtual ~Typed() {}
+		Typed() = default;
+		virtual ~Typed() override = default;
 	};
 
 	// Формирует элемент простого (однотипного) списка
@@ -110,8 +108,8 @@ public:
 		using parent_item::gTypeID;
 
 	public:
-		Simple() {}
-		virtual ~Simple() {}
+		Simple() = default;
+		virtual ~Simple() override = default;
 	};
 };
 //---------------------------------------------------------------------------
@@ -210,8 +208,8 @@ public:
 		void Move(list_type* SrcList_) { parent_list::Move(SrcList_); }
 		void Splice(list_type* AtchList_) { parent_list::Splice(AtchList_); }
 
-		Typed() {}
-		~Typed() {}
+		Typed() = default;
+		~Typed() = default;
 	};
 
 	// То же самое, но добавляет 'Add()' с типом по-умолчанию
@@ -237,9 +235,7 @@ public:
 				(&item_type::New);
 		}
 
-		~Simple()
-		{
-		}
+		~Simple() = default;
 	};
 };
 //---------------------------------------------------------------------------

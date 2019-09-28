@@ -279,7 +279,7 @@ unsigned BasicRand();
 bool TimeRand(void *Buff__, size_t Size_);
 //---------------------------------------------------------------------------
 size_t ByteToHEX(const void *Bytes__, size_t BytesCount_,
-	wchar_t *Line_, size_t LineSize_, wchar_t Delim_='\0');
+	wchar_t *Line_, size_t LineSize_, wchar_t Delim_=L'\0');
 size_t HEXToByte(const wchar_t *Line_, void *Buff__, size_t BuffSize_);
 //---------------------------------------------------------------------------
 bool GeneratePassword(char *Line_, unsigned Len_,

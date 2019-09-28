@@ -144,7 +144,7 @@ object FormTariffs: TFormTariffs
   end
   object CheckBoxReboot: TCheckBox
     Left = 232
-    Top = 60
+    Top = 57
     Width = 177
     Height = 17
     Caption = #1055#1077#1088#1077#1079#1072#1075#1088#1091#1079#1082#1072' '#1087#1086#1089#1083#1077' '#1079#1072#1087#1091#1089#1082#1072

@@ -22,9 +22,7 @@ public:
 	{
 	}
 
-	virtual ~MLogRecordsItem()
-	{
-	}
+	virtual ~MLogRecordsItem() override = default;
 };
 
 class MLogRecords:
@@ -69,15 +67,15 @@ protected:
 	{
 	private:
 		// Функции механизма сохранения/загрузки данных
-		unsigned GetDataSize() const override;
-		void *SetData(void *Data_) const override;
-		const void *GetData(const void *Data_, const void *Limit_) override;
+		virtual unsigned GetDataSize() const override;
+		virtual void *SetData(void *Data_) const override;
+		virtual const void *GetData(const void *Data_, const void *Limit_) override;
 
 	public:
-		void Copy(const MListItem *SrcItem_) override;
+		virtual void Copy(const MListItem *SrcItem_) override;
 
-		EventBase() {}
-		virtual ~EventBase() {}
+		EventBase() = default;
+		virtual ~EventBase() override = default;
 	};
 
 
@@ -85,15 +83,15 @@ protected:
 	{
 	private:
 		// Функции механизма сохранения/загрузки данных
-		unsigned GetDataSize() const override;
-		void *SetData(void *Data_) const override;
-		const void *GetData(const void *Data_, const void *Limit_) override;
+		virtual unsigned GetDataSize() const override;
+		virtual void *SetData(void *Data_) const override;
+		virtual const void *GetData(const void *Data_, const void *Limit_) override;
 
 	public:
 		char Number;            // Номер компьютера
 		bool Apply;				// Режим был установлен/снят
 
-		void Copy(const MListItem *SrcItem_) override;
+		virtual void Copy(const MListItem *SrcItem_) override;
 
 		ModeBase():
 			Number(0),
@@ -101,9 +99,7 @@ protected:
 		{
 		}
 
-		virtual ~ModeBase()
-		{
-		}
+		virtual ~ModeBase() override = default;
 	};
 
 
@@ -118,16 +114,14 @@ protected:
 	public:
 		char Number;            // Номер компьютера
 
-		void Copy(const MListItem *SrcItem_) override;
+		virtual void Copy(const MListItem *SrcItem_) override;
 
 		CmdBase():
 			Number(0)
 		{
 		}
 
-		virtual ~CmdBase()
-		{
-		}
+		virtual ~CmdBase() override = default;
 	};
 
 
@@ -143,7 +137,7 @@ protected:
 		unsigned State;         // Состояние оболочки
 		unsigned User;          // Текущий пользователь (чья смена открыта)
 
-		void Copy(const MListItem *SrcItem_) override;
+		virtual void Copy(const MListItem *SrcItem_) override;
 
 		DataShellBase():
 			State(0),
@@ -151,9 +145,7 @@ protected:
 		{
 		}
 
-		virtual ~DataShellBase()
-		{
-		}
+		virtual ~DataShellBase() override = default;
 	};
 
 
@@ -161,17 +153,17 @@ protected:
 	{
 	private:
 		// Функции механизма сохранения/загрузки данных
-		unsigned GetDataSize() const override;
-		void *SetData(void *Data_) const override;
-		const void *GetData(const void *Data_, const void *Limit_) override;
+		virtual unsigned GetDataSize() const override;
+		virtual void *SetData(void *Data_) const override;
+		virtual const void *GetData(const void *Data_, const void *Limit_) override;
 
 	public:
 		Marray <MStatesItem::LogData> States;    	// Массив состояний компьютеров
 
-		void Copy(const MListItem *SrcItem_) override;
+		virtual void Copy(const MListItem *SrcItem_) override;
 
-		DataStatesBase() {}
-		virtual ~DataStatesBase() {}
+		DataStatesBase() = default;
+		virtual ~DataStatesBase() override = default;
 	};
 
 
@@ -179,17 +171,17 @@ protected:
 	{
 	private:
 		// Функции механизма сохранения/загрузки данных
-		unsigned GetDataSize() const override;
-		void *SetData(void *Data_) const override;
-		const void *GetData(const void *Data_, const void *Limit_) override;
+		virtual unsigned GetDataSize() const override;
+		virtual void *SetData(void *Data_) const override;
+		virtual const void *GetData(const void *Data_, const void *Limit_) override;
 
 	public:
 		Marray <MTariffsItem::LogData> Items;  	// Массив описаний тарифов
 
-		void Copy(const MListItem *SrcItem_) override;
+		virtual void Copy(const MListItem *SrcItem_) override;
 
-		DataTariffsBase() {}
-		virtual ~DataTariffsBase() {}
+		DataTariffsBase() = default;
+		virtual ~DataTariffsBase() override = default;
 	};
 
 
@@ -197,17 +189,17 @@ protected:
 	{
 	private:
 		// Функции механизма сохранения/загрузки данных
-		unsigned GetDataSize() const override;
-		void *SetData(void *Data_) const override;
-		const void *GetData(const void *Data_, const void *Limit_) override;
+		virtual unsigned GetDataSize() const override;
+		virtual void *SetData(void *Data_) const override;
+		virtual const void *GetData(const void *Data_, const void *Limit_) override;
 
 	public:
 		Marray <MFinesItem::LogData> Items;	// Массив описаний штрафов
 
-		void Copy(const MListItem *SrcItem_) override;
+		virtual void Copy(const MListItem *SrcItem_) override;
 
-		DataFinesBase() {}
-		virtual ~DataFinesBase() {}
+		DataFinesBase() = default;
+		virtual ~DataFinesBase() override = default;
 	};
 
 
@@ -215,17 +207,17 @@ protected:
 	{
 	private:
 		// Функции механизма сохранения/загрузки данных
-		unsigned GetDataSize() const override;
-		void *SetData(void *Data_) const override;
-		const void *GetData(const void *Data_, const void *Limit_) override;
+		virtual unsigned GetDataSize() const override;
+		virtual void *SetData(void *Data_) const override;
+		virtual const void *GetData(const void *Data_, const void *Limit_) override;
 
 	public:
 		Marray <MUsersItem::LogData> Items;	// Массив данных о пользователях
 
-		void Copy(const MListItem *SrcItem_) override;
+		virtual void Copy(const MListItem *SrcItem_) override;
 
-		DataUsersBase() {}
-		virtual ~DataUsersBase() {}
+		DataUsersBase() = default;
+		virtual ~DataUsersBase() override = default;
 	};
 
 
@@ -233,23 +225,21 @@ protected:
 	{
 	private:
 		// Функции механизма сохранения/загрузки данных
-		unsigned GetDataSize() const override ;
-		void *SetData(void *Data_) const override ;
-		const void *GetData(const void *Data_, const void *Limit_) override ;
+		virtual unsigned GetDataSize() const override ;
+		virtual void *SetData(void *Data_) const override ;
+		virtual const void *GetData(const void *Data_, const void *Limit_) override ;
 
 	public:
 		bool Opened;			// Настройки открыты/закрыты
 
-		void Copy(const MListItem *SrcItem_) override ;
+		virtual void Copy(const MListItem *SrcItem_) override ;
 
 		AppConfigBase():
 			Opened(false)
 		{
 		}
 
-		virtual ~AppConfigBase()
-		{
-		}
+		virtual ~AppConfigBase() override = default;
 	};
 
 
@@ -257,23 +247,21 @@ protected:
 	{
 	private:
 		// Функции механизма сохранения/загрузки данных
-		unsigned GetDataSize() const override;
-		void *SetData(void *Data_) const override;
-		const void *GetData(const void *Data_, const void *Limit_) override;
+		virtual unsigned GetDataSize() const override;
+		virtual void *SetData(void *Data_) const override;
+		virtual const void *GetData(const void *Data_, const void *Limit_) override;
 
 	public:
 		unsigned User;          // ID-номер пользователя
 
-		void Copy(const MListItem *SrcItem_) override;
+		virtual void Copy(const MListItem *SrcItem_) override;
 
 		AppLogInBase():
 			User(0)
 		{
 		}
 
-		virtual ~AppLogInBase()
-		{
-		}
+		virtual ~AppLogInBase() override = default;
 	};
 
 
@@ -281,9 +269,9 @@ protected:
 	{
 	private:
 		// Функции механизма сохранения/загрузки данных
-		unsigned GetDataSize() const override;
-		void *SetData(void *Data_) const override;
-		const void *GetData(const void *Data_, const void *Limit_) override;
+		virtual unsigned GetDataSize() const override;
+		virtual void *SetData(void *Data_) const override;
+		virtual const void *GetData(const void *Data_, const void *Limit_) override;
 
 	public:
 		char Number;                            // Номер компьютера
@@ -296,7 +284,7 @@ protected:
 		short WorkTime;                         // Поставленное время работы
 		double Cost;                            // Стоимость работы на компьютере в течении 'WorkTime'
 
-		void Copy(const MListItem *SrcItem_) override;
+		virtual void Copy(const MListItem *SrcItem_) override;
 
 		CompRunBase():
 			Number(0),
@@ -311,9 +299,7 @@ protected:
 		{
 		}
 
-		virtual ~CompRunBase()
-		{
-		}
+		virtual ~CompRunBase() override = default;
 	};
 
 
@@ -321,16 +307,16 @@ protected:
 	{
 	private:
 		// Функции механизма сохранения/загрузки данных
-		unsigned GetDataSize() const override;
-		void *SetData(void *Data_) const override;
-		const void *GetData(const void *Data_, const void *Limit_) override;
+		virtual unsigned GetDataSize() const override;
+		virtual void *SetData(void *Data_) const override;
+		virtual const void *GetData(const void *Data_, const void *Limit_) override;
 
 	public:
 		char Number;                        // Номер компьютера
 		unsigned Fine;                      // ID-номер штрафа
 		short Time;                         // Время штрафа
 
-		void Copy(const MListItem *SrcItem_) override;
+		virtual void Copy(const MListItem *SrcItem_) override;
 
 		CompFineBase():
 			Number(0),
@@ -339,9 +325,7 @@ protected:
 		{
 		}
 
-		virtual ~CompFineBase()
-		{
-		}
+		virtual ~CompFineBase() override = default;
 	};
 
 
@@ -349,15 +333,15 @@ protected:
 	{
 	private:
 		// Функции механизма сохранения/загрузки данных
-		unsigned GetDataSize() const override;
-		void *SetData(void *Data_) const override;
-		const void *GetData(const void *Data_, const void *Limit_) override;
+		virtual unsigned GetDataSize() const override;
+		virtual void *SetData(void *Data_) const override;
+		virtual const void *GetData(const void *Data_, const void *Limit_) override;
 
 	public:
 		char From;                          // С какого компьютера было взято время
 		char To;                            // На какой компьютер время было поставлено
 
-		void Copy(const MListItem *SrcItem_) override;
+		virtual void Copy(const MListItem *SrcItem_) override;
 
 		CompExchangeBase():
 			From(0),
@@ -365,9 +349,7 @@ protected:
 		{
 		}
 
-		virtual ~CompExchangeBase()
-		{
-		}
+		virtual ~CompExchangeBase() override = default;
 	};
 
 
@@ -443,9 +425,7 @@ public:
 		TypesIDSet(CmdShutdown::TypeID,		reinterpret_cast<MListItem*(*)()>(&CmdShutdown::New));
 	}
 
-	~MLogRecords()
-	{
-	}
+	~MLogRecords() = default;
 };
 //---------------------------------------------------------------------------
 #endif

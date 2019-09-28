@@ -7,16 +7,6 @@
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
 //---------------------------------------------------------------------------
-MAuth::MAuth()
-{
-    memset(Key,0x00,sizeof(Key));
-}
-
-MAuth::~MAuth()
-{
-//
-}
-
 unsigned MAuth::GetDataSize() const
 {
     return

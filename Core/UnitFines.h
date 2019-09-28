@@ -19,15 +19,15 @@ class MFinesItem:
 {
 public:
 	// Функции механизма сохранения/загрузки данных
-	unsigned GetDataSize() const override;
-	void *SetData(void *Data_) const override;
-	const void *GetData(const void *Data_, const void *Limit_) override;
+	virtual unsigned GetDataSize() const override;
+	virtual void *SetData(void *Data_) const override;
+	virtual const void *GetData(const void *Data_, const void *Limit_) override;
 
 public:
 	short Time;                   	// Время штрафа
 	std::wstring Descr;             // Описание штрафа
 
-	void Copy(const MListItem *SrcItem_) override;
+	virtual void Copy(const MListItem *SrcItem_) override;
 
 	// Поддержка логов
 	struct LogData
@@ -55,17 +55,15 @@ public:
 	{
 	}
 
-	virtual ~MFinesItem()
-	{
-	}
+	virtual ~MFinesItem() override = default;
 };
 //---------------------------------------------------------------------------
 class MFines:
 	public MIDList::Simple <MIDList, MFines, MFinesItem>
 {
 public:
-	MFines() {}
-	~MFines() {}
+	MFines() = default;
+	~MFines() = default;
 };
 //---------------------------------------------------------------------------
 #endif

@@ -14,8 +14,13 @@ public:
     unsigned State;
     unsigned User;
 
-    MShellState();
-    ~MShellState();
+	MShellState()
+	{
+		State=0;
+		User=0;
+	}
+
+	~MShellState() = default;
 };
 //---------------------------------------------------------------------------
 #endif

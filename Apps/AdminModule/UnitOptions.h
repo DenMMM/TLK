@@ -20,19 +20,19 @@ class MOptions:public MSLList
 {
 private:
     // Функции механизма сохранения/загрузки данных
-	unsigned GetDataSize() const override;
-	void *SetData(void *Data_) const override;
-	const void *GetData(const void *Data_, const void *Limit_) override;
+	virtual unsigned GetDataSize() const override;
+	virtual void *SetData(void *Data_) const override;
+	virtual const void *GetData(const void *Data_, const void *Limit_) override;
 
 public:
-    char LogPeriod;             // Период ведения файла лога
-    short FilterFreeTime;       // Время до окончания работы компьютера, когда он подпадает под фильтр свободных (в минутах)
-    short CostDialogTime;       // Время использования диалогов с расчетом цен (в минутах)
-    double CostPrecision;       // Точность расчета цен
-    unsigned UsersRights;       // Права пользователей (администраторов)
-    MPassword Pass;             // Пароль на изменение настроек
+	char LogPeriod;             // Период ведения файла лога
+	short FilterFreeTime;       // Время до окончания работы компьютера, когда он подпадает под фильтр свободных (в минутах)
+	short CostDialogTime;       // Время использования диалогов с расчетом цен (в минутах)
+	double CostPrecision;       // Точность расчета цен
+	unsigned UsersRights;       // Права пользователей (администраторов)
+	MPassword Pass;             // Пароль на изменение настроек
 
-    bool Copy(MOptions *Opt_);
+	bool Copy(MOptions *Opt_);
 
 	MOptions():
 		LogPeriod(mlpDay),
@@ -43,9 +43,7 @@ public:
 	{
 	}
 
-	~MOptions()
-	{
-	}
+	~MOptions() = default;
 };
 //---------------------------------------------------------------------------
 #endif

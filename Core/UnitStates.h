@@ -78,11 +78,11 @@ class MStatesItem:
 		MStatesItem>
 {
 protected:
-	void Copy(const MListItem *SrcItem_) override {}
+	virtual void Copy(const MListItem *SrcItem_) override {}
 	// Функции механизма сохранения/загрузки данных
-	unsigned GetDataSize() const override;
-	void *SetData(void *Data_) const override;
-	const void *GetData(const void *Data_, const void *Limit_) override;
+	virtual unsigned GetDataSize() const override;
+	virtual void *SetData(void *Data_) const override;
+	virtual const void *GetData(const void *Data_, const void *Limit_) override;
 
 	mutable MWAPI::CRITICAL_SECTION CS_Main;    // Объект для синхронизации доступа потоков к данным
 	__int64 SystemTime;         // Системное время, используемое при всех расчетах
@@ -204,9 +204,7 @@ public:
 	{
 	}
 
-	virtual ~MStatesItem()
-	{
-	}
+	virtual ~MStatesItem() override = default;
 };
 //---------------------------------------------------------------------------
 class MStates:
@@ -217,25 +215,25 @@ private:
 
 public:
 	// Вспомогательные функции
-	MStatesItem *Search(int Number_);
+	MStatesItem *Search(int Number_) const;
 	bool Update(MComputers *Computers_);
 	bool Timer(__int64 SystemTime_);
 
 	// Переопределяем функцию сохранения списка в файл
 	bool Save();
 
-	MStates() {}
-	~MStates() {}
+	MStates() = default;
+	~MStates() = default;
 };
 //---------------------------------------------------------------------------
 class MStateCl: public MSLList          /// придумать лучшее наследование
 {
 private:
     // Функции механизма сохранения/загрузки данных
-	unsigned GetDataSize() const override;
-	void *SetData(void *Data_) const override;
-	const void *GetData(const void *Data_, const void *Limit_) override;
-    
+	virtual unsigned GetDataSize() const override;
+	virtual void *SetData(void *Data_) const override;
+	virtual const void *GetData(const void *Data_, const void *Limit_) override;
+
 	HKEY OptKey;				//
 	std::wstring OptPath;		//
 	std::wstring OptValue;		//
@@ -305,9 +303,7 @@ public:
 		SystemTime=LastSyncTime=::GetTickCount();
 	}
 
-	~MStateCl()
-	{
-	}
+	~MStateCl() = default;
 };
 //---------------------------------------------------------------------------
 #endif

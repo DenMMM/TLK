@@ -92,7 +92,8 @@ public:
     void Timer(__int64 SystemTime_);
     DWORD gLastErr() const { return Records.gLastErr(); }
 
-    MLog();
+	MLog();
+	~MLog() = default;
 };
 //---------------------------------------------------------------------------
 #endif
