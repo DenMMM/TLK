@@ -22,12 +22,12 @@ class MSLListItem:
 public:
 	// Функции определения размера данных производного от MSLListItem класса,
 	// сохранения и восстановления их в/из памяти.
-	virtual unsigned GetDataSize() const = 0;
-	virtual void *SetData(void *Data_) const = 0;
-	virtual const void *GetData(const void *Data_, const void *Limit_) = 0;
+	virtual unsigned GetDataSize() const=0;
+	virtual void *SetData(void *Data_) const=0;
+	virtual const void *GetData(const void *Data_, const void *Limit_)=0;
 
-	MSLListItem() = default;
-	virtual ~MSLListItem() override = default;
+	MSLListItem() {}
+	virtual ~MSLListItem() {}
 };
 //---------------------------------------------------------------------------
 class MSLList:
@@ -74,7 +74,9 @@ public:
 	{
 	}
 
-	~MSLList() = default;
+	~MSLList()
+	{
+	}
 };
 //---------------------------------------------------------------------------
 #endif

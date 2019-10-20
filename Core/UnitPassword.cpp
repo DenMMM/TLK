@@ -5,6 +5,16 @@
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
 //---------------------------------------------------------------------------
+MPassword::MPassword()
+{
+    memset(Salt,0,sizeof(Salt));
+    memset(Hash,0,sizeof(Hash));
+}
+
+MPassword::~MPassword()
+{
+}
+
 unsigned MPassword::GetDataSize() const
 {
     return

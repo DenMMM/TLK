@@ -18,17 +18,17 @@ protected:
 
 public:
 	// Функции механизма сохранения/загрузки данных
-	virtual unsigned GetDataSize() const override
+	unsigned GetDataSize() const override
 		{ return sizeof(UUID); }
-	virtual void *SetData(void *Data_) const override
+	void *SetData(void *Data_) const override
 		{ return MemSet(Data_,UUID); }
-	virtual const void *GetData(const void *Data_, const void *Limit_) override
+	const void *GetData(const void *Data_, const void *Limit_) override
 		{ return MemGet(Data_,&UUID,Limit_); }
 
 public:
 	unsigned gUUID() const { return UUID; }
 
-	virtual void Copy(const MListItem *SrcItem_) override
+	void Copy(const MListItem *SrcItem_) override
 	{
 		const MIDListItem *item=
 			dynamic_cast<const MIDListItem*>(SrcItem_);
@@ -40,7 +40,9 @@ public:
 	{
 	}
 
-	virtual ~MIDListItem() override = default;
+	virtual ~MIDListItem()
+	{
+	}
 };
 //---------------------------------------------------------------------------
 class MIDList:
@@ -53,11 +55,11 @@ private:
 	unsigned NextUUID(unsigned LastUUID_);
 
 public:
-	virtual unsigned GetDataSize() const override
+	unsigned GetDataSize() const override
 		{ return sizeof(LastUUID); }
-	virtual void *SetData(void *Data_) const override
+	void *SetData(void *Data_) const override
 		{ return MemSet(Data_,LastUUID); }
-	virtual const void *GetData(const void *Data_, const void *Limit_) override
+	const void *GetData(const void *Data_, const void *Limit_) override
 		{ return MemGet(Data_,&LastUUID,Limit_); }
 
 public:
@@ -69,7 +71,9 @@ public:
 	{
 	}
 
-	~MIDList() = default;
+	~MIDList()
+	{
+	}
 
 
 public:
@@ -83,8 +87,8 @@ public:
 		base_type* SrchUUID(unsigned UUID_) const {
 			return static_cast<base_type*>(parent_list::SrchUUID(UUID_)); }
 
-		Typed() = default;
-		~Typed() = default;
+		Typed() {}
+		~Typed() {}
 	};
 
 	template <
@@ -97,8 +101,8 @@ public:
 		item_type* SrchUUID(unsigned UUID_) const {
 			return static_cast<item_type*>(parent_list::SrchUUID(UUID_)); }
 
-		Simple() = default;
-		~Simple() = default;
+		Simple() {}
+		~Simple() {}
 	};
 };
 //---------------------------------------------------------------------------

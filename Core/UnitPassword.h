@@ -27,9 +27,9 @@ private:
 
 public:
 	// Функции механизма сохранения/загрузки данных
-	virtual unsigned GetDataSize() const override;
-	virtual void *SetData(void *Data_) const override;
-	virtual const void *GetData(const void *Data_, const void *Limit_) override;
+	unsigned GetDataSize() const override;
+	void *SetData(void *Data_) const override;
+	const void *GetData(const void *Data_, const void *Limit_) override;
 //	void Copy(const MList *SrcItem_) override {}
 
 	void Copy(const MPassword *SrcPass_);
@@ -37,13 +37,8 @@ public:
 	void Set(const std::wstring &Pass_);
 	bool Check(const std::wstring &Pass_) const;
 
-	MPassword()
-	{
-		memset(Salt,0,sizeof(Salt));
-		memset(Hash,0,sizeof(Hash));
-	}
-
-	~MPassword() = default;
+    MPassword();
+    ~MPassword();
 };
 //---------------------------------------------------------------------------
 #endif

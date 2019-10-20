@@ -7,8 +7,8 @@
 #include "UnitFormMain.h"           /// 'Shared' גûםוסעט ג מעהוכüםûי פאיכ
 #include "UnitService.h"
 //---------------------------------------------------------------------------
-USEFORM("UnitFormGames.cpp", FormGames);
 USEFORM("UnitFormMain.cpp", FormMain);
+USEFORM("UnitFormGames.cpp", FormGames);
 //---------------------------------------------------------------------------
 void ServiceInstall();
 void ServiceUninstall();

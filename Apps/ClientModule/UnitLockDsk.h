@@ -111,22 +111,8 @@ public:
     bool UpdateWorkTime(int Time_);
     void Hide(bool UnLock_=true);
 
-	MLockDsk():
-		hThread(nullptr),
-		ThreadID(0),
-		hPrevDsk(nullptr),
-		hMainDsk(nullptr),
-		Transp(false),
-		SysTime(0),
-		CompNum(0),
-		WorkTime(0)
-	{
-	}
-
-	~MLockDsk()
-	{
-		Hide(false);    // Завершим работу потока без разблокировки экрана
-	}
+    MLockDsk();
+    ~MLockDsk();
 };
 //---------------------------------------------------------------------------
 #endif

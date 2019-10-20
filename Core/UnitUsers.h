@@ -23,9 +23,9 @@ class MUsersItem:
 {
 public:
 	// Функции механизма сохранения/загрузки данных
-	virtual unsigned GetDataSize() const override;
-	virtual void *SetData(void *Data_) const override;
-	virtual const void *GetData(const void *Data_, const void *Limit_) override;
+	unsigned GetDataSize() const override;
+	void *SetData(void *Data_) const override;
+	const void *GetData(const void *Data_, const void *Limit_) override;
 
 public:
 	std::wstring Login;
@@ -33,7 +33,7 @@ public:
 	bool Active;
 	MPassword Pass;
 
-	virtual void Copy(const MListItem *SrcItem_) override;
+	void Copy(const MListItem *SrcItem_) override;
 
 	// Поддержка логов
 	struct LogData
@@ -64,7 +64,9 @@ public:
 	{
 	}
 
-	virtual ~MUsersItem() override = default;
+	virtual ~MUsersItem()
+	{
+	}
 };
 //---------------------------------------------------------------------------
 class MUsers:
@@ -73,8 +75,8 @@ class MUsers:
 public:
 	size_t ActiveCount() const;
 
-	MUsers() = default;
-	~MUsers() = default;
+	MUsers() {}
+	~MUsers() {}
 };
 //---------------------------------------------------------------------------
 #endif

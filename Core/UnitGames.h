@@ -21,9 +21,9 @@ class MGamesItem:
 {
 public:
 	// Функции механизма сохранения/загрузки данных
-	virtual unsigned GetDataSize() const override;
-	virtual void *SetData(void *Data_) const override;
-	virtual const void *GetData(const void *Data_, const void *Limit_) override;
+	unsigned GetDataSize() const override;
+	void *SetData(void *Data_) const override;
+	const void *GetData(const void *Data_, const void *Limit_) override;
 
 public:
 	std::wstring Name;
@@ -33,22 +33,22 @@ public:
 
 	MGames *AddSubGames();
 	void DelSubGames();
-	virtual void Copy(const MListItem *SrcItem_) override;
+	void Copy(const MListItem *SrcItem_) override;
 
 	MGamesItem():
 		SubGames(nullptr)
 	{
 	}
 
-	virtual ~MGamesItem() override;
+	virtual ~MGamesItem();
 };
 //---------------------------------------------------------------------------
 class MGames:
 	public MSLList::Simple <MSLList, MGames, MGamesItem>
 {
 public:
-	MGames() = default;
-	~MGames() = default;
+	MGames() {}
+	~MGames() {}
 };
 //---------------------------------------------------------------------------
 #endif

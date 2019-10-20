@@ -17,9 +17,9 @@ class MClOptions: public MSLList
 {
 private:
     // Функции механизма сохранения/загрузки данных
-	virtual unsigned GetDataSize() const override;
-	virtual void *SetData(void *Data_) const override;
-	virtual const void *GetData(const void *Data_, const void *Limit_) override;
+	unsigned GetDataSize() const override;
+	void *SetData(void *Data_) const override;
+	const void *GetData(const void *Data_, const void *Limit_) override;
 
 public:
 	std::wstring ShellUser;   			// Логин пользователя для блокировки TLK shell
@@ -43,7 +43,9 @@ public:
 	{
 	}
 
-	~MClOptions() = default;
+	~MClOptions()
+	{
+	}
 };
 //---------------------------------------------------------------------------
 #endif

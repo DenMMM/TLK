@@ -25,9 +25,9 @@ class MComputersItem:
 {
 public:
 	// Функции механизма сохранения/загрузки данных
-	virtual unsigned GetDataSize() const override;
-	virtual void *SetData(void *Data_) const override;
-	virtual const void *GetData(const void *Data_, const void *Limit_) override;
+	unsigned GetDataSize() const override;
+	void *SetData(void *Data_) const override;
+	const void *GetData(const void *Data_, const void *Limit_) override;
 
 public:
 	char Number;						// Номер компьютера
@@ -35,7 +35,7 @@ public:
 	std::wstring Address;				// IP-адрес компьютера
 	bool NotUsed;						// Игнорировать компьютер
 
-	virtual void Copy(const MListItem *SrcItem_) override;
+	void Copy(const MListItem *SrcItem_) override;
 
 	MComputersItem():
 		Number(0),
@@ -44,7 +44,9 @@ public:
 	{
 	}
 
-	virtual ~MComputersItem() override = default;
+	virtual ~MComputersItem()
+	{
+	}
 };
 //---------------------------------------------------------------------------
 class MComputers:
@@ -54,8 +56,8 @@ public:
 	MComputersItem *Search(char Number_) const;
 	void Sort();
 
-	MComputers() = default;
-	~MComputers() = default;
+	MComputers() {}
+	~MComputers() {}
 };
 //---------------------------------------------------------------------------
 #endif

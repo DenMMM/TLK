@@ -75,15 +75,17 @@ public:
 	{
 	}
 
-	virtual ~MTariffRunTimesItem() override = default;
+	virtual ~MTariffRunTimesItem()
+	{
+	}
 };
 
 class MTariffRunTimes:
 	public MList::Simple <MList, MTariffRunTimes, MTariffRunTimesItem>
 {
 public:
-	MTariffRunTimes() = default;
-	~MTariffRunTimes() = default;
+	MTariffRunTimes() {}
+	~MTariffRunTimes() {}
 };
 //---------------------------------------------------------------------------
 class MTariffTimesItem:
@@ -116,15 +118,17 @@ public:
 	{
 	}
 
-	virtual ~MTariffTimesItem() override = default;
+	virtual ~MTariffTimesItem()
+	{
+	}
 };
 
 class MTariffTimes:
 	public MSLList::Simple <MSLList, MTariffTimes, MTariffTimesItem>
 {
 public:
-	MTariffTimes() = default;
-	~MTariffTimes() = default;
+	MTariffTimes() {}
+	~MTariffTimes() {}
 };
 //---------------------------------------------------------------------------
 class MTariffsInfoItem:
@@ -138,23 +142,19 @@ public:
 
 	virtual void Copy(const MListItem *SrcItem_) override;
 
-	MTariffsInfoItem():
-		ID(0)
-	{
-	}
-
-	virtual ~MTariffsInfoItem() override = default;
+	MTariffsInfoItem(): ID(0) {}
+	virtual ~MTariffsInfoItem() {}
 };
 
 class MTariffsInfo:
 	public MList::Simple <MList, MTariffsInfo, MTariffsInfoItem>
 {
 public:
-//	bool Copy(MListItem *SrcItem_);
+	bool Copy(MListItem *SrcItem_);
 	MTariffsInfoItem *Search(unsigned ID_) const;
 
-	MTariffsInfo() = default;
-	~MTariffsInfo() = default;
+	MTariffsInfo() {}
+	~MTariffsInfo() {}
 };
 //---------------------------------------------------------------------------
 class MTariffsItem:
@@ -164,9 +164,9 @@ class MTariffsItem:
 {
 private:
 	// Функции механизма сохранения/загрузки данных
-	virtual unsigned GetDataSize() const override;
-	virtual void *SetData(void *Data_) const override;
-	virtual const void *GetData(const void *Data_, const void *Limit_) override;
+	unsigned GetDataSize() const override;
+	void *SetData(void *Data_) const override;
+	const void *GetData(const void *Data_, const void *Limit_) override;
 
 	void CostPacket(MTariffRunTimesItem *RunTime_) const;
 	void CostFlyPacket(MTariffRunTimesItem *RunTime_) const;
@@ -191,7 +191,7 @@ public:
 	void GetInfo(MTariffsInfoItem *Info_) const;
 	void GetRunTimes(__int64 &Time_, MTariffRunTimes *RunTimes_) const;
 
-	virtual void Copy(const MListItem *SrcItem_) override;
+	void Copy(const MListItem *SrcItem_) override;
 
 	// Поддержка логов
 	struct LogData
@@ -221,7 +221,9 @@ public:
 	{
 	}
 
-	virtual ~MTariffsItem() override = default;
+	virtual ~MTariffsItem()
+	{
+	}
 };
 
 class MTariffs:
@@ -230,8 +232,8 @@ class MTariffs:
 public:
 	void GetForTime(__int64 &Time_, MTariffsInfo *TariffsInfo_) const;
 
-	MTariffs() = default;
-	~MTariffs() = default;
+	MTariffs() {}
+	~MTariffs() {}
 };
 //---------------------------------------------------------------------------
 #endif

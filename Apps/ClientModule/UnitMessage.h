@@ -22,14 +22,9 @@ public:
     bool Show();
     void Stop();
 
-	MMessage():
-		Thread(nullptr),
-		ThreadID(0),
-		hBitmap(nullptr)
-	{
-	}
-
-	~MMessage() = default;
+    MMessage();
+    ~MMessage();
 };
+
 //---------------------------------------------------------------------------
 #endif
