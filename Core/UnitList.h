@@ -4,6 +4,7 @@
 //---------------------------------------------------------------------------
 #include <cstddef>
 #include <vector>
+#include <iterator>
 //---------------------------------------------------------------------------
 class MListItem;
 class MList;
@@ -208,6 +209,124 @@ public:
 	}
 
 
+private:
+	// Шаблонный контейнер итераторов
+	template <
+		typename base_type>				// Базовый класс элемента списка
+	struct Iterators
+	{
+		class const_iterator:
+			public std::iterator <std::bidirectional_iterator_tag, base_type>
+		{
+		protected:
+			typedef typename std::iterator <std::bidirectional_iterator_tag, base_type>::pointer pointer;
+			typedef typename std::iterator <std::bidirectional_iterator_tag, base_type>::reference reference;
+
+			pointer MyPtr;
+
+		public:
+			const_iterator(): MyPtr(nullptr) {}
+			const_iterator(pointer InitPtr_): MyPtr(InitPtr_) {}
+
+			const reference operator*() const { return *MyPtr; }
+			const pointer operator->() const { return MyPtr; }
+
+			const_iterator& operator++()
+			{
+				MyPtr=MyPtr->gNext();
+				return *this;
+			}
+
+			const_iterator operator++(int)
+			{
+				const_iterator Before=(*this);
+				++(*this);
+				return Before;
+			}
+
+			const_iterator& operator--()
+			{
+				MyPtr=MyPtr->gPrev();
+				return *this;
+			}
+
+			const_iterator operator--(int)
+			{
+				const_iterator Before=(*this);
+				--(*this);
+				return Before;
+			}
+
+			bool operator==(const const_iterator& Right_) const
+			{
+				return MyPtr==Right_.MyPtr;
+			}
+
+			bool operator!=(const const_iterator& Right_) const
+			{
+				return MyPtr!=Right_.MyPtr;
+			}
+		};
+
+		class iterator:
+			public const_iterator
+		{
+		protected:
+			typedef typename const_iterator::pointer pointer;
+			typedef typename const_iterator::reference reference;
+			using const_iterator::MyPtr;
+
+		public:
+			iterator() {}
+			iterator(pointer InitPtr_): const_iterator(InitPtr_) {}
+
+			reference operator*() const	{ return *MyPtr; }
+			pointer operator->() const { return MyPtr; }
+
+			iterator& operator++()
+			{
+				++(*static_cast<const_iterator*>(this));
+				return *this;
+			}
+
+			iterator operator++(int)
+			{
+				iterator Before=(*this);
+				++(*this);
+				return Before;
+			}
+
+			iterator& operator--()
+			{
+				--(*static_cast<const_iterator*>(this));
+				return *this;
+			}
+
+			iterator operator--(int)
+			{
+				iterator Before=(*this);
+				--(*this);
+				return Before;
+			}
+		};
+	};
+
+public:
+	// Итераторы и поддержка STL
+//	using const_iterator=Iterators<MListItem>::const_iterator;
+//	using iterator=Iterators<MListItem>::iterator;
+	typedef typename Iterators<MListItem>::const_iterator const_iterator;
+	typedef typename Iterators<MListItem>::iterator iterator;
+
+	iterator begin() noexcept { return iterator(gFirst()); }
+	const_iterator begin() const noexcept { return const_iterator(gFirst()); }
+	const_iterator cbegin() const noexcept { return const_iterator(gFirst()); }
+
+	iterator end() noexcept { return iterator(nullptr); }
+	const_iterator end() const noexcept { return const_iterator(nullptr); }
+	const_iterator cend() const noexcept { return const_iterator(nullptr); }
+
+
 public:
 	// Приводит типы в интерфейсах к желаемому виду (замена шаблонизации MList)
 	template <
@@ -241,6 +360,18 @@ public:
 
 		void Move(list_type* SrcList_) { parent_list::Move(SrcList_); }
 		void Splice(list_type* AtchList_) { parent_list::Splice(AtchList_); }
+
+	public:
+		typedef typename Iterators<base_type>::const_iterator const_iterator;
+		typedef typename Iterators<base_type>::iterator iterator;
+
+		iterator begin() noexcept { return iterator(gFirst()); }
+		const_iterator begin() const noexcept { return const_iterator(gFirst()); }
+		const_iterator cbegin() const noexcept { return const_iterator(gFirst()); }
+
+		iterator end() noexcept { return iterator(nullptr); }
+		const_iterator end() const noexcept { return const_iterator(nullptr); }
+		const_iterator cend() const noexcept { return const_iterator(nullptr); }
 	};
 
 	// То же самое, но добавляет 'Add()' с типом по-умолчанию

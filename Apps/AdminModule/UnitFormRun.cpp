@@ -79,9 +79,10 @@ void __fastcall TFormRun::FormShow(TObject *Sender)
 
     // Заносим в список тарифы, которые можно использовать в это время
 	// или с выбранными компьютерами (при добавлении времени)
-	for ( MTariffsInfoItem* Info=UseTariffs.gFirst();
-		Info; Info=Info->gNext() )
-        ComboBoxTariff->Items->Add(Info->Name.c_str());
+	for ( const auto &Info: UseTariffs )
+	{
+		ComboBoxTariff->Items->Add(Info.Name.c_str());
+	}
 
     // Корректируем интерфейс в соответствии с режимом работы диалога
     if ( RunMode )
@@ -159,18 +160,17 @@ void __fastcall TFormRun::ListViewComputersSelectItem(TObject *Sender,
 		ListViewComputers->Selected->Data);
     int Num=0;
 
-	for ( MTariffsInfoItem* Info=UseTariffs.gFirst();
-		Info; Info=Info->gNext() )
-    {
-        if ( Info->ID==Time->TariffID )
-        {
-            OpenDialogTime=Time->StartTime;
-            SelTariffID=Time->TariffID;
-            ComboBoxTariff->ItemIndex=Num;
-            ComboBoxTariffClick(nullptr);
-            break;
-        }
-        Num++;
+	for ( const auto &Info: UseTariffs )
+	{
+		if ( Info.ID==Time->TariffID )
+		{
+			OpenDialogTime=Time->StartTime;
+			SelTariffID=Time->TariffID;
+			ComboBoxTariff->ItemIndex=Num;
+			ComboBoxTariffClick(nullptr);
+			break;
+		}
+		Num++;
     }
 }
 //---------------------------------------------------------------------------

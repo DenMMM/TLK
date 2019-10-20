@@ -565,13 +565,12 @@ bool MStates::Update(MComputers *Computers_)
 		State=NextState;
 	}
 	// Добавляем состояния для новых компьютеров
-	for ( Computer=Computers_->gFirst();
-		Computer; Computer=Computer->gNext() )
+	for ( const auto &Computer: *Computers_ )
 	{
-		if ( Computer->NotUsed||Search(Computer->Number) ) continue;
+		if ( Computer.NotUsed||Search(Computer.Number) ) continue;
 		result=true;
 		State=Add();
-		State->Associate(Computer->Number);
+		State->Associate(Computer.Number);
 	}
 	// Убираем лишние записи, ассоциированные с одним и тем же компьютером
 	State=gFirst();

@@ -72,17 +72,16 @@ void TFormGames::AddGamesToTree(MGames *Games_, TTreeNode *TreeNode_, TImageList
 
     if ( Games_==nullptr ) return;
 
-	for ( MGamesItem *Game=Games_->gFirst();
-		Game; Game=Game->gNext() )
+	for ( const auto &Game: *Games_ )
     {
-        NewTreeNode=TreeViewGames->Items->AddChild(TreeNode_,Game->Name.c_str());
+        NewTreeNode=TreeViewGames->Items->AddChild(TreeNode_,Game.Name.c_str());
 
         // Извлечем иконку
 		wcscpy(
 			icon_file,
-			wcslen(Game->Icon.c_str())?
-			Game->Icon.c_str():
-			Game->Command.c_str());
+			wcslen(Game.Icon.c_str())?
+			Game.Icon.c_str():
+			Game.Command.c_str());
         pos1=wcschr(icon_file, L'\"');
 		if ( pos1==nullptr ) icon=::ExtractIcon(nullptr, icon_file, 0);
 		else if ( (pos2=wcschr(pos1+1, L'\"'))==nullptr ) icon=nullptr;
@@ -106,9 +105,10 @@ void TFormGames::AddGamesToTree(MGames *Games_, TTreeNode *TreeNode_, TImageList
         }
 
 		// Командная строка для запуска
-		NewTreeNode->Data=const_cast<wchar_t*>(Game->Command.c_str());
+		NewTreeNode->Data=
+			const_cast<wchar_t*>(Game.Command.c_str());     /// безопасно ???
         // Подуровни дерева
-        AddGamesToTree(Game->SubGames,NewTreeNode,ImageList_);
+        AddGamesToTree(Game.SubGames,NewTreeNode,ImageList_);
     }
 }
 //---------------------------------------------------------------------------

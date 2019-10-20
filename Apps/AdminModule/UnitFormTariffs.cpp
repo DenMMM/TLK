@@ -24,27 +24,25 @@ void __fastcall TFormTariffs::FormShow(TObject *Sender)
 	TmpTariffs=*Tariffs;
 
     // Формируем их список
-	for ( MTariffsItem* tariff=TmpTariffs.gFirst();
-		tariff; tariff=tariff->gNext() )
-    {
-        TListItem *item;
-        item=ListViewNames->Items->Add();
-        item->Data=tariff;
+	for ( auto &tariff: TmpTariffs )
+	{
+		TListItem *item;
+		item=ListViewNames->Items->Add();
+        item->Data=&tariff;
         SetListViewNamesLine(item);
     }
 
     // Заполняем список групп программ
     for ( int i=1; i<=8; i++ ) CheckListBoxApps->Items->Add(IntToStr(i));
 	// Формируем список компьютеров
-	for ( MComputersItem* comp=Computers->gFirst();
-		comp; comp=comp->gNext() )
-    {
-        TListItem *item;
-        item=ListViewComputers->Items->Add();
-        item->Data=comp;
-        item->Caption=IntToStr(comp->Number);
-        item->ImageIndex=FormMain->GetCompColorIcon(comp);
-    }
+	for ( auto &comp: *Computers )
+	{
+		TListItem *item;
+		item=ListViewComputers->Items->Add();
+		item->Data=&comp;
+		item->Caption=IntToStr(comp.Number);
+		item->ImageIndex=FormMain->GetCompColorIcon(&comp);
+	}
 
     EditName->MaxLength=MAX_TariffNameLen;
     SetEdit(false);
@@ -99,11 +97,10 @@ void __fastcall TFormTariffs::ListViewNamesSelectItem(TObject *Sender,
     CheckBoxDesktop->Checked=tariff->Programs&mgpDesktop;
     // Проставляем для каких компьютеров используется тариф
     int i=0;
-	for ( MComputersItem* comp=Computers->gFirst();
-		comp; comp=comp->gNext() )
-    {
-        ListViewComputers->Items->Item[i]->Checked=
-            tariff->CheckForComp(comp->Number);
+	for ( const auto &comp: *Computers )
+	{
+		ListViewComputers->Items->Item[i]->Checked=
+            tariff->CheckForComp(comp.Number);
         i++;
     }
 }

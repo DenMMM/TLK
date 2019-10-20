@@ -22,12 +22,11 @@ void __fastcall TFormComputers::FormShow(TObject *Sender)
     TmpComputers=*Computers;
 
     // Формируем их список
-	for ( MComputersItem* comp=TmpComputers.gFirst();
-		comp; comp=comp->gNext() )
-    {
-        TListItem *item;
-        item=ListViewComputers->Items->Add();
-        item->Data=comp;
+	for ( auto &comp: TmpComputers )
+	{
+		TListItem *item;
+		item=ListViewComputers->Items->Add();
+		item->Data=&comp;
         SetListViewComputersLine(item);
     }
     // Сортируем

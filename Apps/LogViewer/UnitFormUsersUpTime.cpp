@@ -37,19 +37,18 @@ bool TFormUsersUpTime::Open(MLogFile *File_, MLogRecordsItem *Begin_, MLogRecord
 
     ProcessUsersUpTime(Begin_,End_,&Users,&Times);
     ListViewUpTimes->Items->Clear();
-	for ( MUserUpTime *Time=Times.gFirst();
-        Time; Time=Time->gNext() )
-    {
-        Item=ListViewUpTimes->Items->Add();
-        Item->ImageIndex=-1;
-		Item->Data=static_cast<void*>(Time);
+	for ( auto &Time: Times )
+	{
+		Item=ListViewUpTimes->Items->Add();
+		Item->ImageIndex=-1;
+		Item->Data=&Time;
 
-		user=Users.SrchUUID(Time->User);
+		user=Users.SrchUUID(Time.User);
 		if ( user==nullptr ) Item->SubItems->Add(L"");
 		else Item->SubItems->Add(user->Name.c_str());
 
-        // Время
-		if ( Int64ToSystemTime(&Time->BeginTime,&ss_time_b) )
+		// Время
+		if ( Int64ToSystemTime(&Time.BeginTime,&ss_time_b) )
 		{
 			swprintf(
 				line, sizeof(line),
@@ -60,45 +59,45 @@ bool TFormUsersUpTime::Open(MLogFile *File_, MLogRecordsItem *Begin_, MLogRecord
 		{
 			*line=L'\0';
 		}
-        Item->SubItems->Add(line);
-        //
+		Item->SubItems->Add(line);
+		//
 		if (
-			Time->EndTime!=0 &&
-			Int64ToSystemTime(&Time->EndTime,&ss_time_e) )
-        {
-            pos=0;
-            if ( ss_time_b.wYear!=ss_time_e.wYear ) goto year;
-            if ( ss_time_b.wMonth!=ss_time_e.wMonth ) goto month;
-            if ( ss_time_b.wDay!=ss_time_e.wDay )
-            {
-                goto day;
+			Time.EndTime!=0 &&
+			Int64ToSystemTime(&Time.EndTime,&ss_time_e) )
+		{
+			pos=0;
+			if ( ss_time_b.wYear!=ss_time_e.wYear ) goto year;
+			if ( ss_time_b.wMonth!=ss_time_e.wMonth ) goto month;
+			if ( ss_time_b.wDay!=ss_time_e.wDay )
+			{
+				goto day;
 year:           pos+=swprintf(line+pos, L"%4d.",ss_time_e.wYear);
 month:          pos+=swprintf(line+pos, L"%02d.",ss_time_e.wMonth);
 day:            pos+=swprintf(line+pos, L"%02d - ",ss_time_e.wDay);
-            }
-            swprintf(line+pos, L"%02d:%02d:%02d",
-                ss_time_e.wHour,ss_time_e.wMinute,ss_time_e.wSecond);
-            Item->SubItems->Add(line);
-            //
-            time=Time->EndTime-Time->BeginTime;
-            hours=time/(60*60*10000000i64);
-            min=(time%(60*60*10000000i64))/(60*10000000i64);
-            pos=0; if ( hours>0 ) pos=swprintf(line+pos, L"%.2i час. ",hours);
-            swprintf(line+pos, L"%.2i мин.",min);
-            Item->SubItems->Add(line);
-        } else
-        {
+			}
+			swprintf(line+pos, L"%02d:%02d:%02d",
+				ss_time_e.wHour,ss_time_e.wMinute,ss_time_e.wSecond);
+			Item->SubItems->Add(line);
+			//
+			time=Time.EndTime-Time.BeginTime;
+			hours=time/(60*60*10000000i64);
+			min=(time%(60*60*10000000i64))/(60*10000000i64);
+			pos=0; if ( hours>0 ) pos=swprintf(line+pos, L"%.2i час. ",hours);
+			swprintf(line+pos, L"%.2i мин.",min);
+			Item->SubItems->Add(line);
+		} else
+		{
 			Item->SubItems->Add(L"");
-            Item->SubItems->Add(L"");
-        }
-        //
-        Item->SubItems->Add(FloatToStrF(Time->Gains,ffCurrency,8,2));
-    }
+			Item->SubItems->Add(L"");
+		}
+		//
+		Item->SubItems->Add(FloatToStrF(Time.Gains,ffCurrency,8,2));
+	}
 
 	Caption=UnicodeString(L"Смены  -  ")+File_->Name.c_str();
-    FormMain->WindowOpen(File_,this);
+	FormMain->WindowOpen(File_,this);
 	FormMain->WindowCaption(this, "Смены");         /// Unicode support ???
-    return true;
+	return true;
 }
 //---------------------------------------------------------------------------
 void __fastcall TFormUsersUpTime::ListViewUpTimesSelectItem(

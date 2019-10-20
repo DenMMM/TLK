@@ -30,8 +30,8 @@ const void *MPassword::GetData(const void *Data_, const void *Limit_)
 
 void MPassword::Set(const std::wstring &Pass_)
 {
-    // Генерируем "соль"
-    for ( size_t i=0; i<sizeof(Salt); i++ ) Salt[i]=random(256);
+	// Генерируем "соль"
+	for ( auto &Sym: Salt ) Sym=random(256);
 
     // Вычисляем хэш введенного пароля и соли
 	hmac_sha(

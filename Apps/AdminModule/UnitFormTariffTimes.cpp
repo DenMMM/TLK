@@ -50,12 +50,11 @@ void __fastcall TFormTariffTimes::FormShow(TObject *Sender)
         ComboBoxSizeM->Items->Add(Line);
     }
     // Заносим время и цены в список
-	for ( MTariffTimesItem* time=TmpTimes.gFirst();
-        time; time=time->gNext() )
-    {
-        TListItem *item;
-        item=ListViewTimes->Items->Add();
-        item->Data=time;
+	for ( auto &time: TmpTimes )
+	{
+		TListItem *item;
+		item=ListViewTimes->Items->Add();
+        item->Data=&time;
         SetListViewTimesLine(item);
     }
 

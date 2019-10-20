@@ -45,17 +45,16 @@ void __fastcall TFormFine::FormShow(TObject *Sender)
     }
 
     // Заполняем список времен штрафов
-	for ( MFinesItem* fine=Fines->gFirst();
-		fine; fine=fine->gNext() )
+	for ( const auto &fine: *Fines )
 	{
-		UnicodeString line=fine->Descr.c_str();
+		UnicodeString line=fine.Descr.c_str();
 		line+=L"  (";
 
-		if ( fine->Time==(24*60) ) line+=L"все время)";
+		if ( fine.Time==(24*60) ) line+=L"все время)";
 		else
 		{
 			wchar_t time[8+1];
-			swprintf(time, sizeof(time), L"%.2i мин.)", fine->Time);
+			swprintf(time, sizeof(time), L"%.2i мин.)", fine.Time);
 			line+=time;
 		}
 

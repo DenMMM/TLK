@@ -15,18 +15,18 @@ public:
 	__int64 EndTime;
 	double Gains;
 
-	void Copy(const MListItem *SrcItem_) {};
-
-	MUserUpTime();
-	virtual ~MUserUpTime();
+	MUserUpTime():
+		User(0),
+		BeginTime(0),
+		EndTime(0),
+		Gains(0.)
+	{
+	}
 };
 //---------------------------------------------------------------------------
 class MUsersUpTime:
 	public MList::Simple <MList, MUsersUpTime, MUserUpTime>
 {
-public:
-    MUsersUpTime() {}
-	~MUsersUpTime() {}
 };
 //---------------------------------------------------------------------------
 #endif

@@ -27,18 +27,17 @@ void __fastcall TFormClient::FormShow(TObject *Sender)
     PageControl->ActivePage=TabSheetGames;
     PageControlChange(nullptr);
 
-    // Заполняем список компьютеров
-	for ( MComputersItem* Computer=Computers->gFirst();
-		Computer; Computer=Computer->gNext() )
-    {
-        TListItem *Item;
+	// Заполняем список компьютеров
+	for ( auto &Computer: *Computers )
+	{
+		TListItem *Item;
 
-        Item=ListViewComputers->Items->Add();
-        Item->Data=static_cast<void*>(Computer);
+		Item=ListViewComputers->Items->Add();
+		Item->Data=&Computer;
 		// Цвет группы и номер компьютера
-        Item->SubItems->Add(IntToStr(Computer->Number));
-        Item->SubItems->Add(L"");
-        Item->SubItemImages[0]=FormMain->GetCompColorIcon(Computer);
+		Item->SubItems->Add(IntToStr(Computer.Number));
+		Item->SubItems->Add(L"");
+		Item->SubItemImages[0]=FormMain->GetCompColorIcon(&Computer);
     }
     //
     EditName->MaxLength=MAX_PrgNameLength;
@@ -390,21 +389,20 @@ void TFormClient::SetTreeViewGamesLine(TTreeNode *Node_)
 //---------------------------------------------------------------------------
 void TFormClient::AddGamesToTree(TTreeNode *Node_, MGames *Games_)
 {
-	for ( MGamesItem *sGame=Games_->gFirst();
-		sGame; sGame=sGame->gNext() )
+	for ( const auto &sGame: *Games_ )
 	{
 		// Добавляем строку в дерево
 		TTreeNode *Node=TreeViewGames->Items->AddChild(Node_, L"");
 		MGamesItem *dGame=new MGamesItem;
-        Node->Data=static_cast<void*>(dGame);
-        // Зададим имя программы/узла
-        dGame->Name=sGame->Name;
-        // Зададим остальные параметры или добавим элементы нижних уровней
-        if ( sGame->SubGames==nullptr )
-        {
-            dGame->Command=sGame->Command;
-            dGame->Icon=sGame->Icon;
-        } else AddGamesToTree(Node,sGame->SubGames);
+		Node->Data=static_cast<void*>(dGame);
+		// Зададим имя программы/узла
+		dGame->Name=sGame.Name;
+		// Зададим остальные параметры или добавим элементы нижних уровней
+		if ( sGame.SubGames==nullptr )
+		{
+			dGame->Command=sGame.Command;
+			dGame->Icon=sGame.Icon;
+        } else AddGamesToTree(Node,sGame.SubGames);
         //
         SetTreeViewGamesLine(Node);
     }

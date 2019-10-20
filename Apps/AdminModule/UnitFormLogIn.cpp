@@ -17,14 +17,13 @@ unsigned TFormLogIn::Execute(MUsers *Users_)
     ID=0;
 
     // Заносим в список активные логины
-	for ( MUsersItem* User=Users_->gFirst();
-        User; User=User->gNext() )
-    {
-        if ( !User->Active ) continue;
+	for ( auto &User: *Users_ )
+	{
+		if ( !User.Active ) continue;
 		ComboBoxLogin->Items->AddObject(
-			User->Login.c_str(),
-			reinterpret_cast<TObject*>(User));
-    }
+			User.Login.c_str(),
+			reinterpret_cast<TObject*>(&User));
+	}
 
     return ShowModal()==mrOk? ID: 0;
 }

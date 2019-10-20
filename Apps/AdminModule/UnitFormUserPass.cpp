@@ -33,13 +33,12 @@ bool TFormUserPass::Execute(MUsers *Users_, int Left_, int Top_, bool LeftTop_)
     Users=true;
     ComboBoxLogin->Enabled=true;
     SetEdit(false,false);
-	for ( MUsersItem* User=Users_->gFirst();
-		User; User=User->gNext() )
-    {
-        if ( !User->Active ) continue;
+	for ( auto &User: *Users_ )
+	{
+		if ( !User.Active ) continue;
 		ComboBoxLogin->Items->AddObject(
-			User->Login.c_str(),
-			reinterpret_cast<TObject*>(User));
+			User.Login.c_str(),
+			reinterpret_cast<TObject*>(&User));
     }
     ActiveControl=ComboBoxLogin;
     SetCoord(Left_,Top_,LeftTop_);

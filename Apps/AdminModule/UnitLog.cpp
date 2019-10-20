@@ -31,10 +31,9 @@ void MLog::AddStatesData(MStates *States_)
 	// Создаем массив состояний компьютеров и заполняем его
 	record->States.Alloc(States_->gCount());
 	size_t i=0;
-	for ( MStatesItem* state=States_->gFirst();
-		state; state=state->gNext(), i++ )
+	for ( const auto &state: *States_ )
 	{
-		record->States[i]=*state;
+		record->States[i]=state;
 	}
 }
 //---------------------------------------------------------------------------
@@ -47,10 +46,9 @@ void MLog::AddTariffsData(MTariffs *Tariffs_)
 	// Создаем массив тарифов и заполняем его
 	record->Items.Alloc(Tariffs_->gCount());
 	size_t i=0;
-	for ( MTariffsItem* tariff=Tariffs_->gFirst();
-		tariff; tariff=tariff->gNext(), i++ )
+	for ( const auto &tariff: *Tariffs_ )
 	{
-		record->Items[i]=*tariff;
+		record->Items[i]=tariff;
 	}
 }
 //---------------------------------------------------------------------------
@@ -63,10 +61,9 @@ void MLog::AddFinesData(MFines *Fines_)
 	// Создаем массив штрафов и заполняем его
 	record->Items.Alloc(Fines_->gCount());
 	size_t i=0;
-	for ( MFinesItem* fine=Fines_->gFirst();
-		fine; fine=fine->gNext(), i++ )
+	for ( const auto &fine: *Fines_ )
 	{
-		record->Items[i]=*fine;
+		record->Items[i]=fine;
     }
 }
 //---------------------------------------------------------------------------
@@ -79,11 +76,10 @@ void MLog::AddUsersData(MUsers *Users_)
 	// Создаем массив пользователей и заполняем его
 	record->Items.Alloc(Users_->ActiveCount());
 	size_t i=0;
-	for ( MUsersItem* user=Users_->gFirst();
-		user; user=user->gNext(), i++ )
+	for ( const auto &user: *Users_ )
 	{
-		if ( !user->Active ) continue;
-		record->Items[i]=*user;
+		if ( !user.Active ) continue;
+		record->Items[i]=user;
     }
 }
 //---------------------------------------------------------------------------

@@ -238,11 +238,10 @@ void MSyncStates::Associate(MStates *States_, MComputers *Computers_)
 	u_long IP;
 
 	LastSyncState=gFirst();
-	for ( MStatesItem* State=States_->gFirst();
-		State; State=State->gNext() )
+	for ( auto &State: *States_ )
 	{
 		// Ищем компьютер, с которым ассоциировано состояние
-		Computer=Computers_->Search(State->Associated());
+		Computer=Computers_->Search(State.Associated());
 		if ( Computer==nullptr ) continue;
 		// Конвертируем IP-адрес из текста в u_long
 //		IP=::inet_addr(Computer->Address.c_str());
@@ -256,16 +255,16 @@ void MSyncStates::Associate(MStates *States_, MComputers *Computers_)
 			) != STATUS_SUCCESS ) continue;
 		IP=IP_inaddr.S_un.S_addr;
 		// Ищем по этому адресу состояние синхронизации
-        // (чтобы сохранить возможно известный MAC-адрес)
-        // или добавляем новое
+		// (чтобы сохранить возможно известный MAC-адрес)
+		// или добавляем новое
 		SyncState=Search(IP);
 		if ( SyncState==nullptr )
 			SyncState=Add();
-        // Ассоциируем состояние синхронизации с состоянием компьютера и его адресом
-        SyncState->Associate(State,IP);
-        // Если состояние не последнее в списке, переносим его к началу
-        if ( LastSyncState!=nullptr ) Swap(LastSyncState,SyncState);
-        LastSyncState=SyncState->gNext();
+		// Ассоциируем состояние синхронизации с состоянием компьютера и его адресом
+		SyncState->Associate(&State,IP);
+		// Если состояние не последнее в списке, переносим его к началу
+		if ( LastSyncState!=nullptr ) Swap(LastSyncState,SyncState);
+		LastSyncState=SyncState->gNext();
     }
     // Удаляем оставшиеся не нужными объекты
     while(LastSyncState)
@@ -429,29 +428,28 @@ void MSync::ThreadExecute()
 
         // Выполняем цикл отправки/приема данных
         NeedSave=false; Process=0;
-		for ( MSyncStatesItem *SyncState=SyncStates.gFirst(), *RecvState=SyncState;
-            SyncState; SyncState=SyncState->gNext() )
-        {
-            // Опустошаем очередь принятых пакетов
-            while(PollData(Socket))
+		for ( auto &SyncState: SyncStates )
+		{
+			// Опустошаем очередь принятых пакетов
+			while(PollData(Socket))
             {
                 // Читаем данные из сокета
                 memset(&FromAddr,0,sizeof(FromAddr)); AddrSize=sizeof(FromAddr);
                 RecvSize=::recvfrom(Socket,(char*)&Packet,sizeof(Packet),
                     0,(sockaddr*)&FromAddr,&AddrSize);
                 if ( (RecvSize==0)||(RecvSize==SOCKET_ERROR) ) continue;
-                // Ищем состояние синхронизации по IP-адресу, с которого пришел пакет
-                RecvState=SyncStates.Search(FromAddr.sin_addr.s_addr);
+				// Ищем состояние синхронизации по IP-адресу, с которого пришел пакет
+				auto RecvState=SyncStates.Search(FromAddr.sin_addr.s_addr);
                 // Передаем его для обработки и отправки ответа сразу же
                 if ( RecvState!=nullptr )
                 {
                     NeedSave|=RecvState->Recv((char*)&Packet,RecvSize,NetCode,NetMAC);
-                    NeedSave|=SyncState->Send(Socket,SocketBC,NetCode,NetMAC);
-                }
+					NeedSave|=SyncState.Send(Socket,SocketBC,NetCode,NetMAC);
+				}
             }
             // Вяло отправляем данные "по-расписанию"
-            NeedSave|=SyncState->Send(Socket,SocketBC,NetCode,NetMAC);
-            Process+=SyncState->gPCount();
+			NeedSave|=SyncState.Send(Socket,SocketBC,NetCode,NetMAC);
+            Process+=SyncState.gPCount();
         }
         // Проверяем нужно ли сохранить обновленные состояния компьютеров
         if ( NeedSave )

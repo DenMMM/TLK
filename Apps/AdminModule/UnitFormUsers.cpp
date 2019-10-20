@@ -21,12 +21,11 @@ void __fastcall TFormUsers::FormShow(TObject *Sender)
 	TmpUsers=*Users;
 
     // Формируем их список
-	for ( MUsersItem* user=TmpUsers.gFirst();
-        user; user=user->gNext() )
-    {
-        TListItem *item;
-        item=ListViewUsers->Items->Add();
-        item->Data=user;
+	for ( auto &user: TmpUsers )
+	{
+		TListItem *item;
+		item=ListViewUsers->Items->Add();
+        item->Data=&user;
         SetListViewUsersLine(item);
     }
     // Сортируем для красоты

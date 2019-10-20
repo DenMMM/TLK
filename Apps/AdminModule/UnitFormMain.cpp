@@ -892,30 +892,29 @@ void TFormMain::UpdateListViewComputers(bool Full_)
     if ( Full_ ) ListViewComputers->Items->Clear();
 
     // Убираем из списка компьютеры, не подходящие под фильтр. Добавляем новые.
-	for ( MStatesItem* State=States->gFirst();
-        State; State=State->gNext() )
-    {
-        State->StateInfo(&Info);
-        Item=ListViewComputers->FindData(0,State,true,false);
-        // Проверяем подходит ли компьютер под выставленный фильтр
-        if ( CheckFilter(&Info,Options->FilterFreeTime) )
-        {
-            // Если компьютер не занесен в список, то добавляем его
-            if ( !Item )
-            {
-                Item=ListViewComputers->Items->Add();
-                Item->Data=State;
-                Info.Changes=mdcAll;
-            }
-        } else
-        {
-            if ( Item ) Item->Delete();
-            continue;
-        }
-        // Обновляем информацию в таблице
-        if ( Full_ ) Info.Changes=mdcAll;
-        SetListViewComputersLine(Item,&Info);
-    }
+	for ( auto &State: *States )
+	{
+		State.StateInfo(&Info);
+		Item=ListViewComputers->FindData(0,&State,true,false);
+		// Проверяем подходит ли компьютер под выставленный фильтр
+		if ( CheckFilter(&Info,Options->FilterFreeTime) )
+		{
+			// Если компьютер не занесен в список, то добавляем его
+			if ( !Item )
+			{
+				Item=ListViewComputers->Items->Add();
+				Item->Data=&State;
+				Info.Changes=mdcAll;
+			}
+		} else
+		{
+			if ( Item ) Item->Delete();
+			continue;
+		}
+		// Обновляем информацию в таблице
+		if ( Full_ ) Info.Changes=mdcAll;
+		SetListViewComputersLine(Item,&Info);
+	}
 }
 //---------------------------------------------------------------------------
 void TFormMain::SetShell()
@@ -986,7 +985,7 @@ void __fastcall TFormMain::NLogResetClick(TObject *Sender)
         ResMessageBox(Handle,1,6,MB_APPLMODAL|MB_OK|MB_ICONERROR,Log->gLastErr());
 }
 //---------------------------------------------------------------------------
-int TFormMain::GetCompColorIcon(MComputersItem *Comp_)
+int TFormMain::GetCompColorIcon(const MComputersItem *Comp_)
 {
     int icon;
 

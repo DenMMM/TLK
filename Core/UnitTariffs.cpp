@@ -118,15 +118,15 @@ void MTariffsItem::CostPacket(MTariffRunTimesItem *RunTime_) const
     //
     WorkTime=0; Cost=0.;
 
-	for ( MTariffTimesItem* tt=Times.gFirst(); tt; tt=tt->gNext() )
+	for ( const auto &tt: Times)
 	{
-		if ( (tt->Type!=mttPacket)||
-			(tt->BeginTime!=RunTime_->BeginTime)||
-			(tt->EndTime!=RunTime_->EndTime) ) continue;
-		WorkTime=tt->MaxWorkTime(StartTime);
+		if ( (tt.Type!=mttPacket)||
+			(tt.BeginTime!=RunTime_->BeginTime)||
+			(tt.EndTime!=RunTime_->EndTime) ) continue;
+		WorkTime=tt.MaxWorkTime(StartTime);
 		// Корректируем время работы в соответствии с заданным ограничением
 		if ( WorkTime>RunTime_->MaxTime ) WorkTime=RunTime_->MaxTime;
-		if ( WorkTime!=0 ) Cost=tt->Cost;
+		if ( WorkTime!=0 ) Cost=tt.Cost;
 		break;
 	}
 
@@ -257,9 +257,10 @@ bool MTariffsItem::CheckForTime(__int64 &Time_) const
     // Выделяем количество минут с начала суток
     Time=ExtractHoursMin(Time_);
 
-	for ( MTariffTimesItem* tt=Times.gFirst();
-		tt; tt=tt->gNext() )
-		if ( tt->MaxWorkTime(Time)>0 ) return true;
+	for ( const auto &tt: Times )
+	{
+		if ( tt.MaxWorkTime(Time)>0 ) return true;
+	}
 
 	return false;
 }
@@ -287,35 +288,35 @@ void MTariffsItem::GetRunTimes(__int64 &Time_, MTariffRunTimes *RunTimes_) const
 	RunTimes_->Clear();
 
 	// Проверяем возможность запуска на почасовой основе
-	for ( MTariffTimesItem* tt=Times.gFirst(); tt; tt=tt->gNext() )
+	for ( const auto &tt: Times )
 	{
-		if ( (tt->Type!=mttHours)||
-			(tt->MaxWorkTime(SysTime)==0) ) continue;
+		if ( (tt.Type!=mttHours)||
+			(tt.MaxWorkTime(SysTime)==0) ) continue;
 
 		MTariffRunTimesItem* rt=RunTimes_->Add();
 		rt->Type=mttHours;
 		break;
 	}
 	// Ищем подходящие "плавающие" пакеты
-	for ( MTariffTimesItem* tt=Times.gFirst(); tt; tt=tt->gNext() )
+	for ( const auto &tt: Times )
 	{
-		if ( (tt->Type!=mttFlyPacket)||
-			(tt->MaxWorkTime(SysTime)==0) ) continue;
+		if ( (tt.Type!=mttFlyPacket)||
+			(tt.MaxWorkTime(SysTime)==0) ) continue;
 
 		MTariffRunTimesItem* rt=RunTimes_->Add();
 		rt->Type=mttFlyPacket;
-		rt->SizeTime=tt->SizeTime;
+		rt->SizeTime=tt.SizeTime;
 	}
 	// Ищем подходящие пакеты
-	for ( MTariffTimesItem* tt=Times.gFirst(); tt; tt=tt->gNext() )
+	for ( const auto &tt: Times )
 	{
-		if ( (tt->Type!=mttPacket)||
-			(tt->MaxWorkTime(SysTime)==0) ) continue;
+		if ( (tt.Type!=mttPacket)||
+			(tt.MaxWorkTime(SysTime)==0) ) continue;
 
 		MTariffRunTimesItem* rt=RunTimes_->Add();
 		rt->Type=mttPacket;
-		rt->BeginTime=tt->BeginTime;
-		rt->EndTime=tt->EndTime;
+		rt->BeginTime=tt.BeginTime;
+		rt->EndTime=tt.EndTime;
 	}
 }
 //---------------------------------------------------------------------------

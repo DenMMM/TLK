@@ -164,7 +164,7 @@ public:		// User declarations
     void UpdateListViewComputers(bool Full_);
         __fastcall TFormMain(TComponent* Owner);
     void SetShell();
-    int GetCompColorIcon(MComputersItem *Comp_);
+    int GetCompColorIcon(const MComputersItem *Comp_);
 };
 //---------------------------------------------------------------------------
 extern PACKAGE TFormMain *FormMain;

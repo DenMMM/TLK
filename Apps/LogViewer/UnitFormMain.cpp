@@ -44,7 +44,10 @@ void __fastcall TFormMain::NOpenClick(TObject *Sender)
     NWindows->Add(Menu);
     // Обрабатываем его записи
     FormEvents=new TFormEvents(this);
-	FormEvents->Open(File,File->Records.gFirst(),File->Records.gLast());
+	FormEvents->Open(
+		File,
+		File->Records.gFirst(),
+		File->Records.gLast());
 
 	FormUsersUpTime=new TFormUsersUpTime(this);
 	FormUsersUpTime->Open(

@@ -19,13 +19,12 @@ void __fastcall TFormFines::FormShow(TObject *Sender)
 	TmpFines=*Fines;
 
     // Формируем их список
-	for ( MFinesItem *fine=TmpFines.gFirst();
-		fine; fine=fine->gNext() )
+	for ( auto &fine: TmpFines )
 	{
-        TListItem *item;
-        item=ListViewFines->Items->Add();
-        item->Data=fine;
-        SetListViewFinesLine(item);
+		TListItem *item;
+		item=ListViewFines->Items->Add();
+		item->Data=&fine;
+		SetListViewFinesLine(item);
     }
     // Сортируем для красоты
     ListViewFines->AlphaSort();

@@ -408,46 +408,44 @@ void TFormEvents::SetListViewComputersLine(TListItem *Item_, MStatesInfo *Info_,
 void TFormEvents::UpdateListViewComputers(bool Full_, MStates *States_, MTariffs *Tariffs_)
 {
     TListItem *Item;
-    MStatesItem *State;
-    MStatesInfo Info;
-    int i;
+	MStatesInfo Info;
+	int i;
 
-    // Убираем записи, не сопоставленные с состоянием компьютера
-    i=ListViewComputers->Items->Count-1;
-    while(i>=0)
-    {
-        Item=ListViewComputers->Items->Item[i];
-        if ( !States_->Search((int)Item->Data) ) Item->Delete();
-        i--;
-    }
+	// Убираем записи, не сопоставленные с состоянием компьютера
+	i=ListViewComputers->Items->Count-1;
+	while(i>=0)
+	{
+		Item=ListViewComputers->Items->Item[i];
+		if ( !States_->Search((int)Item->Data) ) Item->Delete();
+		i--;
+	}
 
-    // Убираем из списка компьютеры, не подходящие под фильтр, и добавляем новые
-	for ( State=States_->gFirst();
-		State; State=State->gNext() )
-    {
-        //
-        State->StateInfo(&Info);
-        //
+	// Убираем из списка компьютеры, не подходящие под фильтр, и добавляем новые
+	for ( auto &State: *States_ )
+	{
+		//
+		State.StateInfo(&Info);
+		//
 		Item=ListViewComputers->FindData(
 			0, reinterpret_cast<void*>(Info.Number),    /// "грязный" cast
 			true, false);
-        // Проверяем подходит ли компьютер под выставленный фильтр
-        if ( !CheckFilter(&Info,2) )
+		// Проверяем подходит ли компьютер под выставленный фильтр
+		if ( !CheckFilter(&Info,2) )
 		{
 			if ( Item ) Item->Delete();
 			continue;
 		}
-        // Если компьютер не занесен в список, то добавляем его
-        if ( !Item )
-        {
-            Item=ListViewComputers->Items->Add();
-            Item->Data=reinterpret_cast<void*>(Info.Number);
-            Info.Changes=mdcAll;
-        }
-        // Обновляем информацию в таблице
+		// Если компьютер не занесен в список, то добавляем его
+		if ( !Item )
+		{
+			Item=ListViewComputers->Items->Add();
+			Item->Data=reinterpret_cast<void*>(Info.Number);
+			Info.Changes=mdcAll;
+		}
+		// Обновляем информацию в таблице
 		if ( Full_ ) Info.Changes=mdcAll;
 		SetListViewComputersLine(Item, &Info, Tariffs_);
-    }
+	}
 }
 //---------------------------------------------------------------------------
 bool TFormEvents::Open(MLogFile *File_,
