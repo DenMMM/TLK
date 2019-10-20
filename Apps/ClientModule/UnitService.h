@@ -66,9 +66,9 @@ private:
     void OnLogOff(DWORD dwSessionId_);
 
 public:
-    bool OnStart();
-    void OnExecute();
-    void OnStop();
+	bool OnStart();
+	void OnExecute();
+	void OnStop();
 
 	MSvcProcess():
 		hUserToken(INVALID_HANDLE_VALUE),
@@ -81,9 +81,7 @@ public:
 	{
 	}
 
-	~MSvcProcess()
-	{
-	}
+	~MSvcProcess() = default;
 };
 //---------------------------------------------------------------------------
 #endif

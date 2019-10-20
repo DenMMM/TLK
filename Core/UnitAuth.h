@@ -19,21 +19,22 @@ class MAuth: public MSLList
 {
 private:
     // Функции механизма сохранения/загрузки данных
-	unsigned GetDataSize() const override ;
-	void *SetData(void *Data_) const override ;
-	const void *GetData(const void *Data_, const void *Limit_) override ;
+	virtual unsigned GetDataSize() const override;
+	virtual void *SetData(void *Data_) const override;
+	virtual const void *GetData(const void *Data_, const void *Limit_) override;
 
     unsigned char Key[MAC_KeySize];
 
 public:
-    void Copy(MList *SrcList_) {}
-    void SetKey(const void *Key_, size_t Size_);
+	void SetKey(const void *Key_, size_t Size_);
     void GetKey(void *Buff_, size_t Size_) const;
     void Calc(const void *Data_, size_t DataSize_, void *MAC_, size_t MACSize_) const;
     bool Check(const void *Data_, size_t DataSize_, const void *MAC_, size_t MACSize_) const;
 
-    MAuth();
-    ~MAuth();
+	MAuth()
+	{
+		memset(Key,0x00,sizeof(Key));
+	}
 };
 //---------------------------------------------------------------------------
 #endif

@@ -5,16 +5,6 @@
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
 //---------------------------------------------------------------------------
-MPassword::MPassword()
-{
-    memset(Salt,0,sizeof(Salt));
-    memset(Hash,0,sizeof(Hash));
-}
-
-MPassword::~MPassword()
-{
-}
-
 unsigned MPassword::GetDataSize() const
 {
     return
@@ -36,12 +26,6 @@ const void *MPassword::GetData(const void *Data_, const void *Limit_)
 		(Data_=MemGetBin(Data_,Salt,sizeof(Salt),Limit_)) &&
 		(Data_=MemGetBin(Data_,Hash,sizeof(Hash),Limit_))
 		? Data_: nullptr;
-}
-
-void MPassword::Copy(const MPassword *SrcPass_)
-{
-    memcpy(Salt,SrcPass_->Salt,sizeof(Salt));
-    memcpy(Hash,SrcPass_->Hash,sizeof(Hash));
 }
 
 void MPassword::Set(const std::wstring &Pass_)

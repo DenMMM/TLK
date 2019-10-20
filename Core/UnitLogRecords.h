@@ -21,10 +21,6 @@ public:
 		SystemTime(0)
 	{
 	}
-
-	virtual ~MLogRecordsItem()
-	{
-	}
 };
 
 class MLogRecords:
@@ -69,15 +65,9 @@ protected:
 	{
 	private:
 		// Функции механизма сохранения/загрузки данных
-		unsigned GetDataSize() const override;
-		void *SetData(void *Data_) const override;
-		const void *GetData(const void *Data_, const void *Limit_) override;
-
-	public:
-		void Copy(const MListItem *SrcItem_) override;
-
-		EventBase() {}
-		virtual ~EventBase() {}
+		virtual unsigned GetDataSize() const override;
+		virtual void *SetData(void *Data_) const override;
+		virtual const void *GetData(const void *Data_, const void *Limit_) override;
 	};
 
 
@@ -85,23 +75,17 @@ protected:
 	{
 	private:
 		// Функции механизма сохранения/загрузки данных
-		unsigned GetDataSize() const override;
-		void *SetData(void *Data_) const override;
-		const void *GetData(const void *Data_, const void *Limit_) override;
+		virtual unsigned GetDataSize() const override;
+		virtual void *SetData(void *Data_) const override;
+		virtual const void *GetData(const void *Data_, const void *Limit_) override;
 
 	public:
 		char Number;            // Номер компьютера
 		bool Apply;				// Режим был установлен/снят
 
-		void Copy(const MListItem *SrcItem_) override;
-
 		ModeBase():
 			Number(0),
 			Apply(false)
-		{
-		}
-
-		virtual ~ModeBase()
 		{
 		}
 	};
@@ -118,14 +102,8 @@ protected:
 	public:
 		char Number;            // Номер компьютера
 
-		void Copy(const MListItem *SrcItem_) override;
-
 		CmdBase():
 			Number(0)
-		{
-		}
-
-		virtual ~CmdBase()
 		{
 		}
 	};
@@ -143,15 +121,9 @@ protected:
 		unsigned State;         // Состояние оболочки
 		unsigned User;          // Текущий пользователь (чья смена открыта)
 
-		void Copy(const MListItem *SrcItem_) override;
-
 		DataShellBase():
 			State(0),
 			User(0)
-		{
-		}
-
-		virtual ~DataShellBase()
 		{
 		}
 	};
@@ -161,17 +133,12 @@ protected:
 	{
 	private:
 		// Функции механизма сохранения/загрузки данных
-		unsigned GetDataSize() const override;
-		void *SetData(void *Data_) const override;
-		const void *GetData(const void *Data_, const void *Limit_) override;
+		virtual unsigned GetDataSize() const override;
+		virtual void *SetData(void *Data_) const override;
+		virtual const void *GetData(const void *Data_, const void *Limit_) override;
 
 	public:
 		Marray <MStatesItem::LogData> States;    	// Массив состояний компьютеров
-
-		void Copy(const MListItem *SrcItem_) override;
-
-		DataStatesBase() {}
-		virtual ~DataStatesBase() {}
 	};
 
 
@@ -179,17 +146,12 @@ protected:
 	{
 	private:
 		// Функции механизма сохранения/загрузки данных
-		unsigned GetDataSize() const override;
-		void *SetData(void *Data_) const override;
-		const void *GetData(const void *Data_, const void *Limit_) override;
+		virtual unsigned GetDataSize() const override;
+		virtual void *SetData(void *Data_) const override;
+		virtual const void *GetData(const void *Data_, const void *Limit_) override;
 
 	public:
 		Marray <MTariffsItem::LogData> Items;  	// Массив описаний тарифов
-
-		void Copy(const MListItem *SrcItem_) override;
-
-		DataTariffsBase() {}
-		virtual ~DataTariffsBase() {}
 	};
 
 
@@ -197,17 +159,12 @@ protected:
 	{
 	private:
 		// Функции механизма сохранения/загрузки данных
-		unsigned GetDataSize() const override;
-		void *SetData(void *Data_) const override;
-		const void *GetData(const void *Data_, const void *Limit_) override;
+		virtual unsigned GetDataSize() const override;
+		virtual void *SetData(void *Data_) const override;
+		virtual const void *GetData(const void *Data_, const void *Limit_) override;
 
 	public:
 		Marray <MFinesItem::LogData> Items;	// Массив описаний штрафов
-
-		void Copy(const MListItem *SrcItem_) override;
-
-		DataFinesBase() {}
-		virtual ~DataFinesBase() {}
 	};
 
 
@@ -215,17 +172,12 @@ protected:
 	{
 	private:
 		// Функции механизма сохранения/загрузки данных
-		unsigned GetDataSize() const override;
-		void *SetData(void *Data_) const override;
-		const void *GetData(const void *Data_, const void *Limit_) override;
+		virtual unsigned GetDataSize() const override;
+		virtual void *SetData(void *Data_) const override;
+		virtual const void *GetData(const void *Data_, const void *Limit_) override;
 
 	public:
 		Marray <MUsersItem::LogData> Items;	// Массив данных о пользователях
-
-		void Copy(const MListItem *SrcItem_) override;
-
-		DataUsersBase() {}
-		virtual ~DataUsersBase() {}
 	};
 
 
@@ -233,21 +185,15 @@ protected:
 	{
 	private:
 		// Функции механизма сохранения/загрузки данных
-		unsigned GetDataSize() const override ;
-		void *SetData(void *Data_) const override ;
-		const void *GetData(const void *Data_, const void *Limit_) override ;
+		virtual unsigned GetDataSize() const override ;
+		virtual void *SetData(void *Data_) const override ;
+		virtual const void *GetData(const void *Data_, const void *Limit_) override ;
 
 	public:
 		bool Opened;			// Настройки открыты/закрыты
 
-		void Copy(const MListItem *SrcItem_) override ;
-
 		AppConfigBase():
 			Opened(false)
-		{
-		}
-
-		virtual ~AppConfigBase()
 		{
 		}
 	};
@@ -257,21 +203,15 @@ protected:
 	{
 	private:
 		// Функции механизма сохранения/загрузки данных
-		unsigned GetDataSize() const override;
-		void *SetData(void *Data_) const override;
-		const void *GetData(const void *Data_, const void *Limit_) override;
+		virtual unsigned GetDataSize() const override;
+		virtual void *SetData(void *Data_) const override;
+		virtual const void *GetData(const void *Data_, const void *Limit_) override;
 
 	public:
 		unsigned User;          // ID-номер пользователя
 
-		void Copy(const MListItem *SrcItem_) override;
-
 		AppLogInBase():
 			User(0)
-		{
-		}
-
-		virtual ~AppLogInBase()
 		{
 		}
 	};
@@ -281,9 +221,9 @@ protected:
 	{
 	private:
 		// Функции механизма сохранения/загрузки данных
-		unsigned GetDataSize() const override;
-		void *SetData(void *Data_) const override;
-		const void *GetData(const void *Data_, const void *Limit_) override;
+		virtual unsigned GetDataSize() const override;
+		virtual void *SetData(void *Data_) const override;
+		virtual const void *GetData(const void *Data_, const void *Limit_) override;
 
 	public:
 		char Number;                            // Номер компьютера
@@ -295,8 +235,6 @@ protected:
 		short SizeTime;                         // =
 		short WorkTime;                         // Поставленное время работы
 		double Cost;                            // Стоимость работы на компьютере в течении 'WorkTime'
-
-		void Copy(const MListItem *SrcItem_) override;
 
 		CompRunBase():
 			Number(0),
@@ -310,10 +248,6 @@ protected:
 			Cost(0.)
 		{
 		}
-
-		virtual ~CompRunBase()
-		{
-		}
 	};
 
 
@@ -321,25 +255,19 @@ protected:
 	{
 	private:
 		// Функции механизма сохранения/загрузки данных
-		unsigned GetDataSize() const override;
-		void *SetData(void *Data_) const override;
-		const void *GetData(const void *Data_, const void *Limit_) override;
+		virtual unsigned GetDataSize() const override;
+		virtual void *SetData(void *Data_) const override;
+		virtual const void *GetData(const void *Data_, const void *Limit_) override;
 
 	public:
 		char Number;                        // Номер компьютера
 		unsigned Fine;                      // ID-номер штрафа
 		short Time;                         // Время штрафа
 
-		void Copy(const MListItem *SrcItem_) override;
-
 		CompFineBase():
 			Number(0),
 			Fine(0),
 			Time(0)
-		{
-		}
-
-		virtual ~CompFineBase()
 		{
 		}
 	};
@@ -349,23 +277,17 @@ protected:
 	{
 	private:
 		// Функции механизма сохранения/загрузки данных
-		unsigned GetDataSize() const override;
-		void *SetData(void *Data_) const override;
-		const void *GetData(const void *Data_, const void *Limit_) override;
+		virtual unsigned GetDataSize() const override;
+		virtual void *SetData(void *Data_) const override;
+		virtual const void *GetData(const void *Data_, const void *Limit_) override;
 
 	public:
 		char From;                          // С какого компьютера было взято время
 		char To;                            // На какой компьютер время было поставлено
 
-		void Copy(const MListItem *SrcItem_) override;
-
 		CompExchangeBase():
 			From(0),
 			To(0)
-		{
-		}
-
-		virtual ~CompExchangeBase()
 		{
 		}
 	};
@@ -415,36 +337,32 @@ public:
 	{
 		TypesIDPrepare(mlrTABLE_SIZE);
 
-		TypesIDSet(LogBegin::TypeID,  		reinterpret_cast<MListItem*(*)()>(&LogBegin::New));
-		TypesIDSet(LogEnd::TypeID,			reinterpret_cast<MListItem*(*)()>(&LogEnd::New));
-		TypesIDSet(AppStart::TypeID,  		reinterpret_cast<MListItem*(*)()>(&AppStart::New));
-		TypesIDSet(AppStop::TypeID,			reinterpret_cast<MListItem*(*)()>(&AppStop::New));
-		TypesIDSet(AppConfig::TypeID,		reinterpret_cast<MListItem*(*)()>(&AppConfig::New));
-		TypesIDSet(AppLogIn::TypeID,  		reinterpret_cast<MListItem*(*)()>(&AppLogIn::New));
-		TypesIDSet(AppLogOut::TypeID,		reinterpret_cast<MListItem*(*)()>(&AppLogOut::New));
-		TypesIDSet(ChComputers::TypeID,		reinterpret_cast<MListItem*(*)()>(&ChComputers::New));
-		TypesIDSet(ChTariffs::TypeID,		reinterpret_cast<MListItem*(*)()>(&ChTariffs::New));
-		TypesIDSet(ChFines::TypeID,			reinterpret_cast<MListItem*(*)()>(&ChFines::New));
-		TypesIDSet(ChUsers::TypeID,			reinterpret_cast<MListItem*(*)()>(&ChUsers::New));
-		TypesIDSet(ChOptions::TypeID,		reinterpret_cast<MListItem*(*)()>(&ChOptions::New));
-		TypesIDSet(DataShell::TypeID,		reinterpret_cast<MListItem*(*)()>(&DataShell::New));
-		TypesIDSet(DataStates::TypeID,		reinterpret_cast<MListItem*(*)()>(&DataStates::New));
-		TypesIDSet(DataTariffs::TypeID,		reinterpret_cast<MListItem*(*)()>(&DataTariffs::New));
-		TypesIDSet(DataFines::TypeID,		reinterpret_cast<MListItem*(*)()>(&DataFines::New));
-		TypesIDSet(DataUsers::TypeID,		reinterpret_cast<MListItem*(*)()>(&DataUsers::New));
-		TypesIDSet(CompRun::TypeID,			reinterpret_cast<MListItem*(*)()>(&CompRun::New));
-		TypesIDSet(CompFine::TypeID,  		reinterpret_cast<MListItem*(*)()>(&CompFine::New));
-		TypesIDSet(CompExchange::TypeID,	reinterpret_cast<MListItem*(*)()>(&CompExchange::New));
-		TypesIDSet(ModeLock::TypeID,		reinterpret_cast<MListItem*(*)()>(&ModeLock::New));
-		TypesIDSet(ModePause::TypeID,		reinterpret_cast<MListItem*(*)()>(&ModePause::New));
-		TypesIDSet(ModeOpen::TypeID,		reinterpret_cast<MListItem*(*)()>(&ModeOpen::New));
-		TypesIDSet(CmdPowerOn::TypeID,		reinterpret_cast<MListItem*(*)()>(&CmdPowerOn::New));
-		TypesIDSet(CmdReboot::TypeID,		reinterpret_cast<MListItem*(*)()>(&CmdReboot::New));
-		TypesIDSet(CmdShutdown::TypeID,		reinterpret_cast<MListItem*(*)()>(&CmdShutdown::New));
-	}
-
-	~MLogRecords()
-	{
+		TypesIDSet <LogBegin> ();
+		TypesIDSet <LogEnd> ();
+		TypesIDSet <AppStart> ();
+		TypesIDSet <AppStop> ();
+		TypesIDSet <AppConfig> ();
+		TypesIDSet <AppLogIn> ();
+		TypesIDSet <AppLogOut> ();
+		TypesIDSet <ChComputers> ();
+		TypesIDSet <ChTariffs> ();
+		TypesIDSet <ChFines> ();
+		TypesIDSet <ChUsers> ();
+		TypesIDSet <ChOptions> ();
+		TypesIDSet <DataShell> ();
+		TypesIDSet <DataStates> ();
+		TypesIDSet <DataTariffs> ();
+		TypesIDSet <DataFines> ();
+		TypesIDSet <DataUsers> ();
+		TypesIDSet <CompRun> ();
+		TypesIDSet <CompFine> ();
+		TypesIDSet <CompExchange> ();
+		TypesIDSet <ModeLock> ();
+		TypesIDSet <ModePause> ();
+		TypesIDSet <ModeOpen> ();
+		TypesIDSet <CmdPowerOn> ();
+		TypesIDSet <CmdReboot> ();
+		TypesIDSet <CmdShutdown> ();
 	}
 };
 //---------------------------------------------------------------------------

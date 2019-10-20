@@ -6,12 +6,6 @@
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
 //---------------------------------------------------------------------------
-void MLogRecords::EventBase::Copy(const MListItem *SrcItem_)
-{
-	auto record=&dynamic_cast<const MLogRecords::EventBase&>(*SrcItem_);
-	SystemTime=record->SystemTime;
-}
-
 unsigned MLogRecords::EventBase::GetDataSize() const
 {
 	return
@@ -31,14 +25,6 @@ const void *MLogRecords::EventBase::GetData(const void *Data_, const void *Limit
 		? Data_: nullptr;
 }
 //---------------------------------------------------------------------------
-void MLogRecords::AppConfigBase::Copy(const MListItem *SrcItem_)
-{
-	auto record=&dynamic_cast<const MLogRecords::AppConfigBase&>(*SrcItem_);
-
-	SystemTime=record->SystemTime;
-	Opened=record->Opened;
-}
-
 unsigned MLogRecords::AppConfigBase::GetDataSize() const
 {
 	return
@@ -62,27 +48,19 @@ const void *MLogRecords::AppConfigBase::GetData(const void *Data_, const void *L
 		? Data_: nullptr;
 }
 //---------------------------------------------------------------------------
-void MLogRecords::AppLogInBase::Copy(const MListItem *SrcItem_)
-{
-	auto record=&dynamic_cast<const MLogRecords::AppLogInBase&>(*SrcItem_);
-
-    SystemTime=record->SystemTime;
-    User=record->User;
-}
-
 unsigned MLogRecords::AppLogInBase::GetDataSize() const
 {
-    return
-        sizeof(SystemTime)+
-        sizeof(User);
+	return
+		sizeof(SystemTime)+
+		sizeof(User);
 }
 
 void *MLogRecords::AppLogInBase::SetData(void *Data_) const
 {
-    Data_=MemSet(Data_,SystemTime);
-    Data_=MemSet(Data_,User);
+	Data_=MemSet(Data_,SystemTime);
+	Data_=MemSet(Data_,User);
 
-    return Data_;
+	return Data_;
 }
 
 const void *MLogRecords::AppLogInBase::GetData(const void *Data_, const void *Limit_)
@@ -93,26 +71,10 @@ const void *MLogRecords::AppLogInBase::GetData(const void *Data_, const void *Li
 		? Data_: nullptr;
 }
 //---------------------------------------------------------------------------
-void MLogRecords::CompRunBase::Copy(const MListItem *SrcItem_)
-{
-	auto record=&dynamic_cast<const MLogRecords::CompRunBase&>(*SrcItem_);
-
-    SystemTime=record->SystemTime;
-    Number=record->Number;
-    Tariff=record->Tariff;
-    StartTime=record->StartTime;
-    Type=record->Type;
-    BeginTime=record->BeginTime;
-    EndTime=record->EndTime;
-    SizeTime=record->SizeTime;
-    WorkTime=record->WorkTime;
-    Cost=record->Cost;
-}
-
 unsigned MLogRecords::CompRunBase::GetDataSize() const
 {
-    return
-        sizeof(SystemTime)+
+	return
+		sizeof(SystemTime)+
         sizeof(Number)+
         sizeof(Tariff)+
         sizeof(StartTime)+
@@ -156,16 +118,6 @@ const void *MLogRecords::CompRunBase::GetData(const void *Data_, const void *Lim
 		? Data_: nullptr;
 }
 //---------------------------------------------------------------------------
-void MLogRecords::CompFineBase::Copy(const MListItem *SrcItem_)
-{
-	auto record=&dynamic_cast<const MLogRecords::CompFineBase&>(*SrcItem_);
-
-    SystemTime=record->SystemTime;
-    Number=record->Number;
-    Fine=record->Fine;
-    Time=record->Time;
-}
-
 unsigned MLogRecords::CompFineBase::GetDataSize() const
 {
     return
@@ -195,15 +147,6 @@ const void *MLogRecords::CompFineBase::GetData(const void *Data_, const void *Li
 		? Data_: nullptr;
 }
 //---------------------------------------------------------------------------
-void MLogRecords::CompExchangeBase::Copy(const MListItem *SrcItem_)
-{
-	auto record=&dynamic_cast<const MLogRecords::CompExchangeBase&>(*SrcItem_);
-
-    SystemTime=record->SystemTime;
-    From=record->From;
-    To=record->To;
-}
-
 unsigned MLogRecords::CompExchangeBase::GetDataSize() const
 {
     return
@@ -230,15 +173,6 @@ const void *MLogRecords::CompExchangeBase::GetData(const void *Data_, const void
 		? Data_: nullptr;
 }
 //---------------------------------------------------------------------------
-void MLogRecords::ModeBase::Copy(const MListItem *SrcItem_)
-{
-	auto record=&dynamic_cast<const MLogRecords::ModeBase&>(*SrcItem_);
-
-    SystemTime=record->SystemTime;
-    Number=record->Number;
-    Apply=record->Apply;
-}
-
 unsigned MLogRecords::ModeBase::GetDataSize() const
 {
     return
@@ -265,14 +199,6 @@ const void *MLogRecords::ModeBase::GetData(const void *Data_, const void *Limit_
 		? Data_: nullptr;
 }
 //---------------------------------------------------------------------------
-void MLogRecords::CmdBase::Copy(const MListItem *SrcItem_)
-{
-	auto record=&dynamic_cast<const MLogRecords::CmdBase&>(*SrcItem_);
-
-	SystemTime=record->SystemTime;
-	Number=record->Number;
-}
-
 unsigned MLogRecords::CmdBase::GetDataSize() const
 {
 	return
@@ -295,15 +221,6 @@ const void *MLogRecords::CmdBase::GetData(const void *Data_, const void *Limit_)
 		? Data_: nullptr;
 }
 //---------------------------------------------------------------------------
-void MLogRecords::DataShellBase::Copy(const MListItem *SrcItem_)
-{
-	auto record=&dynamic_cast<const MLogRecords::DataShellBase&>(*SrcItem_);
-
-    SystemTime=record->SystemTime;
-    State=record->State;
-    User=record->User;
-}
-
 unsigned MLogRecords::DataShellBase::GetDataSize() const
 {
     return
@@ -329,14 +246,6 @@ const void *MLogRecords::DataShellBase::GetData(const void *Data_, const void *L
 		? Data_: nullptr;
 }
 //---------------------------------------------------------------------------
-void MLogRecords::DataStatesBase::Copy(const MListItem *SrcItem_)
-{
-	auto data=&dynamic_cast<const MLogRecords::DataStatesBase&>(*SrcItem_);
-
-	SystemTime=data->SystemTime;
-    States=data->States;
-}
-
 unsigned MLogRecords::DataStatesBase::GetDataSize() const
 {
     unsigned Size;
@@ -414,14 +323,6 @@ const void *MLogRecords::DataStatesBase::GetData(const void *Data_, const void *
 	return Data_;
 }
 //---------------------------------------------------------------------------
-void MLogRecords::DataTariffsBase::Copy(const MListItem *SrcItem_)
-{
-	auto data=&dynamic_cast<const MLogRecords::DataTariffsBase&>(*SrcItem_);
-
-	SystemTime=data->SystemTime;
-    Items=data->Items;
-}
-
 unsigned MLogRecords::DataTariffsBase::GetDataSize() const
 {
     unsigned Size;
@@ -482,14 +383,6 @@ const void *MLogRecords::DataTariffsBase::GetData(const void *Data_, const void 
     return Data_;
 }
 //---------------------------------------------------------------------------
-void MLogRecords::DataFinesBase::Copy(const MListItem *SrcItem_)
-{
-	auto data=&dynamic_cast<const MLogRecords::DataFinesBase&>(*SrcItem_);
-
-	SystemTime=data->SystemTime;
-	Items=data->Items;
-}
-
 unsigned MLogRecords::DataFinesBase::GetDataSize() const
 {
     unsigned Size;
@@ -550,14 +443,6 @@ const void *MLogRecords::DataFinesBase::GetData(const void *Data_, const void *L
 	return Data_;
 }
 //---------------------------------------------------------------------------
-void MLogRecords::DataUsersBase::Copy(const MListItem *SrcItem_)
-{
-	auto data=&dynamic_cast<const MLogRecords::DataUsersBase&>(*SrcItem_);
-
-	SystemTime=data->SystemTime;
-    Items=data->Items;
-}
-
 unsigned MLogRecords::DataUsersBase::GetDataSize() const
 {
     unsigned Size;

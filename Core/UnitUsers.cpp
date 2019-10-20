@@ -7,19 +7,6 @@
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
 //---------------------------------------------------------------------------
-void MUsersItem::Copy(const MListItem *SrcItem_)
-{
-	const MUsersItem *usr=
-		dynamic_cast<const MUsersItem*>(SrcItem_);
-
-	Login=usr->Login;
-    Name=usr->Name;
-    Active=usr->Active;
-	Pass.Copy(&usr->Pass);
-
-    MIDListItem::Copy(SrcItem_);
-}
-
 unsigned MUsersItem::GetDataSize() const
 {
 	return

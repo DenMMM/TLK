@@ -21,34 +21,34 @@ class MGamesItem:
 {
 public:
 	// Функции механизма сохранения/загрузки данных
-	unsigned GetDataSize() const override;
-	void *SetData(void *Data_) const override;
-	const void *GetData(const void *Data_, const void *Limit_) override;
+	virtual unsigned GetDataSize() const override;
+	virtual void *SetData(void *Data_) const override;
+	virtual const void *GetData(const void *Data_, const void *Limit_) override;
 
 public:
 	std::wstring Name;
 	std::wstring Command;
 	std::wstring Icon;
-	MGames *SubGames;
+	MGames *SubGames;               /// Теперь не работает !!! Заменить smart-pointer
 
 	MGames *AddSubGames();
 	void DelSubGames();
-	void Copy(const MListItem *SrcItem_) override;
 
 	MGamesItem():
 		SubGames(nullptr)
 	{
 	}
 
-	virtual ~MGamesItem();
+///	MGamesItem(const MGamesItem&) = default;
+///	MGamesItem(MGamesItem&&) noexcept = default;
+	MGamesItem& operator=(const MGamesItem&) = default;
+	MGamesItem& operator=(MGamesItem&&) noexcept = default;
+	~MGamesItem();
 };
 //---------------------------------------------------------------------------
 class MGames:
 	public MSLList::Simple <MSLList, MGames, MGamesItem>
 {
-public:
-	MGames() {}
-	~MGames() {}
 };
 //---------------------------------------------------------------------------
 #endif

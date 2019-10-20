@@ -6,17 +6,6 @@
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
 //---------------------------------------------------------------------------
-bool MOptions::Copy(MOptions *Opt_)
-{
-    LogPeriod=Opt_->LogPeriod;
-    FilterFreeTime=Opt_->FilterFreeTime;
-    CostDialogTime=Opt_->CostDialogTime;
-    CostPrecision=Opt_->CostPrecision;
-    UsersRights=Opt_->UsersRights;
-    Pass.Copy(&Opt_->Pass);
-    return true;
-}
-
 unsigned MOptions::GetDataSize() const
 {
     return

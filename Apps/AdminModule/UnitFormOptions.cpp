@@ -16,7 +16,7 @@ __fastcall TFormOptions::TFormOptions(TComponent* Owner)
 void __fastcall TFormOptions::FormShow(TObject *Sender)
 {
     // Êîïèğóåì íàñòğîéêè â áóôåğ
-	TmpOptions.Copy(Options.get());
+	TmpOptions=*Options;
 
     {
         int Index;
@@ -104,7 +104,7 @@ void __fastcall TFormOptions::CheckBoxRightPauseExit(TObject *Sender)
 void __fastcall TFormOptions::ButtonSaveClick(TObject *Sender)
 {
     // Êîïèğóåì èç áóôåğà íàçàä
-    Options->Copy(&TmpOptions);
+	*Options=TmpOptions;
     // Ñîõğàíÿåì â ôàéëå
     if ( !Options->Save() )
     {

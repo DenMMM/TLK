@@ -92,7 +92,12 @@ public:
     void Timer(__int64 SystemTime_);
     DWORD gLastErr() const { return Records.gLastErr(); }
 
-    MLog();
+	MLog();
+	MLog(const MLog&) = delete;
+	MLog(MLog&&) noexcept = delete;
+	MLog& operator=(const MLog&) = delete;
+	MLog& operator=(MLog&&) noexcept = delete;
+	~MLog() = default;
 };
 //---------------------------------------------------------------------------
 #endif

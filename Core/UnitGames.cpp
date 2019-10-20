@@ -6,25 +6,6 @@
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
 //---------------------------------------------------------------------------
-void MGamesItem::Copy(const MListItem *SrcItem_)
-{
-	auto game=dynamic_cast<const MGamesItem*>(SrcItem_);
-
-	Name=game->Name;
-	Command=game->Command;
-	Icon=game->Icon;
-	if ( (game->SubGames!=nullptr)&&
-		(game->SubGames->gCount()>0) )
-	{
-		if ( SubGames==nullptr ) SubGames=new MGames;
-		SubGames->Copy(game->SubGames);
-	} else
-	{
-		delete SubGames;
-		SubGames=nullptr;
-	}
-}
-
 unsigned MGamesItem::GetDataSize() const
 {
     const MGames vGames;            // Заглушка для SubGames=nullptr

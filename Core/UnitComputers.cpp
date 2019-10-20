@@ -6,16 +6,6 @@
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
 //---------------------------------------------------------------------------
-void MComputersItem::Copy(const MListItem *SrcItem_)
-{
-	auto comp=dynamic_cast<const MComputersItem*>(SrcItem_);
-
-    Number=comp->Number;
-    Color=comp->Color;
-    Address=comp->Address;
-    NotUsed=comp->NotUsed;
-}
-
 unsigned MComputersItem::GetDataSize() const
 {
     return

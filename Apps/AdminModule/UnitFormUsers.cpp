@@ -18,7 +18,7 @@ __fastcall TFormUsers::TFormUsers(TComponent* Owner)
 void __fastcall TFormUsers::FormShow(TObject *Sender)
 {
     // Копируем пользователей в буфер
-    TmpUsers.Copy(Users.get());
+	TmpUsers=*Users;
 
     // Формируем их список
 	for ( MUsersItem* user=TmpUsers.gFirst();

@@ -21,7 +21,7 @@ __fastcall TFormTariffs::TFormTariffs(TComponent* Owner)
 void __fastcall TFormTariffs::FormShow(TObject *Sender)
 {
     // Копируем список тарифов в буфер
-    TmpTariffs.Copy(Tariffs.get());
+	TmpTariffs=*Tariffs;
 
     // Формируем их список
 	for ( MTariffsItem* tariff=TmpTariffs.gFirst();
@@ -343,4 +343,5 @@ void TFormTariffs::SetListViewNamesLine(TListItem *Item_)
     Item_->Caption=reinterpret_cast<MTariffsItem*>(Item_->Data)->Name.c_str();
 }
 //---------------------------------------------------------------------------
+
 

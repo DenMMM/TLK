@@ -60,7 +60,7 @@ void __fastcall TFormRun::FormShow(TObject *Sender)
 
 		// Копируем параметры запуска/добавления
 		MTariffRunTimesItem* time=CompTimes.Add();
-		time->Copy(&tmptime);
+		*time=tmptime;
         // Добавляем строку в список компьютеров и связываем с параметрами
         TListItem *newitem=ListViewComputers->Items->Add();
         newitem->Data=time;

@@ -18,18 +18,6 @@ void MClOptions::SetShellUser(const std::wstring &Name_)
 	ShellUser=Name_;
 }
 
-bool MClOptions::Copy(MClOptions *ClOptions_)
-{
-	ShellUser=ClOptions_->ShellUser;
-    ToEndTime=ClOptions_->ToEndTime;
-    MessageTime=ClOptions_->MessageTime;
-    MsgEndTime=ClOptions_->MsgEndTime;
-    RebootWait=ClOptions_->RebootWait;
-    AutoLockTime=ClOptions_->AutoLockTime;
-    Flags=ClOptions_->Flags;
-    return true;
-}
-
 unsigned MClOptions::GetDataSize() const
 {
     return

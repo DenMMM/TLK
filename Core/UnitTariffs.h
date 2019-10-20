@@ -59,8 +59,6 @@ public:
 	short MaxTime;          // Ограничение на максимальное время работы (задается перед расчетом)
 	double Cost;            // Стоимость работы на компьютере в течение 'WorkTime'
 
-	virtual void Copy(const MListItem *SrcItem_) override;
-
 	MTariffRunTimesItem():
 		TariffID(0),
 		Number(0),
@@ -70,12 +68,8 @@ public:
 		EndTime(0),
 		SizeTime(0),
 		WorkTime(0),
-			MaxTime(0),
-			Cost(0.)
-	{
-	}
-
-	virtual ~MTariffRunTimesItem()
+		MaxTime(0),
+		Cost(0.)
 	{
 	}
 };
@@ -83,9 +77,6 @@ public:
 class MTariffRunTimes:
 	public MList::Simple <MList, MTariffRunTimes, MTariffRunTimesItem>
 {
-public:
-	MTariffRunTimes() {}
-	~MTariffRunTimes() {}
 };
 //---------------------------------------------------------------------------
 class MTariffTimesItem:
@@ -107,7 +98,6 @@ public:
 	double Cost;            // Стоимость
 
 	int MaxWorkTime(int Time_) const;
-	virtual void Copy(const MListItem *SrcItem_) override;
 
 	MTariffTimesItem():
 		Type(mttHours),
@@ -117,18 +107,11 @@ public:
 		Cost(0.)
 	{
 	}
-
-	virtual ~MTariffTimesItem()
-	{
-	}
 };
 
 class MTariffTimes:
 	public MSLList::Simple <MSLList, MTariffTimes, MTariffTimesItem>
 {
-public:
-	MTariffTimes() {}
-	~MTariffTimes() {}
 };
 //---------------------------------------------------------------------------
 class MTariffsInfoItem:
@@ -140,21 +123,17 @@ public:
 	unsigned ID;
 	std::wstring Name;
 
-	virtual void Copy(const MListItem *SrcItem_) override;
-
-	MTariffsInfoItem(): ID(0) {}
-	virtual ~MTariffsInfoItem() {}
+	MTariffsInfoItem():
+		ID(0)
+	{
+	}
 };
 
 class MTariffsInfo:
 	public MList::Simple <MList, MTariffsInfo, MTariffsInfoItem>
 {
 public:
-	bool Copy(MListItem *SrcItem_);
 	MTariffsInfoItem *Search(unsigned ID_) const;
-
-	MTariffsInfo() {}
-	~MTariffsInfo() {}
 };
 //---------------------------------------------------------------------------
 class MTariffsItem:
@@ -164,9 +143,9 @@ class MTariffsItem:
 {
 private:
 	// Функции механизма сохранения/загрузки данных
-	unsigned GetDataSize() const override;
-	void *SetData(void *Data_) const override;
-	const void *GetData(const void *Data_, const void *Limit_) override;
+	virtual unsigned GetDataSize() const override;
+	virtual void *SetData(void *Data_) const override;
+	virtual const void *GetData(const void *Data_, const void *Limit_) override;
 
 	void CostPacket(MTariffRunTimesItem *RunTime_) const;
 	void CostFlyPacket(MTariffRunTimesItem *RunTime_) const;
@@ -190,8 +169,6 @@ public:
 	void Cost(MTariffRunTimesItem *RunTime_, double Prec_) const;
 	void GetInfo(MTariffsInfoItem *Info_) const;
 	void GetRunTimes(__int64 &Time_, MTariffRunTimes *RunTimes_) const;
-
-	void Copy(const MListItem *SrcItem_) override;
 
 	// Поддержка логов
 	struct LogData
@@ -220,10 +197,6 @@ public:
 		CompsCnt(0)
 	{
 	}
-
-	virtual ~MTariffsItem()
-	{
-	}
 };
 
 class MTariffs:
@@ -231,9 +204,6 @@ class MTariffs:
 {
 public:
 	void GetForTime(__int64 &Time_, MTariffsInfo *TariffsInfo_) const;
-
-	MTariffs() {}
-	~MTariffs() {}
 };
 //---------------------------------------------------------------------------
 #endif

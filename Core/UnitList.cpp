@@ -151,7 +151,7 @@ void MList::Del(MListItem *DelItem_)
 	delete DelItem_;
 }
 
-void MList::Clear()
+void MList::Clear() noexcept
 {
 	MListItem *del=First, *next;
 
@@ -166,21 +166,21 @@ void MList::Clear()
 	Count=0;
 }
 
-void MList::Copy(const MList *SrcList_)
+MList& MList::operator=(const MList& SrcList_)
 {
-    if ( SrcList_==this ) return;
+	if ( (&SrcList_)==this ) return *this;
 
 	// Очищаем список-приемник
 	Clear();
 	try
 	{
 		// Копируем в него элементы исходного
-		MListItem *SrcItem=SrcList_->First, *NewItem;
+		MListItem *SrcItem=SrcList_.First, *NewItem;
 		while(SrcItem)
 		{
 //			Add(SrcItem->Clone());              /// нужна доработка 'operator='
 			NewItem=Add(SrcItem->gTypeID());
-			NewItem->Copy(SrcItem);
+			*NewItem=*SrcItem;
 			SrcItem=SrcItem->Next;
 		}
 	} catch(...)
@@ -190,9 +190,11 @@ void MList::Copy(const MList *SrcList_)
 		// И передадим исключение выше
 		throw;
 	}
+
+	return *this;
 }
 
-void MList::Move(MList *SrcList_)
+void MList::Move(MList *SrcList_) noexcept
 {
     if ( SrcList_==this ) return;
 

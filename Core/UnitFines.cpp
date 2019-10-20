@@ -8,16 +8,6 @@
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
 //---------------------------------------------------------------------------
-void MFinesItem::Copy(const MListItem *SrcItem_)
-{
-	auto fine=dynamic_cast<const MFinesItem*>(SrcItem_);
-
-	Descr=fine->Descr;
-	Time=fine->Time;
-
-	MIDListItem::Copy(SrcItem_);
-}
-
 unsigned MFinesItem::GetDataSize() const
 {
 	return

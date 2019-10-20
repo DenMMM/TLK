@@ -531,7 +531,7 @@ bool MStates::Save()
     return MSLList::Save(true,true);
 }
 //---------------------------------------------------------------------------
-MStatesItem *MStates::Search(int Number_)
+MStatesItem *MStates::Search(int Number_) const
 {
 	MStatesItem *State=gFirst();
 

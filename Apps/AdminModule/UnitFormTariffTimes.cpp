@@ -20,7 +20,7 @@ bool TFormTariffTimes::Execute(MTariffTimes &Times_,
 	Caption=L"Время для тарифа \'"+Name_+L"\'";
 
     // Копируем пакеты в буфер
-    TmpTimes.Copy(&Times_);
+	TmpTimes=Times_;
     // Открываем окно
     if ( ShowModal()!=mrOk ) return false;
     // Замещаем пакетами из буфера текущие

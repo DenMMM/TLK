@@ -23,27 +23,21 @@ public:
 	MListItem* gNext() const { return Next; }
 
 	// Возвращает [двоичный] ID, ассоциированный с типом элемента
-	virtual unsigned char gTypeID() const = 0;
-	// Оператор 'delete' для производного от MListItem класса
-//	virtual MListItem* Destroy() const = 0;
-	// В производном классе реализует 'operator='
-	virtual void Copy(const MListItem* SrcItem_) = 0;
-	// Создает копию объекта без лишних 'dynamic_cast' (оптимизация)
-//	virtual MListItem* Clone() const = 0;
+	virtual unsigned char gTypeID() const noexcept = 0;
+	// Объявим копирование через базовый тип
+	// и защитим указатели от изменения
+	virtual MListItem& operator=(const MListItem&) { return *this; }
+	virtual MListItem& operator=(MListItem&&) noexcept { return *this; }
 
-	MListItem():
-		Prev(nullptr),
-		Next(nullptr)
-	{
-	}
-
-	virtual ~MListItem()
-	{
-	}
+	// Занулим указатели нового объекта
+	MListItem(): Prev(nullptr), Next(nullptr) {}
+	MListItem(MListItem&): MListItem() {}
+	MListItem(MListItem&&): MListItem() {}
+	virtual ~MListItem() = default;
 
 
 public:
-	// Прокси-класс. чтобы реже использовать 'dynamic_cast'
+	// Приводит типы в интерфейсах к желаемому виду (замена шаблонизации MListItem)
 	template <
 		typename parent_item,	// Класс элемента, который будем расширять
 		typename base_type>     // Базовый класс элемента списка (например, MListItem)
@@ -58,12 +52,9 @@ public:
 			return static_cast<base_type*>(parent_item::gPrev()); }
 		base_type* gNext() const {
 			return static_cast<base_type*>(parent_item::gNext()); }
-
-		Proxy() {}
-		virtual ~Proxy() {}
 	};
 
-	// Расширение базовых интерфейсов, зависящее от типа элемента списка
+	// Завершает формироание элемента типизированного списка
 	template <
 		typename parent_item,	// Класс элемента, который будем расширять
 		typename item_type,     // Создаваемый класс (фактический тип элемента)
@@ -82,36 +73,33 @@ public:
 		{
 			return new item_type;
 		}
-/*
-		virtual void Destroy() const override final
+
+		virtual MListItem& operator=(const MListItem& Src_) override //final
 		{
-			delete static_cast<item_type*>(this);	/// Заменен виртуальным деструктором
+			item_type& Left=static_cast<item_type&>(*this);
+			const item_type& Right=dynamic_cast<const item_type&>(Src_);
+			Left=Right;
+			return *this;
 		}
 
-		virtual MListItem* Clone() const override final
+		virtual MListItem& operator=(MListItem&& Src_) noexcept override //final
 		{
-			item_type* new_obj=item_type::New();
-			*new_obj = *(static_cast<item_type*>(this));
-
-			return static_cast<MListItem*>(new_obj);
+			item_type& Left=static_cast<item_type&>(*this);
+			item_type& Right=dynamic_cast<item_type&>(Src_);
+			Left=std::move(Right);
+			return *this;
 		}
-*/
-		Typed() {}
-		virtual ~Typed() {}
 	};
 
-	// Формирует элемент простого (однотипного) списка
+	// Завершает формирование элемента простого списка
 	template <
 		typename parent_item,
 		typename item_type>
 	class Simple: public Typed <parent_item, item_type, 0>
 	{
 	protected:
+		using Typed <parent_item, item_type, 0> ::TypeID;
 		using parent_item::gTypeID;
-
-	public:
-		Simple() {}
-		virtual ~Simple() {}
 	};
 };
 //---------------------------------------------------------------------------
@@ -132,8 +120,11 @@ protected:
 		NewForType.resize(Size_, nullptr);
 	}
 
-	void TypesIDSet(size_t ID_, MListItem*(*Ptr_)())
+	template <typename new_item_type>
+	void TypesIDSet()
 	{
+		const size_t ID_=new_item_type::TypeID;
+
 #ifdef _DEBUG
 		// Проверим, что функция для этого ID_ еще не задана
 		if ( NewForType.at(ID_)!=nullptr )
@@ -142,8 +133,12 @@ protected:
 				"Повторное использование одного и того же TypeID."
 				);
 #endif
-		NewForType[ID_]=Ptr_;
+		NewForType[ID_]=
+			reinterpret_cast<MListItem*(*)()>(&new_item_type::New);
 	}
+
+	// Присоединяет к списку уэе созданный 'item::New()' элемент
+	MListItem *Add(MListItem *NewItem_);
 
 public:
 	// Доступ к атрибутам списка
@@ -155,17 +150,21 @@ public:
 	bool isTyped() const { return NewForTypeDef==nullptr; }
 
 	// Операции над отдельными элементами _одного_ списка
-	MListItem *Add(MListItem *NewItem_);
+	template <typename new_item_type>
+	MListItem *Add()
+	{
+		return Add(new_item_type::New());
+	}
+
 	MListItem *Add(unsigned char TypeID_);
 	MListItem *GetItem(size_t Index_) const;
 	void Swap(MListItem *Item1_, MListItem *Item2_);
 	void Del(MListItem *DelItem_);
 
 	// Операции над списком целиком (не трогая атрибуты наследника MList)
-	void Clear();                       // Удалить все элементы списка
-	void Copy(const MList *SrcList_);   // Создать копию элементов исходного списка
-	void Move(MList *SrcList_);         // Заместить элементы списка исходными      /// заменить на swap ?
-	void Splice(MList *AtchList_);      // Присоединить элементы исходного списка
+	void Clear() noexcept;                  // Удалить все элементы списка
+	void Move(MList *SrcList_) noexcept;    // Заместить элементы списка исходными
+	void Splice(MList *AtchList_);			// Присоединить элементы исходного списка
 
 	MList():
 		First(nullptr),
@@ -175,6 +174,34 @@ public:
 	{
 	}
 
+	MList& operator=(const MList& SrcList_);
+
+	MList(const MList& SrcList_):
+		First(nullptr),
+		Last(nullptr),
+		Count(0),
+		NewForType(SrcList_.NewForType),
+		NewForTypeDef(SrcList_.NewForTypeDef)
+	{
+		*this=SrcList_;
+	}
+
+	MList& operator=(MList&& SrcList_) noexcept
+	{
+		Move(&SrcList_);
+		return *this;
+	}
+
+	MList(MList&& SrcList_) noexcept:
+		First(nullptr),
+		Last(nullptr),
+		Count(0),
+		NewForType(std::move(SrcList_.NewForType)),
+		NewForTypeDef(std::move(SrcList_.NewForTypeDef))
+	{
+		Move(&SrcList_);
+	}
+
 	~MList()
 	{
 		Clear();
@@ -182,21 +209,27 @@ public:
 
 
 public:
-	// Прокси-класс, чтобы не использовать лишний раз 'dynamic_cast'
+	// Приводит типы в интерфейсах к желаемому виду (замена шаблонизации MList)
 	template <
 		typename parent_list,	// Список, которй будем проксировать
 		typename list_type,     // Создаваемый класс списка
 		typename base_type>		// Базовый класс элемента списка
 	class Typed: public parent_list
 	{
+	protected:
+		base_type* Add(base_type* NewItem_) {
+			return static_cast<base_type*>(parent_list::Add(NewItem_)); }
+
 	public:
 		base_type* gFirst() const {
 			return static_cast<base_type*>(parent_list::gFirst()); }
 		base_type* gLast() const {
 			return static_cast<base_type*>(parent_list::gLast()); }
 
-		base_type* Add(base_type* NewItem_) {
-			return static_cast<base_type*>(parent_list::Add(NewItem_)); }
+		template <typename new_item_type>
+		base_type* Add() {
+			return static_cast<base_type*>(parent_list::template Add<new_item_type>()); }
+
 		base_type* Add(unsigned char TypeID_) {
 			return static_cast<base_type*>(parent_list::Add(TypeID_)); }
 		base_type* GetItem(size_t Index_) const {
@@ -206,12 +239,8 @@ public:
 		void Del(base_type* DelItem_) {
 			parent_list::Del(DelItem_); }
 
-		void Copy(const list_type* SrcList_) { parent_list::Copy(SrcList_); }
 		void Move(list_type* SrcList_) { parent_list::Move(SrcList_); }
 		void Splice(list_type* AtchList_) { parent_list::Splice(AtchList_); }
-
-		Typed() {}
-		~Typed() {}
 	};
 
 	// То же самое, но добавляет 'Add()' с типом по-умолчанию
@@ -223,12 +252,11 @@ public:
 	{
 	protected:
 		using parent_list::isTyped;
+		using parent_list::Add;
 
 	public:
-		item_type* Add(item_type* NewItem_) {
-			return static_cast<item_type*>(parent_list::Add(NewItem_)); }
 		item_type* Add() {
-			return static_cast<item_type*>(parent_list::Add(item_type::New())); }
+			return static_cast<item_type*>(parent_list::template Add<item_type>()); }
 
 		Simple()
 		{
@@ -236,22 +264,8 @@ public:
 				reinterpret_cast<MListItem*(*)()>   /// грубовато, в стиле 'C'
 				(&item_type::New);
 		}
-
-		~Simple()
-		{
-		}
 	};
 };
 //---------------------------------------------------------------------------
 #endif
-
-/*
-	// Prohibited operations
-	MPassword();
-	MDirNotify (const MDirNotify &Src_);
-	MDirNotify (MDirNotify &&Src_);
-
-	MDirNotify &operator=(const MDirNotify &Src_);
-	MDirNotify &operator=(MDirNotify &&Src_);
-*/
 

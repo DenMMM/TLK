@@ -16,7 +16,7 @@ __fastcall TFormFines::TFormFines(TComponent* Owner)
 void __fastcall TFormFines::FormShow(TObject *Sender)
 {
     // Копируем текущие штрафы в буфер
-    TmpFines.Copy(Fines.get());
+	TmpFines=*Fines;
 
     // Формируем их список
 	for ( MFinesItem *fine=TmpFines.gFirst();

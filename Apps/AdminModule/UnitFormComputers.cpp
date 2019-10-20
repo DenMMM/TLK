@@ -19,7 +19,7 @@ __fastcall TFormComputers::TFormComputers(TComponent* Owner)
 void __fastcall TFormComputers::FormShow(TObject *Sender)
 {
     // Копируем список компьютеров в буфер
-    TmpComputers.Copy(Computers.get());
+    TmpComputers=*Computers;
 
     // Формируем их список
 	for ( MComputersItem* comp=TmpComputers.gFirst();

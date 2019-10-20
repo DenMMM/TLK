@@ -6,24 +6,6 @@
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
 //---------------------------------------------------------------------------
-MLockDsk::MLockDsk()
-{
-    hThread=nullptr;
-    ThreadID=0;
-    hPrevDsk=nullptr;
-    hMainDsk=nullptr;
-    Transp=false;
-    SysTime=0;
-    CompNum=0;
-    WorkTime=0;
-}
-//---------------------------------------------------------------------------
-MLockDsk::~MLockDsk()
-{
-    // Завершим работу потока без разблокировки экрана
-    Hide(false);
-}
-//---------------------------------------------------------------------------
 DWORD WINAPI MLockDsk::ThreadF(LPVOID Data_)
 {
     DWORD ExitCode;

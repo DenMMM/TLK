@@ -9,33 +9,6 @@
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
 //---------------------------------------------------------------------------
-void MTariffRunTimesItem::Copy(const MListItem *SrcItem_)
-{
-	auto rtime=dynamic_cast<const MTariffRunTimesItem*>(SrcItem_);
-
-	TariffID=rtime->TariffID;
-	Number=rtime->Number;
-	StartTime=rtime->StartTime;
-	Type=rtime->Type;
-	BeginTime=rtime->BeginTime;
-	EndTime=rtime->EndTime;
-	SizeTime=rtime->SizeTime;
-	WorkTime=rtime->WorkTime;
-	MaxTime=rtime->MaxTime;
-	Cost=rtime->Cost;
-}
-//---------------------------------------------------------------------------
-void MTariffTimesItem::Copy(const MListItem *SrcItem_)
-{
-	auto ttime=dynamic_cast<const MTariffTimesItem*>(SrcItem_);
-
-	Type=ttime->Type;
-	BeginTime=ttime->BeginTime;
-	EndTime=ttime->EndTime;
-	SizeTime=ttime->SizeTime;
-	Cost=ttime->Cost;
-}
-
 unsigned MTariffTimesItem::GetDataSize() const
 {
 	return
@@ -78,14 +51,6 @@ int MTariffTimesItem::MaxWorkTime(int Time_) const
 	return WorkTime;
 }
 //---------------------------------------------------------------------------
-void MTariffsInfoItem::Copy(const MListItem *SrcItem_)
-{
-	auto ti=dynamic_cast<const MTariffsInfoItem*>(SrcItem_);
-
-    ID=ti->ID;
-    Name=ti->Name;
-}
-//---------------------------------------------------------------------------
 MTariffsInfoItem *MTariffsInfo::Search(unsigned ID_) const
 {
 	MTariffsInfoItem* ti=gFirst();
@@ -99,20 +64,6 @@ MTariffsInfoItem *MTariffsInfo::Search(unsigned ID_) const
     return nullptr;
 }
 //---------------------------------------------------------------------------
-void MTariffsItem::Copy(const MListItem *SrcItem_)
-{
-	auto trf=dynamic_cast<const MTariffsItem*>(SrcItem_);
-
-    Name=trf->Name;
-    Programs=trf->Programs;
-    Reboot=trf->Reboot;
-    CompsCnt=trf->CompsCnt;
-    for (int i=0; i<CompsCnt; i++) Comps[i]=trf->Comps[i];
-    Times.Copy(&trf->Times);
-
-    MIDListItem::Copy(SrcItem_);
-}
-
 unsigned MTariffsItem::GetDataSize() const
 {
     return

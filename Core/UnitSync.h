@@ -108,11 +108,10 @@ class MSyncStatesItem:
 		MSyncStatesItem>
 {
 private:
-	void Copy(const MListItem *SrcItem_) override {}
 	// Функции механизма сохранения/загрузки данных
-	unsigned GetDataSize() const override;
-	void *SetData(void *Data_) const override;
-	const void *GetData(const void *Data_, const void *Limit_) override;
+	virtual unsigned GetDataSize() const override;
+	virtual void *SetData(void *Data_) const override;
+	virtual const void *GetData(const void *Data_, const void *Limit_) override;
 
 	MStatesItem *State;					// Состояние компьютера, с которым связана запись
 	u_long IP;                          // IP-адрес компьютера-клиента
@@ -162,10 +161,6 @@ public:
 		Seed(0)
 	{
 	}
-
-	virtual ~MSyncStatesItem()
-	{
-	}
 };
 
 class MSyncStates:
@@ -179,9 +174,6 @@ public:
 	bool Stop() const;
 	// Найти объект по IP-адресу
 	MSyncStatesItem *Search(u_long IP_) const;
-
-	MSyncStates() {}
-	~MSyncStates() {}
 };
 //---------------------------------------------------------------------------
 class MSync
@@ -208,7 +200,7 @@ private:
     } Packet;                   // Буфер для принимаемых пакетов
 
     static DWORD WINAPI ThreadFunc(LPVOID Data);
-    static bool PollData(SOCKET Socket_);
+	static bool PollData(SOCKET Socket_);
     static bool UpdateMAC(MSyncStates *States_);
     void ThreadExecute();
     void sPCount(unsigned Value_);      // thread safe
@@ -243,53 +235,59 @@ public:
 	{
 	}
 
+	MSync(const MSync&) = delete;
+	MSync(MSync&&) noexcept = delete;
+	MSync& operator=(const MSync&) = delete;
+	MSync& operator=(MSync&&) noexcept = delete;
+
 	~MSync()
 	{
+///		Stop();
 	}
 };
 //---------------------------------------------------------------------------
 class MSyncCl
 {
 private:
-    bool Init;                  // Была ли выполнена инициализация WinSocket
-    HANDLE Thread;              // Дескриптор потока, осуществляющего прием/отправку
-    DWORD ThreadID;             // Идентификатор потока
-    SOCKET Socket;              // Сокет для приема/отправки данных
-    DWORD LastSendTime;         // Время последней отправки пакета
-    unsigned Process;           // Состояние процесса синхронизации
-    unsigned SendCount;         // Счетчик посланных за сеанс пакетов
-    unsigned Seed;              // ID сеанса
-    unsigned NetCode;           // Код шифрования для сетевого обмена
-    MAuth *NetMAC;              // Аутентификатор сетевых операций
-    MStateCl *State;            // Состояние, с которым ассоциирован сетевой интерфейс
-    MSyncData SyncData;         // Новые данные состояния
+	bool Init;                  // Была ли выполнена инициализация WinSocket
+	HANDLE Thread;              // Дескриптор потока, осуществляющего прием/отправку
+	DWORD ThreadID;             // Идентификатор потока
+	SOCKET Socket;              // Сокет для приема/отправки данных
+	DWORD LastSendTime;         // Время последней отправки пакета
+	unsigned Process;           // Состояние процесса синхронизации
+	unsigned SendCount;         // Счетчик посланных за сеанс пакетов
+	unsigned Seed;              // ID сеанса
+	unsigned NetCode;           // Код шифрования для сетевого обмена
+	MAuth *NetMAC;              // Аутентификатор сетевых операций
+	MStateCl *State;            // Состояние, с которым ассоциирован сетевой интерфейс
+	MSyncData SyncData;         // Новые данные состояния
 
-    union MRcvPacket
-    {
-        MSyncPHello Hello;
-        MSyncPData Data;
-    } RcvPacket;                // Буфер для принимаемых от сервера пакетов
+	union MRcvPacket
+	{
+		MSyncPHello Hello;
+		MSyncPData Data;
+	} RcvPacket;                // Буфер для принимаемых от сервера пакетов
 
-    union MSndPacket
-    {
-        MSyncPHello Hello;
-        MSyncPConf Conf;
-    } SndPacket;                // Буфер для отправляемых серверу пакетов
-    int SndPacketSize;          // Размер отправляемого пакета
-    sockaddr_in SndAddr;        // Адрес сервера
+	union MSndPacket
+	{
+		MSyncPHello Hello;
+		MSyncPConf Conf;
+	} SndPacket;                // Буфер для отправляемых серверу пакетов
+	int SndPacketSize;          // Размер отправляемого пакета
+	sockaddr_in SndAddr;        // Адрес сервера
 
-    static DWORD WINAPI ThreadFunc(LPVOID Data);
-    static bool PollData(SOCKET Socket_);
-    void ThreadExecute();
-    bool Recv(sockaddr_in *From_, char *Packet_, int PacketSize_);
-    bool Send(SOCKET Socket_);
-    
+	static DWORD WINAPI ThreadFunc(LPVOID Data);
+	static bool PollData(SOCKET Socket_);
+	void ThreadExecute();
+	bool Recv(sockaddr_in *From_, char *Packet_, int PacketSize_);
+	bool Send(SOCKET Socket_);
+
 public:
-    bool NetInit(unsigned Code_, MAuth *MAC_);  // Инициализация WinSocket
-    bool NetFree();                             // Освобождение WinSocket
-    void Associate(MStateCl *State_);
-    bool Start();
-    void Stop();
+	bool NetInit(unsigned Code_, MAuth *MAC_);  // Инициализация WinSocket
+	bool NetFree();                             // Освобождение WinSocket
+	void Associate(MStateCl *State_);
+	bool Start();
+	void Stop();
 
 	MSyncCl():
 		Init(false),
@@ -305,8 +303,14 @@ public:
 	{
 	}
 
+	MSyncCl(const MSyncCl&) = delete;
+	MSyncCl(MSyncCl&&) noexcept = delete;
+	MSyncCl& operator=(const MSyncCl&) = delete;
+	MSyncCl& operator=(MSyncCl&&) noexcept = delete;
+
 	~MSyncCl()
 	{
+///		Stop();
 	}
 };
 //---------------------------------------------------------------------------

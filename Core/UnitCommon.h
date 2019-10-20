@@ -12,96 +12,72 @@
 #define ENC_Code        0x5BC935CF  // Код шифрования файлов
 #define ENC_Net         0x9ABD5BAE  // Код шифрования сетевых данных
 //---------------------------------------------------------------------------
-/*template <typename type>
-class Mptr
-{
-private:
-	type *ptr;
-
-public:
-	void operator()(type *ptr_)
-	{
-		if ( ptr!=nullptr )
-		{
-			// Удалим объект, чтобы не потерялся
-			delete ptr_;
-			// Кинем исплючение
-			throw std::runtime_error (
-				"Munique_ptr::()\n"
-				"Попытка присвоения не пустому указателю."
-				);
-		}
-		ptr=ptr_;
-	}
-	type* operator->() { return ptr; }
-	operator type*() { return ptr; }
-
-	Mptr() { ptr=nullptr; }
-	~Mptr() { delete ptr; }
-};*/
-//---------------------------------------------------------------------------
 template <typename titem>
 class Marray
 {
 private:
-    unsigned ICount;
-    titem *Items;
+	size_t ICount;
+	titem *Items;
 
 public:
-    void Alloc(unsigned Count_=0)
-    {
-        if ( Count_==0 || Count_!=ICount  )
-        {
-            delete[] Items;
-            Items=nullptr;
-        }
-        if ( Count_!=0 )
-        {
-            Items=new titem[Count_];
-            ICount=Count_;
-        }
-    }
+	void Alloc(size_t Count_=0)
+	{
+		if ( Count_==0 || Count_!=ICount  )
+		{
+			delete[] Items;
+			Items=nullptr;
+		}
+		if ( Count_!=0 )
+		{
+			Items=new titem[Count_];
+			ICount=Count_;
+		}
+	}
 
-    unsigned Count() const
-    {
-        return ICount;
-    }
+	unsigned Count() const
+	{
+		return ICount;
+	}
 
-    titem &operator[](unsigned Num_) const
-    {
-        if ( Num_>=ICount )
-        {
-            throw std::out_of_range (
-                "MArray::[]\n"
-                "Попытка выйти за пределы массива."
-                );
-        }
-        return Items[Num_];
-    }
+	titem &operator[](size_t Num_) const
+	{
+		if ( Num_>=ICount )
+		{
+			throw std::out_of_range (
+				"MArray::[]\n"
+				"Попытка выйти за пределы массива."
+				);
+		}
+		return Items[Num_];
+	}
 
-    Marray &operator=(const Marray &Src_)
-    {
-        // Убедимся, что не сами себя копируем
-        if ( &Src_==this ) return *this;
-        // Пересоздадим массив
-        Alloc(Src_.ICount);
-        // Скопируем все элементы
-        for (unsigned i=0; i<ICount; i++)
-            Items[i]=Src_.Items[i];         /// возможно, стоит обработать bad_alloc
+	Marray &operator=(const Marray &Src_)
+	{
+		// Убедимся, что не сами себя копируем
+		if ( &Src_==this ) return *this;
+		// Пересоздадим массив
+		Alloc(Src_.ICount);
+		// Скопируем все элементы
+		for (size_t i=0; i<ICount; i++)
+			Items[i]=Src_.Items[i];         /// возможно, стоит обработать bad_alloc
 
-        return *this;
-    }
+		return *this;
+	}
 
-    Marray()
-    {
-        ICount=0;
-        Items=nullptr;
-    }
+	Marray()
+	{
+		ICount=0;
+		Items=nullptr;
+	}
 
-    ~Marray()
-    {
-        delete[] Items;
-    }
+	~Marray()
+	{
+		delete[] Items;
+	}
+
+	Marray(Marray&) = delete;
+	Marray(Marray&&) noexcept = delete;
+	Marray &operator=(Marray&&) noexcept = delete;
 };
 //---------------------------------------------------------------------------
 // Сравнение двух чисел: "0" - равны, "-1" - первое меньше второго, "+1" - наоборот
@@ -279,7 +255,7 @@ unsigned BasicRand();
 bool TimeRand(void *Buff__, size_t Size_);
 //---------------------------------------------------------------------------
 size_t ByteToHEX(const void *Bytes__, size_t BytesCount_,
-	wchar_t *Line_, size_t LineSize_, wchar_t Delim_='\0');
+	wchar_t *Line_, size_t LineSize_, wchar_t Delim_=L'\0');
 size_t HEXToByte(const wchar_t *Line_, void *Buff__, size_t BuffSize_);
 //---------------------------------------------------------------------------
 bool GeneratePassword(char *Line_, unsigned Len_,

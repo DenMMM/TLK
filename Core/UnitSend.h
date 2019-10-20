@@ -239,9 +239,11 @@ public:
 	{
 	}
 
-	~MSend()
-	{
-	}
+	MSend(const MSend&) = delete;
+	MSend(MSend&&) noexcept = delete;
+	MSend& operator=(const MSend&) = delete;
+	MSend& operator=(MSend&&) noexcept = delete;
+	~MSend() = default;
 };
 //---------------------------------------------------------------------------
 class MSendSrv:public MSend
@@ -276,9 +278,11 @@ public:
 	{
 	}
 
-	~MSendSrv()
-	{
-	}
+	MSendSrv(const MSendSrv&) = delete;
+	MSendSrv(MSendSrv&&) noexcept = delete;
+	MSendSrv& operator=(const MSendSrv&) = delete;
+	MSendSrv& operator=(MSendSrv&&) noexcept = delete;
+	~MSendSrv() = default;
 };
 //---------------------------------------------------------------------------
 class MSendCl:public MSend
@@ -301,9 +305,11 @@ public:
 	{
 	}
 
-	~MSendCl()
-	{
-	}
+	MSendCl(const MSendCl&) = delete;
+	MSendCl(MSendCl&&) noexcept = delete;
+	MSendCl& operator=(const MSendCl&) = delete;
+	MSendCl& operator=(MSendCl&&) noexcept = delete;
+	~MSendCl() = default;
 };
 //---------------------------------------------------------------------------
 #endif
