@@ -44,8 +44,10 @@ unsigned MUsers::ActiveCount() const
 {
 	size_t count=0;
 
-	for ( MUsersItem *User=gFirst();
-		User; User=User->gNext() ) if ( User->Active ) count++;
+	for ( auto &User: *this )
+	{
+		if ( User.Active ) count++;
+	}
 
 	return count;
 }

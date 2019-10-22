@@ -103,16 +103,11 @@ class MSyncCl;
 */
 //---------------------------------------------------------------------------
 class MSyncStatesItem:
-	public MSLListItem::Simple <
-		MSLListItem::Proxy <MSLListItem, MSyncStatesItem>,
+	public MSLListItemSimple <
+		MSLListItem <MSyncStates, MSyncStatesItem>,
 		MSyncStatesItem>
 {
 private:
-	// Функции механизма сохранения/загрузки данных
-	virtual unsigned GetDataSize() const override;
-	virtual void *SetData(void *Data_) const override;
-	virtual const void *GetData(const void *Data_, const void *Limit_) override;
-
 	MStatesItem *State;					// Состояние компьютера, с которым связана запись
 	u_long IP;                          // IP-адрес компьютера-клиента
 	sockaddr_in Address;                // Адрес в формате socket
@@ -133,6 +128,11 @@ private:
 	int PacketSize;                     // Размер отправляемого пакета
 
 public:
+	// Функции механизма сохранения/загрузки данных
+	virtual unsigned GetDataSize() const override;
+	virtual void *SetData(void *Data_) const override;
+	virtual const void *GetData(const void *Data_, const void *Limit_) override;
+
 	// Связать MSyncState с MState и IP-адресом компьютера
 	void Associate(MStatesItem *State_, u_long IP_);
 	// Подготовиться к отправке/приему
@@ -164,7 +164,9 @@ public:
 };
 
 class MSyncStates:
-	public MSLList::Simple <MSLList, MSyncStates, MSyncStatesItem>
+	public MSLListSimple <
+		MSLList <MSyncStates, MSyncStatesItem>,
+		MSyncStatesItem>
 {
 public:
 	// Создать объекты синхронизации для компьютеров и связать с их MState

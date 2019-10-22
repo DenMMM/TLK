@@ -12,7 +12,7 @@ class MLogRecordsItem;
 class MLogRecords;
 //---------------------------------------------------------------------------
 class MLogRecordsItem:
-	public MSLListItem::Proxy <MSLListItem, MLogRecordsItem>
+	public MSLListItem <MLogRecords, MLogRecordsItem>
 {
 public:
 	__int64 SystemTime;     // Время создания записи
@@ -24,7 +24,7 @@ public:
 };
 
 class MLogRecords:
-	public MSLList::Typed <MSLList, MLogRecords, MLogRecordsItem>
+	public MSLList <MLogRecords, MLogRecordsItem>
 {
 public:
 	enum ItemType {
@@ -298,39 +298,39 @@ public:
 	class Mode:			public ModeBase {};
 	class Cmd:			public CmdBase {};
 
-	class LogBegin:		public MLogRecordsItem::Typed <Event, LogBegin, mlrBegin> {};
-	class LogEnd:		public MLogRecordsItem::Typed <Event, LogEnd, mlrEnd> {};
+	class LogBegin:		public MSLListItemTyped <Event, MLogRecordsItem, LogBegin, mlrBegin> {};
+	class LogEnd:		public MSLListItemTyped <Event, MLogRecordsItem, LogEnd, mlrEnd> {};
 
-	class AppStart:		public MLogRecordsItem::Typed <Event, AppStart, mlrStart> {};
-	class AppStop:		public MLogRecordsItem::Typed <Event, AppStop, mlrStop> {};
+	class AppStart:		public MSLListItemTyped <Event, MLogRecordsItem, AppStart, mlrStart> {};
+	class AppStop:		public MSLListItemTyped <Event, MLogRecordsItem, AppStop, mlrStop> {};
 
-	class AppConfig:	public MLogRecordsItem::Typed <AppConfigBase, AppConfig, mlrConfig> {};
-	class AppLogIn:		public MLogRecordsItem::Typed <AppLogInBase, AppLogIn, mlrLogIn> {};
-	class AppLogOut:	public MLogRecordsItem::Typed <Event, AppLogOut, mlrLogOut> {};
+	class AppConfig:	public MSLListItemTyped <AppConfigBase, MLogRecordsItem, AppConfig, mlrConfig> {};
+	class AppLogIn:		public MSLListItemTyped <AppLogInBase, MLogRecordsItem, AppLogIn, mlrLogIn> {};
+	class AppLogOut:	public MSLListItemTyped <Event, MLogRecordsItem, AppLogOut, mlrLogOut> {};
 
-	class ChComputers:	public MLogRecordsItem::Typed <Event, ChComputers, mlrComputers> {};
-	class ChTariffs:	public MLogRecordsItem::Typed <Event, ChTariffs, mlrTariffs> {};
-	class ChFines:		public MLogRecordsItem::Typed <Event, ChFines, mlrFines> {};
-	class ChUsers:		public MLogRecordsItem::Typed <Event, ChUsers, mlrUsers> {};
-	class ChOptions:	public MLogRecordsItem::Typed <Event, ChOptions, mlrOptions> {};
+	class ChComputers:	public MSLListItemTyped <Event, MLogRecordsItem, ChComputers, mlrComputers> {};
+	class ChTariffs:	public MSLListItemTyped <Event, MLogRecordsItem, ChTariffs, mlrTariffs> {};
+	class ChFines:		public MSLListItemTyped <Event, MLogRecordsItem, ChFines, mlrFines> {};
+	class ChUsers:		public MSLListItemTyped <Event, MLogRecordsItem, ChUsers, mlrUsers> {};
+	class ChOptions:	public MSLListItemTyped <Event, MLogRecordsItem, ChOptions, mlrOptions> {};
 
-	class DataShell:	public MLogRecordsItem::Typed <DataShellBase, DataShell, mlrDataShState> {};
-	class DataStates:	public MLogRecordsItem::Typed <DataStatesBase, DataStates, mlrDataStates> {};
-	class DataTariffs:	public MLogRecordsItem::Typed <DataTariffsBase, DataTariffs, mlrDataTariffs> {};
-	class DataFines:	public MLogRecordsItem::Typed <DataFinesBase, DataFines, mlrDataFines> {};
-	class DataUsers:	public MLogRecordsItem::Typed <DataUsersBase, DataUsers, mlrDataUsers> {};
+	class DataShell:	public MSLListItemTyped <DataShellBase, MLogRecordsItem, DataShell, mlrDataShState> {};
+	class DataStates:	public MSLListItemTyped <DataStatesBase, MLogRecordsItem, DataStates, mlrDataStates> {};
+	class DataTariffs:	public MSLListItemTyped <DataTariffsBase, MLogRecordsItem, DataTariffs, mlrDataTariffs> {};
+	class DataFines:	public MSLListItemTyped <DataFinesBase, MLogRecordsItem, DataFines, mlrDataFines> {};
+	class DataUsers:	public MSLListItemTyped <DataUsersBase, MLogRecordsItem, DataUsers, mlrDataUsers> {};
 
-	class CompRun:		public MLogRecordsItem::Typed <CompRunBase, CompRun, mlrRun> {};
-	class CompFine:		public MLogRecordsItem::Typed <CompFineBase, CompFine, mlrFine> {};
-	class CompExchange:	public MLogRecordsItem::Typed <CompExchangeBase, CompExchange, mlrExchange> {};
+	class CompRun:		public MSLListItemTyped <CompRunBase, MLogRecordsItem, CompRun, mlrRun> {};
+	class CompFine:		public MSLListItemTyped <CompFineBase, MLogRecordsItem, CompFine, mlrFine> {};
+	class CompExchange:	public MSLListItemTyped <CompExchangeBase, MLogRecordsItem, CompExchange, mlrExchange> {};
 
-	class ModeLock:		public MLogRecordsItem::Typed <Mode, ModeLock, mlrLock> {};
-	class ModePause:	public MLogRecordsItem::Typed <Mode, ModePause, mlrPause> {};
-	class ModeOpen:		public MLogRecordsItem::Typed <Mode, ModeOpen, mlrOpen> {};
+	class ModeLock:		public MSLListItemTyped <Mode, MLogRecordsItem, ModeLock, mlrLock> {};
+	class ModePause:	public MSLListItemTyped <Mode, MLogRecordsItem, ModePause, mlrPause> {};
+	class ModeOpen:		public MSLListItemTyped <Mode, MLogRecordsItem, ModeOpen, mlrOpen> {};
 
-	class CmdPowerOn:	public MLogRecordsItem::Typed <Cmd, CmdPowerOn, mlrPowerOn> {};
-	class CmdReboot:	public MLogRecordsItem::Typed <Cmd, CmdReboot, mlrReboot> {};
-	class CmdShutdown:	public MLogRecordsItem::Typed <Cmd, CmdShutdown, mlrShutdown> {};
+	class CmdPowerOn:	public MSLListItemTyped <Cmd, MLogRecordsItem, CmdPowerOn, mlrPowerOn> {};
+	class CmdReboot:	public MSLListItemTyped <Cmd, MLogRecordsItem, CmdReboot, mlrReboot> {};
+	class CmdShutdown:	public MSLListItemTyped <Cmd, MLogRecordsItem, CmdShutdown, mlrShutdown> {};
 
 public:
 	MLogRecords()

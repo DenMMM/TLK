@@ -73,16 +73,17 @@ struct MStatesInfo
 };
 //---------------------------------------------------------------------------
 class MStatesItem:
-	public MSLListItem::Simple <
-		MSLListItem::Proxy <MSLListItem, MStatesItem>,
+	public MSLListItemSimple <
+		MSLListItem <MStates, MStatesItem>,
 		MStatesItem>
 {
-protected:
+public:
 	// Функции механизма сохранения/загрузки данных
 	virtual unsigned GetDataSize() const override;
 	virtual void *SetData(void *Data_) const override;
 	virtual const void *GetData(const void *Data_, const void *Limit_) override;
 
+private:
 	mutable MWAPI::CRITICAL_SECTION CS_Main;    // Объект для синхронизации доступа потоков к данным
 	__int64 SystemTime;         // Системное время, используемое при всех расчетах
 
@@ -210,7 +211,9 @@ public:
 };
 //---------------------------------------------------------------------------
 class MStates:
-	public MSLList::Simple <MSLList, MStates, MStatesItem>
+	public MSLListSimple <
+		MSLList <MStates, MStatesItem>,
+		MStatesItem>
 {
 private:
 	MWAPI::CRITICAL_SECTION CS_File;   // Объект для синхронизации
@@ -232,14 +235,19 @@ public:
 	~MStates() = default;
 };
 //---------------------------------------------------------------------------
-class MStateCl: public MSLList          /// придумать лучшее наследование
+class MStateClStub:
+	public MSLListItem <MStateCl, MStateClStub> {};
+
+class MStateCl:
+	public MSLList <MStateCl, MStateClStub>     /// private ?
 {
-private:
-    // Функции механизма сохранения/загрузки данных
+public:
+	// Функции механизма сохранения/загрузки данных
 	virtual unsigned GetDataSize() const override;
 	virtual void *SetData(void *Data_) const override;
 	virtual const void *GetData(const void *Data_, const void *Limit_) override;
 
+private:
 	HKEY OptKey;				//
 	std::wstring OptPath;		//
 	std::wstring OptValue;		//

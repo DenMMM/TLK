@@ -15,8 +15,8 @@ class MGames;
 #define MAX_PrgLevel        2       // Количество уровней в списке
 //---------------------------------------------------------------------------
 class MGamesItem:
-	public MSLListItem::Simple <
-		MSLListItem::Proxy <MSLListItem, MGamesItem>,
+	public MSLListItemSimple <
+		MSLListItem <MGames, MGamesItem>,
 		MGamesItem>
 {
 public:
@@ -39,15 +39,17 @@ public:
 	{
 	}
 
-///	MGamesItem(const MGamesItem&) = default;
-///	MGamesItem(MGamesItem&&) noexcept = default;
-	MGamesItem& operator=(const MGamesItem&) = default;
+	MGamesItem(MGamesItem&) = default;
+	MGamesItem(MGamesItem&&) = default;
+	MGamesItem& operator=(MGamesItem&) = default;
 	MGamesItem& operator=(MGamesItem&&) noexcept = default;
 	~MGamesItem();
 };
 //---------------------------------------------------------------------------
 class MGames:
-	public MSLList::Simple <MSLList, MGames, MGamesItem>
+	public MSLListSimple <
+		MSLList <MGames, MGamesItem>,
+		MGamesItem>
 {
 };
 //---------------------------------------------------------------------------

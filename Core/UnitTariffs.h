@@ -43,8 +43,8 @@ class MTariffs;
 //#define Cost_Precision  0.50
 //---------------------------------------------------------------------------
 class MTariffRunTimesItem:
-	public MListItem::Simple <
-		MListItem::Proxy <MListItem, MTariffRunTimesItem>,
+	public MListItemSimple <
+		MListItem <MTariffRunTimes, MTariffRunTimesItem>,
 		MTariffRunTimesItem>
 {
 public:
@@ -75,16 +75,18 @@ public:
 };
 
 class MTariffRunTimes:
-	public MList::Simple <MList, MTariffRunTimes, MTariffRunTimesItem>
+	public MListSimple <
+		MList <MTariffRunTimes, MTariffRunTimesItem>,
+		MTariffRunTimesItem>
 {
 };
 //---------------------------------------------------------------------------
 class MTariffTimesItem:
-	public MSLListItem::Simple <
-		MSLListItem::Proxy <MSLListItem, MTariffTimesItem>,
+	public MSLListItemSimple <
+		MSLListItem <MTariffTimes, MTariffTimesItem>,
 		MTariffTimesItem>
 {
-private:
+public:
 	// Функции механизма сохранения/загрузки данных
 	virtual unsigned GetDataSize() const override;
 	virtual void *SetData(void *Data_) const override;
@@ -110,13 +112,15 @@ public:
 };
 
 class MTariffTimes:
-	public MSLList::Simple <MSLList, MTariffTimes, MTariffTimesItem>
+	public MSLListSimple <
+		MSLList <MTariffTimes, MTariffTimesItem>,
+		MTariffTimesItem>
 {
 };
 //---------------------------------------------------------------------------
 class MTariffsInfoItem:
-	public MListItem::Simple <
-		MListItem::Proxy <MListItem, MTariffsInfoItem>,
+	public MListItemSimple <
+		MListItem <MTariffsInfo, MTariffsInfoItem>,
 		MTariffsInfoItem>
 {
 public:
@@ -130,29 +134,32 @@ public:
 };
 
 class MTariffsInfo:
-	public MList::Simple <MList, MTariffsInfo, MTariffsInfoItem>
+	public MListSimple <
+		MList <MTariffsInfo, MTariffsInfoItem>,
+		MTariffsInfoItem>
 {
 public:
 	MTariffsInfoItem *Search(unsigned ID_) const;
 };
 //---------------------------------------------------------------------------
 class MTariffsItem:
-	public MIDListItem::Simple <
-		MIDListItem::Proxy <MIDListItem, MTariffsItem>,
+	public MIDListItemSimple <
+		MIDListItem <MTariffs, MTariffsItem>,
 		MTariffsItem>
 {
-private:
+public:
 	// Функции механизма сохранения/загрузки данных
 	virtual unsigned GetDataSize() const override;
 	virtual void *SetData(void *Data_) const override;
 	virtual const void *GetData(const void *Data_, const void *Limit_) override;
 
+private:
+	char CompsCnt;                      // Число компьютеров, к которым применим тариф
+	char Comps[MAX_Comps];              // Их номера
+
 	void CostPacket(MTariffRunTimesItem *RunTime_) const;
 	void CostFlyPacket(MTariffRunTimesItem *RunTime_) const;
 	void CostHours(MTariffRunTimesItem *RunTime_) const;
-
-	char CompsCnt;                      // Число компьютеров, к которым применим тариф
-	char Comps[MAX_Comps];              // Их номера
 
 public:
 	std::wstring Name;        			// Название тарифа
@@ -200,7 +207,9 @@ public:
 };
 
 class MTariffs:
-	public MIDList::Simple <MIDList, MTariffs, MTariffsItem>
+	public MIDListSimple <
+		MIDList <MTariffs, MTariffsItem>,
+		MTariffsItem>
 {
 public:
 	void GetForTime(__int64 &Time_, MTariffsInfo *TariffsInfo_) const;

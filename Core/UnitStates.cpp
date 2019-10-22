@@ -533,56 +533,55 @@ bool MStates::Save()
 //---------------------------------------------------------------------------
 MStatesItem *MStates::Search(int Number_) const
 {
-	MStatesItem *State=gFirst();
+	auto iState=cbegin();
+	auto iEnd=cend();
 
-	while(State)
+	while ( iState!=iEnd )
 	{
-		if ( State->Associated()==Number_ ) break;
-		State=State->gNext();
+		if ( iState->Associated()==Number_ ) break;
+		++iState;
 	}
 
-	return State;
+	return &(*iState);
 }
 //---------------------------------------------------------------------------
 bool MStates::Update(MComputers *Computers_)
 {
 	bool result=false;
 	MComputersItem *Computer;
-	MStatesItem *State, *NextState;
 
 	// Убираем состояния, ассоциированные с несуществующими
 	// или неиспользуемыми компьютерами
-	State=gFirst();
-	while(State)
+	for ( auto iState=cbegin(), iEnd=cend(); iState!=iEnd; )
 	{
-		NextState=State->gNext();
-		Computer=Computers_->Search(State->Associated());
+		auto iNext=iState; ++iNext;
+
+		Computer=Computers_->Search(iState->Associated());
 		if ( (Computer==nullptr)||(Computer->NotUsed) )
 		{
 			result=true;
-			Del(State);
+			Del(&(*iState));
 		}
-		State=NextState;
+		iState=iNext;
 	}
 	// Добавляем состояния для новых компьютеров
 	for ( const auto &Computer: *Computers_ )
 	{
 		if ( Computer.NotUsed||Search(Computer.Number) ) continue;
 		result=true;
-		State=Add();
-		State->Associate(Computer.Number);
+		Add()->Associate(Computer.Number);
 	}
 	// Убираем лишние записи, ассоциированные с одним и тем же компьютером
-	State=gFirst();
-	while(State)
+	for ( auto iState=cbegin(), iEnd=cend(); iState!=iEnd; )
 	{
-		NextState=State->gNext();
-		if ( Search(State->Associated())!=State )
+		auto iNext=iState; ++iNext;
+
+		if ( Search(iState->Associated())!=&(*iState) )
 		{
 			result=true;
-			Del(State);
+			Del(&(*iState));
 		}
-		State=NextState;
+		iState=iNext;
 	}
 
 	return result;
@@ -592,8 +591,7 @@ bool MStates::Timer(__int64 SystemTime_)
 {
 	bool result=false;
 	//
-	for ( MStatesItem* State=gFirst(); State;
-		State=State->gNext() ) result|=State->Timer(SystemTime_);
+	for ( auto &State: *this ) result|=State.Timer(SystemTime_);
     //
     return result;
 }

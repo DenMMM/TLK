@@ -202,58 +202,62 @@ void __fastcall TFormRun::ComboBoxTariffClick(TObject *Sender)
     }
 
     ComboBoxTime->Clear();
-    // Запрашиваем для тарифа список пакетов
-    Tariff->GetRunTimes(OpenDialogTime,&UseTimes);
-    // Если пакетов для тарифа в это время нету, то запрещаем ввод времени
-    Time=UseTimes.gFirst();
-    if ( Time==nullptr )
-    {
-        ComboBoxTime->Enabled=false;
-        ComboBoxTime->Color=clBtnFace;
-        ComboBoxTime->Style=csSimple;
-        return;
-    } else
-    {
-        ComboBoxTime->Enabled=true;
-        ComboBoxTime->Color=clWindow;
-    }
-    // Позволяем ввод почасового времени
-    if ( Time->Type==mttHours )
-    {
-        ComboBoxTime->Style=Time->gNext()?csDropDown:csSimple;
-        UseTimes.Del(Time);
-        Time=UseTimes.gFirst();
-    } else ComboBoxTime->Style=csDropDownList;
-    // Заносим в список пакеты
-    while(Time)
-    {
-        switch(Time->Type)
-        {
-            case mttFlyPacket:
+
+	// Запрашиваем для тарифа список пакетов
+	Tariff->GetRunTimes(OpenDialogTime,&UseTimes);
+	// Если пакетов для тарифа в это время нету, то запрещаем ввод времени
+	auto iTime=UseTimes.begin();
+	auto iEnd=UseTimes.end();
+	if ( iTime==iEnd )
+	{
+		ComboBoxTime->Enabled=false;
+		ComboBoxTime->Color=clBtnFace;
+		ComboBoxTime->Style=csSimple;
+		return;
+	}
+	ComboBoxTime->Enabled=true;
+	ComboBoxTime->Color=clWindow;
+
+	// Позволяем ввод почасового времени
+	if ( iTime->Type==mttHours )
+	{
+		ComboBoxTime->Style=iTime->gNext()?csDropDown:csSimple;
+		UseTimes.Del(&(*Time));
+		iTime=UseTimes.begin();
+	} else
+	{
+		ComboBoxTime->Style=csDropDownList;
+	}
+	// Заносим в список пакеты
+	while ( iTime!=iEnd )
+	{
+		switch( iTime->Type )
+		{
+			case mttFlyPacket:
 				swprintf(
 					line, sizeof(line),
 					L"На %i час. %.2i мин.",
-					Time->SizeTime/60,
-					Time->SizeTime%60);
-                break;
-            case mttPacket:
-                int EndTime;
-                EndTime=Time->EndTime; if ( EndTime>=(24*60) ) EndTime-=24*60;
+					iTime->SizeTime/60,
+					iTime->SizeTime%60);
+				break;
+			case mttPacket:
+				int EndTime;
+				EndTime=iTime->EndTime; if ( EndTime>=(24*60) ) EndTime-=24*60;
 				swprintf(
 					line, sizeof(line),
 					L"С %i:%.2i до %i:%.2i",
-					Time->BeginTime/60,
-					Time->BeginTime%60,
+					iTime->BeginTime/60,
+					iTime->BeginTime%60,
 					EndTime/60,
 					EndTime%60);
-                break;
+				break;
 			default:
 				*line=0;
 				break;
-        }
-        ComboBoxTime->Items->Add(line);
-        Time=Time->gNext();
-    }
+		}
+		ComboBoxTime->Items->Add(line);
+		++iTime;
+	}
 
     // Обновляем сведения об общей стоимости заказа
     if ( RunMode ) UpdateFullCost();

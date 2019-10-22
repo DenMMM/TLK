@@ -53,15 +53,16 @@ int MTariffTimesItem::MaxWorkTime(int Time_) const
 //---------------------------------------------------------------------------
 MTariffsInfoItem *MTariffsInfo::Search(unsigned ID_) const
 {
-	MTariffsInfoItem* ti=gFirst();
+	auto iTi=cbegin();
+	auto iEnd=cend();
 
-	while(ti)
+	while ( iTi!=iEnd )
 	{
-		if ( ti->ID==ID_ ) return ti;
-		ti=ti->gNext();
+		if ( iTi->ID==ID_ ) break;
+		++iTi;
 	}
 
-    return nullptr;
+	return &(*iTi);
 }
 //---------------------------------------------------------------------------
 unsigned MTariffsItem::GetDataSize() const
@@ -148,22 +149,24 @@ void MTariffsItem::CostFlyPacket(MTariffRunTimesItem *RunTime_) const
 	while(true)
 	{
 		// Ищем подходящую запись для пакета с ненулевым временем работы
-		MTariffTimesItem* tt=Times.gFirst();
-		for ( ; tt; tt=tt->gNext() )
+		auto iTt=Times.cbegin();
+		auto iEnd=Times.end();
+
+		for ( ; iTt!=iEnd; ++iTt )
 		{
-			if ( (tt->Type!=mttFlyPacket)||
-				(tt->SizeTime!=SizeTime) ) continue;
-			if ( (MaxTime=tt->MaxWorkTime(StartTime))!=0 ) break;
+			if ( (iTt->Type!=mttFlyPacket)||
+				(iTt->SizeTime!=SizeTime) ) continue;
+			if ( (MaxTime=iTt->MaxWorkTime(StartTime))!=0 ) break;
 		}
 		// Если подходящих записей больше нету, то заканчиваем накопление времени и стоимости
-		if ( tt==nullptr )
+		if ( iTt==iEnd )
 		{
 			// Досчитываем стоимость "невлезшего" в тарифную сетку времени
 			// по последней встреченной стоимости пакета
 			Cost+=(SizeTime-WorkTime)*(LastCost/SizeTime);
 			break;
 		}
-		LastCost=tt->Cost;
+		LastCost=iTt->Cost;
 		// Вычисляем сколько еще времени нужно для формирования полного пакета
 		NeedTime=SizeTime-WorkTime;
 		// Проверяем сколько реально времени можно добавить к пакету
@@ -198,35 +201,37 @@ void MTariffsItem::CostHours(MTariffRunTimesItem *RunTime_) const
 	while(true)
 	{
 		// Ищем подходящую запись с ненулевым временем работы
-		MTariffTimesItem* tt=Times.gFirst();
-		for ( ; tt; tt=tt->gNext() )
-        {
-			if ( (tt->Type==mttHours)&&
-				((MaxTime=tt->MaxWorkTime(StartTime))!=0) ) break;
+		auto iTt=Times.cbegin();
+		auto iEnd=Times.cend();
+
+		for ( ; iTt!=iEnd; ++iTt )
+		{
+			if ( (iTt->Type==mttHours)&&
+				((MaxTime=iTt->MaxWorkTime(StartTime))!=0) ) break;
 		}
 		// Если подходящих записей больше нету, то заканчиваем накопление времени и стоимости
-		if ( tt==nullptr ) break;
+		if ( iTt==iEnd ) break;
 		// Вычисляем сколько еще времени нужно добавить
-        NeedTime=SizeTime-WorkTime;
-        // Проверяем сколько реально времени можно добавить
-        RealTime=MaxTime<NeedTime? MaxTime: NeedTime;
-        // Добавляем это время и увеличиваем стоимость
-        WorkTime+=RealTime;
-        Cost+=RealTime*tt->Cost/60.;
-        // Проверяем не набрано ли уже все время
-        if ( WorkTime==SizeTime ) break;
-        // Увеличиваем время начала отсчета и следим, чтобы оно не превысило суточное время
-        StartTime+=RealTime; if ( StartTime>=(24*60) ) StartTime-=24*60;
-    }
+		NeedTime=SizeTime-WorkTime;
+		// Проверяем сколько реально времени можно добавить
+		RealTime=MaxTime<NeedTime? MaxTime: NeedTime;
+		// Добавляем это время и увеличиваем стоимость
+		WorkTime+=RealTime;
+		Cost+=RealTime*iTt->Cost/60.;
+		// Проверяем не набрано ли уже все время
+		if ( WorkTime==SizeTime ) break;
+		// Увеличиваем время начала отсчета и следим, чтобы оно не превысило суточное время
+		StartTime+=RealTime; if ( StartTime>=(24*60) ) StartTime-=24*60;
+	}
 
-    RunTime_->WorkTime=WorkTime;
-    RunTime_->Cost=Cost;
+	RunTime_->WorkTime=WorkTime;
+	RunTime_->Cost=Cost;
 }
 
 void MTariffsItem::Cost(MTariffRunTimesItem *RunTime_, double Prec_) const
 {
-    if ( !CheckForComp(RunTime_->Number) )
-    {
+	if ( !CheckForComp(RunTime_->Number) )
+	{
         RunTime_->WorkTime=0; RunTime_->Cost=0.;
         return;
     }
@@ -324,12 +329,12 @@ void MTariffs::GetForTime(__int64 &Time_, MTariffsInfo *TariffsInfo_) const
 {
 	TariffsInfo_->Clear();
 
-	for ( MTariffsItem* trf=gFirst(); trf; trf=trf->gNext() )
+	for ( const auto &trf: *this )
 	{
-		if ( !trf->CheckForTime(Time_) ) continue;
+		if ( !trf.CheckForTime(Time_) ) continue;
 
 		MTariffsInfoItem* ti=TariffsInfo_->Add();
-		trf->GetInfo(ti);
+		trf.GetInfo(ti);
 	}
 }
 //---------------------------------------------------------------------------

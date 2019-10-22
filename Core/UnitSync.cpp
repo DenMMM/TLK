@@ -232,12 +232,14 @@ error:
 //---------------------------------------------------------------------------
 void MSyncStates::Associate(MStates *States_, MComputers *Computers_)
 {
-    MSyncStatesItem *SyncState, *LastSyncState;
+	MSyncStatesItem *SyncState;
 	MComputersItem *Computer;
 	in_addr IP_inaddr;
 	u_long IP;
 
-	LastSyncState=gFirst();
+	auto iLastSyncState=begin();
+	auto iEnd=end();
+
 	for ( auto &State: *States_ )
 	{
 		// Ищем компьютер, с которым ассоциировано состояние
@@ -263,43 +265,52 @@ void MSyncStates::Associate(MStates *States_, MComputers *Computers_)
 		// Ассоциируем состояние синхронизации с состоянием компьютера и его адресом
 		SyncState->Associate(&State,IP);
 		// Если состояние не последнее в списке, переносим его к началу
-		if ( LastSyncState!=nullptr ) Swap(LastSyncState,SyncState);
-		LastSyncState=SyncState->gNext();
-    }
-    // Удаляем оставшиеся не нужными объекты
-    while(LastSyncState)
-    {
-        SyncState=LastSyncState->gNext();
-        Del(LastSyncState);
-        LastSyncState=SyncState;
-    }
+		if ( iLastSyncState!=iEnd ) Swap(&(*iLastSyncState),SyncState);
+		iLastSyncState=iterator(SyncState->gNext());
+	}
+	// Удаляем оставшиеся не нужными объекты
+	while( iLastSyncState!=iEnd )
+	{
+		SyncState=iLastSyncState->gNext();
+		Del(&(*iLastSyncState));
+		iLastSyncState=iterator(SyncState);
+	}
 }
 //---------------------------------------------------------------------------
 bool MSyncStates::Start() const
 {
-    for ( MSyncStatesItem* SyncState=gFirst();
-		SyncState; SyncState=SyncState->gNext() )
-        if ( !SyncState->Start() ) return false;
-    return true;
+	for ( auto &SyncState: *this )
+	{
+		if ( !SyncState.Start() ) return false;
+	}
+
+	return true;
 }
 //---------------------------------------------------------------------------
 bool MSyncStates::Stop() const
 {
-    bool NeedSave=false;
-	for ( MSyncStatesItem* SyncState=gFirst(); SyncState;
-        SyncState=SyncState->gNext() ) NeedSave|=SyncState->Stop();
-    return NeedSave;
+	bool NeedSave=false;
+
+	for ( auto &SyncState: *this )
+	{
+		NeedSave|=SyncState.Stop();
+	}
+
+	return NeedSave;
 }
 //---------------------------------------------------------------------------
 MSyncStatesItem *MSyncStates::Search(u_long IP_) const
 {
-	MSyncStatesItem* SyncState=gFirst();
-	while(SyncState)
+	auto iSyncState=cbegin();
+	auto iEnd=cend();
+
+	while ( iSyncState!=iEnd )
 	{
-		if ( SyncState->gIP()==IP_ ) break;
-		SyncState=SyncState->gNext();
+		if ( iSyncState->gIP()==IP_ ) break;
+		++iSyncState;
 	}
-	return SyncState;
+
+	return &(*iSyncState);
 }
 //---------------------------------------------------------------------------
 void MSync::SetARPFile(wchar_t *File_, unsigned Code_, bool AutoSave_)

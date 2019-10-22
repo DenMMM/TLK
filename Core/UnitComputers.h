@@ -19,8 +19,8 @@ class MComputers;
 #define mgcYellow                   4       // Желтый
 //---------------------------------------------------------------------------
 class MComputersItem:
-	public MSLListItem::Simple <
-		MSLListItem::Proxy <MSLListItem, MComputersItem>,
+	public MSLListItemSimple <
+		MSLListItem <MComputers, MComputersItem>,
 		MComputersItem>
 {
 public:
@@ -44,11 +44,12 @@ public:
 };
 //---------------------------------------------------------------------------
 class MComputers:
-	public MSLList::Simple <MSLList, MComputers, MComputersItem>
+	public MSLListSimple <
+		MSLList <MComputers, MComputersItem>,
+		MComputersItem>
 {
 public:
 	MComputersItem *Search(char Number_) const;
-	void Sort();
 };
 //---------------------------------------------------------------------------
 #endif

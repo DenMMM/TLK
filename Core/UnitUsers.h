@@ -17,8 +17,8 @@ class MUsers;
 #define MAX_UserNameLen         50
 //---------------------------------------------------------------------------
 class MUsersItem:
-	public MIDListItem::Simple <
-		MIDListItem::Proxy <MIDListItem, MUsersItem>,
+	public MIDListItemSimple <
+		MIDListItem <MUsers, MUsersItem>,
 		MUsersItem>
 {
 public:
@@ -64,7 +64,9 @@ public:
 };
 //---------------------------------------------------------------------------
 class MUsers:
-	public MIDList::Simple <MIDList, MUsers, MUsersItem>
+	public MIDListSimple <
+		MIDList <MUsers, MUsersItem>,
+		MUsersItem>
 {
 public:
 	size_t ActiveCount() const;

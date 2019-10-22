@@ -215,9 +215,13 @@ protected:
     bool SndHello(unsigned Seed_);
     bool RcvHello(unsigned *Seed_);
     bool SndRequest(unsigned char Type_, unsigned Seed_, unsigned Size_);
-    bool RcvRequest(unsigned char *Type_, unsigned Seed_, unsigned *Size_);
-    bool SndObject(MSLList *Obj_, unsigned Type_, unsigned Seed_);
-    bool RcvObject(MSLList *Obj_, unsigned Size_, unsigned Seed_);
+	bool RcvRequest(unsigned char *Type_, unsigned Seed_, unsigned *Size_);
+
+	template <typename obj_type>
+	bool SndObject(obj_type *Obj_, unsigned Type_, unsigned Seed_);
+
+	template <typename obj_type>
+	bool RcvObject(obj_type *Obj_, unsigned Size_, unsigned Seed_);
 
     // Операции с потоком отправки/приема
     static DWORD WINAPI ThreadF(LPVOID Data);
@@ -246,7 +250,7 @@ public:
 	~MSend() = default;
 };
 //---------------------------------------------------------------------------
-class MSendSrv:public MSend
+class MSendSrv: public MSend
 {
 private:
 	HWND Window;                // Окно для обработки сообщений о процессе отправки
@@ -255,26 +259,28 @@ private:
 	int Mode;                   		// Режим (что отправляем/запрашиваем)
 	Marray <MComputersItem*> *Comps;	// Массив со списком компьютеров для рассылки
 	MComputersItem *Comp;				// Указатель на компьютер, для загрузки
-	MSLList *DataObject;				// Объект для отправки/приема
+	MGames *ObjGames;                   // Объекты для
+	MClOptions *ObjOptions;             // отправки/приема
 
-    void ThreadP();
-    void ThreadSend();
-    void ThreadGet();
+	void ThreadP();
+	void ThreadSend();
+	void ThreadGet();
 	void Event(MComputersItem *Computer_, int Event_);
 
 public:
 	bool NetInit(HWND Window_, UINT MinMsg_, unsigned Code_, MAuth *MAC_);
 	bool NetFree();
 	bool Send(Marray <MComputersItem*> *Computers_, MGames *Games_, MClOptions *Options_);
-    bool Get(MComputersItem *Computer_, MGames *Games_, MClOptions *Options_);
-    void Stop();
+	bool Get(MComputersItem *Computer_, MGames *Games_, MClOptions *Options_);
+	void Stop();
 
 	MSendSrv():
 		Window(nullptr),
 		Mode(mssNone),
 		Comps(nullptr),
 		Comp(nullptr),
-		DataObject(nullptr)
+		ObjGames(nullptr),
+		ObjOptions(nullptr)
 	{
 	}
 
@@ -285,7 +291,7 @@ public:
 	~MSendSrv() = default;
 };
 //---------------------------------------------------------------------------
-class MSendCl:public MSend
+class MSendCl: public MSend
 {
 private:
     MStateCl *State;            // Кому сообщать об обновлении списка игр, настроек

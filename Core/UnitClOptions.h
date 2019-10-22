@@ -13,9 +13,13 @@ class MClOptions;
 //---------------------------------------------------------------------------
 #define MAX_ClUNameLen   104            // Длина логина пользователя, под которым будет запускаться TLK shell
 //---------------------------------------------------------------------------
-class MClOptions: public MSLList
+class MClOptionsStub:
+	public MSLListItem <MClOptions, MClOptionsStub> {};
+
+class MClOptions:
+	public MSLList <MClOptions, MClOptionsStub> 	/// private ?
 {
-private:
+public:
     // Функции механизма сохранения/загрузки данных
 	virtual unsigned GetDataSize() const override;
 	virtual void *SetData(void *Data_) const override;

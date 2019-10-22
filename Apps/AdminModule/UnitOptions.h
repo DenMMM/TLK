@@ -2,12 +2,12 @@
 #ifndef UnitOptionsH
 #define UnitOptionsH
 //---------------------------------------------------------------------------
-class MOptions;
-//---------------------------------------------------------------------------
 #include "UnitCommon.h"
 #include "UnitSLList.h"
 #include "UnitLog.h"
 #include "UnitPassword.h"
+//---------------------------------------------------------------------------
+class MOptions;
 //---------------------------------------------------------------------------
 #define MAX_OptPassLen          16          // Длина пароля на настройки
 #define MAX_DialogTime          30          // Options.CostDialogTime
@@ -16,14 +16,12 @@ class MOptions;
 // Main Users Rights
 #define murPause                1           // Разрешить админам приостанавливать компьютеры
 //---------------------------------------------------------------------------
-class MOptions:public MSLList
-{
-private:
-    // Функции механизма сохранения/загрузки данных
-	virtual unsigned GetDataSize() const override;
-	virtual void *SetData(void *Data_) const override;
-	virtual const void *GetData(const void *Data_, const void *Limit_) override;
+class MOptionsStub:
+	public MSLListItem <MOptions, MOptionsStub> {};
 
+class MOptions:
+	public MSLList <MOptions, MOptionsStub>       /// private ?
+{
 public:
 	char LogPeriod;             // Период ведения файла лога
 	short FilterFreeTime;       // Время до окончания работы компьютера, когда он подпадает под фильтр свободных (в минутах)
@@ -31,6 +29,11 @@ public:
 	double CostPrecision;       // Точность расчета цен
 	unsigned UsersRights;       // Права пользователей (администраторов)
 	MPassword Pass;             // Пароль на изменение настроек
+
+	// Функции механизма сохранения/загрузки данных
+	virtual unsigned GetDataSize() const override;
+	virtual void *SetData(void *Data_) const override;
+	virtual const void *GetData(const void *Data_, const void *Limit_) override;
 
 	MOptions():
 		LogPeriod(mlpDay),

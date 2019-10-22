@@ -217,44 +217,46 @@ bool MLog::Begin(
 //---------------------------------------------------------------------------
 bool MLog::Open()
 {
-    MLogRecordsItem *record;
+	Opened=false;
+	Records.Clear();
 
-    Opened=false;
-    Records.Clear();
-    // Загружаем все записи
-    if ( !Records.Load() ) goto error;
+	// Загружаем все записи
+	if ( !Records.Load() ) return false;	// goto error;
 
-    // Производим простейшую проверку
-	record=Records.gFirst();
-	if ( (record==nullptr)||
-		(record->gTypeID() != MLogRecords::LogBegin::TypeID) ) goto error;
+	// Производим простейшую проверку
+	auto iRecord=Records.cbegin();
+	auto iEnd=Records.cend();
+
+	if ( (iRecord==iEnd)||
+		(iRecord->gTypeID() != MLogRecords::LogBegin::TypeID) ) goto error;
 	// Запоминаем время, когда лог был начат
-	BeginTime=dynamic_cast<MLogRecords::LogBegin&>(*record).SystemTime;
+	BeginTime=dynamic_cast<MLogRecords::LogBegin&>(*iRecord).SystemTime;
 	//
-	record=record->gNext();
-	if ( (record==nullptr)||
-		(record->gTypeID() != MLogRecords::DataStates::TypeID) ) goto error;
+	++iRecord;
+	if ( (iRecord==iEnd)||
+		(iRecord->gTypeID() != MLogRecords::DataStates::TypeID) ) goto error;
 
-	record=record->gNext();
-	if ( (record==nullptr)||
-		(record->gTypeID() != MLogRecords::DataTariffs::TypeID) ) goto error;
+	++iRecord;
+	if ( (iRecord==iEnd)||
+		(iRecord->gTypeID() != MLogRecords::DataTariffs::TypeID) ) goto error;
 
-	record=record->gNext();
-	if ( (record==nullptr)||
-		(record->gTypeID() != MLogRecords::DataFines::TypeID) ) goto error;
+	++iRecord;
+	if ( (iRecord==iEnd)||
+		(iRecord->gTypeID() != MLogRecords::DataFines::TypeID) ) goto error;
 
-	record=record->gNext();
-	if ( (record==nullptr)||
-		(record->gTypeID() != MLogRecords::DataUsers::TypeID) ) goto error;
+	++iRecord;
+	if ( (iRecord==iEnd)||
+		(iRecord->gTypeID() != MLogRecords::DataUsers::TypeID) ) goto error;
 
-	record=Records.gLast();
-	if ( record->gTypeID() == MLogRecords::LogEnd::TypeID ) goto error;
+	++iRecord;
+	if ( iRecord->gTypeID() == MLogRecords::LogEnd::TypeID ) goto error;
 //	if ( Records.gLast()->gTypeID() == MLogRecords::LogEnd::TypeID ) goto error;
 	Opened=true;
 
     // Определяем какой пользователь последним открыл смену
     User=0;
-	for ( record=Records.gLast(); record; record=record->gPrev() )
+	for ( MLogRecordsItem *record=Records.gLast();
+		record; record=record->gPrev() )
     {
 		unsigned char type=record->gTypeID();
 		if ( type == MLogRecords::AppLogOut::TypeID ) break;

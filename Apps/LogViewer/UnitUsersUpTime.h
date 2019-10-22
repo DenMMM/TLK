@@ -4,9 +4,12 @@
 //---------------------------------------------------------------------------
 #include "UnitList.h"
 //---------------------------------------------------------------------------
+class MUserUpTime;
+class MUsersUpTime;
+//---------------------------------------------------------------------------
 class MUserUpTime:
-	public MListItem::Simple <
-		MListItem::Proxy <MListItem, MUserUpTime>,
+	public MListItemSimple <
+		MListItem <MUsersUpTime, MUserUpTime>,
 		MUserUpTime>
 {
 public:
@@ -25,7 +28,9 @@ public:
 };
 //---------------------------------------------------------------------------
 class MUsersUpTime:
-	public MList::Simple <MList, MUsersUpTime, MUserUpTime>
+	public MListSimple <
+		MList <MUsersUpTime, MUserUpTime>,
+		MUserUpTime>
 {
 };
 //---------------------------------------------------------------------------

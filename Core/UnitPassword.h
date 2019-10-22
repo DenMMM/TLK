@@ -19,17 +19,21 @@ class MPassword;
 #define PASS_HashSize   SHA256_DIGEST_SIZE  // SHA512_DIGEST_SIZE
 #define PASS_SaltSize   SHA256_DIGEST_SIZE  // SHA256_BLOCK_SIZE, SHA512_BLOCK_SIZE ?
 //---------------------------------------------------------------------------
-class MPassword: private MSLList		/// MSLListItem ?
-{
-private:
-    unsigned char Salt[PASS_SaltSize];
-    unsigned char Hash[PASS_HashSize];
+class MPasswordStub:
+	public MSLListItem <MPassword, MPasswordStub> {};
 
+class MPassword:
+	public MSLList <MPassword, MPasswordStub>
+{
 public:
 	// Функции механизма сохранения/загрузки данных
 	virtual unsigned GetDataSize() const override;
 	virtual void *SetData(void *Data_) const override;
 	virtual const void *GetData(const void *Data_, const void *Limit_) override;
+
+private:
+	unsigned char Salt[PASS_SaltSize];
+	unsigned char Hash[PASS_HashSize];
 
 public:
 	void Set(const std::wstring &Pass_);

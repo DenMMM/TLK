@@ -323,9 +323,10 @@ error:
     return false;
 }
 //---------------------------------------------------------------------------
-bool MSend::SndObject(MSLList *Obj_, unsigned Type_, unsigned Seed_)
+template <typename obj_type>
+bool MSend::SndObject(obj_type *Obj_, unsigned Type_, unsigned Seed_)
 {
-    Marray <char> Data;
+	Marray <char> Data;
 	char *pt;
 	unsigned Size;
 
@@ -337,22 +338,23 @@ bool MSend::SndObject(MSLList *Obj_, unsigned Type_, unsigned Seed_)
 		// Заполняем его
 		pt=static_cast<char*>(MemSet(&Data[0],(unsigned)Seed_));
 		pt=static_cast<char*>(Obj_->SetAllData(pt));
-        // Добавляем MAC и шифруем
-        NetMAC->Calc(&Data[0],pt-&Data[0],pt,&Data[0]+Size-pt);
-        BasicEncode(&Data[0],Size,NetCode);
+		// Добавляем MAC и шифруем
+		NetMAC->Calc(&Data[0],pt-&Data[0],pt,&Data[0]+Size-pt);
+		BasicEncode(&Data[0],Size,NetCode);
 
-        // Отправляем клиенту информер и данные
-        if ( (!SndRequest(Type_,Seed_,Size))||
-            (!Snd(&Data[0],Size,10)) ) goto error;
-    }
-    catch (std::bad_alloc &e) { goto error; }
+		// Отправляем клиенту информер и данные
+		if ( (!SndRequest(Type_,Seed_,Size))||
+			(!Snd(&Data[0],Size,10)) ) goto error;
+	}
+	catch (std::bad_alloc &e) { goto error; }
 
-    return true;
+	return true;
 error:
-    return false;
+	return false;
 }
 //---------------------------------------------------------------------------
-bool MSend::RcvObject(MSLList *Obj_, unsigned Size_, unsigned Seed_)
+template <typename obj_type>
+bool MSend::RcvObject(obj_type *Obj_, unsigned Size_, unsigned Seed_)
 {
     Marray <char> Data;
 
@@ -455,95 +457,113 @@ void MSendSrv::ThreadP()
 //---------------------------------------------------------------------------
 void MSendSrv::ThreadSend()
 {
-    unsigned Seed, RmtSeed, Size;
+	unsigned Seed, RmtSeed, Size;
     unsigned char Type;
-    MComputersItem *pComp;
+	MComputersItem *pComp;
 
-    for ( unsigned i=0; i<Comps->Count(); i++ )
-    {
-        // Создаем сокет для исходящего соединения
-        if ( !Create(true) ) goto next;
-        pComp=(*Comps)[i];
-        // Устанавливаем соединение
-        Event(pComp,mseConnecting);
-        if ( !Connect(pComp->Address.c_str(),2) ) { Event(pComp,mseNotConnect); goto next; }
-        Event(pComp,mseSending);
+	for ( unsigned i=0; i<Comps->Count(); i++ )
+	{
+		// Создаем сокет для исходящего соединения
+		if ( !Create(true) ) goto next;
+		pComp=(*Comps)[i];
+		// Устанавливаем соединение
+		Event(pComp,mseConnecting);
+		if ( !Connect(pComp->Address.c_str(),2) ) { Event(pComp,mseNotConnect); goto next; }
+		Event(pComp,mseSending);
 
-        // Выполнем обмен hello и генерируем ID сеанса
-        Seed=BasicRand();
-        if ( (!SndHello(Seed))||
-            (!RcvHello(&RmtSeed)) ) { Event(pComp,mseProtError); goto next; }
-        Seed=BasicMix(Seed,RmtSeed);
+		// Выполнем обмен hello и генерируем ID сеанса
+		Seed=BasicRand();
+		if ( (!SndHello(Seed))||
+			(!RcvHello(&RmtSeed)) ) { Event(pComp,mseProtError); goto next; }
+		Seed=BasicMix(Seed,RmtSeed);
 
-        // Отправляем блок-информер и данные
-        switch(Mode)
-        {
-            case mssSendGames:  Type=mstSendGames; break;
-            case mssSendConfig: Type=mstSendConfig; break;
-            default: goto next;
-        }
-        if ( !SndObject(DataObject,Type,Seed) ) { Event(pComp,mseProtError); goto next; }
+		// Отправляем блок-информер и данные
+		switch(Mode)
+		{
+			case mssSendGames:
+				if ( !SndObject(ObjGames,mstSendGames,Seed) ) {
+					Event(pComp,mseProtError); goto next; }
+				break;
+			case mssSendConfig:
+				if ( !SndObject(ObjOptions,mstSendConfig,Seed) ) {
+					Event(pComp,mseProtError); goto next; }
+				break;
+			default:
+				goto next;
+		}
 
-        // Принимаем подтверждение
-        if ( !RcvRequest(&Type,Seed,&Size) ) { Event(pComp,mseProtError); goto next; }
-        if ( (Type!=mstAccept)||(Size!=0) ) { Event(pComp,mseProtError); goto next; }
+		// Принимаем подтверждение
+		if ( !RcvRequest(&Type,Seed,&Size) ) { Event(pComp,mseProtError); goto next; }
+		if ( (Type!=mstAccept)||(Size!=0) ) { Event(pComp,mseProtError); goto next; }
 
-        // Завершаем соединение
-        Event(pComp,mseDisconnecting);
-        if ( !Disconnect(10) ) { Event(pComp,mseProtError); goto next; }
+		// Завершаем соединение
+		Event(pComp,mseDisconnecting);
+		if ( !Disconnect(10) ) { Event(pComp,mseProtError); goto next; }
 
-        Event(pComp,mseExecute);
+		Event(pComp,mseExecute);
 next:
-        rClose();
-        if ( Break ) break;
-    }
+		rClose();
+		if ( Break ) break;
+	}
 }
 //---------------------------------------------------------------------------
 void MSendSrv::ThreadGet()
 {
-    unsigned Seed, RmtSeed, Size;
-    unsigned char Type;
+	unsigned Seed, RmtSeed, Size;
+	unsigned char Type;
 
-    if ( !Create(true) ) goto error;
-    // Устанавливаем соединение
-    Event(Comp,mseConnecting);
-    if ( !Connect((Comp)->Address.c_str(),2) ) { Event(Comp,mseNotConnect); goto error; }
-    Event(Comp,mseReceiving);
+	if ( !Create(true) ) goto error;
+	// Устанавливаем соединение
+	Event(Comp,mseConnecting);
+	if ( !Connect((Comp)->Address.c_str(),2) ) { Event(Comp,mseNotConnect); goto error; }
+	Event(Comp,mseReceiving);
 
-    // Выполнем обмен hello и генерируем ID сеанса
-    Seed=BasicRand();
-    if ( (!SndHello(Seed))||
-        (!RcvHello(&RmtSeed)) ) { Event(Comp,mseProtError); goto error; }
-    Seed=BasicMix(Seed,RmtSeed);
+	// Выполнем обмен hello и генерируем ID сеанса
+	Seed=BasicRand();
+	if ( (!SndHello(Seed))||
+		(!RcvHello(&RmtSeed)) ) { Event(Comp,mseProtError); goto error; }
+	Seed=BasicMix(Seed,RmtSeed);
 
-    // Отправляем запрос на данные
-    switch(Mode)
-    {
-        case mssGetGames:   Type=mstGetGames; break;
-        case mssGetConfig:  Type=mstGetConfig; break;
-        default: goto error;
-    }
-    if ( !SndRequest(Type,Seed,0) ) { Event(Comp,mseProtError); goto error; }
+	// Отправляем запрос на данные
+	switch(Mode)
+	{
+		case mssGetGames:   Type=mstGetGames; break;
+		case mssGetConfig:  Type=mstGetConfig; break;
+		default: goto error;
+	}
+	if ( !SndRequest(Type,Seed,0) ) { Event(Comp,mseProtError); goto error; }
 
-    // Принимаем ответ и данные
-    if ( (!RcvRequest(&Type,Seed,&Size))||
-        (Type!=mstAccept)||
-        (!RcvObject(DataObject,Size,Seed)) ) { Event(Comp,mseProtError); goto error; }
+	// Принимаем ответ и данные
+	if ( (!RcvRequest(&Type,Seed,&Size))||
+		(Type!=mstAccept) ) { Event(Comp,mseProtError); goto error; }
+	switch(Mode)
+	{
+		case mssGetGames:
+			if ( !RcvObject(ObjGames,Size,Seed) ) {
+				Event(Comp,mseProtError); goto error; }
+			break;
+		case mssGetConfig:
+			if ( !RcvObject(ObjOptions,Size,Seed) ) {
+				Event(Comp,mseProtError); goto error; }
+			break;
+		default:
+			break;
+	}
 
-    // Завершаем соединение
-    Event(Comp,mseDisconnecting);
-    if ( !Disconnect(10) ) { Event(Comp,mseProtError); goto error; }
+	// Завершаем соединение
+	Event(Comp,mseDisconnecting);
+	if ( !Disconnect(10) ) { Event(Comp,mseProtError); goto error; }
 
-    Event(Comp,mseExecute);
+	Event(Comp,mseExecute);
 error:
-    rClose();
+	rClose();
 }
 //---------------------------------------------------------------------------
 bool MSendSrv::NetInit(HWND Window_, UINT MinMsg_, unsigned Code_, MAuth *MAC_)
 {
-    Window=Window_;
-    MinMsg=MinMsg_;
-    return MSend::NetInit(Code_,MAC_);
+	Window=Window_;
+	MinMsg=MinMsg_;
+	return MSend::NetInit(Code_,MAC_);
 }
 //---------------------------------------------------------------------------
 bool MSendSrv::NetFree()
@@ -561,35 +581,39 @@ bool MSendSrv::Send(Marray <MComputersItem*> *Computers_, MGames *Games_, MClOpt
     Comps=Computers_;
     if ( Games_!=nullptr )
     {
-        DataObject=Games_;
-        Mode=mssSendGames;
-    } else if ( Options_!=nullptr )
-    {
-        DataObject=Options_;
-        Mode=mssSendConfig;
-    } else goto error;                  /// throw ?
+		ObjGames=Games_;
+		ObjOptions=nullptr;
+		Mode=mssSendGames;
+	} else if ( Options_!=nullptr )
+	{
+		ObjGames=nullptr;
+		ObjOptions=Options_;
+		Mode=mssSendConfig;
+	} else goto error;                  /// throw ?
 
-    // Создаем поток, который разошлет данные компьютерам
-    return Start();
+	// Создаем поток, который разошлет данные компьютерам
+	return Start();
 error:
-    return false;
+	return false;
 }
 //---------------------------------------------------------------------------
 bool MSendSrv::Get(MComputersItem *Computer_, MGames *Games_, MClOptions *Options_)
 {
-    if ( Mode!=mssNone ) goto error;
+	if ( Mode!=mssNone ) goto error;
 //    // Прерываем текущие сетевые операции
 //    Stop();
 
-    if ( Computer_==nullptr ) goto error;  /// throw ?
-    Comp=Computer_;
-    if ( Games_!=nullptr )
-    {
-        DataObject=Games_;
-        Mode=mssGetGames;
-    } else if ( Options_!=nullptr )
-    {
-        DataObject=Options_;
+	if ( Computer_==nullptr ) goto error;  /// throw ?
+	Comp=Computer_;
+	if ( Games_!=nullptr )
+	{
+		ObjGames=Games_;
+		ObjOptions=nullptr;
+		Mode=mssGetGames;
+	} else if ( Options_!=nullptr )
+	{
+		ObjGames=nullptr;
+		ObjOptions=Options_;
         Mode=mssGetConfig;
     } else goto error;                  /// throw ?
 

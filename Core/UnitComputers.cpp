@@ -36,34 +36,16 @@ const void *MComputersItem::GetData(const void *Data_, const void *Limit_)
 //---------------------------------------------------------------------------
 MComputersItem *MComputers::Search(char Number_) const
 {
-	MComputersItem *Computer=gFirst();
-	while(Computer)
+	auto iComputer=cbegin();
+	auto iEnd=cend();
+
+	while ( iComputer!=iEnd )
 	{
-		if ( Computer->Number==Number_ ) break;
-		Computer=Computer->gNext();
+		if ( iComputer->Number==Number_ ) break;
+		++iComputer;
 	}
-	return Computer;
-}
 
-void MComputers::Sort()
-{
-    MComputersItem *Computer, *NextComputer;
-    bool Sorted;
-
-    if ( gFirst()==nullptr ) return;
-
-    do
-    {
-		Sorted=true; Computer=gFirst();
-		while((NextComputer=Computer->gNext())!=nullptr)
-        {
-            if ( Computer->Number>NextComputer->Number )
-            {
-                Swap(Computer,NextComputer);
-                Sorted=false;
-            } else Computer=NextComputer;
-        }
-    } while(!Sorted);
+	return &(*iComputer);
 }
 //---------------------------------------------------------------------------
 

@@ -13,8 +13,8 @@ class MFines;
 #define MAX_FineDescrLen    50      // Допустимая длина описания штрафа
 //---------------------------------------------------------------------------
 class MFinesItem:
-	public MIDListItem::Simple <
-		MIDListItem::Proxy <MIDListItem, MFinesItem>,
+	public MIDListItemSimple <
+		MIDListItem <MFines, MFinesItem>,
 		MFinesItem>
 {
 public:
@@ -55,7 +55,9 @@ public:
 };
 //---------------------------------------------------------------------------
 class MFines:
-	public MIDList::Simple <MIDList, MFines, MFinesItem>
+	public MIDListSimple <
+		MIDList <MFines, MFinesItem>,
+		MFinesItem>
 {
 };
 //---------------------------------------------------------------------------
