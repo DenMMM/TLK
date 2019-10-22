@@ -171,43 +171,41 @@ void __fastcall TFormRun::ListViewComputersSelectItem(TObject *Sender,
 			break;
 		}
 		Num++;
-    }
+	}
 }
 //---------------------------------------------------------------------------
 void __fastcall TFormRun::ComboBoxTariffClick(TObject *Sender)
 {
-	MTariffsItem *Tariff;
-	MTariffRunTimesItem *Time;
-	wchar_t line[30];
-
 	// Определяем какой тариф был выбран
 	if ( RunMode ) SelTariffID=
 		UseTariffs.GetItem(ComboBoxTariff->ItemIndex)->ID;
 
-	Tariff=Tariffs->SrchUUID(SelTariffID);
+	MTariffsItem *Tariff=Tariffs->SrchUUID(SelTariffID);
 	// Задаем для выбранных компьютеров тариф, если он применим к ним
-    if ( RunMode )
-    {
-        TItemStates is=TItemStates()<<isSelected;
-        for ( TListItem *Item=ListViewComputers->Selected; Item;
-            Item=ListViewComputers->GetNextItem(Item,sdAll,is) )
-        {
-            Time=reinterpret_cast<MTariffRunTimesItem*>(Item->Data);
-            if ( !Tariff->CheckForComp(Time->Number) ) continue;
-            if ( Time->TariffID==SelTariffID ) continue;
-            Time->TariffID=SelTariffID;
-            Time->Type=mttUndefined;
-            SetListViewComputersLine(Item);
-        }
-    }
+	if ( RunMode )
+	{
+		TItemStates is=TItemStates()<<isSelected;
+		for ( TListItem *Item=ListViewComputers->Selected; Item;
+			Item=ListViewComputers->GetNextItem(Item,sdAll,is) )
+		{
+			auto Time=reinterpret_cast<MTariffRunTimesItem*>(Item->Data);
+			if ( !Tariff->CheckForComp(Time->Number) ) continue;
+			if ( Time->TariffID==SelTariffID ) continue;
+			Time->TariffID=SelTariffID;
+			Time->Type=mttUndefined;
+			SetListViewComputersLine(Item);
+		}
+	}
 
-    ComboBoxTime->Clear();
+	ComboBoxTime->Clear();
 
 	// Запрашиваем для тарифа список пакетов
 	Tariff->GetRunTimes(OpenDialogTime,&UseTimes);
+
 	// Если пакетов для тарифа в это время нету, то запрещаем ввод времени
 	auto iTime=UseTimes.begin();
 	auto iEnd=UseTimes.end();
+
 	if ( iTime==iEnd )
 	{
 		ComboBoxTime->Enabled=false;
@@ -222,7 +220,7 @@ void __fastcall TFormRun::ComboBoxTariffClick(TObject *Sender)
 	if ( iTime->Type==mttHours )
 	{
 		ComboBoxTime->Style=iTime->gNext()?csDropDown:csSimple;
-		UseTimes.Del(&(*Time));
+		UseTimes.Del(&(*iTime));
 		iTime=UseTimes.begin();
 	} else
 	{
@@ -231,6 +229,8 @@ void __fastcall TFormRun::ComboBoxTariffClick(TObject *Sender)
 	// Заносим в список пакеты
 	while ( iTime!=iEnd )
 	{
+		wchar_t line[30];
+
 		switch( iTime->Type )
 		{
 			case mttFlyPacket:
@@ -259,8 +259,8 @@ void __fastcall TFormRun::ComboBoxTariffClick(TObject *Sender)
 		++iTime;
 	}
 
-    // Обновляем сведения об общей стоимости заказа
-    if ( RunMode ) UpdateFullCost();
+	// Обновляем сведения об общей стоимости заказа
+	if ( RunMode ) UpdateFullCost();
 }
 //---------------------------------------------------------------------------
 void __fastcall TFormRun::ComboBoxTimeClick(TObject *Sender)
