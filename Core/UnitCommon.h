@@ -12,74 +12,6 @@
 #define ENC_Code        0x5BC935CF  // Код шифрования файлов
 #define ENC_Net         0x9ABD5BAE  // Код шифрования сетевых данных
 //---------------------------------------------------------------------------
-template <typename titem>
-class Marray
-{
-private:
-	size_t ICount;
-	titem *Items;
-
-public:
-	void Alloc(size_t Count_=0)
-	{
-		if ( Count_==0 || Count_!=ICount  )
-		{
-			delete[] Items;
-			Items=nullptr;
-		}
-		if ( Count_!=0 )
-		{
-			Items=new titem[Count_];
-			ICount=Count_;
-		}
-	}
-
-	unsigned Count() const
-	{
-		return ICount;
-	}
-
-	titem &operator[](size_t Num_) const
-	{
-		if ( Num_>=ICount )
-		{
-			throw std::out_of_range (
-				"MArray::[]\n"
-				"Попытка выйти за пределы массива."
-				);
-		}
-		return Items[Num_];
-	}
-
-	Marray &operator=(const Marray &Src_)
-	{
-		// Убедимся, что не сами себя копируем
-		if ( &Src_==this ) return *this;
-		// Пересоздадим массив
-		Alloc(Src_.ICount);
-		// Скопируем все элементы
-		for (size_t i=0; i<ICount; i++)
-			Items[i]=Src_.Items[i];         /// возможно, стоит обработать bad_alloc
-
-		return *this;
-	}
-
-	Marray()
-	{
-		ICount=0;
-		Items=nullptr;
-	}
-
-	~Marray()
-	{
-		delete[] Items;
-	}
-
-	Marray(Marray&) = delete;
-	Marray(Marray&&) noexcept = delete;
-	Marray &operator=(Marray&&) noexcept = delete;
-};
-//---------------------------------------------------------------------------
 // Сравнение двух чисел: "0" - равны, "-1" - первое меньше второго, "+1" - наоборот
 template <typename type>
 //inline int DComp(type &D1_, type &D2_)
@@ -92,7 +24,7 @@ inline int DComp(type D1_, type D2_)
 template <typename type>
 inline type BitsLeft(type Bits_)
 {
-    return (Bits_<<1)|(Bits_>>(sizeof(type)*8-1));
+	return (Bits_<<1)|(Bits_>>(sizeof(type)*8-1));
 }
 
 // Побитовый циклический сдвиг вправо

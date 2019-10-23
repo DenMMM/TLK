@@ -254,48 +254,44 @@ unsigned MLogRecords::DataStatesBase::GetDataSize() const
             sizeof(SystemTime)+
             sizeof(unsigned);                   // —четчик состо€ний
 
-    if ( States.Count()>0 )
-    {
-        Size+=(
-            sizeof(States[0].Number)+
-            sizeof(States[0].State)+
-            sizeof(States[0].TariffID)+
-            sizeof(States[0].StartWorkTime)+
-            sizeof(States[0].SizeWorkTime)+
-            sizeof(States[0].StartFineTime)+
-            sizeof(States[0].SizeFineTime)+
-            sizeof(States[0].StopTimerTime))*States.Count();
-    }
+	Size+=(
+		sizeof(Items[0].Number)+
+		sizeof(Items[0].State)+
+		sizeof(Items[0].TariffID)+
+		sizeof(Items[0].StartWorkTime)+
+		sizeof(Items[0].SizeWorkTime)+
+		sizeof(Items[0].StartFineTime)+
+		sizeof(Items[0].SizeFineTime)+
+		sizeof(Items[0].StopTimerTime))*Items.size();
 
-    return Size;
+	return Size;
 }
 
 void *MLogRecords::DataStatesBase::SetData(void *Data_) const
 {
-    unsigned Count;
+	Data_=MemSet(Data_,SystemTime);
 
-    Data_=MemSet(Data_,SystemTime);
-    Count=States.Count(); Data_=MemSet(Data_,Count);
+	unsigned Count=Items.size();
+	Data_=MemSet(Data_,Count);
 
-    for ( unsigned i=0; i<Count; i++)
-    {
-        MStatesItem::LogData &ld=States[i];
-        Data_=MemSet(Data_,ld.Number);
-        Data_=MemSet(Data_,ld.State);
-        Data_=MemSet(Data_,ld.TariffID);
-        Data_=MemSet(Data_,ld.StartWorkTime);
-        Data_=MemSet(Data_,ld.SizeWorkTime);
-        Data_=MemSet(Data_,ld.StartFineTime);
-        Data_=MemSet(Data_,ld.SizeFineTime);
-        Data_=MemSet(Data_,ld.StopTimerTime);
-    }
+	for ( const auto &Ld: Items )
+	{
+		Data_=MemSet(Data_,Ld.Number);
+		Data_=MemSet(Data_,Ld.State);
+		Data_=MemSet(Data_,Ld.TariffID);
+		Data_=MemSet(Data_,Ld.StartWorkTime);
+		Data_=MemSet(Data_,Ld.SizeWorkTime);
+		Data_=MemSet(Data_,Ld.StartFineTime);
+		Data_=MemSet(Data_,Ld.SizeFineTime);
+		Data_=MemSet(Data_,Ld.StopTimerTime);
+	}
 
-    return Data_;
+	return Data_;
 }
 
 const void *MLogRecords::DataStatesBase::GetData(const void *Data_, const void *Limit_)
 {
-	unsigned Count;
+	unsigned Count=0;
 
 	if ( !(
 		(Data_=MemGet(Data_,&SystemTime,Limit_)) &&
@@ -303,20 +299,20 @@ const void *MLogRecords::DataStatesBase::GetData(const void *Data_, const void *
 		) ) return nullptr;
 
 	if ( Count>MAX_Comps ) return nullptr;
-	States.Alloc(Count);
+	Items.clear();
+	Items.resize(Count);
 
-	for ( unsigned i=0; i<Count; i++ )
+	for ( auto &Ld: Items )
 	{
-		MStatesItem::LogData &ld=States[i];
 		if ( !(
-			(Data_=MemGet(Data_,&ld.Number,Limit_)) &&
-			(Data_=MemGet(Data_,&ld.State,Limit_)) &&
-			(Data_=MemGet(Data_,&ld.TariffID,Limit_)) &&
-			(Data_=MemGet(Data_,&ld.StartWorkTime,Limit_)) &&
-			(Data_=MemGet(Data_,&ld.SizeWorkTime,Limit_)) &&
-			(Data_=MemGet(Data_,&ld.StartFineTime,Limit_)) &&
-			(Data_=MemGet(Data_,&ld.SizeFineTime,Limit_)) &&
-			(Data_=MemGet(Data_,&ld.StopTimerTime,Limit_))
+			(Data_=MemGet(Data_,&Ld.Number,Limit_)) &&
+			(Data_=MemGet(Data_,&Ld.State,Limit_)) &&
+			(Data_=MemGet(Data_,&Ld.TariffID,Limit_)) &&
+			(Data_=MemGet(Data_,&Ld.StartWorkTime,Limit_)) &&
+			(Data_=MemGet(Data_,&Ld.SizeWorkTime,Limit_)) &&
+			(Data_=MemGet(Data_,&Ld.StartFineTime,Limit_)) &&
+			(Data_=MemGet(Data_,&Ld.SizeFineTime,Limit_)) &&
+			(Data_=MemGet(Data_,&Ld.StopTimerTime,Limit_))
 			) ) return nullptr;
 	}
 
@@ -325,43 +321,39 @@ const void *MLogRecords::DataStatesBase::GetData(const void *Data_, const void *
 //---------------------------------------------------------------------------
 unsigned MLogRecords::DataTariffsBase::GetDataSize() const
 {
-    unsigned Size;
-
-    Size=
+	unsigned Size=
 		sizeof(SystemTime)+
 		sizeof(unsigned);                   // —четчик тарифов
 
-	for ( unsigned i=0, Count=Items.Count(); i<Count; i++ )
-    {
-		MTariffsItem::LogData &ld=Items[i];
-        Size+=
-			sizeof(ld.UUID)+
-			sizeofLine(ld.Name);
-    }
+	for ( const auto &Ld: Items )
+	{
+		Size+=
+			sizeof(Ld.UUID)+
+			sizeofLine(Ld.Name);
+	}
 
-    return Size;
+	return Size;
 }
 
 void *MLogRecords::DataTariffsBase::SetData(void *Data_) const
 {
-    unsigned Count;
+	Data_=MemSet(Data_,SystemTime);
 
-    Data_=MemSet(Data_,SystemTime);
-	Count=Items.Count(); Data_=MemSet(Data_,Count);
+	unsigned Count=Items.size();
+	Data_=MemSet(Data_,Count);
 
-    for ( unsigned i=0; i<Count; i++ )
-    {
-		MTariffsItem::LogData &ld=Items[i];
-		Data_=MemSet(Data_,ld.UUID);
-		Data_=MemSetLine(Data_,ld.Name);
-    }
+	for ( const auto &Ld: Items )
+	{
+		Data_=MemSet(Data_,Ld.UUID);
+		Data_=MemSetLine(Data_,Ld.Name);
+	}
 
     return Data_;
 }
 
 const void *MLogRecords::DataTariffsBase::GetData(const void *Data_, const void *Limit_)
 {
-    unsigned Count;
+    unsigned Count=0;
 
 	if ( !(
 		(Data_=MemGet(Data_,&SystemTime,Limit_)) &&
@@ -369,59 +361,55 @@ const void *MLogRecords::DataTariffsBase::GetData(const void *Data_, const void 
         ) ) return nullptr;
 
 	if ( Count>MAX_Tariffs ) return nullptr;
-	Items.Alloc(Count);
+	Items.clear();
+	Items.resize(Count);
 
-	for ( unsigned i=0; i<Count; i++ )
+	for ( auto &Ld: Items )
 	{
-		MTariffsItem::LogData &ld=Items[i];
 		if ( !(
-			(Data_=MemGet(Data_,&ld.UUID,Limit_)) &&
-			(Data_=MemGetLine(Data_,ld.Name,MAX_TariffNameLen,Limit_))
+			(Data_=MemGet(Data_,&Ld.UUID,Limit_)) &&
+			(Data_=MemGetLine(Data_,Ld.Name,MAX_TariffNameLen,Limit_))
 			) ) return nullptr;
-    }
+	}
 
-    return Data_;
+	return Data_;
 }
 //---------------------------------------------------------------------------
 unsigned MLogRecords::DataFinesBase::GetDataSize() const
 {
-    unsigned Size;
-
-    Size=
+	unsigned Size=
 		sizeof(SystemTime)+
 		sizeof(unsigned);                   // —четчик массива
 
-    for ( unsigned i=0, cnt=Items.Count(); i<cnt; i++ )
-    {
-		MFinesItem::LogData &ld=Items[i];
-        Size+=
-			sizeof(ld.UUID)+
-			sizeofLine(ld.Descr);
-    }
+	for ( const auto &Ld: Items )
+	{
+		Size+=
+			sizeof(Ld.UUID)+
+			sizeofLine(Ld.Descr);
+	}
 
     return Size;
 }
 
 void *MLogRecords::DataFinesBase::SetData(void *Data_) const
 {
-    unsigned Count;
+	Data_=MemSet(Data_,SystemTime);
 
-    Data_=MemSet(Data_,SystemTime);
-    Count=Items.Count(); Data_=MemSet(Data_,Count);
+	unsigned Count=Items.size();
+	Data_=MemSet(Data_,Count);
 
-    for ( unsigned i=0; i<Count; i++ )
-    {
-		MFinesItem::LogData &ld=Items[i];
-		Data_=MemSet(Data_,ld.UUID);
-        Data_=MemSetLine(Data_,ld.Descr);
-    }
+	for ( const auto &Ld: Items )
+	{
+		Data_=MemSet(Data_,Ld.UUID);
+		Data_=MemSetLine(Data_,Ld.Descr);
+	}
 
     return Data_;
 }
 
 const void *MLogRecords::DataFinesBase::GetData(const void *Data_, const void *Limit_)
 {
-    unsigned Count;
+    unsigned Count=0;
 
 	if ( !(
 		(Data_=MemGet(Data_,&SystemTime,Limit_)) &&
@@ -429,60 +417,57 @@ const void *MLogRecords::DataFinesBase::GetData(const void *Data_, const void *L
         ) ) return nullptr;
 
 	if ( Count>MAX_Fines ) return nullptr;
-    Items.Alloc(Count);
+	Items.clear();
+    Items.resize(Count);
 
-    for ( unsigned i=0; i<Count; i++ )
-    {
-		MFinesItem::LogData &ld=Items[i];
+	for ( auto &Ld: Items )
+	{
 		if ( !(
-			(Data_=MemGet(Data_,&ld.UUID,Limit_)) &&
-			(Data_=MemGetLine(Data_,ld.Descr,MAX_FineDescrLen,Limit_))
-            ) ) return nullptr;
-    }
+			(Data_=MemGet(Data_,&Ld.UUID,Limit_)) &&
+			(Data_=MemGetLine(Data_,Ld.Descr,MAX_FineDescrLen,Limit_))
+			) ) return nullptr;
+	}
 
 	return Data_;
 }
 //---------------------------------------------------------------------------
 unsigned MLogRecords::DataUsersBase::GetDataSize() const
 {
-    unsigned Size;
-
-    Size=
+	unsigned Size=
 		sizeof(SystemTime)+
 		sizeof(unsigned);                       // —четчик пользователей
 
-    for ( unsigned i=0, Count=Items.Count(); i<Count; i++ )
-    {
-        MUsersItem::LogData &ld=Items[i];
-        Size+=
-			sizeof(ld.UUID)+
-			sizeofLine(ld.Login)+
-            sizeofLine(ld.Name);
-    }
+	for ( const auto &Ld: Items )
+	{
+		Size+=
+			sizeof(Ld.UUID)+
+			sizeofLine(Ld.Login)+
+			sizeofLine(Ld.Name);
+	}
 
     return Size;
 }
 
 void *MLogRecords::DataUsersBase::SetData(void *Data_) const
 {
-    unsigned Count;
+	Data_=MemSet(Data_,SystemTime);
 
-    Data_=MemSet(Data_,SystemTime);
-    Count=Items.Count(); Data_=MemSet(Data_,Count);
-    for ( unsigned i=0; i<Count; i++ )
-    {
-		MUsersItem::LogData &ld=Items[i];
-        Data_=MemSet(Data_,ld.UUID);
-		Data_=MemSetLine(Data_,ld.Login);
-		Data_=MemSetLine(Data_,ld.Name);
+	unsigned Count=Items.size();
+	Data_=MemSet(Data_,Count);
+
+	for ( const auto &Ld: Items )
+	{
+		Data_=MemSet(Data_,Ld.UUID);
+		Data_=MemSetLine(Data_,Ld.Login);
+		Data_=MemSetLine(Data_,Ld.Name);
 	}
 
-    return Data_;
+	return Data_;
 }
 
 const void *MLogRecords::DataUsersBase::GetData(const void *Data_, const void *Limit_)
 {
-    unsigned Count;
+    unsigned Count=0;
 
 	if ( !(
 		(Data_=MemGet(Data_,&SystemTime,Limit_)) &&
@@ -490,19 +475,19 @@ const void *MLogRecords::DataUsersBase::GetData(const void *Data_, const void *L
         ) ) return nullptr;
 
 	if ( Count>MAX_Users ) return nullptr;
-    Items.Alloc(Count);
+	Items.clear();
+    Items.resize(Count);
 
-    for ( unsigned i=0; i<Count; i++ )
-    {
-        MUsersItem::LogData &ld=Items[i];
+	for ( auto &Ld: Items )
+	{
 		if ( !(
-			(Data_=MemGet(Data_,&ld.UUID,Limit_)) &&
-			(Data_=MemGetLine(Data_,ld.Login,MAX_UserLoginLen,Limit_)) &&
-			(Data_=MemGetLine(Data_,ld.Name,MAX_UserNameLen,Limit_))
-            ) ) return nullptr;
-    }
+			(Data_=MemGet(Data_,&Ld.UUID,Limit_)) &&
+			(Data_=MemGetLine(Data_,Ld.Login,MAX_UserLoginLen,Limit_)) &&
+			(Data_=MemGetLine(Data_,Ld.Name,MAX_UserNameLen,Limit_))
+			) ) return nullptr;
+	}
 
-    return Data_;
+	return Data_;
 }
 //---------------------------------------------------------------------------
 

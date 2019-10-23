@@ -151,25 +151,26 @@ public:
 		__int64 StartFineTime;      // Время, когда был применен штраф (абсолютное время)
 		short SizeFineTime;         // Время ожидания в режиме штрафа (в минутах)
 		__int64 StopTimerTime;      // Время остановки отсчета времени (абсолютное время)
-
-		LogData &operator=(const MStatesItem &State_)
-		{
-			MWAPI::CRITICAL_SECTION::Lock lckObj(State_.CS_Main);
-
-			Number=State_.Number;
-			State=State_.State;
-			TariffID=State_.TariffID;
-			StartWorkTime=State_.StartWorkTime;
-			SizeWorkTime=State_.SizeWorkTime;
-			StartFineTime=State_.StartFineTime;
-			SizeFineTime=State_.SizeFineTime;
-			StopTimerTime=State_.StopTimerTime;
-
-			return *this;
-		}
 	};
 
-	MStatesItem &operator=(const LogData &Data_)
+	LogData gLogData() const
+	{
+		MWAPI::CRITICAL_SECTION::Lock lckObj(CS_Main);
+
+		LogData ld;
+		ld.Number=Number;
+		ld.State=State;
+		ld.TariffID=TariffID;
+		ld.StartWorkTime=StartWorkTime;
+		ld.SizeWorkTime=SizeWorkTime;
+		ld.StartFineTime=StartFineTime;
+		ld.SizeFineTime=SizeFineTime;
+		ld.StopTimerTime=StopTimerTime;
+
+		return ld;
+	}
+
+	void sFromLog(const LogData &Data_)
 	{
 		MWAPI::CRITICAL_SECTION::Lock lckObj(CS_Main);
 
@@ -182,8 +183,6 @@ public:
 		SizeFineTime=Data_.SizeFineTime;
 		StopTimerTime=Data_.StopTimerTime;
 		Changes=mdcAll;
-
-		return *this;
 	}
 
 	MStatesItem():

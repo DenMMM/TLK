@@ -3,6 +3,7 @@
 #define UnitSendH
 //---------------------------------------------------------------------------
 #include <winsock2.h>
+#include <vector>
 
 #include "UnitSLList.h"
 #include "UnitStates.h"
@@ -256,11 +257,11 @@ private:
 	HWND Window;                // Окно для обработки сообщений о процессе отправки
 	UINT MinMsg;                //
 
-	int Mode;                   		// Режим (что отправляем/запрашиваем)
-	Marray <MComputersItem*> *Comps;	// Массив со списком компьютеров для рассылки
-	MComputersItem *Comp;				// Указатель на компьютер, для загрузки
-	MGames *ObjGames;                   // Объекты для
-	MClOptions *ObjOptions;             // отправки/приема
+	int Mode;                   			// Режим (что отправляем/запрашиваем)
+	std::vector <MComputersItem*> *Comps;	// Массив со списком компьютеров для рассылки
+	MComputersItem *Comp;					// Указатель на компьютер, для загрузки
+	MGames *ObjGames;                   	// Объекты для
+	MClOptions *ObjOptions;             	// отправки/приема
 
 	void ThreadP();
 	void ThreadSend();
@@ -270,7 +271,7 @@ private:
 public:
 	bool NetInit(HWND Window_, UINT MinMsg_, unsigned Code_, MAuth *MAC_);
 	bool NetFree();
-	bool Send(Marray <MComputersItem*> *Computers_, MGames *Games_, MClOptions *Options_);
+	bool Send(std::vector <MComputersItem*> *Computers_, MGames *Games_, MClOptions *Options_);
 	bool Get(MComputersItem *Computer_, MGames *Games_, MClOptions *Options_);
 	void Stop();
 

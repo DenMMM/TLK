@@ -11,6 +11,7 @@
 #include <ExtCtrls.hpp>
 #include <ImgList.hpp>
 //---------------------------------------------------------------------------
+#include <vector>
 #include "UnitStates.h"
 #include "UnitComputers.h"
 #include "UnitFines.h"
@@ -46,7 +47,7 @@ private:	// User declarations
         bool Warn;
     };
     
-    Marray <MApplyFine> ApplyFines;
+	std::vector <MApplyFine> ApplyFines;
     void __fastcall SetListViewFinesLine(TListItem *Item_);
 public:		// User declarations
     __fastcall TFormFine(TComponent* Owner);

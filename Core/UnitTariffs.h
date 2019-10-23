@@ -182,20 +182,21 @@ public:
 	{
 		unsigned UUID;            		// ID-номер тарифа
 		std::wstring Name;       		// Название тарифа
-
-		LogData &operator=(const MTariffsItem &Tariff_)
-		{
-			UUID=Tariff_.UUID;
-			Name=Tariff_.Name;
-			return *this;
-		}
 	};
 
-	MTariffsItem &operator=(const LogData &Data_)
+	LogData gLogData() const
+	{
+		LogData ld;
+		ld.UUID=UUID;
+		ld.Name=Name;
+
+		return ld;
+	}
+
+	void sFromLog(const LogData &Data_)
 	{
 		UUID=Data_.UUID;
 		Name=Data_.Name;
-		return *this;
 	}
 
 	MTariffsItem():

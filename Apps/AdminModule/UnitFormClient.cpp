@@ -78,7 +78,7 @@ void __fastcall TFormClient::FormClose(TObject *Sender,
     ButtonCancelClick(nullptr);
     Send.NetFree();
     // Очищаем память
-    SendComps.Alloc(0);
+    SendComps.clear();
     TmpGames.Clear();
     //
     TreeViewGames->Items->Clear();
@@ -167,7 +167,7 @@ void __fastcall TFormClient::NSendClick(TObject *Sender)
 
     {
         // Создадим массив указателей на компьютеры, куда будем рассылать
-        SendComps.Alloc(ListViewComputers->SelCount);
+        SendComps.resize(ListViewComputers->SelCount);
         // Заполним его
         TItemStates is=TItemStates()<<isSelected;
         TListItem *item=ListViewComputers->Selected;
@@ -199,7 +199,7 @@ void __fastcall TFormClient::NSendClick(TObject *Sender)
 error:
     // Удаляем мусор
     TmpGames.Clear();
-    SendComps.Alloc(0);
+    SendComps.clear();
 }
 //---------------------------------------------------------------------------
 void __fastcall TFormClient::NLoadClick(TObject *Sender)
@@ -546,7 +546,7 @@ void TFormClient::SetNet(bool Begin_, bool Sending_)
         // Обновляться будут в TFormClient::Dispatch().
         if ( Sending_ )
         {
-            for ( unsigned int i=0; i<SendComps.Count(); i++ )
+            for ( unsigned int i=0; i<SendComps.size(); i++ )
             {
                 TListItem *item=ListViewComputers->FindData(0,SendComps[i],true,false);
                 if ( item ) item->SubItemImages[1]=13;
@@ -624,7 +624,7 @@ void __fastcall TFormClient::Dispatch(void *Message)
 
         case WM_USER+mseFreeParam:
             // Удаляем мусор
-            SendComps.Alloc(0);
+            SendComps.clear();
             TmpGames.Clear();
             //
             SetNet(false,false);

@@ -479,34 +479,34 @@ error:
 void TFormEvents::UpdateTariffs(MTariffs *Tariffs_,
 	MLogRecords::DataTariffs *LogRecord_)
 {
-    Tariffs_->Clear();
-    for ( unsigned i=0; i<LogRecord_->Items.Count(); i++ )
-    {
-        MTariffsItem *trf=Tariffs_->Add();
-        *trf=LogRecord_->Items[i];
-    }
+	Tariffs_->Clear();
+	for ( auto &Ld: LogRecord_->Items )
+	{
+		MTariffsItem *trf=Tariffs_->Add();
+		trf->sFromLog(Ld);
+	}
 }
 //---------------------------------------------------------------------------
 void TFormEvents::UpdateFines(MFines *Fines_,
 	MLogRecords::DataFines *LogRecord_)
 {
-    Fines_->Clear();
-	for ( unsigned i=0; i<LogRecord_->Items.Count(); i++ )
+	Fines_->Clear();
+	for ( auto &Ld: LogRecord_->Items )
 	{
 		MFinesItem *fn=Fines_->Add();
-		*fn=LogRecord_->Items[i];
-    }
+		fn->sFromLog(Ld);
+	}
 }
 //---------------------------------------------------------------------------
 void TFormEvents::UpdateUsers(MUsers *Users_,
 	MLogRecords::DataUsers *LogRecord_)
 {
-    Users_->Clear();
-    for ( unsigned i=0; i<LogRecord_->Items.Count(); i++ )
-    {
+	Users_->Clear();
+	for ( auto &Ld: LogRecord_->Items )
+	{
 		MUsersItem *usr=Users_->Add();
-        *usr=LogRecord_->Items[i];
-    }
+		usr->sFromLog(Ld);
+	}
 }
 //---------------------------------------------------------------------------
 bool TFormEvents::CheckEventFilter(unsigned char TypeID_)

@@ -39,22 +39,23 @@ public:
 		unsigned UUID;
 		std::wstring Login;
 		std::wstring Name;
-
-		LogData &operator=(const MUsersItem &User_)
-		{
-			UUID=User_.gUUID();
-			Login=User_.Login;
-			Name=User_.Name;
-			return *this;
-		}
 	};
 
-	MUsersItem &operator=(const LogData &Data_)
+	LogData gLogData() const
+	{
+		LogData ld;
+		ld.UUID=gUUID();
+		ld.Login=Login;
+		ld.Name=Name;
+
+		return ld;
+	}
+
+	void sFromLog(const LogData &Data_)
 	{
 		UUID=Data_.UUID;
 		Login=Data_.Login;
 		Name=Data_.Name;
-		return *this;
 	}
 
 	MUsersItem():

@@ -36,10 +36,10 @@ bool ProcessComputersState(MLogRecordsItem *Position_,
     if ( Record==nullptr ) goto error;
     // Заполняем таблицу состояний начальными данными
 	rcdds=dynamic_cast<MLogRecords::DataStates*>(Record);
-	for ( size_t i=0; i<rcdds->States.Count(); i++ )
+	for ( auto &Ld: rcdds->Items )
 	{
-		if ( (state=States_->Add())==nullptr ) goto error;
-		*state=rcdds->States[i];
+		state=States_->Add();
+		state->sFromLog(Ld);
 	}
 	// Начинаем сбор данных за прошедшее время
 	while(Record!=Position_)
@@ -123,10 +123,10 @@ bool ProcessComputersState(MLogRecordsItem *Position_,
 				rcddtrf=static_cast<MLogRecords::DataTariffs*>(Record);
 
 				Tariffs_->Clear();
-				for ( size_t i=0; i<rcddtrf->Items.Count(); i++ )
+				for ( auto &Ld: rcddtrf->Items )
 				{
 					tariff=Tariffs_->Add();
-					*tariff=rcddtrf->Items[i];
+					tariff->sFromLog(Ld);
 				}
 				break;
 
@@ -187,16 +187,16 @@ bool ProcessUsersUpTime(MLogRecordsItem *Begin_, MLogRecordsItem *End_,
 				rcddusr=static_cast<MLogRecords::DataUsers*>(Begin_);
 
 				// Добавляем новых пользователей в список
-				for ( size_t i=0; i<rcddusr->Items.Count(); i++ )
+				for ( auto &Ld: rcddusr->Items )
 				{
-					usr=Users_->SrchUUID(rcddusr->Items[i].UUID);
+					usr=Users_->SrchUUID(Ld.UUID);
 					if ( usr!=nullptr )
 					{
-						usr->Name=rcddusr->Items[i].Name;
+						usr->Name=Ld.Name;
 					} else
 					{
 						usr=Users_->Add();
-						*usr=rcddusr->Items[i];
+						usr->sFromLog(Ld);
 					}
 				}
 				break;

@@ -32,20 +32,21 @@ public:
 	{
 		unsigned UUID;				// ID-номер штрафа
 		std::wstring Descr;         // Описание штрафа
-
-		LogData &operator=(const MFinesItem &Fine_)
-		{
-			UUID=Fine_.gUUID();
-			Descr=Fine_.Descr;
-			return *this;
-		}
 	};
 
-	MFinesItem &operator=(const LogData &Data_)
+	LogData gLogData() const
+	{
+		LogData ld;
+		ld.UUID=gUUID();
+		ld.Descr=Descr;
+
+		return ld;
+	}
+
+	void sFromLog(const LogData &Data_)
 	{
 		UUID=Data_.UUID;
 		Descr=Data_.Descr;
-		return *this;
 	}
 
 	MFinesItem():

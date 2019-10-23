@@ -2,6 +2,7 @@
 #include <winsock2.h>
 #include <ip2string.h>
 #include <ntstatus.h>
+#include <vector>
 #pragma hdrstop
 
 #include "UnitSend.h"
@@ -326,7 +327,7 @@ error:
 template <typename obj_type>
 bool MSend::SndObject(obj_type *Obj_, unsigned Type_, unsigned Seed_)
 {
-	Marray <char> Data;
+	std::vector <char> Data;
 	char *pt;
 	unsigned Size;
 
@@ -334,7 +335,7 @@ bool MSend::SndObject(obj_type *Obj_, unsigned Type_, unsigned Seed_)
 	{
 		// Определяем размер данных и выделяем память под буффер (+ seed,MAC)
 		Size=Obj_->GetAllDataSize()+sizeof(unsigned)+MAC_Size;
-		Data.Alloc(Size);
+		Data.resize(Size);
 		// Заполняем его
 		pt=static_cast<char*>(MemSet(&Data[0],(unsigned)Seed_));
 		pt=static_cast<char*>(Obj_->SetAllData(pt));
@@ -356,14 +357,14 @@ error:
 template <typename obj_type>
 bool MSend::RcvObject(obj_type *Obj_, unsigned Size_, unsigned Seed_)
 {
-    Marray <char> Data;
+    std::vector <char> Data;
 
     try
     {
         // Проверяем допустимость размера данных и выделяем память
         if ( (Size_<SEND_MinData)||
             (Size_>SEND_MaxData) ) goto error;
-        Data.Alloc(Size_);
+        Data.resize(Size_);
 
         // Принимаем их и расшифровываем
         if ( !Rcv(&Data[0],Size_,10) ) goto error;
@@ -461,7 +462,7 @@ void MSendSrv::ThreadSend()
     unsigned char Type;
 	MComputersItem *pComp;
 
-	for ( unsigned i=0; i<Comps->Count(); i++ )
+	for ( unsigned i=0; i<Comps->size(); i++ )
 	{
 		// Создаем сокет для исходящего соединения
 		if ( !Create(true) ) goto next;
@@ -571,7 +572,7 @@ bool MSendSrv::NetFree()
     return MSend::NetFree();
 }
 //---------------------------------------------------------------------------
-bool MSendSrv::Send(Marray <MComputersItem*> *Computers_, MGames *Games_, MClOptions *Options_)
+bool MSendSrv::Send(std::vector <MComputersItem*> *Computers_, MGames *Games_, MClOptions *Options_)
 {
     if ( Mode!=mssNone ) goto error;
 //    // Прерываем текущие сетевые операции

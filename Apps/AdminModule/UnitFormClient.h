@@ -10,9 +10,10 @@
 #include <ExtCtrls.hpp>
 #include <Menus.hpp>
 #include <Dialogs.hpp>
-//---------------------------------------------------------------------------
-#include "UnitSend.h"
 #include <Buttons.hpp>
+//---------------------------------------------------------------------------
+#include <vector>
+#include "UnitSend.h"
 //---------------------------------------------------------------------------
 class TFormClient : public TForm
 {
@@ -93,11 +94,11 @@ __published:	// IDE-managed Components
     void __fastcall EditCmdExit(TObject *Sender);
     void __fastcall EditIconExit(TObject *Sender);
 private:	// User declarations
-    MSendSrv Send;                      // TCP-рассыльщик объектов
-    Marray <MComputersItem*> SendComps;      // Массив указателей на компьютеры, куда рассылать
-    MGames TmpGames;                    // Буфер для списка игр
-    MClOptions TmpOptions;              // Буфер для настроек клиента
-    bool Sending;                       // Флаг отправки/приема данных
+	MSendSrv Send;                      		// TCP-рассыльщик объектов
+	std::vector <MComputersItem*> SendComps;	// Массив указателей на компьютеры, куда рассылать
+	MGames TmpGames;                    		// Буфер для списка игр
+	MClOptions TmpOptions;              		// Буфер для настроек клиента
+	bool Sending;                       		// Флаг отправки/приема данных
     void SetTreeViewGamesLine(TTreeNode *Node_);
     void AddGamesToTree(TTreeNode *Node_, MGames *Games_);
     void CreateGamesTree(MGames *Games_);

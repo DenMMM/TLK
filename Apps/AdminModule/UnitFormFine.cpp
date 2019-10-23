@@ -19,7 +19,7 @@ __fastcall TFormFine::TFormFine(TComponent* Owner)
 void __fastcall TFormFine::FormShow(TObject *Sender)
 {
     // Выделим буфер сразу под все выбранные компьютеры
-    ApplyFines.Alloc(FormMain->ListViewComputers->SelCount);
+    ApplyFines.resize(FormMain->ListViewComputers->SelCount);
 
     unsigned i=0;
     TItemStates is=TItemStates()<<isSelected;
@@ -72,7 +72,7 @@ void __fastcall TFormFine::FormClose(TObject *Sender, TCloseAction &Action)
     ListViewFines->Items->Clear();
     ComboBoxTime->Items->Clear();
     // Чистим буфер
-    ApplyFines.Alloc(0);
+    ApplyFines.clear();
 }
 //---------------------------------------------------------------------------
 void __fastcall TFormFine::ListViewFinesInsert(TObject *Sender,

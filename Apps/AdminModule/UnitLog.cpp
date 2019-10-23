@@ -29,11 +29,11 @@ void MLog::AddStatesData(MStates *States_)
 		*Records.Add(MLogRecords::mlrDataStates));
 	record->SystemTime=SystemTime;
 	// Создаем массив состояний компьютеров и заполняем его
-	record->States.Alloc(States_->gCount());
-	size_t i=0;
-	for ( const auto &state: *States_ )
+	record->Items.clear();
+	record->Items.reserve(States_->gCount());
+	for ( const auto &State: *States_ )
 	{
-		record->States[i]=state;
+		record->Items.push_back(State.gLogData());
 	}
 }
 //---------------------------------------------------------------------------
@@ -44,11 +44,11 @@ void MLog::AddTariffsData(MTariffs *Tariffs_)
 		*Records.Add(MLogRecords::mlrDataTariffs));
 	record->SystemTime=SystemTime;
 	// Создаем массив тарифов и заполняем его
-	record->Items.Alloc(Tariffs_->gCount());
-	size_t i=0;
-	for ( const auto &tariff: *Tariffs_ )
+	record->Items.clear();
+	record->Items.reserve(Tariffs_->gCount());
+	for ( const auto &Tariff: *Tariffs_ )
 	{
-		record->Items[i]=tariff;
+		record->Items.push_back(Tariff.gLogData());
 	}
 }
 //---------------------------------------------------------------------------
@@ -59,12 +59,12 @@ void MLog::AddFinesData(MFines *Fines_)
 		*Records.Add(MLogRecords::mlrDataFines));
 	record->SystemTime=SystemTime;
 	// Создаем массив штрафов и заполняем его
-	record->Items.Alloc(Fines_->gCount());
-	size_t i=0;
-	for ( const auto &fine: *Fines_ )
+	record->Items.clear();
+	record->Items.reserve(Fines_->gCount());
+	for ( const auto &Fine: *Fines_ )
 	{
-		record->Items[i]=fine;
-    }
+		record->Items.push_back(Fine.gLogData());
+	}
 }
 //---------------------------------------------------------------------------
 void MLog::AddUsersData(MUsers *Users_)
@@ -74,13 +74,13 @@ void MLog::AddUsersData(MUsers *Users_)
 		*Records.Add(MLogRecords::mlrDataUsers));
 	record->SystemTime=SystemTime;
 	// Создаем массив пользователей и заполняем его
-	record->Items.Alloc(Users_->ActiveCount());
-	size_t i=0;
-	for ( const auto &user: *Users_ )
+	record->Items.clear();
+	record->Items.reserve(Users_->ActiveCount());
+	for ( const auto &User: *Users_ )
 	{
-		if ( !user.Active ) continue;
-		record->Items[i]=user;
-    }
+		if ( !User.Active ) continue;
+		record->Items.push_back(User.gLogData());
+	}
 }
 //---------------------------------------------------------------------------
 bool MLog::AddEvent(MLogRecords::ItemType Type_)

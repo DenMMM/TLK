@@ -2,6 +2,7 @@
 #ifndef UnitLogRecordsH
 #define UnitLogRecordsH
 //---------------------------------------------------------------------------
+#include <vector>
 #include "UnitSLList.h"
 #include "UnitStates.h"
 #include "UnitTariffs.h"
@@ -138,7 +139,7 @@ protected:
 		virtual const void *GetData(const void *Data_, const void *Limit_) override;
 
 	public:
-		Marray <MStatesItem::LogData> States;    	// Массив состояний компьютеров
+		std::vector <MStatesItem::LogData> Items;		// Массив состояний компьютеров
 	};
 
 
@@ -151,7 +152,7 @@ protected:
 		virtual const void *GetData(const void *Data_, const void *Limit_) override;
 
 	public:
-		Marray <MTariffsItem::LogData> Items;  	// Массив описаний тарифов
+		std::vector <MTariffsItem::LogData> Items;		// Массив описаний тарифов
 	};
 
 
@@ -164,7 +165,7 @@ protected:
 		virtual const void *GetData(const void *Data_, const void *Limit_) override;
 
 	public:
-		Marray <MFinesItem::LogData> Items;	// Массив описаний штрафов
+		std::vector <MFinesItem::LogData> Items;		// Массив описаний штрафов
 	};
 
 
@@ -177,7 +178,7 @@ protected:
 		virtual const void *GetData(const void *Data_, const void *Limit_) override;
 
 	public:
-		Marray <MUsersItem::LogData> Items;	// Массив данных о пользователях
+		std::vector <MUsersItem::LogData> Items;		// Массив данных о пользователях
 	};
 
 
