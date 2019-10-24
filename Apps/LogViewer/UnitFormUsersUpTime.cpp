@@ -27,25 +27,23 @@ void __fastcall TFormUsersUpTime::FormClose(TObject *Sender,
 //---------------------------------------------------------------------------
 bool TFormUsersUpTime::Open(MLogFile *File_, MLogRecordsItem *Begin_, MLogRecordsItem *End_)
 {
-    MUsersItem *user;
-    __int64 time;
-    int hours, min;
-    wchar_t line[50];
-    int pos;
-    SYSTEMTIME ss_time_b, ss_time_e;
-    TListItem *Item;
+	__int64 time;
+	int hours, min;
+	wchar_t line[50];
+	int pos;
+	SYSTEMTIME ss_time_b, ss_time_e;
 
-    ProcessUsersUpTime(Begin_,End_,&Users,&Times);
-    ListViewUpTimes->Items->Clear();
+	ProcessUsersUpTime(Begin_,End_,&Users,&Times);
+	ListViewUpTimes->Items->Clear();
 	for ( auto &Time: Times )
 	{
-		Item=ListViewUpTimes->Items->Add();
+		TListItem *Item=ListViewUpTimes->Items->Add();
 		Item->ImageIndex=-1;
 		Item->Data=&Time;
 
-		user=Users.SrchUUID(Time.User);
-		if ( user==nullptr ) Item->SubItems->Add(L"");
-		else Item->SubItems->Add(user->Name.c_str());
+		auto iUser=Users.SrchUUID(Time.User);
+		if ( iUser==Users.end() ) Item->SubItems->Add(L"");
+		else Item->SubItems->Add(iUser->Name.c_str());
 
 		// Время
 		if ( Int64ToSystemTime(&Time.BeginTime,&ss_time_b) )

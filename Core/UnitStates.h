@@ -219,7 +219,7 @@ private:
 
 public:
 	// Вспомогательные функции
-	MStatesItem *Search(int Number_) const;
+	iterator Search(int Number_);
 	bool Update(MComputers *Computers_);
 	bool Timer(__int64 SystemTime_);
 

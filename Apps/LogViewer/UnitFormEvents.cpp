@@ -358,8 +358,8 @@ void TFormEvents::SetListViewComputersLine(TListItem *Item_, MStatesInfo *Info_,
     // Название тарифа
     if ( Info_->Changes&mdcTariff )
     {
-		MTariffsItem *Tariff=Tariffs_->SrchUUID(Info_->TariffID);
-        if ( Tariff ) SubItems->Strings[2]=Tariff->Name.c_str();
+		auto iTariff=Tariffs_->SrchUUID(Info_->TariffID);
+		if ( iTariff!=Tariffs_->end() ) SubItems->Strings[2]=iTariff->Name.c_str();
 		else SubItems->Strings[2]=L"";
 	}
 	// Время работы
@@ -407,26 +407,21 @@ void TFormEvents::SetListViewComputersLine(TListItem *Item_, MStatesInfo *Info_,
 //---------------------------------------------------------------------------
 void TFormEvents::UpdateListViewComputers(bool Full_, MStates *States_, MTariffs *Tariffs_)
 {
-    TListItem *Item;
-	MStatesInfo Info;
-	int i;
-
 	// Убираем записи, не сопоставленные с состоянием компьютера
-	i=ListViewComputers->Items->Count-1;
-	while(i>=0)
+	for ( int i=ListViewComputers->Items->Count-1; i>=0; i-- )
 	{
-		Item=ListViewComputers->Items->Item[i];
-		if ( !States_->Search((int)Item->Data) ) Item->Delete();
-		i--;
+		TListItem *Item=ListViewComputers->Items->Item[i];
+		if ( States_->Search((int)Item->Data)!=States_->end() ) Item->Delete();
 	}
 
 	// Убираем из списка компьютеры, не подходящие под фильтр, и добавляем новые
 	for ( auto &State: *States_ )
 	{
 		//
+		MStatesInfo Info;
 		State.StateInfo(&Info);
 		//
-		Item=ListViewComputers->FindData(
+		TListItem *Item=ListViewComputers->FindData(
 			0, reinterpret_cast<void*>(Info.Number),    /// "грязный" cast
 			true, false);
 		// Проверяем подходит ли компьютер под выставленный фильтр
@@ -482,8 +477,7 @@ void TFormEvents::UpdateTariffs(MTariffs *Tariffs_,
 	Tariffs_->Clear();
 	for ( auto &Ld: LogRecord_->Items )
 	{
-		MTariffsItem *trf=Tariffs_->Add();
-		trf->sFromLog(Ld);
+		Tariffs_->Add().sFromLog(Ld);
 	}
 }
 //---------------------------------------------------------------------------
@@ -493,8 +487,7 @@ void TFormEvents::UpdateFines(MFines *Fines_,
 	Fines_->Clear();
 	for ( auto &Ld: LogRecord_->Items )
 	{
-		MFinesItem *fn=Fines_->Add();
-		fn->sFromLog(Ld);
+		Fines_->Add().sFromLog(Ld);
 	}
 }
 //---------------------------------------------------------------------------
@@ -504,8 +497,7 @@ void TFormEvents::UpdateUsers(MUsers *Users_,
 	Users_->Clear();
 	for ( auto &Ld: LogRecord_->Items )
 	{
-		MUsersItem *usr=Users_->Add();
-		usr->sFromLog(Ld);
+		Users_->Add().sFromLog(Ld);
 	}
 }
 //---------------------------------------------------------------------------
@@ -672,12 +664,12 @@ void TFormEvents::UpdateListViewEvents()
 			case MLogRecords::AppLogIn::TypeID:
 			{
 				Item->SubItems->Add(L"");
-				MUsersItem *usr=Users.SrchUUID(
+				auto iUsr=Users.SrchUUID(
 					static_cast<MLogRecords::AppLogIn*>(Begin_)->User);
 				swprintf(
 					line, sizeof(line),
 					L"Смену начал(а) '%s'",
-					usr? usr->Name.c_str(): L"???");
+					iUsr!=Users.end()? iUsr->Name.c_str(): L"???");
 				Item->SubItems->Add(line);
 			}
 				break;
@@ -689,10 +681,10 @@ void TFormEvents::UpdateListViewEvents()
 			case MLogRecords::CompRun::TypeID:
 			{
 				auto rcdr=static_cast<MLogRecords::CompRun*>(Begin_);
-				MTariffsItem *trf=Tariffs.SrchUUID(rcdr->Tariff);
+				auto iTrf=Tariffs.SrchUUID(rcdr->Tariff);
 
 				Item->SubItems->Add(IntToStr(rcdr->Number));
-				Item->SubItems->Add(trf? trf->Name.c_str(): L"???");
+				Item->SubItems->Add(iTrf!=Tariffs.end()? iTrf->Name.c_str(): L"???");
 				switch(rcdr->Type)
 				{
 					case mttHours:
@@ -720,13 +712,13 @@ void TFormEvents::UpdateListViewEvents()
 			case MLogRecords::CompFine::TypeID:
 			{
 				auto rcdf=static_cast<MLogRecords::CompFine*>(Begin_);
-				MFinesItem *fn=Fines.SrchUUID(rcdf->Fine);
+				auto iFn=Fines.SrchUUID(rcdf->Fine);
 
 				Item->SubItems->Add(IntToStr(rcdf->Number));
 				swprintf(
 					line, sizeof(line),
 					L"Штраф '%s'",
-					fn? fn->Descr.c_str(): L"???");
+					iFn!=Fines.end()? iFn->Descr.c_str(): L"???");
 				Item->SubItems->Add(line);
 				if ( rcdf->Time==(24*60) )
 				{

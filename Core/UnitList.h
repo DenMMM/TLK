@@ -166,6 +166,8 @@ public:
 	class const_iterator:
 		public std::iterator <std::bidirectional_iterator_tag, base_type>
 	{
+	friend MList <list_type, base_type>;
+
 	protected:
 		typedef typename std::iterator <std::bidirectional_iterator_tag, base_type> ::pointer pointer;
 		typedef typename std::iterator <std::bidirectional_iterator_tag, base_type> ::reference reference;
@@ -174,13 +176,20 @@ public:
 
 	public:
 		const_iterator(): MyPtr(nullptr) {}
-		const_iterator(pointer Init_): MyPtr(Init_) {}
+		explicit const_iterator(pointer Init_): MyPtr(Init_) {}
 
 		const reference operator*() const { return *MyPtr; }
 		const pointer operator->() const { return MyPtr; }
 
 		const_iterator& operator++()
 		{
+#ifdef _DEBUG
+			if ( MyPtr==nullptr )
+				throw std::out_of_range (
+					"MList::operator++()\n"
+					"Попытка выйти за границы списка."
+					);
+#endif
 			MyPtr=MyPtr->Next;
 			return *this;
 		}
@@ -194,7 +203,14 @@ public:
 
 		const_iterator& operator--()
 		{
-			MyPtr=MyPtr->Prev;
+			MyPtr=(MyPtr==nullptr)?	Last: MyPtr->Prev;
+#ifdef _DEBUG
+			if ( MyPtr==nullptr )
+				throw std::out_of_range (
+					"MList::operator--()\n"
+					"Попытка выйти за границы списка."
+					);
+#endif
 			return *this;
 		}
 
@@ -226,7 +242,7 @@ public:
 
 	public:
 		iterator() = default;
-		iterator(pointer Init_): const_iterator(Init_) {}
+		explicit iterator(pointer Init_): const_iterator(Init_) {}
 
 		reference operator*() const { return *MyPtr; }
 		pointer operator->() const { return MyPtr; }
@@ -281,20 +297,23 @@ public:
 
 	// Операции над отдельными элементами _одного_ списка
 	template <typename new_item_type>
-	base_type *Add()
+	new_item_type& Add()
 	{
-		return Add(new_item_type::New());
+		return
+			*static_cast<new_item_type*>(
+			Add(new_item_type::New())
+			);
 	}
 
-	base_type *Add(unsigned char TypeID_);
-	base_type *GetItem(size_t Index_) const;
-	void Swap(base_type *Item1_, base_type *Item2_);
-	void Del(base_type *DelItem_);
+	base_type& Add(unsigned char TypeID_);
+	base_type& GetItem(size_t Index_) const;
+	void Swap(const_iterator iItem1_, const_iterator iItem2_);
+	iterator Del(const_iterator iPos_);
 
 	// Операции над списком целиком (не трогая атрибуты наследника MList)
 	void Clear();                       		// Удалить все элементы списка
-	void Move(list_type *SrcList_) noexcept;    // Заместить элементы списка исходными
-	void Splice(list_type *AtchList_);      	// Присоединить элементы исходного списка
+	void Move(list_type& SrcList_) noexcept;	// Заместить элементы списка исходными
+	void Splice(list_type& AtchList_);      	// Присоединить элементы исходного списка
 
 	MList():
 		First(nullptr),
@@ -318,7 +337,7 @@ public:
 
 	MList& operator=(MList&& SrcList_) noexcept
 	{
-		Move(static_cast<list_type*>(&SrcList_));   /// cast - временный хак
+		Move(static_cast<list_type&>(SrcList_));	/// cast - временный хак
 		return *this;
 	}
 
@@ -358,8 +377,8 @@ public:
 //	typedef typename Iterators<item_type>::const_iterator const_iterator;
 //	typedef typename Iterators<item_type>::iterator iterator;
 
-	item_type* Add() {
-		return static_cast<item_type*>(parent_list::template Add<item_type>()); }
+	item_type& Add() {
+		return parent_list::template Add<item_type>(); }
 
 	MListSimple()
 	{
@@ -395,24 +414,28 @@ base_type *MList<list_type,base_type>::Add(base_type *NewItem_)
 }
 //---------------------------------------------------------------------------
 template <typename list_type, typename base_type>
-base_type *MList<list_type,base_type>::Add(unsigned char TypeID_)
+base_type& MList<list_type,base_type>::Add(unsigned char TypeID_)
 {
 	base_type* (*NewF)()=NewForTypeDef;
 
 	if ( NewF==nullptr )
 	{
-		if ( TypeID_>=NewForType.size() ) return nullptr;
-		// Возьмем из массива адрес функции, создающей элемент списка
-		NewF=NewForType[TypeID_];
-		if ( NewF==nullptr ) return nullptr;
+		if ( (TypeID_>=NewForType.size()) ||
+			((NewF=NewForType[TypeID_])==nullptr) )
+		{
+			throw std::invalid_argument (
+				"MList::Add()\n"
+				"Не известный TypeID."
+				);
+		}
 	}
 
 	// Создадим новый элемент и добавим его к списку
-	return Add(NewF());
+	return *Add(NewF());
 }
 //---------------------------------------------------------------------------
 template <typename list_type, typename base_type>
-base_type *MList<list_type,base_type>::GetItem(size_t Index_) const
+base_type& MList<list_type,base_type>::GetItem(size_t Index_) const
 {
 	if ( Index_>=Count )
 	{
@@ -427,11 +450,11 @@ base_type *MList<list_type,base_type>::GetItem(size_t Index_) const
 	for ( size_t i=0; (i!=Index_)&&(SearchItem!=nullptr); i++ )
 		SearchItem=SearchItem->Next;
 
-	return SearchItem;
+	return *SearchItem;
 }
 //---------------------------------------------------------------------------
 template <typename list_type, typename base_type>
-void MList<list_type,base_type>::Swap(base_type *Item1_, base_type *Item2_)
+void MList<list_type,base_type>::Swap(const_iterator iItem1_, const_iterator iItem2_)
 {
 	if ( Count==0 )
 	{
@@ -440,6 +463,9 @@ void MList<list_type,base_type>::Swap(base_type *Item1_, base_type *Item2_)
 			"Список пуст."
 			);
 	}
+
+	base_type* Item1_=iItem1_.MyPtr;
+	base_type* Item2_=iItem2_.MyPtr;
 
 	if (
 		Item1_==nullptr ||
@@ -475,7 +501,8 @@ void MList<list_type,base_type>::Swap(base_type *Item1_, base_type *Item2_)
 }
 //---------------------------------------------------------------------------
 template <typename list_type, typename base_type>
-void MList<list_type,base_type>::Del(base_type *DelItem_)
+typename MList<list_type,base_type>::iterator
+	MList<list_type,base_type>::Del(const_iterator iPos_)
 {
 	if ( Count==0 )
 	{
@@ -485,6 +512,8 @@ void MList<list_type,base_type>::Del(base_type *DelItem_)
 			);
 	}
 
+	base_type* DelItem_=iPos_.MyPtr;
+
 	if ( DelItem_==nullptr )
 	{
 		throw std::runtime_error (
@@ -492,6 +521,8 @@ void MList<list_type,base_type>::Del(base_type *DelItem_)
 			"Объект не существует (nullptr)."
 			);
 	}
+
+	base_type* NextItem=DelItem_->Next;
 
 	if (
 		DelItem_->Prev==nullptr &&
@@ -515,6 +546,8 @@ void MList<list_type,base_type>::Del(base_type *DelItem_)
 
 	// Удаляем объект из памяти
 	delete DelItem_;
+
+	return iterator(NextItem);
 }
 //---------------------------------------------------------------------------
 template <typename list_type, typename base_type>
@@ -546,7 +579,7 @@ MList<list_type,base_type>& MList<list_type,base_type>::operator=(const MList& S
 		base_type *SrcItem=SrcList_.First, *NewItem;
 		while(SrcItem)
 		{
-			NewItem=Add(SrcItem->gTypeID());
+			NewItem=&Add(SrcItem->gTypeID());
 			*NewItem=*SrcItem;
 			SrcItem=SrcItem->Next;
 		}
@@ -562,43 +595,43 @@ MList<list_type,base_type>& MList<list_type,base_type>::operator=(const MList& S
 }
 //---------------------------------------------------------------------------
 template <typename list_type, typename base_type>
-void MList<list_type,base_type>::Move(list_type *SrcList_) noexcept
+void MList<list_type,base_type>::Move(list_type& SrcList_) noexcept
 {
-	if ( SrcList_==this ) return;
+	if ( &SrcList_==this ) return;
 
 	// Очищаем список-приемник
 	Clear();
 	// Копируем ссылки на элементы и их количество
-	First=SrcList_->First;
-	Last=SrcList_->Last;
-	Count=SrcList_->Count;
+	First=SrcList_.First;
+	Last=SrcList_.Last;
+	Count=SrcList_.Count;
 	// Обнуляем эти поля в исходном списке
-	SrcList_->First=nullptr;
-	SrcList_->Last=nullptr;
-	SrcList_->Count=0;
+	SrcList_.First=nullptr;
+	SrcList_.Last=nullptr;
+	SrcList_.Count=0;
 }
 //---------------------------------------------------------------------------
 template <typename list_type, typename base_type>
-void MList<list_type,base_type>::Splice(list_type *AtchList_)
+void MList<list_type,base_type>::Splice(list_type& AtchList_)
 {
-	if ( AtchList_==this ) return;
+	if ( &AtchList_==this ) return;
 
 	// Проверяем есть ли что присоединять
-	if ( AtchList_->First==nullptr ) return;
+	if ( AtchList_.First==nullptr ) return;
 	// Связываем списки
-	if ( First==nullptr ) First=AtchList_->First;
+	if ( First==nullptr ) First=AtchList_.First;
 	else
 	{
-		Last->Next=AtchList_->First;
+		Last->Next=AtchList_.First;
 		Last->Next->Prev=Last;
 	}
-	Last=AtchList_->Last;
+	Last=AtchList_.Last;
 	// Увеличиваем счетчик
-	Count+=AtchList_->Count;
+	Count+=AtchList_.Count;
 	// Отсоединяем элементы от исходного списка
-	AtchList_->First=nullptr;
-	AtchList_->Last=nullptr;
-	AtchList_->Count=0;
+	AtchList_.First=nullptr;
+	AtchList_.Last=nullptr;
+	AtchList_.Count=0;
 }
 //---------------------------------------------------------------------------
 //---------------------------------------------------------------------------

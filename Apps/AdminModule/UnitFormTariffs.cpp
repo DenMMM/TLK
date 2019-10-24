@@ -78,7 +78,7 @@ void __fastcall TFormTariffs::ListViewNamesSelectItem(TObject *Sender,
     } else
         SetEdit(true);
 
-	auto tariff=reinterpret_cast<MTariffsItem*>(
+	auto *tariff=reinterpret_cast<MTariffsItem*>(
 		ListViewNames->Selected->Data);
     EditName->Text=tariff->Name.c_str();
     // Проставляем группы программ
@@ -114,11 +114,11 @@ void __fastcall TFormTariffs::ButtonAddClick(TObject *Sender)
     }
 
     // Добавляем новый тариф в буфер
-	MTariffsItem* tariff=TmpTariffs.Add();
-    tariff->Name=L"Новый тариф";
+	MTariffsItem& tariff=TmpTariffs.Add();
+    tariff.Name=L"Новый тариф";
     // Добавляем строку в список и связываем ее с тарифом
     TListItem *item=ListViewNames->Items->Add();
-    item->Data=tariff;
+    item->Data=&tariff;
     SetListViewNamesLine(item);
     // Обновляем интерфейс
     ListViewNames->ItemFocused=item;
@@ -135,7 +135,10 @@ void __fastcall TFormTariffs::ButtonDelClick(TObject *Sender)
     while(item)
     {
         // Удаляем тариф из буфера
-        TmpTariffs.Del(reinterpret_cast<MTariffsItem*>(item->Data));
+		TmpTariffs.Del(
+			MTariffs::const_iterator(
+			reinterpret_cast<MTariffsItem*>(item->Data)
+			));
         // Удаляем строку из списка
         next=ListViewNames->GetNextItem(item,sdAll,is);
         item->Delete();
@@ -150,7 +153,7 @@ void __fastcall TFormTariffs::EditNameExit(TObject *Sender)
     if ( ListViewNames->Selected==nullptr ) return;
 
     EditName->Text=EditName->Text.Trim();
-	auto tariff=reinterpret_cast<MTariffsItem*>(
+	auto *tariff=reinterpret_cast<MTariffsItem*>(
 		ListViewNames->Selected->Data);
     tariff->Name=EditName->Text.c_str();
     SetListViewNamesLine(ListViewNames->Selected);
@@ -160,7 +163,7 @@ void __fastcall TFormTariffs::CheckBoxRebootExit(TObject *Sender)
 {
     if ( ListViewNames->Selected==nullptr ) return;
 
-	auto item=reinterpret_cast<MTariffsItem*>(
+	auto *item=reinterpret_cast<MTariffsItem*>(
 		ListViewNames->Selected->Data);
 	TCheckBox &cbox=dynamic_cast<TCheckBox&>(*Sender);
 
@@ -171,7 +174,7 @@ void __fastcall TFormTariffs::CheckBoxRouteExit(TObject *Sender)
 {
 	if ( ListViewNames->Selected==nullptr ) return;
 
-	auto item=reinterpret_cast<MTariffsItem*>(
+	auto *item=reinterpret_cast<MTariffsItem*>(
 		ListViewNames->Selected->Data);
 	TCheckBox &cbox=dynamic_cast<TCheckBox&>(*Sender);
 
@@ -185,7 +188,7 @@ void __fastcall TFormTariffs::CheckBoxDesktopExit(TObject *Sender)
 {
 	if ( ListViewNames->Selected==nullptr ) return;
 
-	auto item=reinterpret_cast<MTariffsItem*>(
+	auto *item=reinterpret_cast<MTariffsItem*>(
 		ListViewNames->Selected->Data);
 	TCheckBox &cbox=dynamic_cast<TCheckBox&>(*Sender);
 
@@ -235,7 +238,7 @@ void __fastcall TFormTariffs::ListViewComputersExit(TObject *Sender)
 				item->Data)->Number;
     }
     // Сохраняем копию этого массива в тарифе
-	auto tariff=reinterpret_cast<MTariffsItem*>(
+	auto *tariff=reinterpret_cast<MTariffsItem*>(
 		ListViewNames->Selected->Data);
 	tariff->SetComps(TmpComps,count);
 }
@@ -276,7 +279,7 @@ void __fastcall TFormTariffs::ButtonTimesClick(TObject *Sender)
 
     try
     {
-		auto tariff=reinterpret_cast<MTariffsItem*>(
+		auto *tariff=reinterpret_cast<MTariffsItem*>(
 			ListViewNames->Selected->Data);
         // Открываем диалог редактирования
 		form.reset(new TFormTariffTimes(0));
@@ -291,7 +294,7 @@ void __fastcall TFormTariffs::ButtonTimesClick(TObject *Sender)
 void __fastcall TFormTariffs::ButtonSaveClick(TObject *Sender)
 {
     // Замещаем тарифы записями из буфера
-    Tariffs->Move(&TmpTariffs);
+    Tariffs->Move(TmpTariffs);
     // Задаем ID-номера для новых тарифов
     Tariffs->SetUUIDs();
     // Сохраняем в файле

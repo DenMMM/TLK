@@ -24,7 +24,7 @@ bool TFormTariffTimes::Execute(MTariffTimes &Times_,
     // Открываем окно
     if ( ShowModal()!=mrOk ) return false;
     // Замещаем пакетами из буфера текущие
-    Times_.Move(&TmpTimes);
+    Times_.Move(TmpTimes);
 
     return true;
 }
@@ -150,9 +150,8 @@ void __fastcall TFormTariffTimes::ListViewTimesSelectItem(TObject *Sender,
 void __fastcall TFormTariffTimes::ListViewTimesCompare(TObject *Sender,
       TListItem *Item1, TListItem *Item2, int Data, int &Compare)
 {
-	auto
-		Time1=reinterpret_cast<MTariffTimesItem*>(Item1->Data),
-		Time2=reinterpret_cast<MTariffTimesItem*>(Item2->Data);
+	auto *Time1=reinterpret_cast<MTariffTimesItem*>(Item1->Data);
+	auto *Time2=reinterpret_cast<MTariffTimesItem*>(Item2->Data);
 
 	if ( Time1->BeginTime<Time2->BeginTime ) Compare=-1;
 	else if ( Time1->BeginTime>Time2->BeginTime ) Compare=1;
@@ -176,7 +175,7 @@ void __fastcall TFormTariffTimes::ComboBoxTypeClick(TObject *Sender)
 {
 	if ( ListViewTimes->Selected==nullptr ) return;
 
-	auto time=reinterpret_cast<MTariffTimesItem*>(
+	auto *time=reinterpret_cast<MTariffTimesItem*>(
 		ListViewTimes->Selected->Data);
     switch ( dynamic_cast<TComboBox&>(*Sender).ItemIndex )
     {
@@ -194,7 +193,7 @@ void __fastcall TFormTariffTimes::ComboBoxBeginHClick(TObject *Sender)
 {
     if ( ListViewTimes->Selected==nullptr ) return;
 
-	auto time=reinterpret_cast<MTariffTimesItem*>(
+	auto *time=reinterpret_cast<MTariffTimesItem*>(
 		ListViewTimes->Selected->Data);
     time->BeginTime=
         ComboBoxBeginH->ItemIndex*60+
@@ -207,7 +206,7 @@ void __fastcall TFormTariffTimes::ComboBoxEndHClick(TObject *Sender)
 {
     if ( ListViewTimes->Selected==nullptr ) return;
 
-	auto time=reinterpret_cast<MTariffTimesItem*>(
+	auto *time=reinterpret_cast<MTariffTimesItem*>(
 		ListViewTimes->Selected->Data);
     time->EndTime=
         ComboBoxEndH->ItemIndex*60+
@@ -220,7 +219,7 @@ void __fastcall TFormTariffTimes::ComboBoxSizeHClick(TObject *Sender)
 {
     if ( ListViewTimes->Selected==nullptr ) return;
 
-	auto time=reinterpret_cast<MTariffTimesItem*>(
+	auto *time=reinterpret_cast<MTariffTimesItem*>(
 		ListViewTimes->Selected->Data);
     time->SizeTime=
         ComboBoxSizeH->ItemIndex*60+
@@ -233,7 +232,7 @@ void __fastcall TFormTariffTimes::EditCostExit(TObject *Sender)
 {
     if ( ListViewTimes->Selected==nullptr ) return;
 
-	auto time=reinterpret_cast<MTariffTimesItem*>(
+	auto *time=reinterpret_cast<MTariffTimesItem*>(
 		ListViewTimes->Selected->Data);
 	double Cost;
 
@@ -255,10 +254,10 @@ void __fastcall TFormTariffTimes::ButtonAddClick(TObject *Sender)
     }
 
     // Добавляем пакет в буфер
-	MTariffTimesItem* time=TmpTimes.Add();
-    // Добавляем строку в список и связываем ее с пакетом
-    TListItem *item=ListViewTimes->Items->Add();
-    item->Data=time;
+	MTariffTimesItem& time=TmpTimes.Add();
+	// Добавляем строку в список и связываем ее с пакетом
+	TListItem *item=ListViewTimes->Items->Add();
+    item->Data=&time;
     // Обновляем интерфейс
     SetListViewTimesLine(item);
     ListViewTimes->AlphaSort();
@@ -275,7 +274,10 @@ void __fastcall TFormTariffTimes::ButtonDelClick(TObject *Sender)
     while(item)
     {
         // Удаляем пакет из буфера
-        TmpTimes.Del(reinterpret_cast<MTariffTimesItem*>(item->Data));
+		TmpTimes.Del(
+			MTariffTimes::const_iterator(
+			reinterpret_cast<MTariffTimesItem*>(item->Data)
+			));
         // Удаляем строку из списка
         next=ListViewTimes->GetNextItem(item,sdAll,is);
         item->Delete();
@@ -314,7 +316,7 @@ void TFormTariffTimes::SetEdit(bool Edit_)
 //---------------------------------------------------------------------------
 void TFormTariffTimes::SetListViewTimesLine(TListItem *Item_)
 {
-    auto time=reinterpret_cast<MTariffTimesItem*>(Item_->Data);
+    auto *time=reinterpret_cast<MTariffTimesItem*>(Item_->Data);
 
     Item_->SubItems->Strings[0]=((TDate)(time->BeginTime/(24.*60))).FormatString(L"hh:nn");
 

@@ -188,7 +188,6 @@ const void *MSLList<list_type,base_type>::GetAllData(const void *Data__, const v
 	const char *Limit;
 	unsigned DataSize;
 	unsigned char TypeID;
-	base_type *Item;
 
 	// Очищаем список для профилактики
 	Clear();
@@ -225,15 +224,20 @@ const void *MSLList<list_type,base_type>::GetAllData(const void *Data__, const v
 		if ( typed )
 		{
 			Data_=static_cast<const char*>(MemGet(Data_, &TypeID, Limit_));
-            if ( Data_==nullptr ) goto error;
+			if ( Data_==nullptr ) goto error;
 		} else TypeID=0;
 		// Добавляем новый элемент в список
-		Item=Add(TypeID); if ( Item==nullptr ) goto error;
-		// Убедимся, что созданный объект имеет правильную базу
-//		Item=&dynamic_cast<base_type&>(*Item);    /// пока _DEBUG ?
-		// Берем данные
-		Data_=static_cast<const char*>(Item->GetData(Data_,Limit));
-		if ( Data_!=Limit ) goto error;
+		try
+		{
+			base_type& Item=Add(TypeID);
+			// Берем данные
+			Data_=static_cast<const char*>(Item.GetData(Data_,Limit));
+			if ( Data_!=Limit ) goto error;
+		}
+		catch (std::invalid_argument &e)
+		{
+			goto error;
+		}
 	}
 
 	return Data_;

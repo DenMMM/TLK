@@ -67,7 +67,7 @@ void __fastcall TFormUsers::ListViewUsersSelectItem(TObject *Sender,
     } else
         SetEdit(true);
 
-	auto user=reinterpret_cast<MUsersItem*>(
+	auto *user=reinterpret_cast<MUsersItem*>(
 		ListViewUsers->Selected->Data);
     EditLogin->Text=user->Login.c_str();
     EditName->Text=user->Name.c_str();
@@ -78,7 +78,7 @@ void __fastcall TFormUsers::EditLoginExit(TObject *Sender)
     if ( ListViewUsers->Selected==nullptr ) return;
 
     EditLogin->Text=EditLogin->Text.Trim();
-	auto user=reinterpret_cast<MUsersItem*>(
+	auto *user=reinterpret_cast<MUsersItem*>(
 		ListViewUsers->Selected->Data);
     user->Login=EditLogin->Text.c_str();
     SetListViewUsersLine(ListViewUsers->Selected);
@@ -101,7 +101,7 @@ void __fastcall TFormUsers::EditNameExit(TObject *Sender)
     if ( ListViewUsers->Selected==nullptr ) return;
 
     EditName->Text=EditName->Text.Trim();
-	auto user=reinterpret_cast<MUsersItem*>(
+	auto *user=reinterpret_cast<MUsersItem*>(
 		ListViewUsers->Selected->Data);
     user->Name=EditName->Text.c_str();
     SetListViewUsersLine(ListViewUsers->Selected);
@@ -109,7 +109,7 @@ void __fastcall TFormUsers::EditNameExit(TObject *Sender)
 //---------------------------------------------------------------------------
 void __fastcall TFormUsers::ButtonPasswordClick(TObject *Sender)
 {
-	auto user=reinterpret_cast<MUsersItem*>(
+	auto *user=reinterpret_cast<MUsersItem*>(
 		ListViewUsers->Selected->Data);
     // Подготавливаем координаты
     TPoint dialog_coord;
@@ -138,12 +138,12 @@ void __fastcall TFormUsers::ButtonAddClick(TObject *Sender)
     }
 
     // Добавили в буфер нового пользователя
-	MUsersItem* user=TmpUsers.Add();
-	user->Login=L"NewUser";
-    user->Name=L"Новый пользователь";
+	MUsersItem& user=TmpUsers.Add();
+	user.Login=L"NewUser";
+    user.Name=L"Новый пользователь";
     // Добавили строку в список и связали с ним
     TListItem *item=ListViewUsers->Items->Add();
-    item->Data=user;
+    item->Data=&user;
     SetListViewUsersLine(item);
     // Обновили интерфейс
     ListViewUsers->ItemFocused=item;
@@ -160,7 +160,10 @@ void __fastcall TFormUsers::ButtonDelClick(TObject *Sender)
     while(item)
     {
         // Удаляем пользователя из буфера
-        TmpUsers.Del(reinterpret_cast<MUsersItem*>(item->Data));
+		TmpUsers.Del(
+			MUsers::const_iterator(
+			reinterpret_cast<MUsersItem*>(item->Data)
+			));
         // Удаляем строку из списка
         next=ListViewUsers->GetNextItem(item,sdAll,is);
         item->Delete();
@@ -173,7 +176,7 @@ void __fastcall TFormUsers::ButtonDelClick(TObject *Sender)
 void __fastcall TFormUsers::ButtonSaveClick(TObject *Sender)
 {
     // Замещаем актуальных пользователями из буфера
-    Users->Move(&TmpUsers);
+    Users->Move(TmpUsers);
     // Задаем ID-номера для новых
     Users->SetUUIDs();                      /// проверить чья смена открыта
     // Сохраняем в файле
@@ -207,7 +210,7 @@ void TFormUsers::SetEdit(bool Edit_)
 //---------------------------------------------------------------------------
 void TFormUsers::SetListViewUsersLine(TListItem *Item_)
 {
-    auto user=reinterpret_cast<MUsersItem*>(Item_->Data);
+    auto *user=reinterpret_cast<MUsersItem*>(Item_->Data);
 //    Item_->ImageIndex=user->Active?15:16;
     Item_->ImageIndex=user->Active?-1:16;
     Item_->Caption=user->Login.c_str();

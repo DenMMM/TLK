@@ -49,7 +49,7 @@ class MComputers:
 		MComputersItem>
 {
 public:
-	MComputersItem *Search(char Number_) const;
+	iterator Search(char Number_);
 };
 //---------------------------------------------------------------------------
 #endif

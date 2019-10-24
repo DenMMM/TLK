@@ -51,10 +51,11 @@ int MTariffTimesItem::MaxWorkTime(int Time_) const
 	return WorkTime;
 }
 //---------------------------------------------------------------------------
-MTariffsInfoItem *MTariffsInfo::Search(unsigned ID_) const
+MTariffsInfo::iterator
+	MTariffsInfo::Search(unsigned ID_)
 {
-	auto iTi=cbegin();
-	auto iEnd=cend();
+	auto iTi=begin();
+	auto iEnd=end();
 
 	while ( iTi!=iEnd )
 	{
@@ -62,7 +63,7 @@ MTariffsInfoItem *MTariffsInfo::Search(unsigned ID_) const
 		++iTi;
 	}
 
-	return &(*iTi);
+	return iTi;
 }
 //---------------------------------------------------------------------------
 unsigned MTariffsItem::GetDataSize() const
@@ -298,8 +299,8 @@ void MTariffsItem::GetRunTimes(__int64 &Time_, MTariffRunTimes *RunTimes_) const
 		if ( (tt.Type!=mttHours)||
 			(tt.MaxWorkTime(SysTime)==0) ) continue;
 
-		MTariffRunTimesItem* rt=RunTimes_->Add();
-		rt->Type=mttHours;
+		MTariffRunTimesItem& rt=RunTimes_->Add();
+		rt.Type=mttHours;
 		break;
 	}
 	// »щем подход€щие "плавающие" пакеты
@@ -308,9 +309,9 @@ void MTariffsItem::GetRunTimes(__int64 &Time_, MTariffRunTimes *RunTimes_) const
 		if ( (tt.Type!=mttFlyPacket)||
 			(tt.MaxWorkTime(SysTime)==0) ) continue;
 
-		MTariffRunTimesItem* rt=RunTimes_->Add();
-		rt->Type=mttFlyPacket;
-		rt->SizeTime=tt.SizeTime;
+		MTariffRunTimesItem& rt=RunTimes_->Add();
+		rt.Type=mttFlyPacket;
+		rt.SizeTime=tt.SizeTime;
 	}
 	// »щем подход€щие пакеты
 	for ( const auto &tt: Times )
@@ -318,10 +319,10 @@ void MTariffsItem::GetRunTimes(__int64 &Time_, MTariffRunTimes *RunTimes_) const
 		if ( (tt.Type!=mttPacket)||
 			(tt.MaxWorkTime(SysTime)==0) ) continue;
 
-		MTariffRunTimesItem* rt=RunTimes_->Add();
-		rt->Type=mttPacket;
-		rt->BeginTime=tt.BeginTime;
-		rt->EndTime=tt.EndTime;
+		MTariffRunTimesItem& rt=RunTimes_->Add();
+		rt.Type=mttPacket;
+		rt.BeginTime=tt.BeginTime;
+		rt.EndTime=tt.EndTime;
 	}
 }
 //---------------------------------------------------------------------------
@@ -333,8 +334,8 @@ void MTariffs::GetForTime(__int64 &Time_, MTariffsInfo *TariffsInfo_) const
 	{
 		if ( !trf.CheckForTime(Time_) ) continue;
 
-		MTariffsInfoItem* ti=TariffsInfo_->Add();
-		trf.GetInfo(ti);
+		MTariffsInfoItem& ti=TariffsInfo_->Add();
+		trf.GetInfo(&ti);
 	}
 }
 //---------------------------------------------------------------------------

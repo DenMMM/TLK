@@ -67,7 +67,7 @@ void __fastcall TFormFines::ListViewFinesSelectItem(TObject *Sender,
     } else
         SetEdit(true);
 
-    auto fine=reinterpret_cast<MFinesItem*>(ListViewFines->Selected->Data);
+    auto *fine=reinterpret_cast<MFinesItem*>(ListViewFines->Selected->Data);
     EditDescription->Text=fine->Descr.c_str();
     ComboBoxTime->ItemIndex=fine->Time==(24*60)? 0: fine->Time;
 }
@@ -77,7 +77,7 @@ void __fastcall TFormFines::EditDescriptionExit(TObject *Sender)
     if ( ListViewFines->Selected==nullptr ) return;
 
     EditDescription->Text=EditDescription->Text.Trim();
-    auto fine=reinterpret_cast<MFinesItem*>(ListViewFines->Selected->Data);
+    auto *fine=reinterpret_cast<MFinesItem*>(ListViewFines->Selected->Data);
     fine->Descr=EditDescription->Text.c_str();
     SetListViewFinesLine(ListViewFines->Selected);
 }
@@ -101,12 +101,12 @@ void __fastcall TFormFines::ButtonAddClick(TObject *Sender)
     }
 
     // Добавляем в буфер новый штраф
-	MFinesItem* fine=TmpFines.Add();
-	fine->Descr=L"Новый штраф";
-    fine->Time=1;
+	MFinesItem& fine=TmpFines.Add();
+	fine.Descr=L"Новый штраф";
+    fine.Time=1;
     // Добавляем строку в список и связываем ее с тарифом
     TListItem *item=ListViewFines->Items->Add();
-    item->Data=fine;
+    item->Data=&fine;
     // Обновляем интерфейс
     SetListViewFinesLine(item);
     ListViewFines->AlphaSort();
@@ -124,7 +124,10 @@ void __fastcall TFormFines::ButtonDelClick(TObject *Sender)
     while(item)
     {
         // Удаляем штраф из буфера
-        TmpFines.Del(reinterpret_cast<MFinesItem*>(item->Data));
+		TmpFines.Del(
+			MFines::const_iterator(
+			reinterpret_cast<MFinesItem*>(item->Data)
+			));
         // Удаляем строку из списка
         next=ListViewFines->GetNextItem(item,sdAll,is);
         item->Delete();
@@ -137,7 +140,7 @@ void __fastcall TFormFines::ButtonDelClick(TObject *Sender)
 void __fastcall TFormFines::ButtonSaveClick(TObject *Sender)
 {
     // Замещаем штрафами из буфера текущие
-    Fines->Move(&TmpFines);
+    Fines->Move(TmpFines);
     // Задаем ID-номера для новых
     Fines->SetUUIDs();
     // Сохраняем в файле
@@ -172,7 +175,7 @@ void TFormFines::SetEdit(bool Edit_)
 //---------------------------------------------------------------------------
 void TFormFines::SetListViewFinesLine(TListItem *Item_)
 {
-    auto fine=reinterpret_cast<MFinesItem*>(Item_->Data);
+    auto *fine=reinterpret_cast<MFinesItem*>(Item_->Data);
     Item_->Caption=fine->Descr.c_str();
     if ( fine->Time==(24*60) ) Item_->SubItems->Strings[0]=L"Все время";
     else Item_->SubItems->Strings[0]=IntToStr(fine->Time)+L" мин.";

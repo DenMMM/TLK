@@ -175,7 +175,7 @@ public:
 	bool Start() const;
 	bool Stop() const;
 	// Найти объект по IP-адресу
-	MSyncStatesItem *Search(u_long IP_) const;
+	iterator Search(u_long IP_);
 };
 //---------------------------------------------------------------------------
 class MSync

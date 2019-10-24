@@ -531,10 +531,10 @@ bool MStates::Save()
     return MSLList::Save(true,true);
 }
 //---------------------------------------------------------------------------
-MStatesItem *MStates::Search(int Number_) const
+MStates::iterator MStates::Search(int Number_)
 {
-	auto iState=cbegin();
-	auto iEnd=cend();
+	auto iState=begin();
+	auto iEnd=end();
 
 	while ( iState!=iEnd )
 	{
@@ -542,46 +542,50 @@ MStatesItem *MStates::Search(int Number_) const
 		++iState;
 	}
 
-	return &(*iState);
+	return iState;
 }
 //---------------------------------------------------------------------------
 bool MStates::Update(MComputers *Computers_)
 {
 	bool result=false;
-	MComputersItem *Computer;
 
 	// Убираем состояния, ассоциированные с несуществующими
 	// или неиспользуемыми компьютерами
 	for ( auto iState=cbegin(), iEnd=cend(); iState!=iEnd; )
 	{
-		auto iNext=iState; ++iNext;
+		auto iComputer=Computers_->Search(iState->Associated());
 
-		Computer=Computers_->Search(iState->Associated());
-		if ( (Computer==nullptr)||(Computer->NotUsed) )
+		if (
+			(iComputer==Computers_->end())||
+			(iComputer->NotUsed) )
 		{
 			result=true;
-			Del(&(*iState));
+			iState=Del(iState);
+		} else
+		{
+			++iState;
 		}
-		iState=iNext;
 	}
 	// Добавляем состояния для новых компьютеров
 	for ( const auto &Computer: *Computers_ )
 	{
-		if ( Computer.NotUsed||Search(Computer.Number) ) continue;
+		if ( Computer.NotUsed ) continue;
+		auto iState=Search(Computer.Number);
+		if ( iState!=end() ) continue;
 		result=true;
-		Add()->Associate(Computer.Number);
+		Add().Associate(Computer.Number);
 	}
 	// Убираем лишние записи, ассоциированные с одним и тем же компьютером
 	for ( auto iState=cbegin(), iEnd=cend(); iState!=iEnd; )
 	{
-		auto iNext=iState; ++iNext;
-
-		if ( Search(iState->Associated())!=&(*iState) )
+		if ( Search(iState->Associated())!=iState )
 		{
 			result=true;
-			Del(&(*iState));
+			iState=Del(iState);
+		} else
+		{
+			++iState;
 		}
-		iState=iNext;
 	}
 
 	return result;

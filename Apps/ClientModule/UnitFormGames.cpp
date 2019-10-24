@@ -42,31 +42,53 @@ void TFormGames::UpdateGames(unsigned Pages_)
     // Загрузим и добавим новые
     if ( Games.Load() )
     {
-		MGamesItem *Game;
-        
-        if ( (Pages_&mgp1)&&((Game=Games.GetItem(0))!=nullptr) )
-            AddGamesToTree(Game->SubGames,nullptr,ImageListGamesIcons);
-        if ( (Pages_&mgp2)&&((Game=Games.GetItem(1))!=nullptr) )
-            AddGamesToTree(Game->SubGames,nullptr,ImageListGamesIcons);
-        if ( (Pages_&mgp3)&&((Game=Games.GetItem(2))!=nullptr) )
-            AddGamesToTree(Game->SubGames,nullptr,ImageListGamesIcons);
-        if ( (Pages_&mgp4)&&((Game=Games.GetItem(3))!=nullptr) )
-            AddGamesToTree(Game->SubGames,nullptr,ImageListGamesIcons);
-        if ( (Pages_&mgp5)&&((Game=Games.GetItem(4))!=nullptr) )
-            AddGamesToTree(Game->SubGames,nullptr,ImageListGamesIcons);
-        if ( (Pages_&mgp6)&&((Game=Games.GetItem(5))!=nullptr) )
-            AddGamesToTree(Game->SubGames,nullptr,ImageListGamesIcons);
-        if ( (Pages_&mgp7)&&((Game=Games.GetItem(6))!=nullptr) )
-            AddGamesToTree(Game->SubGames,nullptr,ImageListGamesIcons);
-        if ( (Pages_&mgp8)&&((Game=Games.GetItem(7))!=nullptr) )
-            AddGamesToTree(Game->SubGames,nullptr,ImageListGamesIcons);
-    }
+		if ( Pages_&mgp1 )
+		{
+			try { AddGamesToTree(Games.GetItem(0).SubGames,nullptr,ImageListGamesIcons); }
+			catch (std::out_of_range &e) {}
+		}
+		if ( Pages_&mgp2 )
+		{
+			try { AddGamesToTree(Games.GetItem(1).SubGames,nullptr,ImageListGamesIcons); }
+			catch (std::out_of_range &e) {}
+		}
+		if ( Pages_&mgp3 )
+		{
+			try { AddGamesToTree(Games.GetItem(2).SubGames,nullptr,ImageListGamesIcons); }
+			catch (std::out_of_range &e) {}
+		}
+		if ( Pages_&mgp4 )
+		{
+			try { AddGamesToTree(Games.GetItem(3).SubGames,nullptr,ImageListGamesIcons); }
+			catch (std::out_of_range &e) {}
+		}
+		if ( Pages_&mgp5 )
+		{
+			try { AddGamesToTree(Games.GetItem(4).SubGames,nullptr,ImageListGamesIcons); }
+			catch (std::out_of_range &e) {}
+		}
+		if ( Pages_&mgp6 )
+		{
+			try { AddGamesToTree(Games.GetItem(5).SubGames,nullptr,ImageListGamesIcons); }
+			catch (std::out_of_range &e) {}
+		}
+		if ( Pages_&mgp7 )
+		{
+			try { AddGamesToTree(Games.GetItem(6).SubGames,nullptr,ImageListGamesIcons); }
+			catch (std::out_of_range &e) {}
+		}
+		if ( Pages_&mgp8 )
+		{
+			try { AddGamesToTree(Games.GetItem(7).SubGames,nullptr,ImageListGamesIcons); }
+			catch (std::out_of_range &e) {}
+		}
+	}
 }
 //---------------------------------------------------------------------------
 void TFormGames::AddGamesToTree(MGames *Games_, TTreeNode *TreeNode_, TImageList *ImageList_)
 {
-    TTreeNode *NewTreeNode;
-    HICON icon;
+	TTreeNode *NewTreeNode;
+	HICON icon;
 	wchar_t icon_file[MAX_PrgIconLength+1];    /// надо: [max(MAX_PrgCmdLength,MAX_PrgIconLength)+1]
     wchar_t *pos1, *pos2;
 

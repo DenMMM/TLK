@@ -27,7 +27,7 @@ void __fastcall TFormFine::FormShow(TObject *Sender)
         item=FormMain->ListViewComputers->GetNextItem(item,sdAll,is) )
     {
         // Проверим применим ли к компьютеру штраф
-        auto state=reinterpret_cast<MStatesItem*>(item->Data);
+		auto *state=reinterpret_cast<MStatesItem*>(item->Data);
         if ( !state->CmdFine(0,true) ) continue;
         // Заполним доп. атрибуты
         ApplyFines[i].State=state;
@@ -91,44 +91,43 @@ void __fastcall TFormFine::ComboBoxTimeClick(TObject *Sender)
 	bool Wait, Warn;
 
     if ( ComboBoxTime->ItemIndex<0 ) return;
-	MFinesItem *SelFine=Fines->GetItem(ComboBoxTime->ItemIndex);
-//	if ( SelFine==nullptr ) return;         /// теперь выше throw
+	MFinesItem& SelFine=Fines->GetItem(ComboBoxTime->ItemIndex);
 
 //    CheckBoxWarn->Enabled=true;
-    Warn=CheckBoxWarn->Checked;
-    if ( (SelFine->Time==(24*60))||Warn )
-    {
-        CheckBoxWait->Enabled=false;
-        Wait=false;
-    } else
-    {
-        CheckBoxWait->Enabled=true;
-        Wait=CheckBoxWait->Checked;
-    }
+	Warn=CheckBoxWarn->Checked;
+	if ( (SelFine.Time==(24*60))||Warn )
+	{
+		CheckBoxWait->Enabled=false;
+		Wait=false;
+	} else
+	{
+		CheckBoxWait->Enabled=true;
+		Wait=CheckBoxWait->Checked;
+	}
 
-    // Заносим новые значения штрафа для выбранных компьютеров
-    TItemStates is=TItemStates()<<isSelected;
-    for ( TListItem *Item=ListViewFines->Selected; Item;
-        Item=ListViewFines->GetNextItem(Item,sdAll,is) )
-    {
-        MApplyFine *ApplyFine;
-        ApplyFine=reinterpret_cast<MApplyFine*>(Item->Data);
-        ApplyFine->Fine=SelFine;
-        ApplyFine->Wait=Wait;
-        ApplyFine->Warn=Warn;
-        SetListViewFinesLine(Item);
-    }
+	// Заносим новые значения штрафа для выбранных компьютеров
+	TItemStates is=TItemStates()<<isSelected;
+	for ( TListItem *Item=ListViewFines->Selected; Item;
+		Item=ListViewFines->GetNextItem(Item,sdAll,is) )
+	{
+		MApplyFine *ApplyFine;
+		ApplyFine=reinterpret_cast<MApplyFine*>(Item->Data);
+		ApplyFine->Fine=&SelFine;
+		ApplyFine->Wait=Wait;
+		ApplyFine->Warn=Warn;
+		SetListViewFinesLine(Item);
+	}
 }
 //---------------------------------------------------------------------------
 void __fastcall TFormFine::BitBtnFineClick(TObject *Sender)
 {
-    // Удаляем оштрафованые компьютеры из списка
-    TItemStates is=TItemStates()<<isSelected;
-    TListItem *item=ListViewFines->Selected, *next;
-    while(item)
-    {
-        next=ListViewFines->GetNextItem(item,sdAll,is);
-        auto appfine=reinterpret_cast<MApplyFine*>(item->Data);
+	// Удаляем оштрафованые компьютеры из списка
+	TItemStates is=TItemStates()<<isSelected;
+	TListItem *item=ListViewFines->Selected, *next;
+	while(item)
+	{
+		next=ListViewFines->GetNextItem(item,sdAll,is);
+        auto *appfine=reinterpret_cast<MApplyFine*>(item->Data);
         if ( appfine->Fine!=nullptr )
         {
             MStatesItem *state=appfine->State;
@@ -167,12 +166,12 @@ void __fastcall TFormFine::BitBtnFineClick(TObject *Sender)
 //---------------------------------------------------------------------------
 void __fastcall TFormFine::SetListViewFinesLine(TListItem *Item_)
 {
-    auto selfine=reinterpret_cast<MApplyFine*>(Item_->Data);
-    MComputersItem *comp=Computers->Search(selfine->Number);
+    auto *selfine=reinterpret_cast<MApplyFine*>(Item_->Data);
+    auto iComp=Computers->Search(selfine->Number);
 
     // Номер компьютера и цвет его группы
-    Item_->SubItemImages[0]=FormMain->GetCompColorIcon(comp);
-    Item_->SubItems->Strings[0]=IntToStr(selfine->Number);
+	Item_->SubItemImages[0]=FormMain->GetCompColorIcon(&*iComp);
+	Item_->SubItems->Strings[0]=IntToStr(selfine->Number);
 
     if ( selfine->Fine==nullptr ) return;
 

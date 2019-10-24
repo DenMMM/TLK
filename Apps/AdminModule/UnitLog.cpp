@@ -8,78 +8,83 @@
 //---------------------------------------------------------------------------
 MLog::MLog()
 {
-    SystemTime=0;
-    BeginTime=0;
-    Opened=false;
-    User=0;
+	SystemTime=0;
+	BeginTime=0;
+	Opened=false;
+	User=0;
 }
 //---------------------------------------------------------------------------
 void MLog::AddSimpleEvent(MLogRecords::ItemType Type_)
 {
 	// Добавляем запись в буфер и заполняем атрибуты
-	auto record=&dynamic_cast<MLogRecords::Event&>(
-		*Records.Add(Type_));
-    record->SystemTime=SystemTime;
+	auto &record=dynamic_cast<MLogRecords::Event&>(
+		Records.Add(Type_));
+
+	record.SystemTime=SystemTime;
 }
 //---------------------------------------------------------------------------
 void MLog::AddStatesData(MStates *States_)
 {
 	// Добавляем запись в буфер и заполняем атрибуты
-	auto record=&dynamic_cast<MLogRecords::DataStates&>(
-		*Records.Add(MLogRecords::mlrDataStates));
-	record->SystemTime=SystemTime;
+	auto &record=dynamic_cast<MLogRecords::DataStates&>(
+		Records.Add(MLogRecords::mlrDataStates));
+
+	record.SystemTime=SystemTime;
 	// Создаем массив состояний компьютеров и заполняем его
-	record->Items.clear();
-	record->Items.reserve(States_->gCount());
+	record.Items.clear();
+	record.Items.reserve(States_->gCount());
 	for ( const auto &State: *States_ )
 	{
-		record->Items.push_back(State.gLogData());
+		record.Items.push_back(State.gLogData());
 	}
 }
 //---------------------------------------------------------------------------
 void MLog::AddTariffsData(MTariffs *Tariffs_)
 {
 	// Добавляем запись в буфер и заполняем атрибуты
-	auto record=&dynamic_cast<MLogRecords::DataTariffs&>(
-		*Records.Add(MLogRecords::mlrDataTariffs));
-	record->SystemTime=SystemTime;
+	auto &record=dynamic_cast<MLogRecords::DataTariffs&>(
+		Records.Add(MLogRecords::mlrDataTariffs));
+
+	record.SystemTime=SystemTime;
 	// Создаем массив тарифов и заполняем его
-	record->Items.clear();
-	record->Items.reserve(Tariffs_->gCount());
+	record.Items.clear();
+	record.Items.reserve(Tariffs_->gCount());
 	for ( const auto &Tariff: *Tariffs_ )
 	{
-		record->Items.push_back(Tariff.gLogData());
+		record.Items.push_back(Tariff.gLogData());
 	}
 }
 //---------------------------------------------------------------------------
 void MLog::AddFinesData(MFines *Fines_)
 {
 	// Добавляем запись в буфер и заполняем атрибуты
-	auto record=&dynamic_cast<MLogRecords::DataFines&>(
-		*Records.Add(MLogRecords::mlrDataFines));
-	record->SystemTime=SystemTime;
+	auto &record=dynamic_cast<MLogRecords::DataFines&>(
+		Records.Add(MLogRecords::mlrDataFines));
+
+	record.SystemTime=SystemTime;
 	// Создаем массив штрафов и заполняем его
-	record->Items.clear();
-	record->Items.reserve(Fines_->gCount());
+	record.Items.clear();
+	record.Items.reserve(Fines_->gCount());
 	for ( const auto &Fine: *Fines_ )
 	{
-		record->Items.push_back(Fine.gLogData());
+		record.Items.push_back(Fine.gLogData());
 	}
 }
 //---------------------------------------------------------------------------
 void MLog::AddUsersData(MUsers *Users_)
 {
 	// Добавляем запись в буфер и заполняем атрибуты
-	auto record=&dynamic_cast<MLogRecords::DataUsers&>(
-		*Records.Add(MLogRecords::mlrDataUsers));
-	record->SystemTime=SystemTime;
+	auto &record=dynamic_cast<MLogRecords::DataUsers&>(
+		Records.Add(MLogRecords::mlrDataUsers));
+
+	record.SystemTime=SystemTime;
 	// Создаем массив пользователей и заполняем его
-	record->Items.clear();
-	record->Items.reserve(Users_->ActiveCount());
+	record.Items.clear();
+	record.Items.reserve(Users_->ActiveCount());
 	for ( const auto &User: *Users_ )
 	{
 		if ( !User.Active ) continue;
-		record->Items.push_back(User.gLogData());
+		record.Items.push_back(User.gLogData());
 	}
 }
 //---------------------------------------------------------------------------
@@ -102,16 +107,15 @@ bool MLog::AddEvent(MLogRecords::ItemType Type_)
 bool MLog::AddMode(MLogRecords::ItemType Type_, char Number_, bool Apply_)
 {
     bool result=false;
-    MLogRecords::Mode *record;
 
-    if ( !Opened ) return false;
+	if ( !Opened ) return false;
 
-    Records.Clear();
-    // Добавляем запись в буфер и заполняем атрибуты
-	record=&dynamic_cast<MLogRecords::Mode&>(*Records.Add(Type_));
-    record->SystemTime=SystemTime;
-    record->Number=Number_;
-    record->Apply=Apply_;
+	Records.Clear();
+	// Добавляем запись в буфер и заполняем атрибуты
+	auto &record=dynamic_cast<MLogRecords::Mode&>(Records.Add(Type_));
+    record.SystemTime=SystemTime;
+    record.Number=Number_;
+	record.Apply=Apply_;
     // Добавляем к файлу безопасно
     result=Records.Attach(true);
     // Очищаем буфер
@@ -123,15 +127,14 @@ bool MLog::AddMode(MLogRecords::ItemType Type_, char Number_, bool Apply_)
 bool MLog::AddCmd(MLogRecords::ItemType Type_, char Number_)
 {
     bool result=false;
-	MLogRecords::Cmd *record;
 
 	if ( !Opened ) return false;
 
 	Records.Clear();
 	// Добавляем запись в буфер и заполняем атрибуты
-	record=&dynamic_cast<MLogRecords::Cmd&>(*Records.Add(Type_));
-	record->SystemTime=SystemTime;
-	record->Number=Number_;
+	auto &record=dynamic_cast<MLogRecords::Cmd&>(Records.Add(Type_));
+	record.SystemTime=SystemTime;
+	record.Number=Number_;
 	// Добавляем к файлу безопасно
 	result=Records.Attach(true);
 	// Очищаем буфер
@@ -353,17 +356,16 @@ bool MLog::AddStop()
 bool MLog::AddConfig(bool Open_)
 {
     bool result=false;
-    MLogRecords::AppConfig *record;
 
-    if ( !Opened ) return false;
-    
-    Records.Clear();
-    // Добавляем запись в буфер
-	record=&dynamic_cast<MLogRecords::AppConfig&>(
-		*Records.Add(MLogRecords::mlrConfig));
+	if ( !Opened ) return false;
+
+	Records.Clear();
+	// Добавляем запись в буфер
+	auto &record=dynamic_cast<MLogRecords::AppConfig&>(
+		Records.Add(MLogRecords::mlrConfig));
     // Заполняем атрибуты
-    record->SystemTime=SystemTime;
-    record->Opened=Open_;
+	record.SystemTime=SystemTime;
+    record.Opened=Open_;
     // Добавляем к файлу безопасно
     result=Records.Attach(true);
     // Очищаем буфер
@@ -453,16 +455,15 @@ bool MLog::AddOptions()
 bool MLog::AddLogIn(unsigned UserID_)
 {
     bool result=false;
-    MLogRecords::AppLogIn *record;
 
-    if ( !Opened ) return false;
+	if ( !Opened ) return false;
 
-    Records.Clear();
-    // Добавляем запись в буфер и заполняем атрибуты
-	record=&dynamic_cast<MLogRecords::AppLogIn&>(
-		*Records.Add(MLogRecords::mlrLogIn));
-	record->SystemTime=SystemTime;
-    record->User=UserID_;
+	Records.Clear();
+	// Добавляем запись в буфер и заполняем атрибуты
+	auto &record=dynamic_cast<MLogRecords::AppLogIn&>(
+		Records.Add(MLogRecords::mlrLogIn));
+	record.SystemTime=SystemTime;
+	record.User=UserID_;
     // Добавляем к файлу безопасно
     result=Records.Attach(true);
     // Очищаем буфер
@@ -484,25 +485,24 @@ bool MLog::AddLogOut()
 bool MLog::AddRun(MTariffRunTimesItem *Time_)
 {
     bool result=false;
-    MLogRecords::CompRun *record;
 
-    if ( !Opened ) return false;
+	if ( !Opened ) return false;
 
-    Records.Clear();
-    // Добавляем запись в буфер
-	record=&dynamic_cast<MLogRecords::CompRun&>(
-		*Records.Add(MLogRecords::mlrRun));
+	Records.Clear();
+	// Добавляем запись в буфер
+	auto &record=dynamic_cast<MLogRecords::CompRun&>(
+		Records.Add(MLogRecords::mlrRun));
     // Заполняем атрибуты
-    record->SystemTime=SystemTime;
-    record->Number=Time_->Number;
-    record->Tariff=Time_->TariffID;
-    record->StartTime=Time_->StartTime;
-    record->Type=Time_->Type;
-    record->BeginTime=Time_->BeginTime;
-    record->EndTime=Time_->EndTime;
-    record->SizeTime=Time_->SizeTime;
-    record->WorkTime=Time_->WorkTime;
-    record->Cost=Time_->Cost;
+    record.SystemTime=SystemTime;
+    record.Number=Time_->Number;
+    record.Tariff=Time_->TariffID;
+    record.StartTime=Time_->StartTime;
+    record.Type=Time_->Type;
+    record.BeginTime=Time_->BeginTime;
+    record.EndTime=Time_->EndTime;
+    record.SizeTime=Time_->SizeTime;
+    record.WorkTime=Time_->WorkTime;
+    record.Cost=Time_->Cost;
     // Добавляем к файлу безопасно
     result=Records.Attach(true);
     // Очищаем буфер
@@ -515,19 +515,18 @@ error:
 bool MLog::AddFine(char Number_, unsigned FineID_, short Time_)
 {
     bool result=false;
-    MLogRecords::CompFine *record;
 
-    if ( !Opened ) return false;
+	if ( !Opened ) return false;
 
-    Records.Clear();
-    // Добавляем запись
-	record=&dynamic_cast<MLogRecords::CompFine&>(
-		*Records.Add(MLogRecords::mlrFine));
+	Records.Clear();
+	// Добавляем запись
+	auto &record=dynamic_cast<MLogRecords::CompFine&>(
+		Records.Add(MLogRecords::mlrFine));
     // Заполняем атрибуты
-    record->SystemTime=SystemTime;
-    record->Number=Number_;
-    record->Fine=FineID_;
-    record->Time=Time_;
+    record.SystemTime=SystemTime;
+    record.Number=Number_;
+	record.Fine=FineID_;
+	record.Time=Time_;
     // Добавляем к файлу безопасно
     result=Records.Attach(true);
     // Очищаем буфер
@@ -540,18 +539,17 @@ error:
 bool MLog::AddExchange(char From_, char To_)
 {
     bool result=false;
-    MLogRecords::CompExchange *record;
 
-    if ( !Opened ) return false;
+	if ( !Opened ) return false;
 
-    Records.Clear();
-    // Добавляем запись
-	record=&dynamic_cast<MLogRecords::CompExchange&>(
-		*Records.Add(MLogRecords::mlrExchange));
+	Records.Clear();
+	// Добавляем запись
+	auto &record=dynamic_cast<MLogRecords::CompExchange&>(
+		Records.Add(MLogRecords::mlrExchange));
     // Заполняем атрибуты
-    record->SystemTime=SystemTime;
-    record->From=From_;
-    record->To=To_;
+    record.SystemTime=SystemTime;
+    record.From=From_;
+	record.To=To_;
     // Добавляем к файлу безопасно
     result=Records.Attach(true);
     // Очищаем буфер

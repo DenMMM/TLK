@@ -148,8 +148,8 @@ void __fastcall TFormMain::FormShow(TObject *Sender)
 		// Определяем пользователя, открывшего смену
 		ShellState->User=Log->LastUser();
 		// Проверяем есть ли он еще в списке пользователей и активен ли его логин
-		MUsersItem* User=Users->SrchUUID(ShellState->User);
-		if ( (User==nullptr) || (!User->Active) ) ShellState->User=0;
+		auto iUser=Users->SrchUUID(ShellState->User);
+		if ( (iUser==Users->end()) || (!iUser->Active) ) ShellState->User=0;
 		// Сохраним в логе стартовые параметры, чтобы потом четко разобрать все режимы
 		if ( !Log->AddStart(
 			ShellState.get(),
@@ -450,9 +450,9 @@ void __fastcall TFormMain::BitBtnExchangeClick(TObject *Sender)
 
 	// Ищем описатели состояния компьютеров
 	TListItem *item=ListViewComputers->Selected;
-	auto state1=reinterpret_cast<MStatesItem*>(item->Data);
+	auto *state1=reinterpret_cast<MStatesItem*>(item->Data);
 	item=ListViewComputers->GetNextItem(item,sdAll,TItemStates()<<isSelected);
-	auto state2=reinterpret_cast<MStatesItem*>(item->Data);
+	auto *state2=reinterpret_cast<MStatesItem*>(item->Data);
 
 	// Проверяем возможно ли применить команду
 	// и не нужно ли поменять местами компьютеры
@@ -471,8 +471,8 @@ void __fastcall TFormMain::BitBtnExchangeClick(TObject *Sender)
 	MTariffRunTimesItem time;
 	state1->RunParam(&time);
 	// Проверяем применим ли тот же тариф ко второму компьютеру
-	MTariffsItem* tariff=Tariffs->SrchUUID(time.TariffID);
-	if ( !((tariff!=nullptr) && tariff->CheckForComp(state2->Associated())) )
+	auto iTariff=Tariffs->SrchUUID(time.TariffID);
+	if ( !((iTariff!=Tariffs->end()) && iTariff->CheckForComp(state2->Associated())) )
 	{
         ResMessageBox(Handle,0,14,MB_APPLMODAL|MB_OK|MB_ICONWARNING);
         return;
@@ -510,7 +510,7 @@ void __fastcall TFormMain::BitBtnLockClick(TObject *Sender)
     for ( TListItem *Item=ListViewComputers->Selected; Item;
         Item=ListViewComputers->GetNextItem(Item,sdAll,is) )
     {
-        auto State=reinterpret_cast<MStatesItem*>(Item->Data);
+        auto *State=reinterpret_cast<MStatesItem*>(Item->Data);
         // Проверяем возможно ли применить команду
         if ( !State->CmdLock(lock,true) ) continue;
         // Добавляем запись в лог
@@ -557,7 +557,7 @@ void __fastcall TFormMain::NRebootClick(TObject *Sender)
     for ( TListItem *Item=ListViewComputers->Selected; Item;
         Item=ListViewComputers->GetNextItem(Item,sdAll,is) )
     {
-        auto State=reinterpret_cast<MStatesItem*>(Item->Data);
+        auto *State=reinterpret_cast<MStatesItem*>(Item->Data);
         // Проверяем возможно ли применить команду
         if ( !State->CmdReboot(true) ) continue;
         // Добавляем запись в лог
@@ -586,7 +586,7 @@ void __fastcall TFormMain::NPowerOnClick(TObject *Sender)
     for ( TListItem *Item=ListViewComputers->Selected; Item;
         Item=ListViewComputers->GetNextItem(Item,sdAll,is) )
     {
-        auto State=reinterpret_cast<MStatesItem*>(Item->Data);
+        auto *State=reinterpret_cast<MStatesItem*>(Item->Data);
         // Проверяем возможно ли применить команду
         if ( !State->CmdPowerOn(true) ) continue;
         // Добавляем запись в лог
@@ -615,7 +615,7 @@ void __fastcall TFormMain::NShutdownClick(TObject *Sender)
     for ( TListItem *Item=ListViewComputers->Selected; Item;
         Item=ListViewComputers->GetNextItem(Item,sdAll,is) )
     {
-        auto State=reinterpret_cast<MStatesItem*>(Item->Data);
+        auto *State=reinterpret_cast<MStatesItem*>(Item->Data);
         // Проверяем возможно ли применить команду
         if ( !State->CmdShutdown(true) ) continue;
         // Добавляем запись в лог
@@ -649,7 +649,7 @@ void __fastcall TFormMain::NPauseClick(TObject *Sender)
     for ( TListItem *Item=ListViewComputers->Selected; Item;
         Item=ListViewComputers->GetNextItem(Item,sdAll,is) )
     {
-        auto State=reinterpret_cast<MStatesItem*>(Item->Data);
+        auto *State=reinterpret_cast<MStatesItem*>(Item->Data);
         // Проверяем возможно ли применить команду
         if ( !State->CmdPause(pause,true) ) continue;
         // Добавляем запись в лог
@@ -686,7 +686,7 @@ void __fastcall TFormMain::NOpenClick(TObject *Sender)
     for ( TListItem *Item=ListViewComputers->Selected; Item;
         Item=ListViewComputers->GetNextItem(Item,sdAll,is) )
     {
-        auto State=reinterpret_cast<MStatesItem*>(Item->Data);
+        auto *State=reinterpret_cast<MStatesItem*>(Item->Data);
         // Проверяем возможно ли применить команду
         if ( !State->CmdOpen(open,true) ) continue;
         // Добавляем запись в лог
@@ -789,7 +789,8 @@ void TFormMain::SetListViewComputersLine(TListItem *Item_, MStatesInfo *Info_)
 	// Номер компьютера
 	if ( Info_->Changes&mdcNumber )
 	{
-		Item_->SubItemImages[0]=GetCompColorIcon(Computers->Search(Info_->Number));
+		auto iComp=Computers->Search(Info_->Number);
+		Item_->SubItemImages[0]=GetCompColorIcon(&*iComp);
 		swprintf(line, sizeof(line), L"%i", Info_->Number);
         SubItems->Strings[0]=line;
     }
@@ -819,8 +820,8 @@ void TFormMain::SetListViewComputersLine(TListItem *Item_, MStatesInfo *Info_)
     // Название тарифа
     if ( Info_->Changes&mdcTariff )
     {
-        MTariffsItem* Tariff=Tariffs->SrchUUID(Info_->TariffID);
-        if ( Tariff ) SubItems->Strings[3]=Tariff->Name.c_str();
+		auto iTariff=Tariffs->SrchUUID(Info_->TariffID);
+		if ( iTariff!=Tariffs->end() ) SubItems->Strings[3]=iTariff->Name.c_str();
         else SubItems->Strings[3]=L"";
     }
     // Время работы
@@ -958,8 +959,8 @@ void TFormMain::SetShell()
 
 	// Заголовок окна программы
 	UnicodeString line=L"TLK - ";
-	MUsersItem *User=Users->SrchUUID(ShellState->User);
-	if ( User!=nullptr ) line+=User->Login.c_str();
+	auto iUser=Users->SrchUUID(ShellState->User);
+	if ( iUser!=Users->end() ) line+=iUser->Login.c_str();
 	else line+=L"смена не начата";
     if ( ShellState->State&mssConfig ) line+=L" (открыты настройки)";
     Caption=line;

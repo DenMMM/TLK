@@ -67,7 +67,7 @@ void __fastcall TFormComputers::ListViewComputersSelectItem(
         return;
     } else SetEdit(true);
 
-	auto comp=reinterpret_cast<MComputersItem*>(
+	auto *comp=reinterpret_cast<MComputersItem*>(
 		ListViewComputers->Selected->Data);
     EditNumber->Text=IntToStr(comp->Number);
     EditAddress->Text=comp->Address.c_str();
@@ -87,7 +87,8 @@ void __fastcall TFormComputers::EditNumberExit(TObject *Sender)
 {
     if ( ListViewComputers->Selected==nullptr ) return;
 
-    auto comp=reinterpret_cast<MComputersItem*>(ListViewComputers->Selected->Data);
+	auto *comp=reinterpret_cast<MComputersItem*>(
+		ListViewComputers->Selected->Data);
 
     // Пытаемся сконвертировать текстовый номер в число
     int Number;
@@ -108,7 +109,8 @@ void __fastcall TFormComputers::EditAddressExit(TObject *Sender)
     if ( ListViewComputers->Selected==nullptr ) return;
 
     EditAddress->Text=EditAddress->Text.Trim();
-    auto comp=reinterpret_cast<MComputersItem*>(ListViewComputers->Selected->Data);
+	auto *comp=reinterpret_cast<MComputersItem*>(
+		ListViewComputers->Selected->Data);
 	comp->Address=EditAddress->Text.c_str();
     SetListViewComputersLine(ListViewComputers->Selected);
 }
@@ -153,20 +155,20 @@ void __fastcall TFormComputers::ButtonAddClick(TObject *Sender)
     }
 
     // Добавляем в буфер компьютер с номером на '1' больше, чем у выбранного
-	MComputersItem* comp=TmpComputers.Add();
+	MComputersItem& comp=TmpComputers.Add();
 	MComputersItem *selcomp=
 		ListViewComputers->Selected==nullptr?
 		nullptr:
 		reinterpret_cast<MComputersItem*>(ListViewComputers->Selected->Data);
-	comp->Number= selcomp ? selcomp->Number+1 : 1;
+	comp.Number= selcomp ? selcomp->Number+1 : 1;
 
 	wchar_t Address[MAX_CompAddrLen+1];
-	swprintf(Address, sizeof(Address), L"192.168.1.%i", comp->Number);
-	comp->Address=Address;
+	swprintf(Address, sizeof(Address), L"192.168.1.%i", comp.Number);
+	comp.Address=Address;
 
     // Добавили строку в список и связали с компьютером
     TListItem *item=ListViewComputers->Items->Add();
-    item->Data=comp;
+    item->Data=&comp;
     // Обновили интерфейс
     SetListViewComputersLine(item);
     ListViewComputers->AlphaSort();
@@ -184,7 +186,10 @@ void __fastcall TFormComputers::ButtonDelClick(TObject *Sender)
     while(item)
     {
         // Удаляем компьютер из буфера
-        TmpComputers.Del(reinterpret_cast<MComputersItem*>(item->Data));
+		TmpComputers.Del(
+			MComputers::const_iterator(
+			reinterpret_cast<MComputersItem*>(item->Data)
+			));
         // Удаляем строку из списка
         next=ListViewComputers->GetNextItem(item,sdAll,is);
         item->Delete();
@@ -197,7 +202,7 @@ void __fastcall TFormComputers::ButtonDelClick(TObject *Sender)
 void __fastcall TFormComputers::ButtonSaveClick(TObject *Sender)
 {
     // Замещаем список компьютеров записями из буфера
-    Computers->Move(&TmpComputers);
+    Computers->Move(TmpComputers);
     // Сохраняем в файле
     if ( !Computers->Save() )
     {
@@ -246,7 +251,7 @@ void TFormComputers::SetEdit(bool Edit_)
 //---------------------------------------------------------------------------
 void TFormComputers::SetListViewComputersLine(TListItem *Item_)
 {
-    auto comp=reinterpret_cast<MComputersItem*>(Item_->Data);
+	auto *comp=reinterpret_cast<MComputersItem*>(Item_->Data);
     TStrings *SubItems=Item_->SubItems;
 
     Item_->SubItemImages[0]=FormMain->GetCompColorIcon(comp);

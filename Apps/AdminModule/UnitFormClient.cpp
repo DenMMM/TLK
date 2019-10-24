@@ -206,7 +206,7 @@ void __fastcall TFormClient::NLoadClick(TObject *Sender)
 {
 	if ( ListViewComputers->SelCount!=1 ) return;
 
-	auto Computer=reinterpret_cast<MComputersItem*>(
+	auto *Computer=reinterpret_cast<MComputersItem*>(
 		ListViewComputers->Selected->Data);
 	if ( Computer==nullptr ) return;
 
@@ -233,7 +233,7 @@ void __fastcall TFormClient::TreeViewGamesChange(TObject *Sender,
 		return;
 	}
 
-	auto Game=reinterpret_cast<MGamesItem*>(Select->Data);
+	auto *Game=reinterpret_cast<MGamesItem*>(Select->Data);
 	if ( Game==nullptr ) return;
 
     EditName->Text=Game->Name.c_str();
@@ -251,7 +251,7 @@ void __fastcall TFormClient::TreeViewGamesChange(TObject *Sender,
 void __fastcall TFormClient::TreeViewGamesDeletion(TObject *Sender,
       TTreeNode *Node)
 {
-    auto Game=reinterpret_cast<MGamesItem*>(Node->Data);
+    auto *Game=reinterpret_cast<MGamesItem*>(Node->Data);
     delete Game;
 }
 //---------------------------------------------------------------------------
@@ -370,7 +370,7 @@ void __fastcall TFormClient::ButtonCancelClick(TObject *Sender)
 void TFormClient::SetTreeViewGamesLine(TTreeNode *Node_)
 {
 //    UnicodeString line;
-    auto Game=reinterpret_cast<MGamesItem*>(Node_->Data);
+    auto *Game=reinterpret_cast<MGamesItem*>(Node_->Data);
 	if ( Game==nullptr ) return;
 
 /*    line=Game->Name.c_str();
@@ -394,7 +394,8 @@ void TFormClient::AddGamesToTree(TTreeNode *Node_, MGames *Games_)
 		// Добавляем строку в дерево
 		TTreeNode *Node=TreeViewGames->Items->AddChild(Node_, L"");
 		MGamesItem *dGame=new MGamesItem;
-		Node->Data=static_cast<void*>(dGame);
+		Node->Data=dGame;
+
 		// Зададим имя программы/узла
 		dGame->Name=sGame.Name;
 		// Зададим остальные параметры или добавим элементы нижних уровней
@@ -410,28 +411,26 @@ void TFormClient::AddGamesToTree(TTreeNode *Node_, MGames *Games_)
 //---------------------------------------------------------------------------
 void TFormClient::CreateGamesTree(MGames *Games_)
 {
-    TTreeNode *Node;
-    MGamesItem *sGame, *dGame;
+	TreeViewGames->Items->Clear();
 
-    TreeViewGames->Items->Clear();
-    for ( int i=0; i<8; i++ )
-    {
-        Node=TreeViewGames->Items->Add(nullptr, L"");
-        dGame=new MGamesItem;
-        Node->Data=static_cast<void*>(dGame);
+	for ( int i=0; i<8; i++ )
+	{
+		TTreeNode *Node=TreeViewGames->Items->Add(nullptr, L"");
+		MGamesItem *dGame=new MGamesItem;
+		Node->Data=dGame;
 
-        sGame=Games_->GetItem(i);
-        // Если узла верхнего уровня нет, зададим имя по-умолчанию
-        if ( sGame==nullptr )
-        {
-            wchar_t str[5+1];
+		MGamesItem& sGame=Games_->GetItem(i);	/// возможен 'out_of_range'
+/*        // Если узла верхнего уровня нет, зададим имя по-умолчанию
+		if ( sGame==nullptr )
+		{
+			wchar_t str[5+1];
 			swprintf(str, sizeof(str), L"Page%i", i+1);
-            dGame->Name=str;
-        } else
-        {
-            dGame->Name=sGame->Name;
-            // Добавим элементы нижних уровней
-            if ( sGame->SubGames!=nullptr ) AddGamesToTree(Node,sGame->SubGames);
+			dGame->Name=str;
+		} else */
+		{
+			dGame->Name=sGame.Name;
+			// Добавим элементы нижних уровней
+			if ( sGame.SubGames!=nullptr ) AddGamesToTree(Node,sGame.SubGames);
         }
         //
         SetTreeViewGamesLine(Node);
@@ -440,52 +439,51 @@ void TFormClient::CreateGamesTree(MGames *Games_)
 //---------------------------------------------------------------------------
 void TFormClient::AddGamesFromTree(MGames *Games_, TTreeNode *Node_)
 {
-    TTreeNode *Node;
-    MGamesItem *sGame, *dGame;
-    MGames *SubGames;
+	Games_->Clear();
 
-    Games_->Clear();
-    for ( int i=0; i<Node_->Count; i++ )
-    {
-        Node=Node_->Item[i];
-        dGame=Games_->Add();
-        sGame=reinterpret_cast<MGamesItem*>(Node->Data);
-        // Задаем имя программы/узла
-        dGame->Name=sGame->Name;
-        // Если это узловой элемент, добавляем дочерние
-        if ( Node->HasChildren )
-        {
-            SubGames=dGame->AddSubGames();
-            if ( SubGames!=nullptr ) AddGamesFromTree(SubGames,Node);
+	for ( int i=0; i<Node_->Count; i++ )
+	{
+		TTreeNode *Node=Node_->Item[i];
+		MGamesItem& dGame=Games_->Add();
+		auto *sGame=reinterpret_cast<MGamesItem*>(Node->Data);
+
+		// Задаем имя программы/узла
+		dGame.Name=sGame->Name;
+		// Если это узловой элемент, добавляем дочерние
+		if ( Node->HasChildren )
+		{
+			MGames *SubGames=dGame.AddSubGames();
+            AddGamesFromTree(SubGames,Node);
         } else
         {
             // Иначе можно задать команду и путь к иконке
-            dGame->Command=sGame->Command;
-            dGame->Icon=sGame->Icon;
-        }
+			dGame.Command=sGame->Command;
+			dGame.Icon=sGame->Icon;
+		}
     }
 }
 //---------------------------------------------------------------------------
 void TFormClient::CreateGamesFromTree(MGames *Games_)
 {
     TTreeNodes *items=TreeViewGames->Items;
-    MGamesItem *sGame, *dGame;
-    MGames *SubGames;
 
-    Games_->Clear();
-    for ( int i=0; i<items->Count; i++ )
-    {
-        TTreeNode *node=items->Item[i];
-        if ( node->Level ) continue;
-        dGame=Games_->Add();
-        sGame=reinterpret_cast<MGamesItem*>(node->Data);
-        //
-        dGame->Name=sGame->Name;
-        // Добавляем вложенные элементы
-        if ( node->HasChildren )
-        {
-            SubGames=dGame->AddSubGames();
-            if ( SubGames!=nullptr ) AddGamesFromTree(SubGames,node);
+	Games_->Clear();
+
+	for ( int i=0; i<items->Count; i++ )
+	{
+		TTreeNode *node=items->Item[i];
+		if ( node->Level ) continue;
+
+		MGamesItem& dGame=Games_->Add();
+		auto *sGame=reinterpret_cast<MGamesItem*>(node->Data);
+
+		//
+		dGame.Name=sGame->Name;
+		// Добавляем вложенные элементы
+		if ( node->HasChildren )
+		{
+			MGames *SubGames=dGame.AddSubGames();
+			AddGamesFromTree(SubGames,node);
         }
     }
 }

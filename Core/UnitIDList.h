@@ -60,10 +60,6 @@ template <
 class MIDList:
 	public MSLList <list_type, base_type>
 {
-public:
-	// "Вытащим" объявления из родительского шаблона
-//	using MSLList <list_type, base_type> ::gFirst;
-
 private:
 	unsigned LastUUID;
 
@@ -80,12 +76,10 @@ public:
 		{ return MemGet(Data_,&LastUUID,Limit_); }
 
 public:
-	using MList <list_type, base_type> ::begin;
-	using MList <list_type, base_type> ::end;
-	using MList <list_type, base_type> ::cbegin;
-	using MList <list_type, base_type> ::cend;
+	using MSLList <list_type, base_type> ::begin;
+	using MSLList <list_type, base_type> ::end;
 
-	base_type *SrchUUID(unsigned UUID_) const;
+	auto SrchUUID(unsigned UUID_);
 	void SetUUIDs();
 
 	MIDList():
@@ -120,18 +114,19 @@ unsigned MIDList<list_type,base_type>::FirstUUID()
 template <typename list_type, typename base_type>
 unsigned MIDList<list_type,base_type>::NextUUID(unsigned LastUUID_)
 {
+	auto iEnd=end();
 	// Перебираем ID (пропуская '0') пока не найдем свободный
 	do { if ( (++LastUUID_)==0 ) continue; }
-	while ( SrchUUID(LastUUID_)!=nullptr );
+	while ( SrchUUID(LastUUID_)!=iEnd );
 
 	return LastUUID_;
 }
 //---------------------------------------------------------------------------
 template <typename list_type, typename base_type>
-base_type *MIDList<list_type,base_type>::SrchUUID(unsigned UUID_) const
+auto MIDList<list_type,base_type>::SrchUUID(unsigned UUID_)
 {
-	auto iItem=cbegin();
-	auto iEnd=cend();
+	auto iItem=begin();
+	auto iEnd=end();
 
 	while ( iItem!=iEnd )
 	{
@@ -139,8 +134,20 @@ base_type *MIDList<list_type,base_type>::SrchUUID(unsigned UUID_) const
 		++iItem;
 	}
 
-	return &(*iItem);
+	return iItem;
 }
+//---------------------------------------------------------------------------
+/*
+template <typename list_type, typename base_type>
+auto MIDList<list_type,base_type>::SrchUUID(unsigned UUID_)
+{
+	const MIDList* ConstThis=this;
+	const auto ConstRes=ConstThis->SrchUUID(UUID_);
+	return iterator(
+		reinterpret_cast<base_type*>(&*ConstRes)		/// хак ?
+		);
+}
+*/
 //---------------------------------------------------------------------------
 template <typename list_type, typename base_type>
 void MIDList<list_type,base_type>::SetUUIDs()

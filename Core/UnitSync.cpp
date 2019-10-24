@@ -232,8 +232,6 @@ error:
 //---------------------------------------------------------------------------
 void MSyncStates::Associate(MStates *States_, MComputers *Computers_)
 {
-	MSyncStatesItem *SyncState;
-	MComputersItem *Computer;
 	in_addr IP_inaddr;
 	u_long IP;
 
@@ -243,38 +241,33 @@ void MSyncStates::Associate(MStates *States_, MComputers *Computers_)
 	for ( auto &State: *States_ )
 	{
 		// Ищем компьютер, с которым ассоциировано состояние
-		Computer=Computers_->Search(State.Associated());
-		if ( Computer==nullptr ) continue;
+		auto iComputer=Computers_->Search(State.Associated());
+		if ( iComputer==Computers_->end() ) continue;
 		// Конвертируем IP-адрес из текста в u_long
 //		IP=::inet_addr(Computer->Address.c_str());
 //		if ( IP==INADDR_NONE ) continue;
 		const wchar_t *term;
 		if ( ::RtlIpv4StringToAddressW(
-			Computer->Address.c_str(),
+			iComputer->Address.c_str(),
 			TRUE,
 			&term,               				/// nullptr allowed ?
 			&IP_inaddr
 			) != STATUS_SUCCESS ) continue;
 		IP=IP_inaddr.S_un.S_addr;
+
 		// Ищем по этому адресу состояние синхронизации
 		// (чтобы сохранить возможно известный MAC-адрес)
 		// или добавляем новое
-		SyncState=Search(IP);
-		if ( SyncState==nullptr )
-			SyncState=Add();
+		auto iSyncState=Search(IP);
+		if ( iSyncState==iEnd ) iSyncState=iterator(&Add());
 		// Ассоциируем состояние синхронизации с состоянием компьютера и его адресом
-		SyncState->Associate(&State,IP);
+		iSyncState->Associate(&State,IP);
 		// Если состояние не последнее в списке, переносим его к началу
-		if ( iLastSyncState!=iEnd ) Swap(&(*iLastSyncState),SyncState);
-		iLastSyncState=iterator(SyncState->gNext());
+		if ( iLastSyncState!=iEnd ) Swap(iLastSyncState,iSyncState);
+		iLastSyncState=++iSyncState;
 	}
 	// Удаляем оставшиеся не нужными объекты
-	while( iLastSyncState!=iEnd )
-	{
-		SyncState=iLastSyncState->gNext();
-		Del(&(*iLastSyncState));
-		iLastSyncState=iterator(SyncState);
-	}
+	while( iLastSyncState!=iEnd ) iLastSyncState=Del(iLastSyncState);
 }
 //---------------------------------------------------------------------------
 bool MSyncStates::Start() const
@@ -299,10 +292,10 @@ bool MSyncStates::Stop() const
 	return NeedSave;
 }
 //---------------------------------------------------------------------------
-MSyncStatesItem *MSyncStates::Search(u_long IP_) const
+MSyncStates::iterator MSyncStates::Search(u_long IP_)
 {
-	auto iSyncState=cbegin();
-	auto iEnd=cend();
+	auto iSyncState=begin();
+	auto iEnd=end();
 
 	while ( iSyncState!=iEnd )
 	{
@@ -310,7 +303,7 @@ MSyncStatesItem *MSyncStates::Search(u_long IP_) const
 		++iSyncState;
 	}
 
-	return &(*iSyncState);
+	return iSyncState;
 }
 //---------------------------------------------------------------------------
 void MSync::SetARPFile(wchar_t *File_, unsigned Code_, bool AutoSave_)
@@ -450,11 +443,11 @@ void MSync::ThreadExecute()
                     0,(sockaddr*)&FromAddr,&AddrSize);
                 if ( (RecvSize==0)||(RecvSize==SOCKET_ERROR) ) continue;
 				// Ищем состояние синхронизации по IP-адресу, с которого пришел пакет
-				auto RecvState=SyncStates.Search(FromAddr.sin_addr.s_addr);
-                // Передаем его для обработки и отправки ответа сразу же
-                if ( RecvState!=nullptr )
+				auto iRecvState=SyncStates.Search(FromAddr.sin_addr.s_addr);
+				// Передаем его для обработки и отправки ответа сразу же
+				if ( iRecvState!=SyncStates.end() )
                 {
-                    NeedSave|=RecvState->Recv((char*)&Packet,RecvSize,NetCode,NetMAC);
+                    NeedSave|=iRecvState->Recv((char*)&Packet,RecvSize,NetCode,NetMAC);
 					NeedSave|=SyncState.Send(Socket,SocketBC,NetCode,NetMAC);
 				}
             }
@@ -507,34 +500,34 @@ bool MSync::UpdateMAC(MSyncStates *States_)
 {
     PMIB_IPNETTABLE Table=nullptr;
     ULONG TableSize;
-    PMIB_IPNETROW Record;
-	MSyncStatesItem *State;
+	PMIB_IPNETROW Record;
 	bool NeedSave=false;
 
-    // Берем размер таблицы
-    TableSize=0;
-    if ( ::GetIpNetTable(nullptr,&TableSize,TRUE)!=
-        ERROR_INSUFFICIENT_BUFFER ) goto error;
-    // Выделяем память под таблицу
-    try { Table=(PMIB_IPNETTABLE)new char[TableSize]; }
-    catch (std::bad_alloc &e) { goto error; }
-    memset(Table,0,TableSize);
-    // Берем таблицу
-    if ( ::GetIpNetTable(Table,&TableSize,TRUE)!=0 ) goto error;
+	// Берем размер таблицы
+	TableSize=0;
+	if ( ::GetIpNetTable(nullptr,&TableSize,TRUE)!=
+		ERROR_INSUFFICIENT_BUFFER ) goto error;
+	// Выделяем память под таблицу
+	try { Table=(PMIB_IPNETTABLE)new char[TableSize]; }
+	catch (std::bad_alloc &e) { goto error; }
+	memset(Table,0,TableSize);
+	// Берем таблицу
+	if ( ::GetIpNetTable(Table,&TableSize,TRUE)!=0 ) goto error;
 
-    // Обновляем MAC-адреса в списке состояний
-    for ( DWORD i=0; i<Table->dwNumEntries; i++ )
-    {
-        Record=&Table->table[i];
-        // Проверяем тип записи (нужны только динамические и статические)
-        if ( (Record->dwType!=MIB_IPNET_TYPE_DYNAMIC)&&
-            (Record->dwType!=MIB_IPNET_TYPE_STATIC) ) continue;
-        // Проверяем совпадает ли длина MAC-адреса с ожидаемой
-        if ( Record->dwPhysAddrLen!=MAC_AddrLength ) continue;
-        // Ищем состояние, ассоциированное с тем же адресом, что взят из таблицы
-        if ( (State=States_->Search(Record->dwAddr))==nullptr ) continue;
-        // Обновляем MAC-адрес
-        NeedSave|=State->UpdateMAC(Record->bPhysAddr);
+	// Обновляем MAC-адреса в списке состояний
+	for ( DWORD i=0; i<Table->dwNumEntries; i++ )
+	{
+		Record=&Table->table[i];
+		// Проверяем тип записи (нужны только динамические и статические)
+		if ( (Record->dwType!=MIB_IPNET_TYPE_DYNAMIC)&&
+			(Record->dwType!=MIB_IPNET_TYPE_STATIC) ) continue;
+		// Проверяем совпадает ли длина MAC-адреса с ожидаемой
+		if ( Record->dwPhysAddrLen!=MAC_AddrLength ) continue;
+		// Ищем состояние, ассоциированное с тем же адресом, что взят из таблицы
+		auto iState=States_->Search(Record->dwAddr);
+		if ( iState==States_->end() ) continue;
+		// Обновляем MAC-адрес
+		NeedSave|=iState->UpdateMAC(Record->bPhysAddr);
     }
 
     delete[] Table;
