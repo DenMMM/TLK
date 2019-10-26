@@ -259,7 +259,7 @@ void MSyncStates::Associate(MStates *States_, MComputers *Computers_)
 		// (чтобы сохранить возможно известный MAC-адрес)
 		// или добавляем новое
 		auto iSyncState=Search(IP);
-		if ( iSyncState==iEnd ) iSyncState=iterator(&Add());
+		if ( iSyncState==iEnd ) iSyncState=iterator(&Add(),this);   /// подумать над 'this'
 		// Ассоциируем состояние синхронизации с состоянием компьютера и его адресом
 		iSyncState->Associate(&State,IP);
 		// Если состояние не последнее в списке, переносим его к началу

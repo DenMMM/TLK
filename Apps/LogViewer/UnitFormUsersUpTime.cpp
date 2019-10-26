@@ -25,7 +25,10 @@ void __fastcall TFormUsersUpTime::FormClose(TObject *Sender,
     FormMain->WindowClose(this);
 }
 //---------------------------------------------------------------------------
-bool TFormUsersUpTime::Open(MLogFile *File_, MLogRecordsItem *Begin_, MLogRecordsItem *End_)
+bool TFormUsersUpTime::Open(
+	MLogFile *File_,
+	MLogRecords::const_iterator Begin_,
+	MLogRecords::const_iterator End_)
 {
 	__int64 time;
 	int hours, min;
@@ -35,6 +38,7 @@ bool TFormUsersUpTime::Open(MLogFile *File_, MLogRecordsItem *Begin_, MLogRecord
 
 	ProcessUsersUpTime(Begin_,End_,&Users,&Times);
 	ListViewUpTimes->Items->Clear();
+
 	for ( auto &Time: Times )
 	{
 		TListItem *Item=ListViewUpTimes->Items->Add();

@@ -36,14 +36,10 @@ class MListItem
 	friend MList <list_type, base_type>;
 
 private:
-	base_type* Prev;			// Указатель на предыдущий элемент списка
-	base_type* Next;			// Указатель на следующий элемент списка
+	base_type *Prev;			// Указатель на предыдущий элемент списка
+	base_type *Next;			// Указатель на следующий элемент списка
 
 public:
-	// Доступ к элементам класса
-	base_type* gPrev() const { return Prev; }
-	base_type* gNext() const { return Next; }
-
 	// Возвращает [двоичный] ID, ассоциированный с типом элемента
 	virtual unsigned char gTypeID() const noexcept = 0;
 	// Объявим виртуальное копирование через базовый тип
@@ -142,10 +138,11 @@ protected:
 #ifdef _DEBUG
 		// Проверим, что функция для этого ID_ еще не задана
 		if ( NewForType.at(ID_)!=nullptr )
+		{
 			throw std::runtime_error (
 				"MList::TypesIDSet()\n"
-				"Повторное использование одного и того же TypeID."
-				);
+				"Повторное использование одного и того же TypeID.");
+		}
 #endif
 		NewForType[ID_]=
 			reinterpret_cast<base_type*(*)()>(&new_item_type::New);
@@ -172,11 +169,16 @@ public:
 		typedef typename std::iterator <std::bidirectional_iterator_tag, base_type> ::pointer pointer;
 		typedef typename std::iterator <std::bidirectional_iterator_tag, base_type> ::reference reference;
 
-		pointer MyPtr;		// Адрес элемента, на который указывает итератор
+		pointer MyPtr;			// Адрес элемента, на который указывает итератор
+		const MList *ListPtr;	// Адрес списка, которому принадлежит элемент
 
 	public:
-		const_iterator(): MyPtr(nullptr) {}
-		explicit const_iterator(pointer Init_): MyPtr(Init_) {}
+		const_iterator():
+			MyPtr(nullptr), ListPtr(nullptr) {}
+		explicit const_iterator(pointer Init_):
+			MyPtr(Init_), ListPtr(nullptr) {}
+		explicit const_iterator(pointer Init_, const MList *ListInit_):
+			MyPtr(Init_), ListPtr(ListInit_) {}
 
 		const reference operator*() const { return *MyPtr; }
 		const pointer operator->() const { return MyPtr; }
@@ -184,11 +186,18 @@ public:
 		const_iterator& operator++()
 		{
 #ifdef _DEBUG
+			if ( ListPtr==nullptr )
+			{
+				throw std::runtime_error (
+					"MList::const_iterator::operator++()\n"
+					"Итератор не привязан к списку.");
+			}
 			if ( MyPtr==nullptr )
+			{
 				throw std::out_of_range (
-					"MList::operator++()\n"
-					"Попытка выйти за границы списка."
-					);
+					"MList::const_iterator::operator++()\n"
+					"Попытка выйти за границы списка.");
+			}
 #endif
 			MyPtr=MyPtr->Next;
 			return *this;
@@ -203,13 +212,22 @@ public:
 
 		const_iterator& operator--()
 		{
-			MyPtr=(MyPtr==nullptr)?	Last: MyPtr->Prev;
+#ifdef _DEBUG
+			if ( ListPtr==nullptr )
+			{
+				throw std::runtime_error (
+					"MList::const_iterator::operator--()\n"
+					"Итератор не привязан к списку.");
+			}
+#endif
+			MyPtr=(MyPtr==nullptr)? ListPtr->Last: MyPtr->Prev;
 #ifdef _DEBUG
 			if ( MyPtr==nullptr )
+			{
 				throw std::out_of_range (
-					"MList::operator--()\n"
-					"Попытка выйти за границы списка."
-					);
+					"MList::const_iterator::operator--()\n"
+					"Попытка выйти за границы списка.");
+			}
 #endif
 			return *this;
 		}
@@ -235,14 +253,17 @@ public:
 	class iterator:
 		public const_iterator
 	{
-	protected:
+	private:
 		typedef typename const_iterator::pointer pointer;
 		typedef typename const_iterator::reference reference;
 		using const_iterator::MyPtr;
 
 	public:
 		iterator() = default;
-		explicit iterator(pointer Init_): const_iterator(Init_) {}
+		explicit iterator(pointer Init_):
+			const_iterator(Init_) {}
+		explicit iterator(pointer Init_, MList *ListInit_):
+			const_iterator(Init_,ListInit_) {}
 
 		reference operator*() const { return *MyPtr; }
 		pointer operator->() const { return MyPtr; }
@@ -274,13 +295,13 @@ public:
 		}
 	};
 
-	iterator begin() noexcept { return iterator(First); }
-	const_iterator begin() const noexcept { return const_iterator(First); }
-	const_iterator cbegin() const noexcept { return const_iterator(First); }
+	iterator begin() noexcept { return iterator(First,this); }
+	const_iterator begin() const noexcept { return const_iterator(First,this); }
+	const_iterator cbegin() const noexcept { return begin(); }
 
-	iterator end() noexcept { return iterator(nullptr); }
-	const_iterator end() const noexcept { return const_iterator(nullptr); }
-	const_iterator cend() const noexcept { return const_iterator(nullptr); }
+	iterator end() noexcept { return iterator(nullptr,this); }
+	const_iterator end() const noexcept { return const_iterator(nullptr,this); }
+	const_iterator cend() const noexcept { return end(); }
 
 protected:
 	// Присоединяет к списку уэе созданный 'item::New()' элемент
@@ -288,8 +309,6 @@ protected:
 
 public:
 	// Доступ к атрибутам списка
-	base_type *gFirst() const { return First; }
-	base_type *gLast() const { return Last; }
 	size_t gCount() const { return Count; }
 
 	// Проверяет можно ли добавлять элементы по ID
@@ -360,7 +379,6 @@ public:
 // Заглушка для эмуляции простых списков
 template <
 	typename parent_list,       // Родительский класс списка
-//	typename list_type,			// Создаваемый класс (имя)
 	typename item_type>			// Тип элемента
 class MListSimple: public parent_list
 {
@@ -390,16 +408,16 @@ public:
 template <typename list_type, typename base_type>
 base_type *MList<list_type,base_type>::Add(base_type *NewItem_)
 {
-	// Проверим, что объект еще не привязан к какому-либо списку
+#ifdef _DEBUG
 	if (
 		NewItem_->Prev!=nullptr ||
 		NewItem_->Next!=nullptr )
 	{
 		throw std::runtime_error (
 			"MList::Add()\n"
-			"Объект уже добавлен в список."
-			);
+			"Объект уже добавлен в список.");
 	}
+#endif
 	// Инициализируем объект
 	NewItem_->Prev=Last;
 	NewItem_->Next=nullptr;
@@ -425,8 +443,7 @@ base_type& MList<list_type,base_type>::Add(unsigned char TypeID_)
 		{
 			throw std::invalid_argument (
 				"MList::Add()\n"
-				"Не известный TypeID."
-				);
+				"Не известный TypeID.");
 		}
 	}
 
@@ -437,61 +454,59 @@ base_type& MList<list_type,base_type>::Add(unsigned char TypeID_)
 template <typename list_type, typename base_type>
 base_type& MList<list_type,base_type>::GetItem(size_t Index_) const
 {
+#ifdef _DEBUG
 	if ( Index_>=Count )
 	{
 		throw std::out_of_range (
-			"MList<list_type,base_type>::GetItem()\n"
-			"Попытка выйти за границы списка."
-			);
+			"MList::GetItem()\n"
+			"Попытка выйти за границы списка.");
+	}
+#endif
+
+	for ( auto &Item: *this )
+	{
+		if ( Index_==0 ) return Item;
+		--Index_;
 	}
 
-	base_type *SearchItem=First;
-	// Ищем по цепочке указатель на нужный элемент
-	for ( size_t i=0; (i!=Index_)&&(SearchItem!=nullptr); i++ )
-		SearchItem=SearchItem->Next;
-
-	return *SearchItem;
+	throw std::runtime_error (
+		"MList::GetItem()\n"
+		"Список короче, чем ожидалось.");
 }
 //---------------------------------------------------------------------------
 template <typename list_type, typename base_type>
 void MList<list_type,base_type>::Swap(const_iterator iItem1_, const_iterator iItem2_)
 {
+#ifdef _DEBUG
 	if ( Count==0 )
-	{
 		throw std::runtime_error (
-			"MList<list_type,base_type>::Swap()\n"
-			"Список пуст."
-			);
-	}
+			"MList::Swap()\n"
+			"Список пуст.");
+#endif
 
 	base_type* Item1_=iItem1_.MyPtr;
 	base_type* Item2_=iItem2_.MyPtr;
 
+#ifdef _DEBUG
 	if (
 		Item1_==nullptr ||
 		Item2_==nullptr )
 	{
-		throw std::runtime_error (
-			"MList<list_type,base_type>::Swap()\n"
-			"Объект не существует (nullptr)."
-			);
+		throw std::invalid_argument (
+			"MList::Swap()\n"
+			"Объект не существует (nullptr).");
 	}
+#endif
 
 	if ( Item1_==Item2_ ) return;
 
-	base_type *Item;
-
 	if ( Item1_->Prev ) Item1_->Prev->Next=Item2_;
 	if ( Item2_->Prev ) Item2_->Prev->Next=Item1_;
-	Item=Item1_->Prev;
-	Item1_->Prev=Item2_->Prev;
-	Item2_->Prev=Item;
+	std::swap(Item1_->Prev,Item2_->Prev);
 
 	if ( Item1_->Next ) Item1_->Next->Prev=Item2_;
 	if ( Item2_->Next ) Item2_->Next->Prev=Item1_;
-	Item=Item1_->Next;
-	Item1_->Next=Item2_->Next;
-	Item2_->Next=Item;
+	std::swap(Item1_->Next,Item2_->Next);
 
 	if ( First==Item1_ ) First=Item2_;
 	else if ( First==Item2_ ) First=Item1_;
@@ -504,36 +519,31 @@ template <typename list_type, typename base_type>
 typename MList<list_type,base_type>::iterator
 	MList<list_type,base_type>::Del(const_iterator iPos_)
 {
+	base_type* DelItem_=iPos_.MyPtr;
+
+#ifdef _DEBUG
 	if ( Count==0 )
 	{
 		throw std::runtime_error (
-			"MList<list_type,base_type>::Del()\n"
-			"Список пуст."
-			);
+			"MList::Del()\n"
+			"Список пуст.");
 	}
-
-	base_type* DelItem_=iPos_.MyPtr;
-
 	if ( DelItem_==nullptr )
 	{
-		throw std::runtime_error (
-			"MList<list_type,base_type>::Del()\n"
-			"Объект не существует (nullptr)."
-			);
+		throw std::invalid_argument (
+			"MList::Del()\n"
+			"Объект не существует (nullptr).");
 	}
-
-	base_type* NextItem=DelItem_->Next;
-
 	if (
 		DelItem_->Prev==nullptr &&
 		DelItem_->Next==nullptr &&
 		DelItem_!=First )
 	{
 		throw std::runtime_error (
-			"MList<list_type,base_type>::Del()\n"
-			"Объект не принадлежит списку."
-			);
+			"MList::Del()\n"
+			"Объект не принадлежит списку.");
 	}
+#endif
 
 	// Разбираемся с предыдущим элементом списка и его началом
 	if ( DelItem_->Prev!=nullptr ) DelItem_->Prev->Next=DelItem_->Next;
@@ -544,26 +554,41 @@ typename MList<list_type,base_type>::iterator
 	// Корректируем счетчик
 	Count--;
 
+	base_type* NextItem=DelItem_->Next;
+
 	// Удаляем объект из памяти
 	delete DelItem_;
 
-	return iterator(NextItem);
+	return iterator(NextItem,this);
 }
 //---------------------------------------------------------------------------
 template <typename list_type, typename base_type>
 void MList<list_type,base_type>::Clear()
 {
-	base_type *del=First, *next;
+	base_type *del=First;
 
 	while(del!=nullptr)
 	{
-		next=del->Next;
+		base_type *next=del->Next;
 		delete del;
 		del=next;
 	}
 
 	First=Last=nullptr;
 	Count=0;
+
+/*	auto iItem=cbegin();
+	auto iEnd=cend();
+
+	while ( iItem!=iEnd )
+	{
+		auto iDel=iItem++;
+		delete &(*iDel);
+	}
+
+	First=Last=nullptr;
+	Count=0;
+*/
 }
 //---------------------------------------------------------------------------
 template <typename list_type, typename base_type>
@@ -573,21 +598,19 @@ MList<list_type,base_type>& MList<list_type,base_type>::operator=(const MList& S
 
 	// Очищаем список-приемник
 	Clear();
+
 	try
 	{
 		// Копируем в него элементы исходного
-		base_type *SrcItem=SrcList_.First, *NewItem;
-		while(SrcItem)
+		for ( auto &SrcItem: SrcList_ )
 		{
-			NewItem=&Add(SrcItem->gTypeID());
-			*NewItem=*SrcItem;
-			SrcItem=SrcItem->Next;
+			auto &NewItem=Add(SrcItem.gTypeID());
+			NewItem=SrcItem;
 		}
 	} catch(...)
 	{
-		// Раз список не заполнился, очистим его
+		// Раз список не заполнился, очистим его и передадим исключение выше
 		Clear();
-		// И передадим исключение выше
 		throw;
 	}
 
@@ -626,7 +649,6 @@ void MList<list_type,base_type>::Splice(list_type& AtchList_)
 		Last->Next->Prev=Last;
 	}
 	Last=AtchList_.Last;
-	// Увеличиваем счетчик
 	Count+=AtchList_.Count;
 	// Отсоединяем элементы от исходного списка
 	AtchList_.First=nullptr;

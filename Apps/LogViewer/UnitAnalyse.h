@@ -8,10 +8,13 @@
 #include "UnitUsers.h"
 #include "UnitUsersUpTime.h"
 //---------------------------------------------------------------------------
-bool ProcessComputersState(MLogRecordsItem *Position_,
-    MStates *States_, MTariffs *Tariffs_);
+bool ProcessComputersState(
+	MLogRecords::const_iterator Position_,
+	MStates *States_, MTariffs *Tariffs_);
 //---------------------------------------------------------------------------
-bool ProcessUsersUpTime(MLogRecordsItem *Begin_, MLogRecordsItem *End_,
+bool ProcessUsersUpTime(
+	MLogRecords::const_iterator Begin_,
+	MLogRecords::const_iterator End_,
 	MUsers *Users_, MUsersUpTime *UpTimes_);
 //---------------------------------------------------------------------------
 #endif

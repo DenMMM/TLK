@@ -11,8 +11,7 @@ void MClOptions::SetShellUser(const std::wstring &Name_)
 	{
 		throw std::out_of_range (
 			"MClOptions::SetShellUser()\n"
-			"Длина имени превышет MAX_ClUNameLen."
-			);
+			"Длина имени превышет MAX_ClUNameLen.");
 	}
 
 	ShellUser=Name_;

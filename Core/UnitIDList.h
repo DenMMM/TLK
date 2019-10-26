@@ -98,9 +98,8 @@ unsigned MIDList<list_type,base_type>::FirstUUID()
 	if ( !GetLocalTimeInt64(&time) )
 	{
 		throw std::runtime_error (
-			"MIDList<list_type,base_type>::FirstUUID()"
-			"Ќе удалось запросить системное врем€. √енераци€ уникальных ID не возможна."
-			);
+			"MIDList::FirstUUID()"
+			"Ќе удалось запросить системное врем€. √енераци€ уникальных ID не возможна.");
 	}
 //    id=::GetTickCount();                // чуток случайности
 //    id<<=16;

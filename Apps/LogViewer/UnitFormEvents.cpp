@@ -15,8 +15,6 @@ TFormEvents *FormEvents;
 __fastcall TFormEvents::TFormEvents(TComponent* Owner)
     : TForm(Owner)
 {
-    EventsBegin=nullptr;
-    EventsEnd=nullptr;
     EventSort=0;
     StateFilter=mcfAll;
 }
@@ -259,8 +257,9 @@ void __fastcall TFormEvents::ButtonCompUpdClick(TObject *Sender)
 //		ListViewEvents->ItemFocused &&
 		PanelState->Height&&ListViewEvents->ItemFocused &&
 		ProcessComputersState(
+			MLogRecords::const_iterator(
 			reinterpret_cast<MLogRecordsItem*>(
-				ListViewEvents->ItemFocused->Data),
+				ListViewEvents->ItemFocused->Data)),
 			&States, &Tariffs) )
 	{
 			UpdateListViewComputers(false, &States, &Tariffs);
@@ -443,14 +442,16 @@ void TFormEvents::UpdateListViewComputers(bool Full_, MStates *States_, MTariffs
 	}
 }
 //---------------------------------------------------------------------------
-bool TFormEvents::Open(MLogFile *File_,
-	MLogRecordsItem *Begin_, MLogRecordsItem *End_)
+bool TFormEvents::Open(
+	MLogFile *File_,
+	MLogRecords::const_iterator Begin_,
+	MLogRecords::const_iterator End_)
 {
     // Чистим интерфейс
     ListViewEvents->Items->Clear();
     ListViewComputers->Items->Clear();
     //
-    if ( Begin_==nullptr ) goto error;
+//    if ( Begin_==nullptr ) goto error;
 
 	Caption=UnicodeString(L"События  -  ")+File_->Name.c_str();
 
@@ -567,12 +568,10 @@ void TFormEvents::UpdateListViewEvents()
     wchar_t line[256];
     TListItem *Item;
 
-    MLogRecordsItem *Begin_=EventsBegin;
-    MLogRecordsItem *End_=EventsEnd;
+	ListViewEvents->Items->Clear();
 
-    ListViewEvents->Items->Clear();
-
-	for ( ; Begin_!=End_->gNext(); Begin_=Begin_->gNext() )
+	for ( MLogRecords::const_iterator Begin_=EventsBegin, End_=EventsEnd;
+		Begin_!=End_; ++Begin_ )
     {
         // Обновим список тарифов/штрафов/пользователей
         switch(Begin_->gTypeID())
@@ -580,17 +579,17 @@ void TFormEvents::UpdateListViewEvents()
 			case MLogRecords::DataTariffs::TypeID:
 				UpdateTariffs(
 					&Tariffs,
-					static_cast<MLogRecords::DataTariffs*>(Begin_));
+					static_cast<MLogRecords::DataTariffs*>(&*Begin_));
 				break;
 			case MLogRecords::DataFines::TypeID:
 				UpdateFines(
 					&Fines,
-					static_cast<MLogRecords::DataFines*>(Begin_));
+					static_cast<MLogRecords::DataFines*>(&*Begin_));
 				break;
 			case MLogRecords::DataUsers::TypeID:
 				UpdateUsers(
 					&Users,
-					static_cast<MLogRecords::DataUsers*>(Begin_));
+					static_cast<MLogRecords::DataUsers*>(&*Begin_));
 				break;
             default:
                 break;
@@ -602,7 +601,7 @@ void TFormEvents::UpdateListViewEvents()
         // Общие данные
         Item=ListViewEvents->Items->Add();
         Item->ImageIndex=-1;
-        Item->Data=Begin_;
+        Item->Data=&*Begin_;
         // Время события
         if ( Int64ToSystemTime(&Begin_->SystemTime, &ss_time) )
 			swprintf(
@@ -635,7 +634,7 @@ void TFormEvents::UpdateListViewEvents()
 
 			case MLogRecords::AppConfig::TypeID:
 				Item->SubItems->Add(L"");
-				if ( static_cast<MLogRecords::AppConfig*>(Begin_)->Opened )
+				if ( static_cast<MLogRecords::AppConfig*>(&*Begin_)->Opened )
 					Item->SubItems->Add(L"Настройки открыты");
 				else
 					Item->SubItems->Add(L"Настройки закрыты");
@@ -665,7 +664,7 @@ void TFormEvents::UpdateListViewEvents()
 			{
 				Item->SubItems->Add(L"");
 				auto iUsr=Users.SrchUUID(
-					static_cast<MLogRecords::AppLogIn*>(Begin_)->User);
+					static_cast<MLogRecords::AppLogIn*>(&*Begin_)->User);
 				swprintf(
 					line, sizeof(line),
 					L"Смену начал(а) '%s'",
@@ -680,7 +679,7 @@ void TFormEvents::UpdateListViewEvents()
 
 			case MLogRecords::CompRun::TypeID:
 			{
-				auto rcdr=static_cast<MLogRecords::CompRun*>(Begin_);
+				auto rcdr=static_cast<MLogRecords::CompRun*>(&*Begin_);
 				auto iTrf=Tariffs.SrchUUID(rcdr->Tariff);
 
 				Item->SubItems->Add(IntToStr(rcdr->Number));
@@ -711,7 +710,7 @@ void TFormEvents::UpdateListViewEvents()
 				break;
 			case MLogRecords::CompFine::TypeID:
 			{
-				auto rcdf=static_cast<MLogRecords::CompFine*>(Begin_);
+				auto rcdf=static_cast<MLogRecords::CompFine*>(&*Begin_);
 				auto iFn=Fines.SrchUUID(rcdf->Fine);
 
 				Item->SubItems->Add(IntToStr(rcdf->Number));
@@ -743,7 +742,7 @@ void TFormEvents::UpdateListViewEvents()
 				break;
 			case MLogRecords::CompExchange::TypeID:
 			{
-				auto rcde=static_cast<MLogRecords::CompExchange*>(Begin_);
+				auto rcde=static_cast<MLogRecords::CompExchange*>(&*Begin_);
 
 				Item->SubItems->Add(IntToStr(rcde->From));
 				swprintf(
@@ -755,7 +754,7 @@ void TFormEvents::UpdateListViewEvents()
 				break;
 			case MLogRecords::ModeLock::TypeID:
 			{
-				auto rcdl=static_cast<MLogRecords::ModeLock*>(Begin_);
+				auto rcdl=static_cast<MLogRecords::ModeLock*>(&*Begin_);
 
 				Item->SubItems->Add(IntToStr(rcdl->Number));
 				Item->SubItems->Add(rcdl->Apply? L"Прикрыт": L"Открыт");
@@ -763,7 +762,7 @@ void TFormEvents::UpdateListViewEvents()
 				break;
 			case MLogRecords::ModePause::TypeID:
 			{
-				auto rcdp=static_cast<MLogRecords::ModePause*>(Begin_);
+				auto rcdp=static_cast<MLogRecords::ModePause*>(&*Begin_);
 
 				Item->SubItems->Add(IntToStr(rcdp->Number));
 				Item->SubItems->Add(rcdp->Apply? L"Время приостановлено": L"Время запущено");
@@ -771,7 +770,7 @@ void TFormEvents::UpdateListViewEvents()
 				break;
 			case MLogRecords::ModeOpen::TypeID:
 			{
-				auto rcdo=static_cast<MLogRecords::ModeOpen*>(Begin_);
+				auto rcdo=static_cast<MLogRecords::ModeOpen*>(&*Begin_);
 
 				Item->SubItems->Add(IntToStr(rcdo->Number));
 				Item->SubItems->Add(rcdo->Apply? L"Открыт для настройки": L"Закрыт после настройки");
@@ -779,7 +778,7 @@ void TFormEvents::UpdateListViewEvents()
 				break;
 			case MLogRecords::CmdPowerOn::TypeID:
 			{
-				auto rcdpwr=static_cast<MLogRecords::CmdPowerOn*>(Begin_);
+				auto rcdpwr=static_cast<MLogRecords::CmdPowerOn*>(&*Begin_);
 
 				Item->SubItems->Add(IntToStr(rcdpwr->Number));
 				Item->SubItems->Add(L"Команда на включение");
@@ -787,7 +786,7 @@ void TFormEvents::UpdateListViewEvents()
 				break;
 			case MLogRecords::CmdReboot::TypeID:
 			{
-				auto rcdprb=static_cast<MLogRecords::CmdReboot*>(Begin_);
+				auto rcdprb=static_cast<MLogRecords::CmdReboot*>(&*Begin_);
 
 				Item->SubItems->Add(IntToStr(rcdprb->Number));
 				Item->SubItems->Add(L"Команда на перезагрузку");
@@ -795,7 +794,7 @@ void TFormEvents::UpdateListViewEvents()
 				break;
 			case MLogRecords::CmdShutdown::TypeID:
 			{
-				auto rcdpsd=static_cast<MLogRecords::CmdShutdown*>(Begin_);
+				auto rcdpsd=static_cast<MLogRecords::CmdShutdown*>(&*Begin_);
 
 				Item->SubItems->Add(IntToStr(rcdpsd->Number));
 				Item->SubItems->Add(L"Команда на выключение");

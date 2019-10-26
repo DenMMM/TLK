@@ -221,7 +221,8 @@ void __fastcall TFormRun::ComboBoxTariffClick(TObject *Sender)
 	// Позволяем ввод почасового времени
 	if ( iTime->Type==mttHours )
 	{
-		ComboBoxTime->Style=iTime->gNext()?csDropDown:csSimple;
+		auto iTemp=iTime; ++iTemp;
+		ComboBoxTime->Style=(iTemp!=iEnd)? csDropDown: csSimple;
 		UseTimes.Del(iTime);
 		iTime=UseTimes.begin();
 	} else

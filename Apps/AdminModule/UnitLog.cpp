@@ -253,27 +253,30 @@ bool MLog::Open()
 
 	++iRecord;
 	if ( iRecord->gTypeID() == MLogRecords::LogEnd::TypeID ) goto error;
-//	if ( Records.gLast()->gTypeID() == MLogRecords::LogEnd::TypeID ) goto error;
+//	if ( Records.gLa_st()->gTypeID() == MLogRecords::LogEnd::TypeID ) goto error;
 	Opened=true;
 
     // Определяем какой пользователь последним открыл смену
-    User=0;
-	for ( MLogRecordsItem *record=Records.gLast();
-		record; record=record->gPrev() )
-    {
-		unsigned char type=record->gTypeID();
+	User=0;
+	for ( auto iBegin=Records.cbegin(), iRecord=Records.cend();
+		iRecord!=iBegin; )
+	{
+		--iRecord;		// безопасно, т.к. список явно не пустой
+
+		unsigned char type=iRecord->gTypeID();
 		if ( type == MLogRecords::AppLogOut::TypeID ) break;
 		else if ( type == MLogRecords::AppLogIn::TypeID )
-        {
-			User=dynamic_cast<MLogRecords::AppLogIn&>(*record).User;
-            break;
-        }
-    }
-    // Очищаем буфер
-    Records.Clear();
+		{
+			User=dynamic_cast<MLogRecords::AppLogIn&>(*iRecord).User;
+			break;
+		}
+	}
+
+	// Очищаем буфер
+	Records.Clear();
 
 error:
-    return Opened;
+	return Opened;
 }
 //---------------------------------------------------------------------------
 bool MLog::End()

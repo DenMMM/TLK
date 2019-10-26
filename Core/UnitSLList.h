@@ -260,9 +260,8 @@ bool MSLList<list_type,base_type>::SaveTo(const std::wstring &File_, unsigned Co
     if ( data_size>MAX_SLFileSize )
     {
 		throw std::runtime_error (      /// заменить на return false ?
-            "MSLList<list_type,base_type>::SaveTo()\n"
-            "Размер данных превышает ограничение MAX_SLFileSize."
-			);
+			"MSLList::SaveTo()\n"
+			"Размер данных превышает ограничение MAX_SLFileSize.");
     }
     // Выделяем память под данные.
     // bad_alloc не ловим, т.к. ничего еще не начали делать
@@ -271,9 +270,8 @@ bool MSLList<list_type,base_type>::SaveTo(const std::wstring &File_, unsigned Co
 	if ( SetAllData(all_data.data()) != &all_data[all_data.size()] )
 	{
 		throw std::runtime_error (
-			"MSLList<list_type,base_type>::SaveTo()\n"
-			"Размер данных MSLList<list_type,base_type>::SetAllData() не соответствует MSLList<list_type,base_type>::GetAllDataSize()."
-			);
+			"MSLList::SaveTo()\n"
+			"Размер данных MSLList::SetAllData() не соответствует MSLList::GetAllDataSize().");
 	}
 	// Шифруем данные
 	BasicEncode(all_data.data(),all_data.size(),Code_);
@@ -329,9 +327,8 @@ bool MSLList<list_type,base_type>::AttachTo(const std::wstring &File_, unsigned 
     if ( data_size>MAX_SLFileSize )
     {
         throw std::runtime_error (      /// заменить на return false ?
-            "MSLList<list_type,base_type>::AttachTo()\n"
-            "Размер данных превышает ограничение MAX_SLFileSize."
-            );
+			"MSLList::AttachTo()\n"
+			"Размер данных превышает ограничение MAX_SLFileSize.");
     }
     if ( (data_size+file_sizel)>MAX_SLFileSize ) goto error;
 
@@ -343,7 +340,7 @@ bool MSLList<list_type,base_type>::AttachTo(const std::wstring &File_, unsigned 
     data_size+=read_size-sizeof(unsigned);
     // Выделяем память под новые данные и часть старых из файла
     try { all_data.resize(data_size); }
-    catch(std::bad_alloc &e)
+	catch ( std::bad_alloc &e )
     {
         // Закрываем файл и передаем исключение выше
         ::CloseHandle(file);
@@ -363,10 +360,9 @@ bool MSLList<list_type,base_type>::AttachTo(const std::wstring &File_, unsigned 
 		&all_data[all_data.size()] )
 	{
         throw std::runtime_error (
-            "MSLList<list_type,base_type>::AttachTo()\n"
-            "Размер данных MSLList<list_type,base_type>::SetAllData() не соответствует MSLList<list_type,base_type>::GetAllDataSize()."
-            );
-    }
+			"MSLList::AttachTo()\n"
+			"Размер данных MSLList::SetAllData() не соответствует MSLList::GetAllDataSize().");
+	}
 
     // Шифруем
     BasicEncode(all_data.data(),all_data.size(),Code_);
@@ -413,7 +409,7 @@ bool MSLList<list_type,base_type>::LoadFrom(const std::wstring &File_, unsigned 
 		 (file_sizel>MAX_SLFileSize) ) goto error;
 	// Выделяем память под данные
 	try { all_data.resize(file_sizel); }
-	catch(std::bad_alloc &e)
+	catch ( std::bad_alloc &e )
 	{
 		// Закрываем файл и передаем исключение выше
 		::CloseHandle(file);
@@ -453,19 +449,17 @@ bool MSLList<list_type,base_type>::StoreTo(HKEY Key_, const std::wstring &SubKey
     if ( size>MAX_SLRegSize )
     {
         throw std::runtime_error (      /// заменить на return false ?
-            "MSLList<list_type,base_type>::StoreTo()\n"
-            "Размер данных превышает ограничение MAX_SLRegSize."
-            );
-    }
+			"MSLList::StoreTo()\n"
+			"Размер данных превышает ограничение MAX_SLRegSize.");
+	}
     // Выделяем память (bad_alloc не ловим, т.к. еще ничего не начали делать)
     data.resize(size);
     // Сохраняем весь список в памяти и сверяем реальный размер данных
 	if ( SetAllData(data.data()) != &data[data.size()] )
 	{
         throw std::runtime_error (
-            "MSLList<list_type,base_type>::StoreTo()\n"
-            "Размер данных MSLList<list_type,base_type>::SetAllData() не соответствует MSLList<list_type,base_type>::GetAllDataSize()."
-            );
+			"MSLList::StoreTo()\n"
+			"Размер данных MSLList::SetAllData() не соответствует MSLList::GetAllDataSize().");
     }
     // Шифруем
 	BasicEncode(data.data(),data.size(),Code_);
@@ -499,7 +493,7 @@ bool MSLList<list_type,base_type>::QueryFrom(HKEY Key_, const std::wstring &SubK
 		0,KEY_QUERY_VALUE,&key)!=ERROR_SUCCESS ) goto api_error;
 	// Сразу выделяем память под данные (для реестра буфер маленький)
 	try { data.resize(MAX_SLRegSize); }
-	catch(std::bad_alloc &e)
+	catch ( std::bad_alloc &e )
 	{
 		// Закрываем ключ реестра и передаем исключение выше
 		::RegCloseKey(key); key=nullptr;
@@ -538,18 +532,16 @@ bool MSLList<list_type,base_type>::SaveAsReg(
 	static const char hk2[]="HKEY_CURRENT_USER";
 	static const char hk3[]="HKEY_USERS";
 	static const char hk4[]="HKEY_CLASSES_ROOT";
-	const char *hk;	std::vector <char> data;	std::vector <wchar_t> reg_data;	DWORD size, reg_size, rw_size;	HANDLE file;	LastError=0;	if ( Key_==HKEY_LOCAL_MACHINE ) hk=hk1;	else if ( Key_==HKEY_CURRENT_USER ) hk=hk2;	else if ( Key_==HKEY_USERS ) hk=hk3;	else if ( Key_==HKEY_CLASSES_ROOT ) hk=hk4;	else		throw std::runtime_error (			"MSLList<list_type,base_type>::SaveAsReg()\n"
-			"Задан не верный тип HKEY."
-			);
+	const char *hk;	std::vector <char> data;	std::vector <wchar_t> reg_data;	DWORD size, reg_size, rw_size;	HANDLE file;	LastError=0;	if ( Key_==HKEY_LOCAL_MACHINE ) hk=hk1;	else if ( Key_==HKEY_CURRENT_USER ) hk=hk2;	else if ( Key_==HKEY_USERS ) hk=hk3;	else if ( Key_==HKEY_CLASSES_ROOT ) hk=hk4;	else		throw std::runtime_error (			"MSLList::SaveAsReg()\n"
+			"Задан не верный тип HKEY.");
 
     // Определяем размер данных и проверяем на допустимость
     size=GetAllDataSize();
     if ( size>MAX_SLRegSize )
     {
         throw std::runtime_error (      /// заменить на return false ?
-            "MSLList<list_type,base_type>::SaveAsReg()\n"
-            "Размер данных превышает ограничение MAX_SLRegSize."
-            );
+			"MSLList::SaveAsReg()\n"
+			"Размер данных превышает ограничение MAX_SLRegSize.");
     }
     // Выделяем память (bad_alloc не ловим, т.к. еще ничего не начали делать)
     data.resize(size);
@@ -565,9 +557,8 @@ bool MSLList<list_type,base_type>::SaveAsReg(
 	if ( SetAllData(data.data()) != (data.data()+data.size()) )
     {
         throw std::runtime_error (
-            "MSLList<list_type,base_type>::SaveAsReg()\n"
-            "Размер данных MSLList<list_type,base_type>::SetAllData() не соответствует MSLList<list_type,base_type>::GetAllDataSize()."
-            );
+			"MSLList::SaveAsReg()\n"
+			"Размер данных MSLList::SetAllData() не соответствует MSLList::GetAllDataSize().");
     }
     // Шифруем
 	BasicEncode(data.data(),data.size(),Code_);

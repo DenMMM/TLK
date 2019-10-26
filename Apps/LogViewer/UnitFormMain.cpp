@@ -46,14 +46,14 @@ void __fastcall TFormMain::NOpenClick(TObject *Sender)
     FormEvents=new TFormEvents(this);
 	FormEvents->Open(
 		File,
-		File->Records.gFirst(),
-		File->Records.gLast());
+		File->Records.cbegin(),
+		File->Records.cend());
 
 	FormUsersUpTime=new TFormUsersUpTime(this);
 	FormUsersUpTime->Open(
 		File,
-		File->Records.gFirst(),
-		File->Records.gLast());
+		File->Records.cbegin(),
+		File->Records.cend());
 
 error:
     return;

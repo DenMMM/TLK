@@ -209,9 +209,8 @@ size_t ByteToHEX(const void *Bytes__, size_t BytesCount_,
 	if ( pin!=BytesCount_ )
 	{
 		throw std::runtime_error (
-			"ByteToHEX\n"
-			"Не достаточный размер буфера для HEX-строки."
-			);
+			"ByteToHEX()\n"
+			"Не достаточный размер буфера для HEX-строки.");
 	}
 
 	// Последний разделитель заменим концом строки

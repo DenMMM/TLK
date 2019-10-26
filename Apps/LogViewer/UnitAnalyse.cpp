@@ -6,13 +6,14 @@
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
 //---------------------------------------------------------------------------
-bool ProcessComputersState(MLogRecordsItem *Position_,
+bool ProcessComputersState(
+	MLogRecords::const_iterator Position_,
 	MStates *States_, MTariffs *Tariffs_)
 {
 	States_->Clear();
 	Tariffs_->Clear();
 	// Ищем назад по логу ближайшие данные по состоянию компьютеров
-	MLogRecordsItem *Record=Position_;
+	MLogRecords::const_iterator Record=Position_;
 	while(
 		Record &&
 		(Record->gTypeID()!=MLogRecords::DataStates::TypeID)
@@ -133,18 +134,20 @@ bool ProcessComputersState(MLogRecordsItem *Position_,
 				break;
 
 			default: break;
-        }
-    }
-    // Обновляем состояния
+		}
+	}
+	// Обновляем состояния
 	States_->Timer(Record->SystemTime);
 
-    return true;
+	return true;
 error:
-    return false;
+	return false;
 }
 //---------------------------------------------------------------------------
-bool ProcessUsersUpTime(MLogRecordsItem *Begin_, MLogRecordsItem *End_,
-    MUsers *Users_, MUsersUpTime *UpTimes_)
+bool ProcessUsersUpTime(
+	MLogRecords::const_iterator Begin_,
+	MLogRecords::const_iterator End_,
+	MUsers *Users_, MUsersUpTime *UpTimes_)
 {
 	Users_->Clear();
 	UpTimes_->Clear();
