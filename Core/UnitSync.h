@@ -3,6 +3,7 @@
 #define UnitSyncH
 //---------------------------------------------------------------------------
 #include <winsock2.h>
+#include <atomic>
 #include "UnitWinAPI.h"
 #include "UnitSLList.h"
 #include "UnitComputers.h"
@@ -192,8 +193,7 @@ private:
     MStates *States;            // Cостояния компьютеров для синхронизации
     MSyncStates SyncStates;     // Объекты процесса синхронизации
 
-    unsigned PCount;                            // Общий счетчик отправленных пакетов (индикация)
-    mutable MWAPI::CRITICAL_SECTION CS_PCount;  // и объект синхронизации доступа потоков к нему
+	std::atomic_uint PCount;	// Счетчик отправленных пакетов (индикация)
 
     union MPacket
     {
@@ -205,7 +205,8 @@ private:
 	static bool PollData(SOCKET Socket_);
     static bool UpdateMAC(MSyncStates *States_);
     void ThreadExecute();
-    void sPCount(unsigned Value_);      // thread safe
+
+	void sPCount(unsigned Value_) { PCount.store(Value_); }
 
 public:
     bool NetInit(unsigned Code_, MAuth *MAC_);  // Инициализация WinSocket
@@ -220,8 +221,8 @@ public:
     DWORD gLastErr() const { return SyncStates.gLastErr(); }
 
 	// Индикация процесса снхронизации
-	unsigned gPCountMax() const;        // thread safe
-	unsigned gPCount() const;           // thread safe
+	unsigned gPCountMax() const { return SyncStates.gCount()*SYNC_SendRetryes; }
+	unsigned gPCount() const { return PCount.load(); }
 
 	MSync():
 		Init(false),
@@ -232,8 +233,7 @@ public:
 		NetMAC(nullptr),
 		States(nullptr),
 		Socket(INVALID_SOCKET),
-		SocketBC(INVALID_SOCKET),
-		PCount(0)
+		SocketBC(INVALID_SOCKET)
 	{
 	}
 

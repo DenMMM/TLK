@@ -73,37 +73,44 @@ unsigned MTariffsItem::GetDataSize() const
         sizeofLine(Name)+
         sizeof(Programs)+
         sizeof(Reboot)+
-        sizeof(CompsCnt)+
-        sizeof(*Comps)*CompsCnt+
-        Times.GetAllDataSize();
+        sizeof(char)+
+		sizeof(char)*Comps.size()+
+		Times.GetAllDataSize();
 }
 
 void *MTariffsItem::SetData(void *Data_) const
 {
-    Data_=MIDListItem::SetData(Data_);
+	Data_=MIDListItem::SetData(Data_);
 	Data_=MemSetLine(Data_,Name);
-    Data_=MemSet(Data_,Programs);
-    Data_=MemSet(Data_,Reboot);
-    Data_=MemSet(Data_,CompsCnt);
-    for (int i=0; i<CompsCnt; i++) Data_=MemSet(Data_,Comps[i]);
-    Data_=Times.SetAllData(Data_);
-    return Data_;
+	Data_=MemSet(Data_,Programs);
+	Data_=MemSet(Data_,Reboot);
+	Data_=MemSet(Data_,(char)Comps.size());
+	for ( auto Comp: Comps ) Data_=MemSet(Data_,Comp);
+	Data_=Times.SetAllData(Data_);
+	return Data_;
 }
 
 const void *MTariffsItem::GetData(const void *Data_, const void *Limit_)
 {
-    if ( !(
+	char CompsCnt=0;
+
+	if ( !(
 		(Data_=MIDListItem::GetData(Data_,Limit_)) &&
 		(Data_=MemGetLine(Data_,Name,MAX_TariffNameLen,Limit_)) &&
-        (Data_=MemGet(Data_,&Programs,Limit_)) &&
-        (Data_=MemGet(Data_,&Reboot,Limit_)) &&
+		(Data_=MemGet(Data_,&Programs,Limit_)) &&
+		(Data_=MemGet(Data_,&Reboot,Limit_)) &&
 		(Data_=MemGet(Data_,&CompsCnt,Limit_))
 		) ) return nullptr;
 
-	if ( (CompsCnt<0) || (CompsCnt>sizeof(Comps)) ) return nullptr;
+	if ( (CompsCnt<0) || (CompsCnt>MAX_Comps) ) return nullptr;
 
-    for ( int i=0; i<CompsCnt; i++ )
-        if ( !(Data_=MemGet(Data_,&Comps[i],Limit_)) ) return nullptr;
+	Comps.clear();
+	for ( ; CompsCnt>0; --CompsCnt )
+	{
+		char Comp;
+		if ( !(Data_=MemGet(Data_,&Comp,Limit_)) ) return nullptr;
+		Comps.push_back(Comp);
+	}
 
 	if ( !(Data_=Times.GetAllData(Data_,Limit_)) ) return nullptr;
 
@@ -248,14 +255,6 @@ void MTariffsItem::Cost(MTariffRunTimesItem *RunTime_, double Prec_) const
     RunTime_->Cost=ceil(RunTime_->Cost/Prec_)*Prec_;
 }
 
-bool MTariffsItem::SetComps(char *Comps_, int Count_)
-{
-    if ( (Count_<0)||(Count_>sizeof(Comps)) ) return false;
-    CompsCnt=Count_;
-    for ( int i=0; i<Count_; i++ ) Comps[i]=Comps_[i];
-    return true;
-}
-
 bool MTariffsItem::CheckForTime(__int64 &Time_) const
 {
     int Time;
@@ -273,8 +272,11 @@ bool MTariffsItem::CheckForTime(__int64 &Time_) const
 
 bool MTariffsItem::CheckForComp(char Num_) const
 {
-	for ( int i=0; i<CompsCnt; i++ )
-		if ( Comps[i]==Num_ ) return true;
+	for ( char Comp: Comps )
+	{
+		if ( Comp==Num_ ) return true;
+	}
+
 	return false;
 }
 

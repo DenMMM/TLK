@@ -64,9 +64,9 @@ __published:	// IDE-managed Components
     void __fastcall ButtonSaveClick(TObject *Sender);
     void __fastcall CheckBoxDesktopExit(TObject *Sender);
 private:	// User declarations
-    MTariffs TmpTariffs;               // Буфер для списка тарифов
-    char TmpComps[MAX_Comps];          // Буфер для списка компьютеров редактируемого тарифа
-    void SetEdit(bool Edit_);
+	MTariffs TmpTariffs;				// Буфер для списка тарифов
+	std::vector <char> TmpComps;		// Буфер для списка компьютеров редактируемого тарифа
+	void SetEdit(bool Edit_);
     void SetListViewNamesLine(TListItem *Item_);
 public:		// User declarations
     __fastcall TFormTariffs(TComponent* Owner);

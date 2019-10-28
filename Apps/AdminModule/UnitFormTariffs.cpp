@@ -16,6 +16,7 @@
 __fastcall TFormTariffs::TFormTariffs(TComponent* Owner)
     : TForm(Owner)
 {
+	TmpComps.reserve(MAX_Comps);
 }
 //---------------------------------------------------------------------------
 void __fastcall TFormTariffs::FormShow(TObject *Sender)
@@ -228,19 +229,20 @@ void __fastcall TFormTariffs::ListViewComputersExit(TObject *Sender)
 {
     if ( ListViewNames->Selected==nullptr ) return;
     // Заполняем массив номеров компьютеров
-    int count=0;
+    TmpComps.clear();
     TListItems *items=ListViewComputers->Items;
-    for ( int i=0; (i<items->Count)&&(i<sizeof(TmpComps)); i++ )
+	for ( int i=0; i<items->Count; ++i )
     {
         TListItem *item=items->Item[i];
-		if ( item->Checked )
-			TmpComps[count++]=reinterpret_cast<MComputersItem*>(
-				item->Data)->Number;
-    }
+		if ( !item->Checked ) continue;
+		TmpComps.push_back(
+			reinterpret_cast<MComputersItem*>(
+			item->Data)->Number);
+	}
     // Сохраняем копию этого массива в тарифе
 	auto *tariff=reinterpret_cast<MTariffsItem*>(
 		ListViewNames->Selected->Data);
-	tariff->SetComps(TmpComps,count);
+	tariff->Comps=TmpComps;
 }
 //---------------------------------------------------------------------------
 void __fastcall TFormTariffs::ButtonSetSelCompClick(TObject *Sender)

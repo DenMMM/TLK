@@ -372,7 +372,7 @@ bool MSync::Start()
     if ( ::bind(SocketBC,(sockaddr*)&Address,
         sizeof(Address))==SOCKET_ERROR ) goto error;
 
-    //
+	//
     if ( !SyncStates.Start() ) goto error;
 
     // Создаем поток для выполнения отправки и приема данных
@@ -399,9 +399,9 @@ void MSync::Stop()
     Thread=nullptr; ThreadID=0;
     // Закрываем сокеты
     ::closesocket(Socket); Socket=INVALID_SOCKET;
-    ::closesocket(SocketBC); SocketBC=INVALID_SOCKET;
-    // При необходимости сохраняем состояния компьютеров
-    if ( SyncStates.Stop() ) States->Save();
+	::closesocket(SocketBC); SocketBC=INVALID_SOCKET;
+	// При необходимости сохраняем состояния компьютеров
+	if ( SyncStates.Stop() ) States->Save();
 }
 //---------------------------------------------------------------------------
 DWORD WINAPI MSync::ThreadFunc(LPVOID Data)
@@ -535,25 +535,6 @@ bool MSync::UpdateMAC(MSyncStates *States_)
 error:
     delete[] Table;
     return false;
-}
-//---------------------------------------------------------------------------
-void MSync::sPCount(unsigned Value_)
-{
-    MWAPI::CRITICAL_SECTION::Lock lckObj(CS_PCount);
-
-    PCount=Value_;
-}
-//---------------------------------------------------------------------------
-unsigned MSync::gPCountMax() const
-{
-    return SyncStates.gCount()*SYNC_SendRetryes;
-}
-//---------------------------------------------------------------------------
-unsigned MSync::gPCount() const
-{
-    MWAPI::CRITICAL_SECTION::Lock lckObj(CS_PCount);
-
-    return PCount;
 }
 //---------------------------------------------------------------------------
 bool MSyncCl::PollData(SOCKET Socket_)

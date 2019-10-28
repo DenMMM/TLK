@@ -154,9 +154,6 @@ public:
 	virtual const void *GetData(const void *Data_, const void *Limit_) override;
 
 private:
-	char CompsCnt;                      // Число компьютеров, к которым применим тариф
-	char Comps[MAX_Comps];              // Их номера
-
 	void CostPacket(MTariffRunTimesItem *RunTime_) const;
 	void CostFlyPacket(MTariffRunTimesItem *RunTime_) const;
 	void CostHours(MTariffRunTimesItem *RunTime_) const;
@@ -165,9 +162,9 @@ public:
 	std::wstring Name;        			// Название тарифа
 	unsigned Programs;                  // Группы программ для запуска
 	bool Reboot;                        // Пререзагружать компьютер после запуска
+	std::vector <char> Comps;           // Номера компьютеров, к которым применим тариф
 	MTariffTimes Times;					// Типы тарифа по времени
 
-	bool SetComps(char *Comps_, int Count_);
 	// Проверяет есть ли для заданного времени пакеты по тарифу
 	bool CheckForTime(__int64 &Time_) const;
 	// Проверяет применим ли тариф к компьютеру
@@ -201,9 +198,9 @@ public:
 
 	MTariffsItem():
 		Programs(0),
-		Reboot(false),
-		CompsCnt(0)
+		Reboot(false)
 	{
+        Comps.reserve(MAX_Comps);       // оптимизация
 	}
 };
 
