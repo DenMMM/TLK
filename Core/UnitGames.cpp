@@ -15,9 +15,9 @@ unsigned MGamesItem::GetDataSize() const
 		sizeofLine(Command)+
         sizeofLine(Icon)+
 		(
-			(SubGames==nullptr) || (SubGames->gCount()==0)?
+			(!upSubGames) || (upSubGames->gCount()==0)?
 			vGames.GetAllDataSize():
-			SubGames->GetAllDataSize()
+			upSubGames->GetAllDataSize()
 		);
 }
 
@@ -29,9 +29,9 @@ void *MGamesItem::SetData(void *Data_) const
 	Data_=MemSetLine(Data_,Command);
     Data_=MemSetLine(Data_,Icon);
 	Data_=
-		(SubGames==nullptr) || (SubGames->gCount()==0)?
-        vGames.SetAllData(Data_):
-		SubGames->SetAllData(Data_);
+		(!upSubGames) || (upSubGames->gCount()==0)?
+		vGames.SetAllData(Data_):
+		upSubGames->SetAllData(Data_);
 
     return Data_;
 }
@@ -45,32 +45,46 @@ const void *MGamesItem::GetData(const void *Data_, const void *Limit_)
 		) ) return nullptr;
 
 	// Создаем SubGames и пробуем его заполнить
+	upSubGames.reset(new MGames);
 	if ( !(
-		AddSubGames() &&
-		(Data_=SubGames->GetAllData(Data_,Limit_))
+		(Data_=upSubGames->GetAllData(Data_,Limit_))
 		) ) return nullptr;
 
 	// Если SubGames оказался пустым, удалим его
-	if ( SubGames->gCount()==0 ) DelSubGames();
+	if ( upSubGames->gCount()==0 ) upSubGames.reset(nullptr);
 
 	return Data_;
 }
 
-MGames *MGamesItem::AddSubGames()
+MGamesItem::MGamesItem(const MGamesItem& Src_):
+	Name(Src_.Name),
+	Command(Src_.Command),
+	Icon(Src_.Icon),
+	upSubGames(nullptr)
 {
-    if ( SubGames==nullptr ) SubGames=new MGames;
-    return SubGames;
+	if ( Src_.upSubGames )
+	{
+		upSubGames.reset(new MGames);
+		*upSubGames=*Src_.upSubGames;
+	}
 }
 
-void MGamesItem::DelSubGames()
+MGamesItem& MGamesItem::operator=(const MGamesItem& Right_)
 {
-	delete SubGames;
-	SubGames=nullptr;
-}
+	Name=Right_.Name;
+	Command=Right_.Command;
+	Icon=Right_.Icon;
+	if ( Right_.upSubGames )
+	{
+//		if ( !upSubGames ) upSubGames.reset(new MGames);
+		upSubGames.reset(new MGames);
+		*upSubGames=*Right_.upSubGames;
+	} else
+	{
+		upSubGames.reset(nullptr);
+	}
 
-MGamesItem::~MGamesItem()
-{
-	delete SubGames;
+	return *this;
 }
 //---------------------------------------------------------------------------
 

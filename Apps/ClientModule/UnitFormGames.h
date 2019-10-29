@@ -34,8 +34,11 @@ __published:	// IDE-managed Components
 private:	// User declarations
     MGames Games;
 
-    void AddGamesToTree(MGames *Games_, TTreeNode *TreeNode_, TImageList *ImageList_);
-    void UpdateGames(unsigned Pages_);
+	void AddGamesToTree(const MGames &Games_,
+		TTreeNode *TreeNode_, TImageList *ImageList_);
+	void AddGamesIndexToTree(const MGames &Games_, size_t Index_,
+		TTreeNode *TreeNode_, TImageList *ImageList_);
+	void UpdateGames(unsigned Pages_);
     void __fastcall MQueryEndSession(TMessage &Msg);
     BEGIN_MESSAGE_MAP
     MESSAGE_HANDLER(WM_QUERYENDSESSION,TMessage,MQueryEndSession);

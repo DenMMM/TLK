@@ -47,7 +47,7 @@ void __fastcall TFormClient::FormShow(TObject *Sender)
     ButtonAddChild->Enabled=false;
     SetNet(false,true);
     //
-    CreateGamesTree(&TmpGames);
+    CreateGamesTree(TmpGames);
 
     EditShellUser->MaxLength=MAX_ClUNameLen;
 	ComboBoxToEndTime->Items->Add(L"Не показывать");
@@ -63,7 +63,7 @@ void __fastcall TFormClient::FormShow(TObject *Sender)
         ComboBoxRebootWait->Items->Add(line);
         ComboBoxAutoLockTime->Items->Add(line);
     }
-    OptionsToShell(&TmpOptions);
+    OptionsToShell(TmpOptions);
     ComboBoxToEndTimeClick(nullptr);
     ComboBoxMsgEndTimeClick(nullptr);
     ComboBoxRebootWaitClick(nullptr);
@@ -133,14 +133,14 @@ void __fastcall TFormClient::NOpenClick(TObject *Sender)
         if ( !TmpGames.LoadFrom(OpenDialog->FileName.c_str(),ENC_Code) )
             ResMessageBox(Handle,1,9,MB_APPLMODAL|MB_OK|MB_ICONERROR,TmpGames.gLastErr());
         else
-            CreateGamesTree(&TmpGames);
+            CreateGamesTree(TmpGames);
         TmpGames.Clear();
     } else if ( PageControl->ActivePage==TabSheetOptions )
     {
         if ( !TmpOptions.LoadFrom(OpenDialog->FileName.c_str(),ENC_Code) )
             ResMessageBox(Handle,1,11,MB_APPLMODAL|MB_OK|MB_ICONERROR,TmpOptions.gLastErr());
         else
-            OptionsToShell(&TmpOptions);
+			OptionsToShell(TmpOptions);
     }
 }
 //---------------------------------------------------------------------------
@@ -149,13 +149,13 @@ void __fastcall TFormClient::NSaveClick(TObject *Sender)
     if ( !SaveDialog->Execute() ) return;
     if ( PageControl->ActivePage==TabSheetGames )
     {
-        CreateGamesFromTree(&TmpGames);
+        CreateGamesFromTree(TmpGames);
         if ( !TmpGames.SaveTo(SaveDialog->FileName.c_str(),ENC_Code) )
             ResMessageBox(Handle,1,10,MB_APPLMODAL|MB_OK|MB_ICONERROR,TmpGames.gLastErr());
         TmpGames.Clear();
     } else if ( PageControl->ActivePage==TabSheetOptions )
     {
-        ShellToOptions(&TmpOptions);
+        ShellToOptions(TmpOptions);
         if ( !TmpOptions.SaveTo(SaveDialog->FileName.c_str(),ENC_Code) )
             ResMessageBox(Handle,1,12,MB_APPLMODAL|MB_OK|MB_ICONERROR,TmpOptions.gLastErr());
     }
@@ -182,14 +182,14 @@ void __fastcall TFormClient::NSendClick(TObject *Sender)
     if ( PageControl->ActivePage==TabSheetGames )
     {
         // Заполняем объект для отправки
-        CreateGamesFromTree(&TmpGames);
+        CreateGamesFromTree(TmpGames);
         // Запускаем отправку данных
         SetNet(true,true);
         if ( !Send.Send(&SendComps,&TmpGames,nullptr) ) goto error;
     } else if ( PageControl->ActivePage==TabSheetOptions )
     {
         // Заполняем объект для отправки
-        ShellToOptions(&TmpOptions);
+        ShellToOptions(TmpOptions);
         // Запускаем отправку данных
         SetNet(true,true);
         if ( !Send.Send(&SendComps,nullptr,&TmpOptions) ) goto error;
@@ -387,9 +387,9 @@ void TFormClient::SetTreeViewGamesLine(TTreeNode *Node_)
     Node_->Text=Game->Name.c_str();
 }
 //---------------------------------------------------------------------------
-void TFormClient::AddGamesToTree(TTreeNode *Node_, MGames *Games_)
+void TFormClient::AddGamesToTree(TTreeNode *Node_, const MGames &Games_)
 {
-	for ( const auto &sGame: *Games_ )
+	for ( const auto &sGame: Games_ )
 	{
 		// Добавляем строку в дерево
 		TTreeNode *Node=TreeViewGames->Items->AddChild(Node_, L"");
@@ -399,17 +399,17 @@ void TFormClient::AddGamesToTree(TTreeNode *Node_, MGames *Games_)
 		// Зададим имя программы/узла
 		dGame->Name=sGame.Name;
 		// Зададим остальные параметры или добавим элементы нижних уровней
-		if ( sGame.SubGames==nullptr )
+		if ( !sGame.upSubGames )
 		{
 			dGame->Command=sGame.Command;
 			dGame->Icon=sGame.Icon;
-        } else AddGamesToTree(Node,sGame.SubGames);
+        } else AddGamesToTree(Node,*sGame.upSubGames);
         //
         SetTreeViewGamesLine(Node);
     }
 }
 //---------------------------------------------------------------------------
-void TFormClient::CreateGamesTree(MGames *Games_)
+void TFormClient::CreateGamesTree(const MGames &Games_)
 {
 	TreeViewGames->Items->Clear();
 
@@ -419,32 +419,33 @@ void TFormClient::CreateGamesTree(MGames *Games_)
 		MGamesItem *dGame=new MGamesItem;
 		Node->Data=dGame;
 
-		MGamesItem& sGame=Games_->GetItem(i);	/// возможен 'out_of_range'
-/*        // Если узла верхнего уровня нет, зададим имя по-умолчанию
-		if ( sGame==nullptr )
+		try
 		{
+			MGamesItem& sGame=Games_.GetItem(i);
+
+			dGame->Name=sGame.Name;
+			// Добавим элементы нижних уровней
+			if ( sGame.upSubGames ) AddGamesToTree(Node,*sGame.upSubGames);
+		} catch (std::out_of_range &e)
+		{
+			// Если узла верхнего уровня нет, зададим имя по-умолчанию
 			wchar_t str[5+1];
 			swprintf(str, sizeof(str), L"Page%i", i+1);
 			dGame->Name=str;
-		} else */
-		{
-			dGame->Name=sGame.Name;
-			// Добавим элементы нижних уровней
-			if ( sGame.SubGames!=nullptr ) AddGamesToTree(Node,sGame.SubGames);
-        }
-        //
+		}
+		//
         SetTreeViewGamesLine(Node);
     }
 }
 //---------------------------------------------------------------------------
-void TFormClient::AddGamesFromTree(MGames *Games_, TTreeNode *Node_)
+void TFormClient::AddGamesFromTree(MGames &Games_, TTreeNode *Node_)
 {
-	Games_->Clear();
+	Games_.Clear();
 
 	for ( int i=0; i<Node_->Count; i++ )
 	{
 		TTreeNode *Node=Node_->Item[i];
-		MGamesItem& dGame=Games_->Add();
+		MGamesItem& dGame=Games_.Add();
 		auto *sGame=reinterpret_cast<MGamesItem*>(Node->Data);
 
 		// Задаем имя программы/узла
@@ -452,8 +453,8 @@ void TFormClient::AddGamesFromTree(MGames *Games_, TTreeNode *Node_)
 		// Если это узловой элемент, добавляем дочерние
 		if ( Node->HasChildren )
 		{
-			MGames *SubGames=dGame.AddSubGames();
-            AddGamesFromTree(SubGames,Node);
+			dGame.upSubGames.reset(new MGames);
+			AddGamesFromTree(*dGame.upSubGames,Node);
         } else
         {
             // Иначе можно задать команду и путь к иконке
@@ -463,18 +464,18 @@ void TFormClient::AddGamesFromTree(MGames *Games_, TTreeNode *Node_)
     }
 }
 //---------------------------------------------------------------------------
-void TFormClient::CreateGamesFromTree(MGames *Games_)
+void TFormClient::CreateGamesFromTree(MGames &Games_)
 {
     TTreeNodes *items=TreeViewGames->Items;
 
-	Games_->Clear();
+	Games_.Clear();
 
 	for ( int i=0; i<items->Count; i++ )
 	{
 		TTreeNode *node=items->Item[i];
 		if ( node->Level ) continue;
 
-		MGamesItem& dGame=Games_->Add();
+		MGamesItem& dGame=Games_.Add();
 		auto *sGame=reinterpret_cast<MGamesItem*>(node->Data);
 
 		//
@@ -482,38 +483,38 @@ void TFormClient::CreateGamesFromTree(MGames *Games_)
 		// Добавляем вложенные элементы
 		if ( node->HasChildren )
 		{
-			MGames *SubGames=dGame.AddSubGames();
-			AddGamesFromTree(SubGames,node);
+			dGame.upSubGames.reset(new MGames);
+			AddGamesFromTree(*dGame.upSubGames,node);
         }
     }
 }
 //---------------------------------------------------------------------------
-void TFormClient::OptionsToShell(MClOptions *Options_)
+void TFormClient::OptionsToShell(const MClOptions &Options_)
 {
-    EditShellUser->Text=Options_->ShellUser.c_str();
-    ComboBoxToEndTime->ItemIndex=Options_->ToEndTime;
-    ComboBoxMessageTime->ItemIndex=Options_->MessageTime-1;
-    ComboBoxMsgEndTime->ItemIndex=Options_->MsgEndTime;
-    ComboBoxRebootWait->ItemIndex=Options_->RebootWait;
-    ComboBoxAutoLockTime->ItemIndex=Options_->AutoLockTime;
-    ComboBoxToEndTimeClick(nullptr);
-    CheckBoxTransp->Checked=Options_->Flags&mcoTransp;
-    CheckBoxRoute->Checked=Options_->Flags&mcoAddRoute;
-    CheckBoxAutoRun->Checked=Options_->Flags&mcoAutoRun;
+	EditShellUser->Text=Options_.ShellUser.c_str();
+	ComboBoxToEndTime->ItemIndex=Options_.ToEndTime;
+	ComboBoxMessageTime->ItemIndex=Options_.MessageTime-1;
+	ComboBoxMsgEndTime->ItemIndex=Options_.MsgEndTime;
+	ComboBoxRebootWait->ItemIndex=Options_.RebootWait;
+	ComboBoxAutoLockTime->ItemIndex=Options_.AutoLockTime;
+	ComboBoxToEndTimeClick(nullptr);
+	CheckBoxTransp->Checked=Options_.Flags&mcoTransp;
+	CheckBoxRoute->Checked=Options_.Flags&mcoAddRoute;
+	CheckBoxAutoRun->Checked=Options_.Flags&mcoAutoRun;
 }
 //---------------------------------------------------------------------------
-void TFormClient::ShellToOptions(MClOptions *Options_)
+void TFormClient::ShellToOptions(MClOptions &Options_)
 {
-    Options_->SetShellUser(EditShellUser->Text.c_str());
-    Options_->ToEndTime=ComboBoxToEndTime->ItemIndex;
-    Options_->MessageTime=ComboBoxMessageTime->ItemIndex+1;
-    Options_->MsgEndTime=ComboBoxMsgEndTime->ItemIndex;
-    Options_->RebootWait=ComboBoxRebootWait->ItemIndex;
-    Options_->AutoLockTime=ComboBoxAutoLockTime->ItemIndex;
-    Options_->Flags=
-        (CheckBoxTransp->Checked?mcoTransp:0)|
-        (CheckBoxRoute->Checked?mcoAddRoute:0)|
-        (CheckBoxAutoRun->Checked?mcoAutoRun:0);
+	Options_.SetShellUser(EditShellUser->Text.c_str());
+	Options_.ToEndTime=ComboBoxToEndTime->ItemIndex;
+	Options_.MessageTime=ComboBoxMessageTime->ItemIndex+1;
+	Options_.MsgEndTime=ComboBoxMsgEndTime->ItemIndex;
+	Options_.RebootWait=ComboBoxRebootWait->ItemIndex;
+	Options_.AutoLockTime=ComboBoxAutoLockTime->ItemIndex;
+	Options_.Flags=
+		(CheckBoxTransp->Checked?mcoTransp:0)|
+		(CheckBoxRoute->Checked?mcoAddRoute:0)|
+		(CheckBoxAutoRun->Checked?mcoAutoRun:0);
 }
 //---------------------------------------------------------------------------
 void TFormClient::SetEdit(bool Edit_, bool Full_)
@@ -605,9 +606,9 @@ void __fastcall TFormClient::Dispatch(void *Message)
 			// Если данные загружали, обновляем интерфейс
 			if ( Sending ) break;
 			if ( PageControl->ActivePage==TabSheetGames )
-				CreateGamesTree(&TmpGames);
+				CreateGamesTree(TmpGames);
 			else if ( PageControl->ActivePage==TabSheetOptions )
-				OptionsToShell(&TmpOptions);
+				OptionsToShell(TmpOptions);
 			break;
 
 		case WM_USER+mseNotConnect:

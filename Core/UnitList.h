@@ -454,14 +454,13 @@ base_type& MList<list_type,base_type>::Add(unsigned char TypeID_)
 template <typename list_type, typename base_type>
 base_type& MList<list_type,base_type>::GetItem(size_t Index_) const
 {
-#ifdef _DEBUG
+	// Нельзя '#ifdef _DEBUG'
 	if ( Index_>=Count )
 	{
 		throw std::out_of_range (
 			"MList::GetItem()\n"
 			"Попытка выйти за границы списка.");
 	}
-#endif
 
 	for ( auto &Item: *this )
 	{

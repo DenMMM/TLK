@@ -1,10 +1,10 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <BorlandProject>
 	<Transactions>
-    <Transaction>1899.12.30 00:00:00.000.744,C:\Program Files (x86)\Embarcadero\Studio\20.0\lib\win32c\release\psdk\NTDLL.lib=</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.368,=C:\Program Files (x86)\Embarcadero\Studio\20.0\lib\win32c\release\psdk\NTDLL.lib</Transaction>
     <Transaction>1899.12.30 00:00:00.000.246,D:\MMM\Desktop\TLK_3.12_d2_src\Core\iphlpapi.lib=</Transaction>
     <Transaction>1899.12.30 00:00:00.000.770,=D:\MMM\Desktop\TLK_3.12_d2_src\Core\UnitComputers.cpp</Transaction>
-    <Transaction>1899.12.30 00:00:00.000.368,=C:\Program Files (x86)\Embarcadero\Studio\20.0\lib\win32c\release\psdk\NTDLL.lib</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.744,C:\Program Files (x86)\Embarcadero\Studio\20.0\lib\win32c\release\psdk\NTDLL.lib=</Transaction>
     <Transaction>1899.12.30 00:00:00.000.975,=D:\MMM\Desktop\TLK_3.12_d2_src\Core\NTDLL.lib</Transaction>
     <Transaction>1899.12.30 00:00:00.000.841,D:\MMM\Desktop\TLK_3.12_d2_src\Core\NTDLL.lib=</Transaction>
     <Transaction>1899.12.30 00:00:00.000.301,=D:\MMM\Desktop\TLK_3.12_d2_src\Core\NTDLL.lib</Transaction>

@@ -3,6 +3,7 @@
 #define UnitGamesH
 //---------------------------------------------------------------------------
 #include <string>
+#include <memory>
 
 #include "UnitSLList.h"
 //---------------------------------------------------------------------------
@@ -29,21 +30,31 @@ public:
 	std::wstring Name;
 	std::wstring Command;
 	std::wstring Icon;
-	MGames *SubGames;               /// Теперь не работает !!! Заменить smart-pointer
+	std::unique_ptr <MGames> upSubGames;
 
-	MGames *AddSubGames();
-	void DelSubGames();
+	MGamesItem() = default;
+	MGamesItem(const MGamesItem& Src_);
 
-	MGamesItem():
-		SubGames(nullptr)
+	MGamesItem(MGamesItem&& Src_):
+		Name(std::move(Src_.Name)),
+		Command(std::move(Src_.Command)),
+		Icon(std::move(Src_.Icon)),
+		upSubGames(std::move(Src_.upSubGames))
 	{
 	}
 
-	MGamesItem(MGamesItem&) = default;
-	MGamesItem(MGamesItem&&) = default;
-	MGamesItem& operator=(MGamesItem&) = default;
-	MGamesItem& operator=(MGamesItem&&) noexcept = default;
-	~MGamesItem();
+	MGamesItem& operator=(const MGamesItem& Right_);
+	MGamesItem& operator=(MGamesItem&& Right_) noexcept
+	{
+		Name=std::move(Right_.Name);
+		Command=std::move(Right_.Command);
+		Icon=std::move(Right_.Icon);
+		upSubGames=std::move(Right_.upSubGames);
+
+        return *this;
+	}
+
+	virtual ~MGamesItem() override = default;
 };
 //---------------------------------------------------------------------------
 class MGames:

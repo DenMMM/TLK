@@ -100,15 +100,15 @@ private:	// User declarations
 	MClOptions TmpOptions;              		// Буфер для настроек клиента
 	bool Sending;                       		// Флаг отправки/приема данных
     void SetTreeViewGamesLine(TTreeNode *Node_);
-    void AddGamesToTree(TTreeNode *Node_, MGames *Games_);
-    void CreateGamesTree(MGames *Games_);
-    void AddGamesFromTree(MGames *Games_, TTreeNode *Node_);
-    void CreateGamesFromTree(MGames *Games_);
-    void OptionsToShell(MClOptions *Options_);
-    void ShellToOptions(MClOptions *Options_);
-    void SetEdit(bool Edit_, bool Full_);
-    void SetNet(bool Process_, bool Sending_);
-    void __fastcall Dispatch(void *Message);
+	void AddGamesToTree(TTreeNode *Node_, const MGames &Games_);
+	void CreateGamesTree(const MGames &Games_);
+	void AddGamesFromTree(MGames &Games_, TTreeNode *Node_);
+	void CreateGamesFromTree(MGames &Games_);
+	void OptionsToShell(const MClOptions &Options_);
+	void ShellToOptions(MClOptions &Options_);
+	void SetEdit(bool Edit_, bool Full_);
+	void SetNet(bool Process_, bool Sending_);
+	void __fastcall Dispatch(void *Message);
 public:		// User declarations
     __fastcall TFormClient(TComponent* Owner);
 };
