@@ -115,7 +115,7 @@ bool MSyncStatesItem::Send(SOCKET Socket_, SOCKET SocketBC_, unsigned Code_, MAu
                 Address.sin_family=AF_INET;
                 Address.sin_port=::htons(SYNC_Port);
                 Address.sin_addr.s_addr=IP;
-                // Запрашиваем новые данные для синхронизации после обмена hello
+				// Запрашиваем новые данные для синхронизации после обмена hello
                 State->NetSyncData(&SyncData);
                 //
                 Seed=BasicRand();

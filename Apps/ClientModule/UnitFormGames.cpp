@@ -104,15 +104,13 @@ void TFormGames::AddGamesToTree(const MGames &Games_,
 void TFormGames::AddGamesIndexToTree(const MGames &Games_, size_t Index_,
 	TTreeNode *TreeNode_, TImageList *ImageList_)
 {
-	try
-	{
-		const MGamesItem &Item=Games_.GetItem(Index_);
-		if ( !Item.upSubGames ) return;
-		AddGamesToTree(*Item.upSubGames,TreeNode_,ImageList_);
-	}
-	catch (std::out_of_range &e)
-	{
-	}
+	const MGamesItem *Item=nullptr;
+	// Попытаемся взять адрес MGames по номеру вкладки
+	try  { Item=&Games_.GetItem(Index_); }
+	catch (std::out_of_range &e) { return; }
+	// Добавим содержимое его SubGames в список программ
+	if ( !Item->upSubGames ) return;
+	AddGamesToTree(*Item->upSubGames,TreeNode_,ImageList_);
 }
 //---------------------------------------------------------------------------
 void __fastcall TFormGames::FormCreate(TObject *Sender)

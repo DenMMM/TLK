@@ -90,7 +90,7 @@ public:
 	bool LoadFrom(const std::wstring &File_, unsigned Code_);
 	bool StoreTo(HKEY Key_, const std::wstring &SubKey_, const std::wstring &Value_, unsigned Code_) const;
 	bool QueryFrom(HKEY Key_, const std::wstring &SubKey_, const std::wstring &Value_, unsigned Code_);
-	bool SaveAsReg(const wchar_t *File_, HKEY Key_, const wchar_t *SubKey_, const wchar_t *Value_, unsigned Code_) const;    /// std::string
+	bool SaveAsReg(const std::wstring &File_, HKEY Key_, const std::wstring &SubKey_, const std::wstring &Value_, unsigned Code_) const;
 	void SetDefaultFile(const std::wstring &File_, unsigned Code_);
 	void SetDefaultKey(HKEY Key_, const std::wstring &SubKey_, const std::wstring &Value_, unsigned Code_);
 	bool Save(bool Always_=true, bool Safe_=false) const;
@@ -443,12 +443,12 @@ bool MSLList<list_type,base_type>::StoreTo(HKEY Key_, const std::wstring &SubKey
 	std::vector <BYTE> data;
 	unsigned size;
 
-    LastError=0;
-    // Определяем размер данных и проверяем на допустимость
-    size=GetAllDataSize();
-    if ( size>MAX_SLRegSize )
-    {
-        throw std::runtime_error (      /// заменить на return false ?
+	LastError=0;
+	// Определяем размер данных и проверяем на допустимость
+	size=GetAllDataSize();
+	if ( size>MAX_SLRegSize )
+	{
+		throw std::runtime_error (      /// заменить на return false ?
 			"MSLList::StoreTo()\n"
 			"Размер данных превышает ограничение MAX_SLRegSize.");
 	}
@@ -503,83 +503,85 @@ bool MSLList<list_type,base_type>::QueryFrom(HKEY Key_, const std::wstring &SubK
 	size=MAX_SLRegSize;
 	if ( ::RegQueryValueEx(key,Value_.c_str(),
 		nullptr,nullptr,data.data(),&size)!=ERROR_SUCCESS ) goto api_error;
-    // Закрываем ключ реестра
-    ::RegCloseKey(key); key=nullptr;
+	// Закрываем ключ реестра
+	::RegCloseKey(key); key=nullptr;
 
-    // Расшифровываем данные
-    BasicDecode(data.data(),size,Code_);
-    // Заносим данные в список (bad_alloc не ловим, т.к. уже безопасно)
+	// Расшифровываем данные
+	BasicDecode(data.data(),size,Code_);
+	// Заносим данные в список (bad_alloc не ловим, т.к. уже безопасно)
 	if ( GetAllData(&data[0], &data[size])==nullptr ) goto error;
 
-    return true;
+	return true;
 api_error:
-    LastError=::GetLastError();
+	LastError=::GetLastError();
 error:
-    if ( key!=nullptr ) ::RegCloseKey(key);
-    return false;
+	if ( key!=nullptr ) ::RegCloseKey(key);
+	return false;
 }
 //---------------------------------------------------------------------------
 template <typename list_type, typename base_type>
 bool MSLList<list_type,base_type>::SaveAsReg(
-	const wchar_t *File_,
+	const std::wstring &File_,
 	HKEY Key_,
-	const wchar_t *SubKey_,
-	const wchar_t *Value_,
+	const std::wstring &SubKey_,
+	const std::wstring &Value_,
 	unsigned Code_) const
 {
-	static const char hdr[]="REGEDIT4";
-	static const char hk1[]="HKEY_LOCAL_MACHINE";
-	static const char hk2[]="HKEY_CURRENT_USER";
-	static const char hk3[]="HKEY_USERS";
-	static const char hk4[]="HKEY_CLASSES_ROOT";
-	const char *hk;	std::vector <char> data;	std::vector <wchar_t> reg_data;	DWORD size, reg_size, rw_size;	HANDLE file;	LastError=0;	if ( Key_==HKEY_LOCAL_MACHINE ) hk=hk1;	else if ( Key_==HKEY_CURRENT_USER ) hk=hk2;	else if ( Key_==HKEY_USERS ) hk=hk3;	else if ( Key_==HKEY_CLASSES_ROOT ) hk=hk4;	else		throw std::runtime_error (			"MSLList::SaveAsReg()\n"
-			"Задан не верный тип HKEY.");
-
-    // Определяем размер данных и проверяем на допустимость
-    size=GetAllDataSize();
-    if ( size>MAX_SLRegSize )
-    {
-        throw std::runtime_error (      /// заменить на return false ?
+	LastError=0;
+	// Определяем размер данных и проверяем на допустимость
+	DWORD size=GetAllDataSize();
+	if ( size>MAX_SLRegSize )
+	{
+		throw std::runtime_error (      /// заменить на return false ?
 			"MSLList::SaveAsReg()\n"
 			"Размер данных превышает ограничение MAX_SLRegSize.");
-    }
-    // Выделяем память (bad_alloc не ловим, т.к. еще ничего не начали делать)
-    data.resize(size);
-    reg_size=
-        sizeof(hdr)+
-        sizeof(hk1)+
-        +16+1+
-        size*3+
-        wcslen(SubKey_)+
-        wcslen(Value_);
-    reg_data.resize(reg_size);
-    // Сохраняем весь список в памяти и сверяем реальный размер данных
+	}
+	// Выделяем память (bad_alloc не ловим, т.к. еще ничего не начали делать)
+	std::vector <char> data;
+	data.resize(size);
+	// Сохраняем весь список в памяти и сверяем реальный размер данных
 	if ( SetAllData(data.data()) != (data.data()+data.size()) )
-    {
-        throw std::runtime_error (
+	{
+		throw std::runtime_error (
 			"MSLList::SaveAsReg()\n"
 			"Размер данных MSLList::SetAllData() не соответствует MSLList::GetAllDataSize().");
-    }
-    // Шифруем
+	}
+	// Шифруем
 	BasicEncode(data.data(),data.size(),Code_);
+	// Конвертируем в HEX
+	std::vector <wchar_t> hex_data;
+	hex_data.resize((data.size()*3+1)*sizeof(wchar_t));
+	ByteToHEX(
+		data.data(), data.size(),
+		hex_data.data(), hex_data.size(),
+		L',');
 
-    // Формируем текстовую часть reg-файла
-	reg_size=swprintf(
-		reg_data.data(), reg_data.size(),
-		L"%s\r\n\r\n[%s\\%s]\r\n\"%s\"=hex:",
-		hdr, hk, SubKey_, Value_);
-    // Добавляем HEX-строку
-    reg_size+=ByteToHEX(data.data(),size,&reg_data[reg_size],size*3,L',');
-	reg_size+=swprintf(
-		&reg_data[reg_size],
-		reg_data.size()-reg_size,
-		L"\r\n");
+	// Формируем текстовую часть reg-файла
+	static const wchar_t hdr[]=L"REGEDIT4";
+	static const wchar_t hk1[]=L"HKEY_LOCAL_MACHINE";
+	static const wchar_t hk2[]=L"HKEY_CURRENT_USER";
+	static const wchar_t hk3[]=L"HKEY_USERS";
+	static const wchar_t hk4[]=L"HKEY_CLASSES_ROOT";
+	const wchar_t *hk=nullptr;	if ( Key_==HKEY_LOCAL_MACHINE ) hk=hk1;
+	else if ( Key_==HKEY_CURRENT_USER ) hk=hk2;	else if ( Key_==HKEY_USERS ) hk=hk3;	else if ( Key_==HKEY_CLASSES_ROOT ) hk=hk4;	else		throw std::runtime_error (			"MSLList::SaveAsReg()\n"
+			"Задан не верный тип HKEY.");
 
-	// Создаем файл
-	if ( (file=::CreateFile(File_,GENERIC_WRITE,0,nullptr,CREATE_ALWAYS,
+	const std::wstring reg_str=
+		L"\xFEFF"           			// UTF-16BE
+		L"Windows Registry Editor Version 5.00\r\n"
+		L"\r\n"
+		L"["+std::wstring(hk)+L"\\"+SubKey_+L"]\r\n"+
+		L"\""+Value_+L"\"=hex:"+hex_data.data()+L"\r\n";
+
+	const wchar_t *reg_data=reg_str.c_str();    /// Windows only !!!
+	const DWORD reg_size=reg_str.length()*sizeof(*reg_data);
+
+	// Создаем файл и записываем данные
+	HANDLE file;
+	DWORD rw_size;
+	if ( (file=::CreateFile(File_.c_str(),GENERIC_WRITE,0,nullptr,CREATE_ALWAYS,
 		FILE_ATTRIBUTE_NORMAL,nullptr)) == INVALID_HANDLE_VALUE ) goto api_error;
-	// Записываем данные
-	if ( (!::WriteFile(file,reg_data.data(),reg_size,&rw_size,nullptr))||
+	if ( (!::WriteFile(file,reg_data,reg_size,&rw_size,nullptr))||
 		(rw_size!=reg_size) ) goto api_error;
 
 	::CloseHandle(file);

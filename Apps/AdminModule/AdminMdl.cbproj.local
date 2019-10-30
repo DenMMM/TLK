@@ -1,11 +1,11 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <BorlandProject>
 	<Transactions>
-    <Transaction>1899.12.30 00:00:00.000.512,D:\MMM\Desktop\TLK_3.12_d2_src\Core\iphlpapi.lib=</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.909,=D:\MMM\Desktop\TLK_3.12_d2_src\Core\iphlpapi.lib</Transaction>
     <Transaction>1899.12.30 00:00:00.000.861,D:\MMM\Desktop\TLK_3.11_d8_src.2007\Core\UnitSyncMsgs.cpp=D:\MMM\Desktop\TLK_3.11_d8_src.2007\Core\UnitSyncMessages.cpp</Transaction>
     <Transaction>1899.12.30 00:00:00.000.115,D:\MMM\Desktop\TLK_3.11_d8_src.2007\Core\UnitSyncMessages.h=D:\MMM\Desktop\TLK_3.11_d8_src.2007\Apps\AdminModule\Unit1.h</Transaction>
     <Transaction>1899.12.30 00:00:00.000.151,=D:\MMM\Desktop\TLK_3.11_d8_src.2007\Apps\AdminModule\Unit1.cpp</Transaction>
-    <Transaction>1899.12.30 00:00:00.000.909,=D:\MMM\Desktop\TLK_3.12_d2_src\Core\iphlpapi.lib</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.512,D:\MMM\Desktop\TLK_3.12_d2_src\Core\iphlpapi.lib=</Transaction>
     <Transaction>1899.12.30 00:00:00.000.472,D:\MMM\Desktop\TLK_3.12_d2_src\Core\NTDLL.lib=</Transaction>
     <Transaction>1899.12.30 00:00:00.000.179,=D:\MMM\Desktop\TLK_3.12_d2_src\Core\NTDLL.lib</Transaction>
     <Transaction>1899.12.30 00:00:00.000.115,D:\MMM\Desktop\TLK_3.11_d8_src.2007\Core\UnitSyncMessages.cpp=D:\MMM\Desktop\TLK_3.11_d8_src.2007\Apps\AdminModule\Unit1.cpp</Transaction>
