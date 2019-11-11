@@ -48,10 +48,10 @@ public:
 
 	// Занулим указатели нового объекта
 	MListItem(): Prev(nullptr), Next(nullptr) {}
-	MListItem(MListItem&): MListItem() {}
+	MListItem(const MListItem&): MListItem() {}
 	MListItem(MListItem&&): MListItem() {}
 	// А при копировании сохраним их не тронутыми
-	MListItem& operator=(MListItem&) { return *this; }
+	MListItem& operator=(const MListItem&) { return *this; }
 	MListItem& operator=(MListItem&&) noexcept { return *this; }
 
 	virtual ~MListItem() = default;

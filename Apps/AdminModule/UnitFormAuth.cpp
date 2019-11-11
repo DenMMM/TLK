@@ -26,6 +26,9 @@ void __fastcall TFormAuth::FormShow(TObject *Sender)
 		L"Файлы реестра Windows(*.reg)|*.reg|"
 		L"Все файлы (*.*)|*.*";
 	SaveDialog->DefaultExt=L"REG";
+
+	// Добавим энтропии
+	BasicRand.event();
 }
 //---------------------------------------------------------------------------
 void __fastcall TFormAuth::MemoHEXKeyPress(TObject *Sender, char &Key)
@@ -101,7 +104,7 @@ void __fastcall TFormAuth::ButtonOKClick(TObject *Sender)
 void __fastcall TFormAuth::ButtonNewClick(TObject *Sender)
 {
     // Генерируем ключ
-    if ( !TimeRand(TmpKey, sizeof(TmpKey)) ) return;
+	if ( !CngRand(TmpKey,sizeof(TmpKey)) ) TimeRand(TmpKey,sizeof(TmpKey));
     // Переводим BYTE в HEX-строку
     ByteToHEX(TmpKey,sizeof(TmpKey),HexBuffer,sizeof(HexBuffer),L' ');
     // Подаем на редактирование

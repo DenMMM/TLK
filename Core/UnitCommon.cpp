@@ -1,10 +1,25 @@
 //---------------------------------------------------------------------------
 #include <stdio.h>
+//#include <windows.h>
+#include <winsock2.h>
+#include <ntstatus.h>
+#include <netioapi.h>
 #pragma hdrstop
 
 #include "UnitCommon.h"
+#include "UnitEncode.h"
+#include "fasthash.h"
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
+//---------------------------------------------------------------------------
+MTimeRand BasicRand([]() -> std::seed_seq& {
+	static std::seed_seq seq(
+		std::initializer_list<uint_fast32_t>({
+			::GetCurrentProcessId(),
+			CalcHwMacHash()
+		}));
+	return seq;
+}());
 //---------------------------------------------------------------------------
 /// шаблон тут просится
 void *MemSetLine(void *Mem__, const std::string &Line__)
@@ -69,108 +84,29 @@ const void *MemGetLine(const void *Mem__, std::wstring &Line_,
 	return Mem_;
 }
 //---------------------------------------------------------------------------
-void BasicEncode(void *Data__, size_t DataSize_, unsigned Code_, int Round_)
+void TimeRand(void *Buff__, size_t Size_)
 {
-	unsigned char *Data_=static_cast<unsigned char*>(Data__);
-	unsigned char *limit;
-	unsigned blk;
+	std::uniform_int_distribution <unsigned> dist(
+		std::numeric_limits<unsigned char>::min(),
+		std::numeric_limits<unsigned char>::max());
 
-	if ( DataSize_<sizeof(blk) ) return;
-
-	limit=Data_+DataSize_-sizeof(blk);
-	// Считаем начальный блок целиком
-	blk=*((unsigned*)Data_);
-	goto begin;
-
-	do
-	{
-		// Сохраним в выход младший байт блока
-		Data_[0]=blk;
-		// Сдвинем блок вправо и загрузим старший байт из входа
-		blk>>=8;
-		blk|=( (unsigned)Data_[sizeof(blk)] )<<(sizeof(blk)*8-8);
-		++Data_;
-begin:
-		// Перемешаем биты блока
-		for ( int i=Round_; i; i-- )
-			blk=BasicEncodeRound(blk,Code_);
-	} while(Data_!=limit);
-
-	// Сохраним в выход последний блок целиком
-	*((unsigned*)Data_)=blk;
-}
-
-void BasicDecode(void *Data__, size_t DataSize_, unsigned Code_, int Round_)
-{
-	unsigned char *Data_=static_cast<unsigned char*>(Data__);
-	unsigned char *limit;
-    unsigned blk;
-
-    if ( DataSize_<sizeof(blk) ) return;
-
-    limit=Data_;
-    Data_+=DataSize_-sizeof(blk);
-
-    // Считаем начальный блок целиком
-    blk=*((unsigned*)Data_);
-    goto begin;
-
-    do
-    {
-        --Data_;
-        // Сохраним в выход старший байт блока
-        Data_[sizeof(blk)]=blk>>(sizeof(blk)*8-8);
-        // Сдвинем блок влево и загрузим младший байт из входа
-        blk<<=8;
-        blk|=Data_[0];
-begin:
-        // Перемешаем биты блока
-        for ( int i=Round_; i; i-- )
-            blk=BasicDecodeRound(blk,Code_);
-    } while(Data_!=limit);
-
-    // Сохраним в выход последний блок целиком
-    *((unsigned*)Data_)=blk;
-}
-
-unsigned BasicMix(unsigned Key1_, unsigned Key2_)
-{
-    unsigned k1=Key1_;
-    unsigned k2=Key2_;
-
-    // Шифруем каждый ключ друг другом
-    BasicEncode((char*)&Key2_,sizeof(Key2_),k1,sizeof(Key2_)*8);
-    BasicEncode((char*)&Key1_,sizeof(Key1_),k2,sizeof(Key1_)*8);
-	// XOR результатов с проверкой на равенство
-//	return (Key1_^=Key2_)? Key1_: Key2_;
-	return Key1_^=Key2_;
-}
-
-unsigned BasicRand()
-{
-    unsigned rnd=0;
-    for ( int i=sizeof(rnd); i; i--)
-        rnd=(rnd<<8)|random(256);
-    return rnd;
-}
-
-bool TimeRand(void *Buff__, size_t Size_)
-{
 	unsigned char *Buff_=static_cast<unsigned char*>(Buff__);
-	LARGE_INTEGER ent1;
-    DWORD ent2;
+	for ( size_t i=0; i<Size_; i++ ) Buff_[i]=dist(BasicRand);
+}
 
-    // Считываем счетчик тактов процессора
-    if ( !::QueryPerformanceCounter(&ent1) ) return false;  /// throw ?
-    // Считываем таймер активности ОС
-    ent2=::GetTickCount();
+bool CngRand(void *Buff_, size_t Size_)
+{
+/*
+	BCRYPT_ALG_HANDLE hAlg;
 
-    // Заполним выходной буфер псевдослучайными значениями
-	for ( size_t i=0; i<Size_; i++ ) Buff_[i]=random(256);
-	// Добавим энтропии
-	BasicEncode(Buff_, Size_, ent1.LowPart, 32);
-	BasicEncode(Buff_, Size_, ent1.HighPart, 32);
-	BasicEncode(Buff_, Size_, ent2, 32);
+	if ( ::BCryptOpenAlgorithmProvider(
+		&hAlg, BCRYPT_RNG_ALGORITHM,
+		nullptr, 0) != STATUS_SUCCESS ) return false;
+*/
+	if ( !BCRYPT_SUCCESS(::BCryptGenRandom(
+		nullptr, //hAlg,
+		(PUCHAR)Buff_, Size_,
+		BCRYPT_USE_SYSTEM_PREFERRED_RNG)) ) return false;
 
 	return true;
 }
@@ -258,39 +194,6 @@ size_t HEXToByte(const wchar_t *Line_, void *Buff__, size_t BuffSize_)
     }
 
     return pout;
-}
-//---------------------------------------------------------------------------
-bool GeneratePassword(char *Line_, unsigned Len_,
-    bool Cap_, bool Low_, bool Num_)
-{
-    static const char cap[]={'A','B','C','D','E','F','G','H','I','J','K','L','M',
-                             'N','O','P','Q','R','S','T','U','V','W','X','Y','Z'};
-    static const char low[]={'a','b','c','d','e','f','g','h','i','j','k','l','m',
-                             'n','o','p','q','r','s','t','u','v','w','x','y','z'};
-    static const char dig[]={'0','1','2','3','4','5','6','7','8','9'};
-    char buff[sizeof(cap)+
-             sizeof(low)+
-             sizeof(dig)];
-    unsigned use;
-
-    // Считаем сколько символов в буфере будет использовано и попутно заполняем его
-    use=0;
-    if ( Cap_ ) { memcpy(buff+use,cap,sizeof(cap)); use+=sizeof(cap); }
-    if ( Low_ ) { memcpy(buff+use,low,sizeof(low)); use+=sizeof(low); }
-    if ( Num_ ) { memcpy(buff+use,dig,sizeof(dig)); use+=sizeof(dig); }
-    if ( use==0 ) goto error;
-
-    // Заполним буфер случайными значениями
-    TimeRand(Line_,Len_);
-    // Заменим их выбранными символами
-    for (unsigned i=0; i<Len_; i++)
-        Line_[i]=buff[((unsigned)Line_[i])%use];
-    *(Line_+Len_)=0;
-
-    return true;
-error:
-    *Line_=0;
-    return false;
 }
 //---------------------------------------------------------------------------
 int ResMessageBox(HWND Owner_, UINT uCaption_, UINT uMessage_, UINT Type_, DWORD LastErr_)
@@ -422,12 +325,39 @@ void RegExecList(HKEY hKey_, LPCWSTR SubKey_, HANDLE hToken_)
 				::CloseHandle(pi.hThread);
 				::CloseHandle(pi.hProcess);
 			}
-        }
-        if ( (++index)>=100 ) break;
-    }
+		}
+		if ( (++index)>=100 ) break;
+	}
 
-    ::RegCloseKey(key);
-    if ( lpEnv!=nullptr ) ::DestroyEnvironmentBlock(lpEnv);
+	::RegCloseKey(key);
+	if ( lpEnv!=nullptr ) ::DestroyEnvironmentBlock(lpEnv);
+}
+//---------------------------------------------------------------------------
+uint32_t CalcHwMacHash()
+{
+	// Запросим таблицу сетевых интерфейсов
+	PMIB_IF_TABLE2 pTable=nullptr;
+	if ( ::GetIfTable2(&pTable)!=NO_ERROR ) return 0;       /// throw ?
+
+	// Посчитаем хэш MAC-адресов
+	uint32_t uHash=0;
+	for ( ULONG i=0, j=pTable->NumEntries; i<j; ++i )
+	{
+		PMIB_IF_ROW2 pRow=&pTable->Table[i];
+
+		// Учтем только физические интерфейсы
+		if ( !pRow->InterfaceAndOperStatusFlags.HardwareInterface ) continue;
+
+		uHash=fasthash32(
+			pRow->PhysicalAddress,
+			pRow->PhysicalAddressLength,
+			uHash);
+	}
+
+	// Освободим память
+	::FreeMibTable(pTable);
+
+	return uHash;
 }
 //---------------------------------------------------------------------------
 

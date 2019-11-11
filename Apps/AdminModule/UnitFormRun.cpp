@@ -8,7 +8,6 @@
 #include "UnitFormRun.h"
 #include "UnitFormMain.h"
 #include "UnitStates.h"
-#include "UnitCommon.h"
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
 #pragma resource "*.dfm"
@@ -113,7 +112,10 @@ void __fastcall TFormRun::FormShow(TObject *Sender)
 	ActiveControl=
 		RunMode?
 		static_cast<TWinControl*>(ComboBoxTariff):
-        static_cast<TWinControl*>(ListViewComputers);
+		static_cast<TWinControl*>(ListViewComputers);
+
+	// Добавим энтропии
+	BasicRand.event();
 }
 //---------------------------------------------------------------------------
 void __fastcall TFormRun::FormClose(TObject *Sender, TCloseAction &Action)
@@ -127,7 +129,7 @@ void __fastcall TFormRun::FormClose(TObject *Sender, TCloseAction &Action)
     // Очищаем буферы
     CompTimes.Clear();
     UseTariffs.Clear();
-    UseTimes.Clear();
+	UseTimes.Clear();
 }
 //---------------------------------------------------------------------------
 void __fastcall TFormRun::TimerDialogLockTimer(TObject *Sender)

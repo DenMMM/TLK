@@ -2,13 +2,16 @@
 #ifndef UnitSyncH
 #define UnitSyncH
 //---------------------------------------------------------------------------
-#include <winsock2.h>
 #include <atomic>
+#include <chrono>
+#include <winsock2.h>
+
 #include "UnitWinAPI.h"
 #include "UnitSLList.h"
 #include "UnitComputers.h"
 #include "UnitStates.h"
 #include "UnitSyncMsgs.h"
+#include "UnitRandCounter.h"
 //---------------------------------------------------------------------------
 class MSyncStatesItem;
 class MSyncStates;
@@ -127,6 +130,16 @@ private:
 		MSyncPWOL WOL;
 	} Packet;                           // Пакет, отправляемый клиенту
 	int PacketSize;                     // Размер отправляемого пакета
+
+	// Генерация Seed со стороны сервера
+	static MRandCounter SeedRand;
+	static MWAPI::CRITICAL_SECTION CS_Seed;
+
+	unsigned NextSeed()
+	{
+		MWAPI::CRITICAL_SECTION::Lock lckObj(CS_Seed);  /// Для MSync излишне
+		return SeedRand++;
+	}
 
 public:
 	// Функции механизма сохранения/загрузки данных
@@ -284,6 +297,10 @@ private:
 	bool Recv(sockaddr_in *From_, char *Packet_, int PacketSize_);
 	bool Send(SOCKET Socket_);
 
+	// Генерация Seed со стороны клиента
+	MRandCounter SeedRand;
+	unsigned NextSeed() { return SeedRand++; }
+
 public:
 	bool NetInit(unsigned Code_, MAuth *MAC_);  // Инициализация WinSocket
 	bool NetFree();                             // Освобождение WinSocket
@@ -301,7 +318,10 @@ public:
 		Process(mspNone),
 		SendCount(0),
 		LastSendTime(0),
-		NetCode(0)
+		NetCode(0),
+		SeedRand(
+			std::chrono::system_clock::
+			now().time_since_epoch().count())
 	{
 	}
 

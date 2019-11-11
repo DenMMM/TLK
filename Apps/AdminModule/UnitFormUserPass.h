@@ -32,6 +32,7 @@ __published:	// IDE-managed Components
     void __fastcall FormCloseQuery(TObject *Sender, bool &CanClose);
     void __fastcall ButtonGenerateClick(TObject *Sender);
     void __fastcall ComboBoxLoginClick(TObject *Sender);
+	void __fastcall EditPasswordKeyPress(TObject *Sender, System::WideChar &Key);
 private:	// User declarations
     bool Users;
     void SetCoord(int Left_, int Top_, bool LeftTop_);

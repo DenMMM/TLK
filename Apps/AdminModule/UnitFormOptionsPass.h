@@ -30,6 +30,7 @@ __published:	// IDE-managed Components
     void __fastcall FormCloseQuery(TObject *Sender, bool &CanClose);
     void __fastcall FormClose(TObject *Sender, TCloseAction &Action);
     void __fastcall ButtonGenerateClick(TObject *Sender);
+	void __fastcall EditPasswordKeyPress(TObject *Sender, System::WideChar &Key);
 private:	// User declarations
     MOptions *TmpOptions;
     void SetCoord(int Left_, int Top_, bool LeftTop_);

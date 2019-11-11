@@ -1,8 +1,10 @@
 //---------------------------------------------------------------------------
 #include <cstdlib>
 #include <stdexcept>
+#include <array>
 #include <winsock2.h>
 #include <ip2string.h>
+//#include <Mstcpip.h>
 #include <ntstatus.h>
 #include <iphlpapi.h>
 #pragma hdrstop
@@ -12,6 +14,14 @@
 #include "UnitCommon.h"
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
+//---------------------------------------------------------------------------
+MRandCounter
+	MSyncStatesItem::SeedRand(
+		std::chrono::system_clock::
+		now().time_since_epoch().count());
+
+MWAPI::CRITICAL_SECTION
+	MSyncStatesItem::CS_Seed;
 //---------------------------------------------------------------------------
 unsigned MSyncStatesItem::GetDataSize() const
 {
@@ -45,25 +55,25 @@ void MSyncStatesItem::Associate(MStatesItem *State_, u_long IP_)
     State=State_;
     KnownMAC=(IP==IP_);
     IP=IP_;
-    Process=mspNone;
+	Process=mspNone;
 }
 //---------------------------------------------------------------------------
 bool MSyncStatesItem::UpdateMAC(unsigned char *MAC_)
 {
-    bool NeedSave;
-    // Проверяем нужно ли обновить MAC-адрес
-    NeedSave=(!KnownMAC)||(memcmp(MAC,MAC_,MAC_AddrLength)!=0);
-    // При необходимости обновляем MAC-адрес
-    if ( NeedSave ) { memcpy(MAC,MAC_,MAC_AddrLength); KnownMAC=true; }
-    return NeedSave;
+	bool NeedSave;
+	// Проверяем нужно ли обновить MAC-адрес
+	NeedSave=(!KnownMAC)||(memcmp(MAC,MAC_,MAC_AddrLength)!=0);
+	// При необходимости обновляем MAC-адрес
+	if ( NeedSave ) { memcpy(MAC,MAC_,MAC_AddrLength); KnownMAC=true; }
+	return NeedSave;
 }
 //---------------------------------------------------------------------------
 bool MSyncStatesItem::Start()
 {
-    if ( (State==nullptr)||(IP==INADDR_NONE) ) return false;
-    Process=mspWait;
-    LastSendTime=::GetTickCount()-SYNC_WaitInterval;
-    return true;
+	if ( (State==nullptr)||(IP==INADDR_NONE) ) return false;
+	Process=mspWait;
+	LastSendTime=::GetTickCount()-SYNC_WaitInterval;
+	return true;
 }
 //---------------------------------------------------------------------------
 bool MSyncStatesItem::Stop()
@@ -118,7 +128,7 @@ bool MSyncStatesItem::Send(SOCKET Socket_, SOCKET SocketBC_, unsigned Code_, MAu
 				// Запрашиваем новые данные для синхронизации после обмена hello
                 State->NetSyncData(&SyncData);
                 //
-                Seed=BasicRand();
+                Seed=NextSeed();
                 // Заполняем заголовок hello-пакета со своим random
                 Packet.Hello.Header.Version=SYNC_Version;
                 Packet.Hello.Header.Type=mptHello;
@@ -194,7 +204,7 @@ bool MSyncStatesItem::Recv(char *Packet_, int PacketSize_, unsigned Code_, MAuth
 //            Address.sin_port=::htons(SYNC_Port);
 //            Address.sin_addr.s_addr=::inet_addr(IP);
             // Можем сгенерировать сеансовый ID из своего random и клиента
-            Seed=BasicMix(Seed,RecvHeader->Seed);
+            Seed^=RecvHeader->Seed;
             // Заполняем заголовок пакета
             Packet.Data.Header.Version=SYNC_Version;
             Packet.Data.Header.Type=mptSyncData;
@@ -446,50 +456,57 @@ void MSync::ThreadExecute()
 				auto iRecvState=SyncStates.Search(FromAddr.sin_addr.s_addr);
 				// Передаем его для обработки и отправки ответа сразу же
 				if ( iRecvState!=SyncStates.end() )
-                {
-                    NeedSave|=iRecvState->Recv((char*)&Packet,RecvSize,NetCode,NetMAC);
+				{
+					NeedSave|=iRecvState->Recv((char*)&Packet,RecvSize,NetCode,NetMAC);
 					NeedSave|=SyncState.Send(Socket,SocketBC,NetCode,NetMAC);
 				}
-            }
-            // Вяло отправляем данные "по-расписанию"
+			}
+			// Вяло отправляем данные "по-расписанию"
 			NeedSave|=SyncState.Send(Socket,SocketBC,NetCode,NetMAC);
-            Process+=SyncState.gPCount();
-        }
-        // Проверяем нужно ли сохранить обновленные состояния компьютеров
-        if ( NeedSave )
-        {
-            // Скроем возможные ошибки выделения памяти
-            try { States->Save(); }
-            catch (std::bad_alloc &e) {}
-        }
-        // Обновляем MAC-адреса и при необходимости сохраняем на диск
-        if ( UpdateMAC(&SyncStates)&&AutoSaveARP )
-        {
-            // Скроем возможные ошибки выделения памяти
-            try { SyncStates.Save(); }
-            catch (std::bad_alloc &e) {}
-        }
-        // Обновляем индикатор процесса синхронизации
-        sPCount(Process);
+			Process+=SyncState.gPCount();
+		}
+		// Проверяем нужно ли сохранить обновленные состояния компьютеров
+		if ( NeedSave )
+		{
+			// Скроем возможные ошибки выделения памяти
+			try { States->Save(); }
+			catch (std::bad_alloc &e) {}
+		}
+		// Обновляем MAC-адреса и при необходимости сохраняем на диск
+		if ( UpdateMAC(&SyncStates)&&AutoSaveARP )
+		{
+			// Скроем возможные ошибки выделения памяти
+			try { SyncStates.Save(); }
+			catch (std::bad_alloc &e) {}
+		}
+		// Обновляем индикатор процесса синхронизации
+		sPCount(Process);
 
-        // Проверяем не пора ли завершить работу
-        if ( ::PeekMessage(&Message,(HWND)-1,0,0,PM_REMOVE) ) return;
+		// Проверяем не пора ли завершить работу
+		if ( ::PeekMessage(&Message,(HWND)-1,0,0,PM_REMOVE) ) return;
 
-        // Засыпаем, если пакеты быстро разослали
-        if ( (::GetTickCount()-StartCycleTime)<(SYNC_SendInterval/4) )
-            ::Sleep(SYNC_SendInterval/4);
-    }
+		// Засыпаем, если пакеты быстро разослали
+		if ( (::GetTickCount()-StartCycleTime)<(SYNC_SendInterval/4) )
+		{
+			::Sleep(SYNC_SendInterval/4);
+/*
+			// Добавим энтропии
+			thread_local static unsigned cntr=0;
+			if ( (++cntr)%64 == 0 ) BasicRand.event();
+*/
+		}
+	}
 }
 //---------------------------------------------------------------------------
 bool MSync::PollData(SOCKET Socket_)
 {
-    fd_set WaitSockets;
-    timeval WaitTimer;
+	fd_set WaitSockets;
+	timeval WaitTimer;
 
-    // Заносим сокет в таблицу
-    FD_ZERO(&WaitSockets);
-    FD_SET(Socket_,&WaitSockets);
-    // Устанавливаем таймер ожидания данных в ноль
+	// Заносим сокет в таблицу
+	FD_ZERO(&WaitSockets);
+	FD_SET(Socket_,&WaitSockets);
+	// Устанавливаем таймер ожидания данных в ноль
     WaitTimer.tv_sec=0;
     WaitTimer.tv_usec=0;
 
@@ -533,8 +550,8 @@ bool MSync::UpdateMAC(MSyncStates *States_)
     delete[] Table;
     return NeedSave;
 error:
-    delete[] Table;
-    return false;
+	delete[] Table;
+	return false;
 }
 //---------------------------------------------------------------------------
 bool MSyncCl::PollData(SOCKET Socket_)
@@ -546,18 +563,18 @@ bool MSyncCl::PollData(SOCKET Socket_)
     FD_ZERO(&WaitSockets);
     FD_SET(Socket_,&WaitSockets);
     // Устанавливаем таймер ожидания данных в ноль
-    WaitTimer.tv_sec=0;
-    WaitTimer.tv_usec=0;
+	WaitTimer.tv_sec=0;
+	WaitTimer.tv_usec=0;
 
-    return ::select(0,&WaitSockets,nullptr,nullptr,&WaitTimer)==1;
+	return ::select(0,&WaitSockets,nullptr,nullptr,&WaitTimer)==1;
 }
 //---------------------------------------------------------------------------
 bool MSyncCl::NetInit(unsigned Code_, MAuth *MAC_)
 {
-    WSADATA WSAData;
-    NetCode=Code_;
-    NetMAC=MAC_;
-    Init=!::WSAStartup(MAKEWORD(1,1),&WSAData);
+	WSADATA WSAData;
+	NetCode=Code_;
+	NetMAC=MAC_;
+	Init=!::WSAStartup(MAKEWORD(1,1),&WSAData);
     return Init;
 }
 //---------------------------------------------------------------------------
@@ -594,7 +611,7 @@ bool MSyncCl::Start()
 
     //
     LastSendTime=::GetTickCount();
-    Process=mspWait;
+	Process=mspWait;
 
     // Создаем поток для выполнения отправки и приема данных
     Thread=::CreateThread(nullptr,0,&ThreadFunc,(LPVOID)this,0,&ThreadID);
@@ -709,9 +726,11 @@ bool MSyncCl::Recv(sockaddr_in *From_, char *Packet_, int PacketSize_)
             // Заполняем заголовок hello-пакета со своим random
             SndPacket.Hello.Header.Version=SYNC_Version;
             SndPacket.Hello.Header.Type=mptHello;
-            SndPacket.Hello.Header.Seed=BasicRand();
+            SndPacket.Hello.Header.Seed=NextSeed();
             // И сразу генерируем сеансовый ID, т.к. random сервера уже приняли
-            Seed=BasicMix(SndPacket.Hello.Header.Seed,RecvHeader->Seed);
+			Seed=
+				SndPacket.Hello.Header.Seed^
+				RecvHeader->Seed;
             // Добавляем к пакету MAC
             NetMAC->Calc((char*)&SndPacket.Hello,
                 sizeof(SndPacket.Hello)-sizeof(SndPacket.Hello.MAC),

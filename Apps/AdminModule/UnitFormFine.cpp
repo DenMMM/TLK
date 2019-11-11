@@ -64,15 +64,18 @@ void __fastcall TFormFine::FormShow(TObject *Sender)
 	CheckBoxWait->Enabled=false; CheckBoxWait->Checked=true;
 	CheckBoxWarn->Enabled=false; CheckBoxWarn->Checked=false;
 	ActiveControl=ComboBoxTime;
+
+	// Добавим энтропии
+	BasicRand.event();
 }
 //---------------------------------------------------------------------------
 void __fastcall TFormFine::FormClose(TObject *Sender, TCloseAction &Action)
 {
-    // Чистим интерфейсные элементы
-    ListViewFines->Items->Clear();
-    ComboBoxTime->Items->Clear();
-    // Чистим буфер
-    ApplyFines.clear();
+	// Чистим интерфейсные элементы
+	ListViewFines->Items->Clear();
+	ComboBoxTime->Items->Clear();
+	// Чистим буфер
+	ApplyFines.clear();
 }
 //---------------------------------------------------------------------------
 void __fastcall TFormFine::ListViewFinesInsert(TObject *Sender,

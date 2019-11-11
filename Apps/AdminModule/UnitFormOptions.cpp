@@ -37,7 +37,10 @@ void __fastcall TFormOptions::FormShow(TObject *Sender)
     EditCostDialogTime->MaxLength=5;
     EditCostPrecision->MaxLength=10;
     EditFilterFreeTime->MaxLength=5;
-    ActiveControl=ComboBoxLogPeriod;
+	ActiveControl=ComboBoxLogPeriod;
+
+	// Добавим энтропии
+	BasicRand.event();
 }
 //---------------------------------------------------------------------------
 void __fastcall TFormOptions::FormClose(TObject *Sender,

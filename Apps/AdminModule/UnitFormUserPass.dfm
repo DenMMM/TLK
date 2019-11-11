@@ -90,6 +90,7 @@ object FormUserPass: TFormUserPass
     Width = 185
     Height = 21
     TabOrder = 1
+    OnKeyPress = EditPasswordKeyPress
   end
   object EditNew: TEdit
     Left = 108

@@ -4,21 +4,21 @@
 //---------------------------------------------------------------------------
 #include "UnitCommon.h"
 //---------------------------------------------------------------------------
-USEFORM("UnitFormFine.cpp", FormFine);
-USEFORM("UnitFormFines.cpp", FormFines);
 USEFORM("UnitFormLogIn.cpp", FormLogIn);
-USEFORM("UnitFormMain.cpp", FormMain);
-USEFORM("UnitFormNewPass.cpp", FormNewPass);
-USEFORM("UnitFormComputers.cpp", FormComputers);
-USEFORM("UnitFormAuth.cpp", FormAuth);
-USEFORM("UnitFormClient.cpp", FormClient);
-USEFORM("UnitFormUserPass.cpp", FormUserPass);
-USEFORM("UnitFormUsers.cpp", FormUsers);
-USEFORM("UnitFormTariffTimes.cpp", FormTariffTimes);
+USEFORM("UnitFormFines.cpp", FormFines);
+USEFORM("UnitFormFine.cpp", FormFine);
 USEFORM("UnitFormOpenConfig.cpp", FormOpenConfig);
-USEFORM("UnitFormOptions.cpp", FormOptions);
-USEFORM("UnitFormOptionsPass.cpp", FormOptionsPass);
+USEFORM("UnitFormNewPass.cpp", FormNewPass);
+USEFORM("UnitFormMain.cpp", FormMain);
+USEFORM("UnitFormComputers.cpp", FormComputers);
+USEFORM("UnitFormClient.cpp", FormClient);
+USEFORM("UnitFormAuth.cpp", FormAuth);
+USEFORM("UnitFormUsers.cpp", FormUsers);
 USEFORM("UnitFormRun.cpp", FormRun);
+USEFORM("UnitFormOptionsPass.cpp", FormOptionsPass);
+USEFORM("UnitFormOptions.cpp", FormOptions);
+USEFORM("UnitFormUserPass.cpp", FormUserPass);
+USEFORM("UnitFormTariffTimes.cpp", FormTariffTimes);
 USEFORM("UnitFormTariffs.cpp", FormTariffs);
 //---------------------------------------------------------------------------
 int WINAPI _tWinMain(HINSTANCE, HINSTANCE, LPTSTR lpCmdLine, int)
@@ -32,23 +32,21 @@ int WINAPI _tWinMain(HINSTANCE, HINSTANCE, LPTSTR lpCmdLine, int)
         ResMessageBox(nullptr,1,24,MB_APPLMODAL|MB_OK|MB_ICONERROR);
         return 0;
     }
-    // Инициализируем генератор случайных чисел
-    randomize();
 
-        try
-        {
-         Application->Initialize();
-         Application->Title = L"TLK - Модуль управления";
-         Application->CreateForm(__classid(TFormMain), &FormMain);
+	try
+	{
+		Application->Initialize();
+		Application->Title = L"TLK - Модуль управления";
+		Application->CreateForm(__classid(TFormMain), &FormMain);
 		Application->Run();
-        }
-        catch (Exception &exception)
-        {
-                 Application->ShowException(&exception);
-        }
+	}
+	catch (Exception &exception)
+	{
+		Application->ShowException(&exception);
+	}
 
-    ::CloseHandle(mutex);
-        return 0;
+	::CloseHandle(mutex);
+	return 0;
 }
 //---------------------------------------------------------------------------
 

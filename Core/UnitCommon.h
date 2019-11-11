@@ -8,6 +8,8 @@
 #include <userenv.h>
 #include <mem.h>
 #include <stdexcept>
+
+#include "UnitTimeRand.h"
 //---------------------------------------------------------------------------
 #define ENC_Code        0x5BC935CF  // Код шифрования файлов
 #define ENC_Net         0x9ABD5BAE  // Код шифрования сетевых данных
@@ -18,20 +20,6 @@ template <typename type>
 inline int DComp(type D1_, type D2_)
 {
 	return D1_==D2_? 0: (D1_<D2_? -1: 1);
-}
-
-// Побитовый циклический сдвиг влево
-template <typename type>
-inline type BitsLeft(type Bits_)
-{
-	return (Bits_<<1)|(Bits_>>(sizeof(type)*8-1));
-}
-
-// Побитовый циклический сдвиг вправо
-template <typename type>
-inline type BitsRight(type Bits_)
-{
-    return (Bits_>>1)|(Bits_<<(sizeof(type)*8-1));
 }
 //---------------------------------------------------------------------------
 size_t sizeofLine(const std::wstring &Line_)
@@ -159,39 +147,13 @@ inline bool SetLocalTimeInt64(const __int64 *lpInt64)
         ::SetLocalTime(&ssTime);
 }
 //---------------------------------------------------------------------------
-// Основной раунд шифрования
-template <typename type>
-inline type BasicEncodeRound(type Blk_, type Code_)
-{
-    Blk_+=Code_;                             // складываем с циклическим переносом
-    Blk_=BitsRight(Blk_);                    // побитовый циклический сдвиг вправо
-    Blk_^=Code_;                             // побитовое исключающее "или"
-    return Blk_;
-}
-
-// Основной раунд дешифрования
-template <typename type>
-inline type BasicDecodeRound(type Blk_, type Code_)
-{
-    Blk_^=Code_;                             // побитовое исключающее "или"
-    Blk_=BitsLeft(Blk_);                     // побитовый циклический сдвиг вправо
-    Blk_-=Code_;                             // складываем с циклическим переносом
-    return Blk_;
-}
-
-// Простейшее блочно-потоковое шифрование/дешифрование
-void BasicEncode(void *Data__, size_t DataSize_, unsigned Code_, int Round_=8);
-void BasicDecode(void *Data__, size_t DataSize_, unsigned Code_, int Round_=8);
-unsigned BasicMix(unsigned Key1_, unsigned Key2_);
-unsigned BasicRand();
-bool TimeRand(void *Buff__, size_t Size_);
+extern MTimeRand BasicRand;
+void TimeRand(void *Buff__, size_t Size_);
+bool CngRand(void *Buff_, size_t Size_);
 //---------------------------------------------------------------------------
 size_t ByteToHEX(const void *Bytes__, size_t BytesCount_,
 	wchar_t *Line_, size_t LineSize_, wchar_t Delim_=L'\0');
 size_t HEXToByte(const wchar_t *Line_, void *Buff__, size_t BuffSize_);
-//---------------------------------------------------------------------------
-bool GeneratePassword(char *Line_, unsigned Len_,
-    bool Cap_, bool Low_, bool Num_);
 //---------------------------------------------------------------------------
 int ResMessageBox(HWND Owner_, UINT uCaption, UINT uMessage, UINT Type_, DWORD LastErr_=0);
 //---------------------------------------------------------------------------
@@ -200,6 +162,9 @@ bool WinExit(UINT uFlags);
 //---------------------------------------------------------------------------
 // Запуск программ по списку из реестра
 void RegExecList(HKEY hKey_, LPCWSTR SubKey_, HANDLE hToken_=INVALID_HANDLE_VALUE);
+//---------------------------------------------------------------------------
+// Вычисляет хэш MAC-адресов всех физических сетевых адаптеров
+uint32_t CalcHwMacHash();    		/// uint64_t ?
 //---------------------------------------------------------------------------
 #endif
 

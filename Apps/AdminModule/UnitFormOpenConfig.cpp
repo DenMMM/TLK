@@ -29,7 +29,10 @@ void TFormOpenConfig::SetCoord(int Left_, int Top_, bool LeftTop_)
 void __fastcall TFormOpenConfig::FormShow(TObject *Sender)
 {
     EditPassword->MaxLength=MAX_OptPassLen;
-    EditPassword->PasswordChar=PASS_Char;
+	EditPassword->PasswordChar=PASS_Char;
+
+	// Добавим энтропии
+	BasicRand.event();
 }
 //---------------------------------------------------------------------------
 void __fastcall TFormOpenConfig::FormCloseQuery(TObject *Sender,

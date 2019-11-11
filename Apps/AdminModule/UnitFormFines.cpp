@@ -36,7 +36,10 @@ void __fastcall TFormFines::FormShow(TObject *Sender)
     EditDescription->MaxLength=MAX_FineDescrLen;
     
     SetEdit(false);
-    ActiveControl=ListViewFines;
+	ActiveControl=ListViewFines;
+
+	// Добавим энтропии
+	BasicRand.event();
 }
 //---------------------------------------------------------------------------
 void __fastcall TFormFines::FormClose(TObject *Sender,

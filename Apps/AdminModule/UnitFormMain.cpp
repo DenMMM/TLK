@@ -213,7 +213,7 @@ void __fastcall TFormMain::FormShow(TObject *Sender)
 		return;
 	}
 
-    Tag=false;
+	Tag=false;
 }
 //---------------------------------------------------------------------------
 void __fastcall TFormMain::FormClose(TObject *Sender, TCloseAction &Action)
@@ -981,26 +981,26 @@ void __fastcall TFormMain::NLogResetClick(TObject *Sender)
 		Fines.get(),
 		Users.get()) )
 	{
-        ShellState->State&=~mssErrorLog; SetShell();
-    } else
-        ResMessageBox(Handle,1,6,MB_APPLMODAL|MB_OK|MB_ICONERROR,Log->gLastErr());
+		ShellState->State&=~mssErrorLog; SetShell();
+	} else
+		ResMessageBox(Handle,1,6,MB_APPLMODAL|MB_OK|MB_ICONERROR,Log->gLastErr());
 }
 //---------------------------------------------------------------------------
 int TFormMain::GetCompColorIcon(const MComputersItem *Comp_)
 {
-    int icon;
+	int icon;
 
-    if ( Comp_==nullptr ) return -1;
-    switch(Comp_->Color)
-    {
-        case mgcAqua:   icon=0; break;
-        case mgcGreen:  icon=1; break;
-        case mgcRed:    icon=2; break;
-        case mgcYellow: icon=3; break;
-        default:        icon=-1; break;
-    }
+	if ( Comp_==nullptr ) return -1;
+	switch(Comp_->Color)
+	{
+		case mgcAqua:   icon=0; break;
+		case mgcGreen:  icon=1; break;
+		case mgcRed:    icon=2; break;
+		case mgcYellow: icon=3; break;
+		default:        icon=-1; break;
+	}
 
-    return icon;
+	return icon;
 }
 //---------------------------------------------------------------------------
 

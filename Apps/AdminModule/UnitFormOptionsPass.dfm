@@ -73,6 +73,7 @@ object FormOptionsPass: TFormOptionsPass
     Width = 185
     Height = 21
     TabOrder = 0
+    OnKeyPress = EditPasswordKeyPress
   end
   object EditNew: TEdit
     Left = 108

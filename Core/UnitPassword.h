@@ -38,6 +38,7 @@ private:
 public:
 	void Set(const std::wstring &Pass_);
 	bool Check(const std::wstring &Pass_) const;
+	static std::wstring New(size_t Len_, bool Cap_, bool Low_, bool Num_);
 
 	MPassword()
 	{

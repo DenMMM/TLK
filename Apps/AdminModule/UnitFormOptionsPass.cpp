@@ -35,7 +35,10 @@ void __fastcall TFormOptionsPass::FormShow(TObject *Sender)
     EditNew->MaxLength=MAX_OptPassLen;
     EditNew->PasswordChar=PASS_Char;
     EditConfirm->MaxLength=MAX_OptPassLen;
-    EditConfirm->PasswordChar=PASS_Char;
+	EditConfirm->PasswordChar=PASS_Char;
+
+	// Добавим энтропии
+	BasicRand.event();
 }
 //---------------------------------------------------------------------------
 void __fastcall TFormOptionsPass::FormCloseQuery(TObject *Sender,
@@ -68,14 +71,14 @@ void __fastcall TFormOptionsPass::FormClose(TObject *Sender,
 void __fastcall TFormOptionsPass::ButtonGenerateClick(TObject *Sender)
 {
 	std::unique_ptr <TFormNewPass> form;
-    char buffer[MAX_OptPassLen+1];
+	std::wstring buffer;
 
-    try
-    {
+	try
+	{
 		form.reset(new TFormNewPass(0));
 		if ( !form->Execute(buffer,5,MAX_OptPassLen,
 			Left+20,Top+30,true) ) return;
-		EditNew->Text=buffer;
+		EditNew->Text=buffer.c_str();
 		EditConfirm->Text=L""; EditConfirm->ClearUndo();
 		ActiveControl=EditConfirm;
 	}
@@ -83,6 +86,12 @@ void __fastcall TFormOptionsPass::ButtonGenerateClick(TObject *Sender)
 	{
 		Application->ShowException(&ex);
 	}
+}
+//---------------------------------------------------------------------------
+void __fastcall TFormOptionsPass::EditPasswordKeyPress(TObject *Sender, System::WideChar &Key)
+{
+	// Добавим энтропии
+	BasicRand.event();
 }
 //---------------------------------------------------------------------------
 

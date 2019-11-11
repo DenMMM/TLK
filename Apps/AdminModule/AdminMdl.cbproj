@@ -59,7 +59,7 @@
         <Base>true</Base>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Base)'!=''">
-        <IncludePath>..\..\Core\;..\..\Ext\BrianGladman\SHA\;$(IncludePath)</IncludePath>
+        <IncludePath>..\..\;..\..\Ext\ZilongTan\fast-hash\;..\..\Core\;..\..\Ext\BrianGladman\SHA\;$(IncludePath)</IncludePath>
         <ILINK_AppType>Windows</ILINK_AppType>
         <PackageImports>rtl.bpi;vcl.bpi;vclx.bpi;ibxpress.bpi;$(PackageImports)</PackageImports>
         <DCC_CBuilderOutput>JPHNE</DCC_CBuilderOutput>
@@ -79,7 +79,7 @@
         <BCC_GenerateWindowsApp>true</BCC_GenerateWindowsApp>
         <BCC_DebugLineNumbers>true</BCC_DebugLineNumbers>
         <Multithreaded>true</Multithreaded>
-        <ILINK_LibraryPath>..\..\Core\;..\..\Ext\BrianGladman\SHA\;..\..\Ext\BrianGladman\SHA;..\..\Core;$(BDS)\lib\obj;$(BDS)\lib;$(BDS)\lib\psdk;$(ILINK_LibraryPath)</ILINK_LibraryPath>
+        <ILINK_LibraryPath>..\..\;..\..\Ext\ZilongTan\fast-hash\;..\..\Core\;..\..\Ext\BrianGladman\SHA\;..\..\Ext\BrianGladman\SHA;..\..\Core;$(BDS)\lib\obj;$(BDS)\lib;$(BDS)\lib\psdk;$(ILINK_LibraryPath)</ILINK_LibraryPath>
         <DCC_AdditionalSwitches> -M</DCC_AdditionalSwitches>
         <BCC_InlineFunctionExpansion>false</BCC_InlineFunctionExpansion>
         <SanitizedProjectName>AdminMdl</SanitizedProjectName>
@@ -282,12 +282,16 @@
             <BuildOrder>50</BuildOrder>
             <BuildOrder>34</BuildOrder>
         </CppCompile>
+        <LibFiles Include="..\..\Core\BCRYPT.lib" Condition="'$(Platform)'=='Win32'">
+            <BuildOrder>45</BuildOrder>
+            <IgnorePath>true</IgnorePath>
+        </LibFiles>
         <LibFiles Include="..\..\Core\iphlpapi.lib" Condition="'$(Platform)'=='Win32'">
             <BuildOrder>44</BuildOrder>
             <IgnorePath>true</IgnorePath>
         </LibFiles>
         <LibFiles Include="..\..\Core\NTDLL.lib" Condition="'$(Platform)'=='Win32'">
-            <BuildOrder>44</BuildOrder>
+            <BuildOrder>45</BuildOrder>
             <IgnorePath>true</IgnorePath>
         </LibFiles>
         <CppCompile Include="..\..\Core\UnitAuth.cpp">
@@ -305,6 +309,10 @@
         <CppCompile Include="..\..\Core\UnitComputers.cpp">
             <BuildOrder>71</BuildOrder>
             <BuildOrder>5</BuildOrder>
+        </CppCompile>
+        <CppCompile Include="..\..\Core\UnitEncode.cpp">
+            <DependentOn>..\..\Core\UnitEncode.h</DependentOn>
+            <BuildOrder>48</BuildOrder>
         </CppCompile>
         <CppCompile Include="..\..\Core\UnitFines.cpp">
             <BuildOrder>74</BuildOrder>
@@ -330,6 +338,10 @@
             <BuildOrder>13</BuildOrder>
             <BuildOrder>122</BuildOrder>
         </CppCompile>
+        <CppCompile Include="..\..\Core\UnitRandCounter.cpp">
+            <DependentOn>..\..\Core\UnitRandCounter.h</DependentOn>
+            <BuildOrder>49</BuildOrder>
+        </CppCompile>
         <CppCompile Include="..\..\Core\UnitSend.cpp">
             <BuildOrder>17</BuildOrder>
             <BuildOrder>101</BuildOrder>
@@ -354,6 +366,10 @@
             <BuildOrder>86</BuildOrder>
             <BuildOrder>0</BuildOrder>
         </CppCompile>
+        <CppCompile Include="..\..\Core\UnitTimeRand.cpp">
+            <DependentOn>..\..\Core\UnitTimeRand.h</DependentOn>
+            <BuildOrder>47</BuildOrder>
+        </CppCompile>
         <CppCompile Include="..\..\Core\UnitUsers.cpp">
             <BuildOrder>89</BuildOrder>
             <BuildOrder>2</BuildOrder>
@@ -374,21 +390,24 @@
             <BuildOrder>19</BuildOrder>
             <BuildOrder>113</BuildOrder>
         </CppCompile>
-        <FormResources Include="UnitFormFine.dfm"/>
-        <FormResources Include="UnitFormFines.dfm"/>
+        <CppCompile Include="..\..\Ext\ZilongTan\fast-hash\fasthash.c">
+            <BuildOrder>46</BuildOrder>
+        </CppCompile>
         <FormResources Include="UnitFormLogIn.dfm"/>
-        <FormResources Include="UnitFormMain.dfm"/>
-        <FormResources Include="UnitFormNewPass.dfm"/>
-        <FormResources Include="UnitFormComputers.dfm"/>
-        <FormResources Include="UnitFormAuth.dfm"/>
-        <FormResources Include="UnitFormClient.dfm"/>
-        <FormResources Include="UnitFormUserPass.dfm"/>
-        <FormResources Include="UnitFormUsers.dfm"/>
-        <FormResources Include="UnitFormTariffTimes.dfm"/>
+        <FormResources Include="UnitFormFines.dfm"/>
+        <FormResources Include="UnitFormFine.dfm"/>
         <FormResources Include="UnitFormOpenConfig.dfm"/>
-        <FormResources Include="UnitFormOptions.dfm"/>
-        <FormResources Include="UnitFormOptionsPass.dfm"/>
+        <FormResources Include="UnitFormNewPass.dfm"/>
+        <FormResources Include="UnitFormMain.dfm"/>
+        <FormResources Include="UnitFormComputers.dfm"/>
+        <FormResources Include="UnitFormClient.dfm"/>
+        <FormResources Include="UnitFormAuth.dfm"/>
+        <FormResources Include="UnitFormUsers.dfm"/>
         <FormResources Include="UnitFormRun.dfm"/>
+        <FormResources Include="UnitFormOptionsPass.dfm"/>
+        <FormResources Include="UnitFormOptions.dfm"/>
+        <FormResources Include="UnitFormUserPass.dfm"/>
+        <FormResources Include="UnitFormTariffTimes.dfm"/>
         <FormResources Include="UnitFormTariffs.dfm"/>
         <BuildConfiguration Include="Release">
             <Key>Cfg_2</Key>
@@ -517,14 +536,14 @@
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
-                <DeployFile LocalName="..\..\Ext\BrianGladman\SHA\hmac.c" Configuration="Debug" Class="ProjectFile">
-                    <Platform Name="Win32">
-                        <RemoteDir>.\</RemoteDir>
+                <DeployFile Condition="'$(DynamicRTL)'=='true' And '$(Multithreaded)'=='true'" LocalName="$(BDS)\bin64\cc64260mt.dll" Class="DependencyModule">
+                    <Platform Name="Win64">
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
-                <DeployFile Condition="'$(DynamicRTL)'=='true' And '$(Multithreaded)'=='true'" LocalName="$(BDS)\bin64\cc64260mt.dll" Class="DependencyModule">
-                    <Platform Name="Win64">
+                <DeployFile LocalName="..\..\Ext\BrianGladman\SHA\hmac.c" Configuration="Debug" Class="ProjectFile">
+                    <Platform Name="Win32">
+                        <RemoteDir>.\</RemoteDir>
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
@@ -603,6 +622,12 @@
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
+                <DeployFile LocalName="..\..\Core\BCRYPT.lib" Configuration="Debug" Class="ProjectFile">
+                    <Platform Name="Win32">
+                        <RemoteDir>.\</RemoteDir>
+                        <Overwrite>true</Overwrite>
+                    </Platform>
+                </DeployFile>
                 <DeployFile LocalName=".\AdminMdl.tds" Configuration="Debug" Class="DebugSymbols">
                     <Platform Name="Win32">
                         <RemoteName>AdminMdl.tds</RemoteName>
@@ -611,6 +636,12 @@
                 </DeployFile>
                 <DeployFile Condition="'$(DynamicRTL)'=='true' And '$(Multithreaded)'=='true'" LocalName="$(BDS)\bin64\cc64250mt.dll" Class="DependencyModule">
                     <Platform Name="Win64">
+                        <Overwrite>true</Overwrite>
+                    </Platform>
+                </DeployFile>
+                <DeployFile LocalName="..\..\Ext\ZilongTan\fast-hash\fasthash.c" Configuration="Debug" Class="ProjectFile">
+                    <Platform Name="Win32">
+                        <RemoteDir>.\</RemoteDir>
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>

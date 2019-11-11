@@ -26,13 +26,15 @@ __published:	// IDE-managed Components
     void __fastcall ButtonNewClick(TObject *Sender);
     void __fastcall FormClose(TObject *Sender, TCloseAction &Action);
 private:	// User declarations
-    char *Buffer;
-    int MinLength;
+	std::wstring TmpPass;
+	int MinLength;
     int MaxLength;
     void SetCoord(int Left_, int Top_, bool LeftTop_);
 public:		// User declarations
     __fastcall TFormNewPass(TComponent* Owner);
-    bool Execute(char *Buffer_, int MinLength_, int MaxLength_,
+	bool Execute(
+		std::wstring &Result_,
+		int MinLength_, int MaxLength_,
         int Left_, int Top_, bool LeftTop_);
 };
 //---------------------------------------------------------------------------

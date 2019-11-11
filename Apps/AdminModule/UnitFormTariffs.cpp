@@ -47,7 +47,10 @@ void __fastcall TFormTariffs::FormShow(TObject *Sender)
 
     EditName->MaxLength=MAX_TariffNameLen;
     SetEdit(false);
-    ActiveControl=ListViewNames;
+	ActiveControl=ListViewNames;
+
+	// Добавим энтропии
+	BasicRand.event();
 }
 //---------------------------------------------------------------------------
 void __fastcall TFormTariffs::FormClose(TObject *Sender,

@@ -10,6 +10,14 @@
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
 //---------------------------------------------------------------------------
+MRandCounter
+	MSendSrv::SeedRand(
+		std::chrono::system_clock::
+		now().time_since_epoch().count());
+
+MWAPI::CRITICAL_SECTION
+	MSendSrv::CS_Seed;
+//---------------------------------------------------------------------------
 bool MSend::NetInit(unsigned Code_, MAuth *MAC_)
 {
     WSADATA WSAData;
@@ -473,10 +481,10 @@ void MSendSrv::ThreadSend()
 		Event(pComp,mseSending);
 
 		// Выполнем обмен hello и генерируем ID сеанса
-		Seed=BasicRand();
+		Seed=NextSeed();
 		if ( (!SndHello(Seed))||
 			(!RcvHello(&RmtSeed)) ) { Event(pComp,mseProtError); goto next; }
-		Seed=BasicMix(Seed,RmtSeed);
+		Seed^=RmtSeed;
 
 		// Отправляем блок-информер и данные
 		switch(Mode)
@@ -520,10 +528,10 @@ void MSendSrv::ThreadGet()
 	Event(Comp,mseReceiving);
 
 	// Выполнем обмен hello и генерируем ID сеанса
-	Seed=BasicRand();
+	Seed=NextSeed();
 	if ( (!SndHello(Seed))||
 		(!RcvHello(&RmtSeed)) ) { Event(Comp,mseProtError); goto error; }
-	Seed=BasicMix(Seed,RmtSeed);
+	Seed^=RmtSeed;
 
 	// Отправляем запрос на данные
 	switch(Mode)
@@ -645,11 +653,11 @@ void MSendCl::ThreadP()
         // Принимаем hello и random сервера
         if ( !RcvHello(&RmtSeed) ) goto next;
         // Отправляем свой
-        Seed=BasicRand();
+        Seed=NextSeed();
         if ( !SndHello(Seed) ) goto next;
         // Формируем сеансовый ID и принимаем запрос
-        Seed=BasicMix(Seed,RmtSeed);
-        if ( !RcvRequest(&Type,Seed,&Size) ) goto next;
+		Seed^=RmtSeed;
+		if ( !RcvRequest(&Type,Seed,&Size) ) goto next;
 
         // Обрабатываем запрос
         switch(Type)

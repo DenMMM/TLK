@@ -35,7 +35,10 @@ void __fastcall TFormLogIn::FormShow(TObject *Sender)
     LabelPassword->Enabled=false;
     EditPassword->Enabled=false;
     EditPassword->Color=clBtnFace;
-    ActiveControl=ComboBoxLogin;
+	ActiveControl=ComboBoxLogin;
+
+	// Добавим энтропии
+	BasicRand.event();
 }
 //---------------------------------------------------------------------------
 void __fastcall TFormLogIn::ComboBoxLoginClick(TObject *Sender)

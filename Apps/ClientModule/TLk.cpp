@@ -4,7 +4,7 @@
 #include <cwchar>
 #pragma hdrstop
 //---------------------------------------------------------------------------
-#include "UnitFormMain.h"           /// 'Shared' вынести в отдельный файл
+#include "UnitFormMain.h"
 #include "UnitService.h"
 //---------------------------------------------------------------------------
 USEFORM("UnitFormGames.cpp", FormGames);
@@ -18,9 +18,6 @@ int WINAPI _tWinMain(HINSTANCE, HINSTANCE, LPTSTR lpCmdLine, int)
 {
 	const wchar_t cmd_shell[]=L"/shell:";
 	wchar_t *cmd_HEX=nullptr;
-
-    // Инициализируем генератор случайных чисел
-    randomize();
 
 	if ( wcscmp(lpCmdLine, L"/install")==0 )
 	{
@@ -61,22 +58,22 @@ int WINAPI _tWinMain(HINSTANCE, HINSTANCE, LPTSTR lpCmdLine, int)
         ::SystemParametersInfo(SPI_SETDESKWALLPAPER,0,wlp,0);   /// ,SPIF_SENDCHANGE);
     }
 
-    try
-    {
-         Application->Initialize();
-         Application->Title = L"TLK - Клиент";
-         Application->CreateForm(__classid(TFormMain), &FormMain);
+	try
+	{
+		Application->Initialize();
+		Application->Title = L"TLK - Клиент";
+		Application->CreateForm(__classid(TFormMain), &FormMain);
 		Application->CreateForm(__classid(TFormGames), &FormGames);
 		Application->Run();
-    }
-    catch (Exception &exception)
-    {
-         Application->ShowException(&exception);
-    }
+	}
+	catch (Exception &exception)
+	{
+		Application->ShowException(&exception);
+	}
 
-    Shared.Close();
+	Shared.Close();
 
-    return 0;
+	return 0;
 }
 //---------------------------------------------------------------------------
 void ServiceInstall()

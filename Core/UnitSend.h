@@ -4,6 +4,7 @@
 //---------------------------------------------------------------------------
 #include <winsock2.h>
 #include <vector>
+#include <chrono>
 
 #include "UnitSLList.h"
 #include "UnitStates.h"
@@ -11,6 +12,7 @@
 #include "UnitGames.h"
 #include "UnitClOptions.h"
 #include "UnitAuth.h"
+#include "UnitRandCounter.h"
 //---------------------------------------------------------------------------
 struct MSendHello;
 struct MSendRequest;
@@ -268,6 +270,16 @@ private:
 	void ThreadGet();
 	void Event(MComputersItem *Computer_, int Event_);
 
+	// Генерация Seed со стороны сервера
+	static MRandCounter SeedRand;
+	static MWAPI::CRITICAL_SECTION CS_Seed;
+
+	unsigned NextSeed()
+	{
+		MWAPI::CRITICAL_SECTION::Lock lckObj(CS_Seed);  /// Для MSendSrv излишне
+		return SeedRand++;
+	}
+
 public:
 	bool NetInit(HWND Window_, UINT MinMsg_, unsigned Code_, MAuth *MAC_);
 	bool NetFree();
@@ -301,6 +313,10 @@ private:
 
     void ThreadP();
 
+	// Генерация Seed со стороны клиента
+	MRandCounter SeedRand;
+	unsigned NextSeed() { return SeedRand++; }
+
 public:
     bool NetInit(MStateCl *State_, unsigned Code_, MAuth *MAC_);
     bool NetFree();
@@ -308,7 +324,10 @@ public:
     void Stop();
 
 	MSendCl():
-		State(nullptr)
+		State(nullptr),
+		SeedRand(
+			std::chrono::system_clock::
+			now().time_since_epoch().count())
 	{
 	}
 

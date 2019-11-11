@@ -36,7 +36,10 @@ void __fastcall TFormComputers::FormShow(TObject *Sender)
     EditAddress->MaxLength=MAX_CompAddrLen;
 
     SetEdit(false);
-    ActiveControl=ListViewComputers;
+	ActiveControl=ListViewComputers;
+
+	// Добавим энтропии
+	BasicRand.event();
 }
 //---------------------------------------------------------------------------
 void __fastcall TFormComputers::FormClose(TObject *Sender,

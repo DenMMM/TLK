@@ -77,7 +77,10 @@ void __fastcall TFormUserPass::FormShow(TObject *Sender)
     EditNew->MaxLength=MAX_UserPassLen;
     EditNew->PasswordChar=PASS_Char;
     EditConfirm->MaxLength=MAX_UserPassLen;
-    EditConfirm->PasswordChar=PASS_Char;
+	EditConfirm->PasswordChar=PASS_Char;
+
+	// Добавим энтропии
+	BasicRand.event();
 }
 //---------------------------------------------------------------------------
 void __fastcall TFormUserPass::FormCloseQuery(TObject *Sender,
@@ -119,26 +122,32 @@ void __fastcall TFormUserPass::FormClose(TObject *Sender,
 void __fastcall TFormUserPass::ButtonGenerateClick(TObject *Sender)
 {
 	std::unique_ptr <TFormNewPass> form;
-	char buffer[MAX_UserPassLen+1];
+	std::wstring buffer;
 
 	try
 	{
 		form.reset(new TFormNewPass(0));
 		if ( !form->Execute(buffer,5,MAX_UserPassLen,
 			Left+20,Top+30,true) ) return;
-		EditNew->Text=buffer;
+		EditNew->Text=buffer.c_str();
 		EditConfirm->Text=L""; EditConfirm->ClearUndo();
         ActiveControl=EditConfirm;
     }
-    catch (Exception &ex)
-    {
-        Application->ShowException(&ex);
-    }
+	catch (Exception &ex)
+	{
+		Application->ShowException(&ex);
+	}
 }
 //---------------------------------------------------------------------------
 void __fastcall TFormUserPass::ComboBoxLoginClick(TObject *Sender)
 {
-    SetEdit(true,true);
+	SetEdit(true,true);
+}
+//---------------------------------------------------------------------------
+void __fastcall TFormUserPass::EditPasswordKeyPress(TObject *Sender, System::WideChar &Key)
+{
+	// Добавим энтропии
+	BasicRand.event();
 }
 //---------------------------------------------------------------------------
 

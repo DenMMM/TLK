@@ -25,8 +25,14 @@ namespace MWAPI
                 Obj(Obj_)
             {
                 Obj.Enter();
-            }
-            ~Lock()
+			}
+
+			Lock(const Lock&) = delete;
+			Lock(Lock&&) = default;
+			Lock& operator=(const Lock&) = delete;
+			Lock& operator=(Lock&&) = default;
+
+			~Lock()
             {
                 Obj.Leafe();
             }
@@ -56,7 +62,13 @@ namespace MWAPI
                     Obj1.Enter();
                 }
             }
-            ~DualLock()
+
+			DualLock(const DualLock&) = delete;
+			DualLock(DualLock&&) = default;
+			DualLock& operator=(const DualLock&) = delete;
+			DualLock& operator=(DualLock&&) = default;
+
+			~DualLock()
             {
                 Obj1.Leafe();
                 Obj2.Leafe();
@@ -68,10 +80,13 @@ namespace MWAPI
         void Enter() { ::EnterCriticalSection(&Section); }
         void Leafe() { ::LeaveCriticalSection(&Section); }
 
-        CRITICAL_SECTION() { ::InitializeCriticalSection(&Section); }
-        ~CRITICAL_SECTION() { ::DeleteCriticalSection(&Section); }
-    };
-
+		CRITICAL_SECTION() { ::InitializeCriticalSection(&Section); }
+		CRITICAL_SECTION(const CRITICAL_SECTION&) = delete;
+		CRITICAL_SECTION(CRITICAL_SECTION&&) = delete;
+		CRITICAL_SECTION& operator=(const CRITICAL_SECTION&) = delete;
+		CRITICAL_SECTION& operator=(CRITICAL_SECTION&&) = delete;
+		~CRITICAL_SECTION() { ::DeleteCriticalSection(&Section); }
+	};
 };
 //---------------------------------------------------------------------------
 #endif

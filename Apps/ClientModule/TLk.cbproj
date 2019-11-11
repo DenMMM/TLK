@@ -59,7 +59,7 @@
         <Base>true</Base>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Base)'!=''">
-        <IncludePath>..\..\Core\;..\..\Ext\BrianGladman\SHA\;$(IncludePath)</IncludePath>
+        <IncludePath>..\..\Ext\ZilongTan\fast-hash\;..\..\Core\;..\..\Ext\BrianGladman\SHA\;$(IncludePath)</IncludePath>
         <ILINK_AppType>Windows</ILINK_AppType>
         <DCC_CBuilderOutput>JPHNE</DCC_CBuilderOutput>
         <DCC_UnitSearchPath>.\;$(BDS)\lib;$(BDS)\lib\obj;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
@@ -75,7 +75,7 @@
         <TASM_Debugging>None</TASM_Debugging>
         <TASM_AdditionalSwitches> /w2</TASM_AdditionalSwitches>
         <BCC_GenerateWindowsApp>true</BCC_GenerateWindowsApp>
-        <ILINK_LibraryPath>..\..\Core\;..\..\Ext\BrianGladman\SHA\;..\..\Ext\BrianGladman\SHA;..\..\Core;$(BDS)\lib;$(ILINK_LibraryPath)</ILINK_LibraryPath>
+        <ILINK_LibraryPath>..\..\Ext\ZilongTan\fast-hash\;..\..\Core\;..\..\Ext\BrianGladman\SHA\;..\..\Ext\BrianGladman\SHA;..\..\Core;$(BDS)\lib;$(ILINK_LibraryPath)</ILINK_LibraryPath>
         <Multithreaded>true</Multithreaded>
         <DCC_AdditionalSwitches> -M</DCC_AdditionalSwitches>
         <SanitizedProjectName>TLk</SanitizedProjectName>
@@ -226,6 +226,10 @@
             <DependentOn>..\..\Core\UnitComputers.h</DependentOn>
             <BuildOrder>27</BuildOrder>
         </CppCompile>
+        <CppCompile Include="..\..\Core\UnitEncode.cpp">
+            <DependentOn>..\..\Core\UnitEncode.h</DependentOn>
+            <BuildOrder>29</BuildOrder>
+        </CppCompile>
         <CppCompile Include="..\..\Core\UnitGames.cpp">
             <BuildOrder>15</BuildOrder>
             <BuildOrder>14</BuildOrder>
@@ -269,6 +273,9 @@
         <CppCompile Include="..\..\Ext\BrianGladman\SHA\sha2.c">
             <BuildOrder>47</BuildOrder>
             <BuildOrder>4</BuildOrder>
+        </CppCompile>
+        <CppCompile Include="..\..\Ext\ZilongTan\fast-hash\fasthash.c">
+            <BuildOrder>28</BuildOrder>
         </CppCompile>
         <FormResources Include="UnitFormGames.dfm"/>
         <FormResources Include="UnitFormMain.dfm"/>
@@ -398,14 +405,14 @@
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
-                <DeployFile LocalName="..\..\Ext\BrianGladman\SHA\hmac.c" Configuration="Debug" Class="ProjectFile">
-                    <Platform Name="Win32">
-                        <RemoteDir>.\</RemoteDir>
+                <DeployFile Condition="'$(DynamicRTL)'=='true' And '$(Multithreaded)'=='true'" LocalName="$(BDS)\bin64\cc64260mt.dll" Class="DependencyModule">
+                    <Platform Name="Win64">
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
-                <DeployFile Condition="'$(DynamicRTL)'=='true' And '$(Multithreaded)'=='true'" LocalName="$(BDS)\bin64\cc64260mt.dll" Class="DependencyModule">
-                    <Platform Name="Win64">
+                <DeployFile LocalName="..\..\Ext\BrianGladman\SHA\hmac.c" Configuration="Debug" Class="ProjectFile">
+                    <Platform Name="Win32">
+                        <RemoteDir>.\</RemoteDir>
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
@@ -486,6 +493,12 @@
                 </DeployFile>
                 <DeployFile Condition="'$(DynamicRTL)'=='true' And '$(Multithreaded)'=='true'" LocalName="$(BDS)\bin64\cc64250mt.dll" Class="DependencyModule">
                     <Platform Name="Win64">
+                        <Overwrite>true</Overwrite>
+                    </Platform>
+                </DeployFile>
+                <DeployFile LocalName="..\..\Ext\ZilongTan\fast-hash\fasthash.c" Configuration="Debug" Class="ProjectFile">
+                    <Platform Name="Win32">
+                        <RemoteDir>.\</RemoteDir>
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
