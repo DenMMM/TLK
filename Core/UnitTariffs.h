@@ -139,7 +139,13 @@ class MTariffsInfo:
 		MTariffsInfoItem>
 {
 public:
-	iterator Search(unsigned ID_);
+	const_iterator Search(unsigned ID_) const;
+	iterator Search(unsigned ID_)
+	{
+		return const_cast_iter(
+			const_cast<const MTariffsInfo*>(this)->Search(ID_)
+			);
+	}
 };
 //---------------------------------------------------------------------------
 class MTariffsItem:

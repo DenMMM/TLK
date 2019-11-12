@@ -94,9 +94,9 @@ public:
 
 	MLog();
 	MLog(const MLog&) = delete;
-	MLog(MLog&&) noexcept = delete;
+	MLog(MLog&&) = delete;
 	MLog& operator=(const MLog&) = delete;
-	MLog& operator=(MLog&&) noexcept = delete;
+	MLog& operator=(MLog&&) = delete;
 	~MLog() = default;
 };
 //---------------------------------------------------------------------------

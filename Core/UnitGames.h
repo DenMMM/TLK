@@ -44,7 +44,7 @@ public:
 	}
 
 	MGamesItem& operator=(const MGamesItem& Right_);
-	MGamesItem& operator=(MGamesItem&& Right_) noexcept
+	MGamesItem& operator=(MGamesItem&& Right_)
 	{
 		Name=std::move(Right_.Name);
 		Command=std::move(Right_.Command);

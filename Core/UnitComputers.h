@@ -49,7 +49,13 @@ class MComputers:
 		MComputersItem>
 {
 public:
-	iterator Search(char Number_);
+	const_iterator Search(char Number_) const;
+	iterator Search(char Number_)
+	{
+		return const_cast_iter(
+			const_cast<const MComputers*>(this)->Search(Number_)
+			);
+	}
 };
 //---------------------------------------------------------------------------
 #endif

@@ -51,8 +51,8 @@ int MTariffTimesItem::MaxWorkTime(int Time_) const
 	return WorkTime;
 }
 //---------------------------------------------------------------------------
-MTariffsInfo::iterator
-	MTariffsInfo::Search(unsigned ID_)
+MTariffsInfo::const_iterator
+	MTariffsInfo::Search(unsigned ID_) const
 {
 	auto iTi=begin();
 	auto iEnd=end();

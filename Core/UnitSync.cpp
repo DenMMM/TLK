@@ -302,7 +302,7 @@ bool MSyncStates::Stop() const
 	return NeedSave;
 }
 //---------------------------------------------------------------------------
-MSyncStates::iterator MSyncStates::Search(u_long IP_)
+MSyncStates::const_iterator MSyncStates::Search(u_long IP_) const
 {
 	auto iSyncState=begin();
 	auto iEnd=end();

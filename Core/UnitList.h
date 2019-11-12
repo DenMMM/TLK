@@ -43,15 +43,15 @@ public:
 	// Возвращает [двоичный] ID, ассоциированный с типом элемента
 	virtual unsigned char gTypeID() const noexcept = 0;
 	// Объявим виртуальное копирование через базовый тип
-	virtual base_type& operator=(base_type&) = 0;
-	virtual base_type& operator=(base_type&&) noexcept = 0;
+	virtual base_type& operator=(const base_type&) = 0;
+	virtual base_type& operator=(base_type&&) = 0;
 
 	// Занулим указатели нового объекта
-	MListItem(): Prev(nullptr), Next(nullptr) {}
-	MListItem(const MListItem&): MListItem() {}
-	MListItem(MListItem&&): MListItem() {}
+	MListItem() noexcept: Prev(nullptr), Next(nullptr) {}
+	MListItem(const MListItem&) noexcept: MListItem() {}
+	MListItem(MListItem&&) noexcept: MListItem() {}
 	// А при копировании сохраним их не тронутыми
-	MListItem& operator=(const MListItem&) { return *this; }
+	MListItem& operator=(const MListItem&) noexcept { return *this; }
 	MListItem& operator=(MListItem&&) noexcept { return *this; }
 
 	virtual ~MListItem() = default;
@@ -68,7 +68,7 @@ class MListItemTyped: public parent_item
 public:
 	static const unsigned char TypeID = type_id;
 
-	virtual unsigned char gTypeID() const override final
+	virtual unsigned char gTypeID() const noexcept override final
 	{
 		return type_id;			// TypeID
 	}
@@ -78,15 +78,15 @@ public:
 		return new item_type;
 	}
 
-	virtual base_type& operator=(base_type& Src_) override ///final
+	virtual base_type& operator=(const base_type& Src_) override	///final
 	{
 		item_type& Left=static_cast<item_type&>(*this);
-		item_type& Right=dynamic_cast<item_type&>(Src_);
+		const item_type& Right=dynamic_cast<const item_type&>(Src_);
 		Left=Right;
 		return Left;
 	}
 
-	virtual base_type& operator=(base_type&& Src_) noexcept override ///final
+	virtual base_type& operator=(base_type&& Src_) override			///final
 	{
 		item_type& Left=static_cast<item_type&>(*this);
 		item_type& Right=dynamic_cast<item_type&>(Src_);
@@ -262,7 +262,7 @@ public:
 		iterator() = default;
 		explicit iterator(pointer Init_):
 			const_iterator(Init_) {}
-		explicit iterator(pointer Init_, MList *ListInit_):
+		explicit iterator(pointer Init_, const MList *ListInit_):
 			const_iterator(Init_,ListInit_) {}
 
 		reference operator*() const { return *MyPtr; }
@@ -304,15 +304,23 @@ public:
 	const_iterator cend() const noexcept { return end(); }
 
 protected:
+	// Как автор "MList" могу себе позволить этот хак...
+	static iterator const_cast_iter(const_iterator iConst_)
+	{
+		return iterator(
+			const_cast<base_type*>(iConst_.MyPtr),
+			iConst_.ListPtr);
+	}
+
 	// Присоединяет к списку уэе созданный 'item::New()' элемент
 	base_type *Add(base_type *NewItem_);
 
 public:
 	// Доступ к атрибутам списка
-	size_t gCount() const { return Count; }
+	size_t gCount() const noexcept { return Count; }
 
 	// Проверяет можно ли добавлять элементы по ID
-	bool isTyped() const { return NewForTypeDef==nullptr; }
+	bool isTyped() const noexcept { return NewForTypeDef==nullptr; }
 
 	// Операции над отдельными элементами _одного_ списка
 	template <typename new_item_type>
@@ -330,9 +338,9 @@ public:
 	iterator Del(const_iterator iPos_);
 
 	// Операции над списком целиком (не трогая атрибуты наследника MList)
-	void Clear();                       		// Удалить все элементы списка
+	void Clear() noexcept;						// Удалить все элементы списка
 	void Move(list_type& SrcList_) noexcept;	// Заместить элементы списка исходными
-	void Splice(list_type& AtchList_);      	// Присоединить элементы исходного списка
+	void Splice(list_type& AtchList_);			// Присоединить элементы исходного списка
 
 	MList():
 		First(nullptr),
@@ -562,7 +570,7 @@ typename MList<list_type,base_type>::iterator
 }
 //---------------------------------------------------------------------------
 template <typename list_type, typename base_type>
-void MList<list_type,base_type>::Clear()
+void MList<list_type,base_type>::Clear() noexcept
 {
 	base_type *del=First;
 

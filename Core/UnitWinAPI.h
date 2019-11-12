@@ -77,8 +77,8 @@ namespace MWAPI
 
 
         // Синхронизация доступа к одиночному объекту
-        void Enter() { ::EnterCriticalSection(&Section); }
-        void Leafe() { ::LeaveCriticalSection(&Section); }
+		void Enter() { ::EnterCriticalSection(&Section); }
+		void Leafe() { ::LeaveCriticalSection(&Section); }
 
 		CRITICAL_SECTION() { ::InitializeCriticalSection(&Section); }
 		CRITICAL_SECTION(const CRITICAL_SECTION&) = delete;

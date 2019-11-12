@@ -189,7 +189,13 @@ public:
 	bool Start() const;
 	bool Stop() const;
 	// Найти объект по IP-адресу
-	iterator Search(u_long IP_);
+	const_iterator Search(u_long IP_) const;
+	iterator Search(u_long IP_)
+	{
+		return const_cast_iter(
+			const_cast<const MSyncStates*>(this)->Search(IP_)
+			);
+	}
 };
 //---------------------------------------------------------------------------
 class MSync
@@ -219,7 +225,7 @@ private:
     static bool UpdateMAC(MSyncStates *States_);
     void ThreadExecute();
 
-	void sPCount(unsigned Value_) { PCount.store(Value_); }
+	void sPCount(unsigned Value_) noexcept { PCount.store(Value_); }
 
 public:
     bool NetInit(unsigned Code_, MAuth *MAC_);  // Инициализация WinSocket
@@ -231,11 +237,11 @@ public:
     void SetARPFile(wchar_t *File_, unsigned Code_, bool AutoSave_);
     bool SaveARP() const { return SyncStates.Save(); }
     bool LoadARP() { return SyncStates.Load(); }
-    DWORD gLastErr() const { return SyncStates.gLastErr(); }
+	DWORD gLastErr() const noexcept { return SyncStates.gLastErr(); }
 
 	// Индикация процесса снхронизации
-	unsigned gPCountMax() const { return SyncStates.gCount()*SYNC_SendRetryes; }
-	unsigned gPCount() const { return PCount.load(); }
+	unsigned gPCountMax() const noexcept { return SyncStates.gCount()*SYNC_SendRetryes; }
+	unsigned gPCount() const noexcept { return PCount.load(); }
 
 	MSync():
 		Init(false),
@@ -251,9 +257,9 @@ public:
 	}
 
 	MSync(const MSync&) = delete;
-	MSync(MSync&&) noexcept = delete;
+	MSync(MSync&&) = delete;
 	MSync& operator=(const MSync&) = delete;
-	MSync& operator=(MSync&&) noexcept = delete;
+	MSync& operator=(MSync&&) = delete;
 
 	~MSync()
 	{
@@ -326,9 +332,9 @@ public:
 	}
 
 	MSyncCl(const MSyncCl&) = delete;
-	MSyncCl(MSyncCl&&) noexcept = delete;
+	MSyncCl(MSyncCl&&) = delete;
 	MSyncCl& operator=(const MSyncCl&) = delete;
-	MSyncCl& operator=(MSyncCl&&) noexcept = delete;
+	MSyncCl& operator=(MSyncCl&&) = delete;
 
 	~MSyncCl()
 	{

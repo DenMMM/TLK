@@ -34,7 +34,7 @@ const void *MComputersItem::GetData(const void *Data_, const void *Limit_)
         ? Data_: nullptr;
 }
 //---------------------------------------------------------------------------
-MComputers::iterator MComputers::Search(char Number_)
+MComputers::const_iterator MComputers::Search(char Number_) const
 {
 	auto iComputer=begin();
 	auto iEnd=end();

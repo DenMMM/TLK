@@ -531,7 +531,7 @@ bool MStates::Save()
     return MSLList::Save(true,true);
 }
 //---------------------------------------------------------------------------
-MStates::iterator MStates::Search(int Number_)
+MStates::const_iterator MStates::Search(int Number_) const
 {
 	auto iState=begin();
 	auto iEnd=end();

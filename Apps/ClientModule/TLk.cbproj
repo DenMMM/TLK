@@ -184,20 +184,20 @@
             <BuildOrder>19</BuildOrder>
         </CppCompile>
         <CppCompile Include="UnitLockDsk.cpp">
-            <BuildOrder>71</BuildOrder>
-            <BuildOrder>12</BuildOrder>
+            <DependentOn>UnitLockDsk.h</DependentOn>
+            <BuildOrder>29</BuildOrder>
         </CppCompile>
         <CppCompile Include="UnitMessage.cpp">
-            <BuildOrder>14</BuildOrder>
-            <BuildOrder>11</BuildOrder>
+            <DependentOn>UnitMessage.h</DependentOn>
+            <BuildOrder>29</BuildOrder>
         </CppCompile>
         <CppCompile Include="UnitService.cpp">
-            <BuildOrder>59</BuildOrder>
-            <BuildOrder>2</BuildOrder>
+            <DependentOn>UnitService.h</DependentOn>
+            <BuildOrder>29</BuildOrder>
         </CppCompile>
         <CppCompile Include="UnitShared.cpp">
-            <BuildOrder>68</BuildOrder>
-            <BuildOrder>11</BuildOrder>
+            <DependentOn>UnitShared.h</DependentOn>
+            <BuildOrder>29</BuildOrder>
         </CppCompile>
         <LibFiles Include="userenv.lib">
             <BuildOrder>8</BuildOrder>
@@ -212,15 +212,16 @@
             <IgnorePath>true</IgnorePath>
         </LibFiles>
         <CppCompile Include="..\..\Core\UnitAuth.cpp">
-            <BuildOrder>50</BuildOrder>
-            <BuildOrder>5</BuildOrder>
+            <DependentOn>..\..\Core\UnitAuth.h</DependentOn>
+            <BuildOrder>29</BuildOrder>
         </CppCompile>
         <CppCompile Include="..\..\Core\UnitClOptions.cpp">
-            <BuildOrder>20</BuildOrder>
+            <DependentOn>..\..\Core\UnitClOptions.h</DependentOn>
+            <BuildOrder>29</BuildOrder>
         </CppCompile>
         <CppCompile Include="..\..\Core\UnitCommon.cpp">
-            <BuildOrder>17</BuildOrder>
-            <BuildOrder>16</BuildOrder>
+            <DependentOn>..\..\Core\UnitCommon.h</DependentOn>
+            <BuildOrder>29</BuildOrder>
         </CppCompile>
         <CppCompile Include="..\..\Core\UnitComputers.cpp">
             <DependentOn>..\..\Core\UnitComputers.h</DependentOn>
@@ -231,36 +232,36 @@
             <BuildOrder>29</BuildOrder>
         </CppCompile>
         <CppCompile Include="..\..\Core\UnitGames.cpp">
-            <BuildOrder>15</BuildOrder>
-            <BuildOrder>14</BuildOrder>
+            <DependentOn>..\..\Core\UnitGames.h</DependentOn>
+            <BuildOrder>29</BuildOrder>
         </CppCompile>
         <CppCompile Include="..\..\Core\UnitList.cpp">
-            <BuildOrder>24</BuildOrder>
-            <BuildOrder>23</BuildOrder>
+            <DependentOn>..\..\Core\UnitList.h</DependentOn>
+            <BuildOrder>29</BuildOrder>
         </CppCompile>
         <CppCompile Include="..\..\Core\UnitSend.cpp">
-            <BuildOrder>38</BuildOrder>
-            <BuildOrder>23</BuildOrder>
+            <DependentOn>..\..\Core\UnitSend.h</DependentOn>
+            <BuildOrder>29</BuildOrder>
         </CppCompile>
         <CppCompile Include="..\..\Core\UnitSLList.cpp">
-            <BuildOrder>26</BuildOrder>
-            <BuildOrder>25</BuildOrder>
+            <DependentOn>..\..\Core\UnitSLList.h</DependentOn>
+            <BuildOrder>29</BuildOrder>
         </CppCompile>
         <CppCompile Include="..\..\Core\UnitStates.cpp">
-            <BuildOrder>32</BuildOrder>
-            <BuildOrder>21</BuildOrder>
+            <DependentOn>..\..\Core\UnitStates.h</DependentOn>
+            <BuildOrder>29</BuildOrder>
         </CppCompile>
         <CppCompile Include="..\..\Core\UnitSync.cpp">
-            <BuildOrder>35</BuildOrder>
-            <BuildOrder>22</BuildOrder>
+            <DependentOn>..\..\Core\UnitSync.h</DependentOn>
+            <BuildOrder>29</BuildOrder>
         </CppCompile>
         <CppCompile Include="..\..\Core\UnitTariffs.cpp">
+            <DependentOn>..\..\Core\UnitTariffs.h</DependentOn>
             <BuildOrder>29</BuildOrder>
-            <BuildOrder>26</BuildOrder>
         </CppCompile>
         <CppCompile Include="..\..\Core\UnitWinAPI.cpp">
-            <BuildOrder>9</BuildOrder>
-            <BuildOrder>80</BuildOrder>
+            <DependentOn>..\..\Core\UnitWinAPI.h</DependentOn>
+            <BuildOrder>29</BuildOrder>
         </CppCompile>
         <CppCompile Include="..\..\Ext\BrianGladman\SHA\hmac.c">
             <BuildOrder>41</BuildOrder>
@@ -400,6 +401,12 @@
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
+                <DeployFile LocalName="..\..\Ext\BrianGladman\SHA\hmac.c" Configuration="Debug" Class="ProjectFile">
+                    <Platform Name="Win32">
+                        <RemoteDir>.\</RemoteDir>
+                        <Overwrite>true</Overwrite>
+                    </Platform>
+                </DeployFile>
                 <DeployFile Condition="'$(DynamicRTL)'=='true' And '$(Multithreaded)'!='true'" LocalName="$(BDS)\bin\cc32260.dll" Class="DependencyModule">
                     <Platform Name="Win32">
                         <Overwrite>true</Overwrite>
@@ -407,12 +414,6 @@
                 </DeployFile>
                 <DeployFile Condition="'$(DynamicRTL)'=='true' And '$(Multithreaded)'=='true'" LocalName="$(BDS)\bin64\cc64260mt.dll" Class="DependencyModule">
                     <Platform Name="Win64">
-                        <Overwrite>true</Overwrite>
-                    </Platform>
-                </DeployFile>
-                <DeployFile LocalName="..\..\Ext\BrianGladman\SHA\hmac.c" Configuration="Debug" Class="ProjectFile">
-                    <Platform Name="Win32">
-                        <RemoteDir>.\</RemoteDir>
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>

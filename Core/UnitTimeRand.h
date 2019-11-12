@@ -38,7 +38,7 @@ protected:
 			for ( auto E: Ent_ )
 			{
 				BasicEncode(
-					Ent.data(), Ent.size()*sizeof(uint_fast32_t),
+					Ent.data(), Ent.size()*sizeof(result_type),
 					E, 32);
 			}
 		}

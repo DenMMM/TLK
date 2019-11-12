@@ -96,7 +96,7 @@ public:
 	bool Save(bool Always_=true, bool Safe_=false) const;
 	bool Attach(bool Safe_=false) const;
 	bool Load();
-	DWORD gLastErr() const { return LastError; }
+	DWORD gLastErr() const noexcept { return LastError; }
 
 	MSLList():
 		DefaultCode(0),

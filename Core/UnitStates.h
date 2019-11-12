@@ -204,9 +204,9 @@ public:
 	}
 
 	MStatesItem(const MStatesItem&) { throw; }
-	MStatesItem(MStatesItem&&) noexcept { throw; }
+	MStatesItem(MStatesItem&&) { throw; }
 	MStatesItem& operator=(const MStatesItem&) { throw; return *this; }
-	MStatesItem& operator=(MStatesItem&&) noexcept { throw; return *this; }
+	MStatesItem& operator=(MStatesItem&&) { throw; return *this; }
 };
 //---------------------------------------------------------------------------
 class MStates:
@@ -219,7 +219,14 @@ private:
 
 public:
 	// Вспомогательные функции
-	iterator Search(int Number_);
+	const_iterator Search(int Number_) const;
+	iterator Search(int Number_)
+	{
+		return const_cast_iter(
+			const_cast<const MStates*>(this)->Search(Number_)
+			);
+	}
+
 	bool Update(MComputers *Computers_);
 	bool Timer(__int64 SystemTime_);
 
@@ -228,9 +235,9 @@ public:
 
 	MStates() = default;
 	MStates(const MStates&) = delete;
-	MStates(MStates&&) noexcept = delete;
+	MStates(MStates&&) = delete;
 	MStates& operator=(const MStates&) = delete;
-	MStates& operator=(MStates&&) noexcept = delete;
+	MStates& operator=(MStates&&) = delete;
 	~MStates() = default;
 };
 //---------------------------------------------------------------------------
@@ -317,9 +324,9 @@ public:
 	}
 
 	MStateCl(const MStateCl&) = delete;
-	MStateCl(MStateCl&&) noexcept = delete;
+	MStateCl(MStateCl&&) = delete;
 	MStateCl& operator=(const MStateCl&) = delete;
-	MStateCl& operator=(MStateCl&&) noexcept = delete;
+	MStateCl& operator=(MStateCl&&) = delete;
 	~MStateCl() = default;
 };
 //---------------------------------------------------------------------------

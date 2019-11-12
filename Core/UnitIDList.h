@@ -45,7 +45,7 @@ public:
 		{ return MemGet(Data_,&UUID,Limit_); }
 
 public:
-	unsigned gUUID() const { return UUID; }
+	unsigned gUUID() const noexcept { return UUID; }
 
 	MIDListItem():
 		UUID(0)
@@ -63,8 +63,8 @@ class MIDList:
 private:
 	unsigned LastUUID;
 
-	unsigned FirstUUID();
-	unsigned NextUUID(unsigned LastUUID_);
+	static unsigned FirstUUID();
+	unsigned NextUUID(unsigned LastUUID_) const;
 
 public:
 	// Функции механизма сохранения/загрузки данных
@@ -75,11 +75,23 @@ public:
 	virtual const void *GetData(const void *Data_, const void *Limit_) override
 		{ return MemGet(Data_,&LastUUID,Limit_); }
 
+protected:
+	using MSLList <list_type, base_type> ::const_cast_iter;
+
 public:
 	using MSLList <list_type, base_type> ::begin;
 	using MSLList <list_type, base_type> ::end;
+	typedef typename MSLList <list_type, base_type> ::iterator iterator;
+	typedef typename MSLList <list_type, base_type> ::const_iterator const_iterator;
 
-	auto SrchUUID(unsigned UUID_);
+	const_iterator SrchUUID(unsigned UUID_) const;
+	iterator SrchUUID(unsigned UUID_)
+	{
+		return const_cast_iter(
+			const_cast<const MIDList*>(this)->SrchUUID(UUID_)
+			);
+	}
+
 	void SetUUIDs();
 
 	MIDList():
@@ -111,7 +123,7 @@ unsigned MIDList<list_type,base_type>::FirstUUID()
 }
 //---------------------------------------------------------------------------
 template <typename list_type, typename base_type>
-unsigned MIDList<list_type,base_type>::NextUUID(unsigned LastUUID_)
+unsigned MIDList<list_type,base_type>::NextUUID(unsigned LastUUID_) const
 {
 	auto iEnd=end();
 	// Перебираем ID (пропуская '0') пока не найдем свободный
@@ -122,7 +134,8 @@ unsigned MIDList<list_type,base_type>::NextUUID(unsigned LastUUID_)
 }
 //---------------------------------------------------------------------------
 template <typename list_type, typename base_type>
-auto MIDList<list_type,base_type>::SrchUUID(unsigned UUID_)
+typename MIDList<list_type,base_type>::const_iterator
+	MIDList<list_type,base_type>::SrchUUID(unsigned UUID_) const
 {
 	auto iItem=begin();
 	auto iEnd=end();
@@ -137,6 +150,15 @@ auto MIDList<list_type,base_type>::SrchUUID(unsigned UUID_)
 }
 //---------------------------------------------------------------------------
 /*
+template <typename list_type, typename base_type>
+typename MIDList<list_type,base_type>::iterator
+	MIDList<list_type,base_type>::SrchUUID(unsigned UUID_)
+{
+	auto iConst=const_cast<const MIDList*>(this)->SrchUUID(UUID_);
+	const auto *pConst=static_cast<const MIDListItem<list_type,base_type>*>(&*iConst);
+	return iterator(const_cast<MIDListItem<list_type,base_type>*>(pConst), this);
+}
+
 template <typename list_type, typename base_type>
 auto MIDList<list_type,base_type>::SrchUUID(unsigned UUID_)
 {
