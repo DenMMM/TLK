@@ -150,8 +150,8 @@ bool MLog::Rename() const
     int name_length;
 
     // Конвертируем время начала и окончания (текущее) лога
-    if ( !(Int64ToSystemTime(&BeginTime,&begin_time)&&
-        Int64ToSystemTime(&SystemTime,&end_time)) ) goto error;
+	if ( !(Int64ToSystemTime(BeginTime,begin_time)&&
+        Int64ToSystemTime(SystemTime,end_time)) ) goto error;
 
     // Путь к файлу
 	name_length=swprintf(
@@ -296,8 +296,8 @@ bool MLog::CheckPeriod(int Period_) const
 
     if ( !Opened ) return false;
     
-    if ( !(Int64ToSystemTime(&BeginTime,&begin)&&
-        Int64ToSystemTime(&SystemTime,&current)) ) goto error;
+    if ( !(Int64ToSystemTime(BeginTime,begin)&&
+        Int64ToSystemTime(SystemTime,current)) ) goto error;
 
     switch(Period_)
     {

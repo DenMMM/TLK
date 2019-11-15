@@ -24,7 +24,7 @@ bool TFormTariffTimes::Execute(MTariffTimes &Times_,
     // Открываем окно
     if ( ShowModal()!=mrOk ) return false;
     // Замещаем пакетами из буфера текущие
-    Times_.Move(TmpTimes);
+	Times_=std::move(TmpTimes);
 
     return true;
 }

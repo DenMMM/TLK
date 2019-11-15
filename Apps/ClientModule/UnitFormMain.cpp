@@ -206,7 +206,7 @@ void TFormMain::SharedProcess()
         wchar_t line[]=L"--:--";
         SYSTEMTIME st;
 
-        if ( Int64ToSystemTime(&SysTime,&st) )
+        if ( Int64ToSystemTime(SysTime,st) )
         {
 			swprintf(
 				line, sizeof(line),

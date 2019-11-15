@@ -192,9 +192,8 @@ public:
 	const_iterator Search(u_long IP_) const;
 	iterator Search(u_long IP_)
 	{
-		return const_cast_iter(
-			const_cast<const MSyncStates*>(this)->Search(IP_)
-			);
+		const auto *const_this=this;
+		return const_cast_iter(const_this->Search(IP_));
 	}
 };
 //---------------------------------------------------------------------------

@@ -52,9 +52,8 @@ public:
 	const_iterator Search(char Number_) const;
 	iterator Search(char Number_)
 	{
-		return const_cast_iter(
-			const_cast<const MComputers*>(this)->Search(Number_)
-			);
+		const auto *const_this=this;
+		return const_cast_iter(const_this->Search(Number_));
 	}
 };
 //---------------------------------------------------------------------------

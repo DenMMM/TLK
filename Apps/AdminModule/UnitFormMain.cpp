@@ -232,7 +232,7 @@ void __fastcall TFormMain::TimerTimer(TObject *Sender)
     __int64 SystemTime;
 
     // Берем системное время
-    GetLocalTimeInt64(&SystemTime);
+    GetLocalTimeInt64(SystemTime);
     // Подаем его модулю лога
     Log->Timer(SystemTime);
     // Обновляем состояния компьютеров и сохраняем в случае изменений

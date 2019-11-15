@@ -142,9 +142,8 @@ public:
 	const_iterator Search(unsigned ID_) const;
 	iterator Search(unsigned ID_)
 	{
-		return const_cast_iter(
-			const_cast<const MTariffsInfo*>(this)->Search(ID_)
-			);
+		const auto *const_this=this;
+		return const_cast_iter(const_this->Search(ID_));
 	}
 };
 //---------------------------------------------------------------------------
@@ -160,9 +159,9 @@ public:
 	virtual const void *GetData(const void *Data_, const void *Limit_) override;
 
 private:
-	void CostPacket(MTariffRunTimesItem *RunTime_) const;
-	void CostFlyPacket(MTariffRunTimesItem *RunTime_) const;
-	void CostHours(MTariffRunTimesItem *RunTime_) const;
+	void CostPacket(MTariffRunTimesItem &RunTime_) const;
+	void CostFlyPacket(MTariffRunTimesItem &RunTime_) const;
+	void CostHours(MTariffRunTimesItem &RunTime_) const;
 
 public:
 	std::wstring Name;        			// Название тарифа
@@ -176,9 +175,9 @@ public:
 	// Проверяет применим ли тариф к компьютеру
 	bool CheckForComp(char Num_) const;
 	//
-	void Cost(MTariffRunTimesItem *RunTime_, double Prec_) const;
-	void GetInfo(MTariffsInfoItem *Info_) const;
-	void GetRunTimes(__int64 &Time_, MTariffRunTimes *RunTimes_) const;
+	void Cost(MTariffRunTimesItem &RunTime_, double Prec_) const;
+	MTariffsInfoItem GetInfo() const;
+	MTariffRunTimes GetRunTimes(__int64 Time_) const;
 
 	// Поддержка логов
 	struct LogData
@@ -216,7 +215,7 @@ class MTariffs:
 		MTariffsItem>
 {
 public:
-	void GetForTime(__int64 &Time_, MTariffsInfo *TariffsInfo_) const;
+	MTariffsInfo GetForTime(__int64 &Time_) const;
 };
 //---------------------------------------------------------------------------
 #endif

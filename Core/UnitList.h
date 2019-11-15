@@ -339,7 +339,6 @@ public:
 
 	// Операции над списком целиком (не трогая атрибуты наследника MList)
 	void Clear() noexcept;						// Удалить все элементы списка
-	void Move(list_type& SrcList_) noexcept;	// Заместить элементы списка исходными
 	void Splice(list_type& AtchList_);			// Присоединить элементы исходного списка
 
 	MList():
@@ -351,7 +350,6 @@ public:
 	}
 
 	MList& operator=(const MList& SrcList_);
-
 	MList(const MList& SrcList_):
 		First(nullptr),
 		Last(nullptr),
@@ -362,12 +360,7 @@ public:
 		*this=SrcList_;
 	}
 
-	MList& operator=(MList&& SrcList_) noexcept
-	{
-		Move(static_cast<list_type&>(SrcList_));	/// cast - временный хак
-		return *this;
-	}
-
+	MList& operator=(MList&& SrcList_) noexcept;
 	MList(MList&& SrcList_) noexcept:
 		First(nullptr),
 		Last(nullptr),
@@ -375,7 +368,7 @@ public:
 		NewForType(std::move(SrcList_.NewForType)),
 		NewForTypeDef(std::move(SrcList_.NewForTypeDef))
 	{
-		Move(&SrcList_);
+		*this=std::move(SrcList_);              /// а "move" надо ?
 	}
 
 	~MList()
@@ -599,7 +592,8 @@ void MList<list_type,base_type>::Clear() noexcept
 }
 //---------------------------------------------------------------------------
 template <typename list_type, typename base_type>
-MList<list_type,base_type>& MList<list_type,base_type>::operator=(const MList& SrcList_)
+MList<list_type,base_type>&
+	MList<list_type,base_type>::operator=(const MList& SrcList_)
 {
 	if ( (&SrcList_)==this ) return *this;
 
@@ -625,9 +619,10 @@ MList<list_type,base_type>& MList<list_type,base_type>::operator=(const MList& S
 }
 //---------------------------------------------------------------------------
 template <typename list_type, typename base_type>
-void MList<list_type,base_type>::Move(list_type& SrcList_) noexcept
+MList<list_type,base_type>&
+	MList<list_type,base_type>::operator=(MList&& SrcList_) noexcept
 {
-	if ( &SrcList_==this ) return;
+	if ( (&SrcList_)==this ) return *this;
 
 	// Очищаем список-приемник
 	Clear();
@@ -639,6 +634,8 @@ void MList<list_type,base_type>::Move(list_type& SrcList_) noexcept
 	SrcList_.First=nullptr;
 	SrcList_.Last=nullptr;
 	SrcList_.Count=0;
+
+	return *this;
 }
 //---------------------------------------------------------------------------
 template <typename list_type, typename base_type>

@@ -304,7 +304,7 @@ void MLockDsk::UpdSysTime() const
     SYSTEMTIME st;
 
     // Текущее время
-    if ( Int64ToSystemTime(&SysTime,&st) )
+    if ( Int64ToSystemTime(SysTime,st) )
     {
 		swprintf(
 			line, sizeof(line),

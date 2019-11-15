@@ -176,7 +176,7 @@ void __fastcall TFormUsers::ButtonDelClick(TObject *Sender)
 void __fastcall TFormUsers::ButtonSaveClick(TObject *Sender)
 {
     // Замещаем актуальных пользователями из буфера
-    Users->Move(TmpUsers);
+    *Users=std::move(TmpUsers);
     // Задаем ID-номера для новых
     Users->SetUUIDs();                      /// проверить чья смена открыта
     // Сохраняем в файле

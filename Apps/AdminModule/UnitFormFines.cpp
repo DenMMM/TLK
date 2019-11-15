@@ -143,7 +143,7 @@ void __fastcall TFormFines::ButtonDelClick(TObject *Sender)
 void __fastcall TFormFines::ButtonSaveClick(TObject *Sender)
 {
     // Замещаем штрафами из буфера текущие
-    Fines->Move(TmpFines);
+    *Fines=std::move(TmpFines);
     // Задаем ID-номера для новых
     Fines->SetUUIDs();
     // Сохраняем в файле

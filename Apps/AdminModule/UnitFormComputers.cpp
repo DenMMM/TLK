@@ -205,7 +205,7 @@ void __fastcall TFormComputers::ButtonDelClick(TObject *Sender)
 void __fastcall TFormComputers::ButtonSaveClick(TObject *Sender)
 {
     // Çàìåùàåì ñïèñîê êîìïüşòåğîâ çàïèñÿìè èç áóôåğà
-    Computers->Move(TmpComputers);
+	*Computers=std::move(TmpComputers);
     // Ñîõğàíÿåì â ôàéëå
     if ( !Computers->Save() )
     {

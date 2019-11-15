@@ -299,8 +299,8 @@ void __fastcall TFormTariffs::ButtonTimesClick(TObject *Sender)
 void __fastcall TFormTariffs::ButtonSaveClick(TObject *Sender)
 {
     // Çàìåùàåì òàğèôû çàïèñÿìè èç áóôåğà
-    Tariffs->Move(TmpTariffs);
-    // Çàäàåì ID-íîìåğà äëÿ íîâûõ òàğèôîâ
+	*Tariffs=std::move(TmpTariffs);
+	// Çàäàåì ID-íîìåğà äëÿ íîâûõ òàğèôîâ
     Tariffs->SetUUIDs();
     // Ñîõğàíÿåì â ôàéëå
     if ( !Tariffs->Save() )

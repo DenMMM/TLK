@@ -768,9 +768,9 @@ bool MStateCl::NewSyncData(MSyncData *Data_)
     __int64 CurrentTime;
 
     // ѕровер€ем отклонение системного времени и при необходимости корректируем его
-    GetLocalTimeInt64(&CurrentTime);
+    GetLocalTimeInt64(CurrentTime);
     CurrentTime=(CurrentTime-=Data_->SystemTime)<0?-CurrentTime:CurrentTime;
-    if ( CurrentTime>=MAX_TimeShift*10000000i64 ) SetLocalTimeInt64(&Data_->SystemTime);
+    if ( CurrentTime>=MAX_TimeShift*10000000i64 ) SetLocalTimeInt64(Data_->SystemTime);
 
     CS_Main.Enter();
     // «аносим новые данные о режиме работы и помечаем событи€ дл€ оболочки

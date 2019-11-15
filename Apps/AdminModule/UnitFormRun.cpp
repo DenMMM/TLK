@@ -52,8 +52,7 @@ void __fastcall TFormRun::FormShow(TObject *Sender)
 			// Добавляем тариф в список для использования, если он еще не добавлен
 			if ( UseTariffs.Search(tmptime.TariffID)!=UseTariffs.end() )
 			{
-				MTariffsInfoItem& info=UseTariffs.Add();
-				iTariff->GetInfo(&info);
+				UseTariffs.Add()=iTariff->GetInfo();
 			}
 		}
 
@@ -71,9 +70,9 @@ void __fastcall TFormRun::FormShow(TObject *Sender)
     if ( RunMode )
     {
         // Определяем абсолютное время открытия диалога
-        if ( RunMode ) GetLocalTimeInt64(&OpenDialogTime);
+        if ( RunMode ) GetLocalTimeInt64(OpenDialogTime);
         // Берем список тарифов, пригодных для использования в это время
-        Tariffs->GetForTime(OpenDialogTime,&UseTariffs);
+		UseTariffs=Tariffs->GetForTime(OpenDialogTime);
     }
 
     // Заносим в список тарифы, которые можно использовать в это время
@@ -204,7 +203,7 @@ void __fastcall TFormRun::ComboBoxTariffClick(TObject *Sender)
 	ComboBoxTime->Clear();
 
 	// Запрашиваем для тарифа список пакетов
-	iTariff->GetRunTimes(OpenDialogTime,&UseTimes);
+	UseTimes=iTariff->GetRunTimes(OpenDialogTime);
 
 	// Если пакетов для тарифа в это время нету, то запрещаем ввод времени
 	auto iTime=UseTimes.begin();
@@ -301,7 +300,7 @@ void __fastcall TFormRun::ComboBoxTimeClick(TObject *Sender)
 		Time->EndTime=SelTime.EndTime;
 		Time->SizeTime=SelTime.SizeTime;
 		// Рассчитываем время работы и стоимость
-		iTariff->Cost(Time,Options->CostPrecision);
+		iTariff->Cost(*Time,Options->CostPrecision);
 		//
 		SetListViewComputersLine(Item);
 	}
@@ -366,7 +365,7 @@ void __fastcall TFormRun::ComboBoxTimeChange(TObject *Sender)
         Time->Type=mttHours;
         Time->SizeTime=time;
         // Рассчитываем время работы и стоимость
-        iTariff->Cost(Time,Options->CostPrecision);
+        iTariff->Cost(*Time,Options->CostPrecision);
         //
         SetListViewComputersLine(Item);
     }

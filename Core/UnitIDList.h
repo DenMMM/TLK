@@ -87,9 +87,8 @@ public:
 	const_iterator SrchUUID(unsigned UUID_) const;
 	iterator SrchUUID(unsigned UUID_)
 	{
-		return const_cast_iter(
-			const_cast<const MIDList*>(this)->SrchUUID(UUID_)
-			);
+		const auto *const_this=this;
+		return const_cast_iter(const_this->SrchUUID(UUID_));
 	}
 
 	void SetUUIDs();
@@ -107,7 +106,7 @@ unsigned MIDList<list_type,base_type>::FirstUUID()
 	__int64 time;
 	unsigned id;
 
-	if ( !GetLocalTimeInt64(&time) )
+	if ( !GetLocalTimeInt64(time) )
 	{
 		throw std::runtime_error (
 			"MIDList::FirstUUID()"

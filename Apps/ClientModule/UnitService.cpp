@@ -445,7 +445,7 @@ void MSvcProcess::OnTimer()
     // Опытаемся занять shared-секцию
     if ( !Shared.Lock() ) return;
 
-    GetLocalTimeInt64(&SystemTime);
+    GetLocalTimeInt64(SystemTime);
     Shared.UpdateSysTime(SystemTime);
 
     // Если время показа предупреждения об окончании времени истекло, уберем сообщение

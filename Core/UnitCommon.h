@@ -54,15 +54,6 @@ inline const void *MemGet(const void *Mem_, type *Data_, const void *Limit_)
 	return new_limit;
 }
 
-// Поиск значения в области памяти с контролем выхода за границу
-template <typename type>
-type *MemSrch(type *Mem_, const type *Limit_, type Data_)
-{
-    do { if ( Mem_>=Limit_ ) return nullptr; }
-    while( *(Mem_++)!=Data_ );
-    return Mem_;
-}
-
 // Копирование строк со сдвигом указателя, контролем длины и выхода за границу
 void *MemSetLine(void *Mem_, const std::string &Line__);
 void *MemSetLine(void *Mem__, const std::wstring &Line__);
@@ -103,47 +94,53 @@ inline bool MemSlowCmp(const void *Mem1__, const void *Mem2__, size_t Size_)
     return diff_cnt==0;
 }
 //---------------------------------------------------------------------------
-inline bool SystemTimeToInt64(const SYSTEMTIME *lpSystemTime, __int64 *lpInt64)
+inline bool SystemTimeToInt64(const SYSTEMTIME& rSystemTime, __int64& rInt64)
 {
-    FILETIME FileTime;
-    LARGE_INTEGER LargeInteger;
+	union
+	{
+		FILETIME FileTime;
+		LARGE_INTEGER LargeInteger;
+	};
 
-    if ( !::SystemTimeToFileTime(lpSystemTime,&FileTime) ) return false;
-    memcpy(&LargeInteger,&FileTime,sizeof(LargeInteger));
-    *lpInt64=LargeInteger.QuadPart;
+	if ( !::SystemTimeToFileTime(&rSystemTime,&FileTime) ) return false;
+//    memcpy(&LargeInteger,&FileTime,sizeof(LargeInteger));
+    rInt64=LargeInteger.QuadPart;
 
     return true;
 }
 
-inline bool Int64ToSystemTime(const __int64 *lpInt64, SYSTEMTIME *lpSystemTime)
+inline bool Int64ToSystemTime(const __int64 Int64, SYSTEMTIME& rSystemTime)
 {
-    LARGE_INTEGER LargeInteger;
-    FILETIME FileTime;
+	union
+	{
+		LARGE_INTEGER LargeInteger;
+		FILETIME FileTime;
+	};
 
-    LargeInteger.QuadPart=*lpInt64;
-    memcpy(&FileTime,&LargeInteger,sizeof(FileTime));
+	LargeInteger.QuadPart=Int64;
+//    memcpy(&FileTime,&LargeInteger,sizeof(FileTime));
 
-    return ::FileTimeToSystemTime(&FileTime,lpSystemTime);
+	return ::FileTimeToSystemTime(&FileTime,&rSystemTime);
 }
 
 inline int ExtractHoursMin(const __int64 Int64)
 {
     SYSTEMTIME ssTime;
-    if ( !Int64ToSystemTime(&Int64,&ssTime) ) return -1;
+    if ( !Int64ToSystemTime(Int64,ssTime) ) return -1;
     return ssTime.wHour*60+ssTime.wMinute;
 }
 
-inline bool GetLocalTimeInt64(__int64 *lpInt64)
+inline bool GetLocalTimeInt64(__int64& rInt64)
 {
     SYSTEMTIME ssTime;
-    ::GetLocalTime(&ssTime);
-    return SystemTimeToInt64(&ssTime,lpInt64);
+	::GetLocalTime(&ssTime);
+	return SystemTimeToInt64(ssTime,rInt64);
 }
 
-inline bool SetLocalTimeInt64(const __int64 *lpInt64)
+inline bool SetLocalTimeInt64(const __int64 Int64)
 {
-    SYSTEMTIME ssTime;
-    return Int64ToSystemTime(lpInt64,&ssTime)&&
+	SYSTEMTIME ssTime;
+	return Int64ToSystemTime(Int64,ssTime)&&
         ::SetLocalTime(&ssTime);
 }
 //---------------------------------------------------------------------------

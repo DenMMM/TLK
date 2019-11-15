@@ -222,9 +222,8 @@ public:
 	const_iterator Search(int Number_) const;
 	iterator Search(int Number_)
 	{
-		return const_cast_iter(
-			const_cast<const MStates*>(this)->Search(Number_)
-			);
+		const auto *const_this=this;
+		return const_cast_iter(const_this->Search(Number_));
 	}
 
 	bool Update(MComputers *Computers_);

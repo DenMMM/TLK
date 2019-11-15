@@ -117,41 +117,41 @@ const void *MTariffsItem::GetData(const void *Data_, const void *Limit_)
 	return Data_;
 }
 
-void MTariffsItem::CostPacket(MTariffRunTimesItem *RunTime_) const
+void MTariffsItem::CostPacket(MTariffRunTimesItem &RunTime_) const
 {
-    int StartTime, WorkTime;
-    double Cost;
+	int StartTime, WorkTime;
+	double Cost;
 
-    // Выделяем количество минут с начала суток
-    StartTime=ExtractHoursMin(RunTime_->StartTime);
-    //
-    WorkTime=0; Cost=0.;
+	// Выделяем количество минут с начала суток
+	StartTime=ExtractHoursMin(RunTime_.StartTime);
+	//
+	WorkTime=0; Cost=0.;
 
 	for ( const auto &tt: Times)
 	{
 		if ( (tt.Type!=mttPacket)||
-			(tt.BeginTime!=RunTime_->BeginTime)||
-			(tt.EndTime!=RunTime_->EndTime) ) continue;
+			(tt.BeginTime!=RunTime_.BeginTime)||
+			(tt.EndTime!=RunTime_.EndTime) ) continue;
 		WorkTime=tt.MaxWorkTime(StartTime);
 		// Корректируем время работы в соответствии с заданным ограничением
-		if ( WorkTime>RunTime_->MaxTime ) WorkTime=RunTime_->MaxTime;
+		if ( WorkTime>RunTime_.MaxTime ) WorkTime=RunTime_.MaxTime;
 		if ( WorkTime!=0 ) Cost=tt.Cost;
 		break;
 	}
 
-	RunTime_->WorkTime=WorkTime;
-	RunTime_->Cost=Cost;
+	RunTime_.WorkTime=WorkTime;
+	RunTime_.Cost=Cost;
 }
 
-void MTariffsItem::CostFlyPacket(MTariffRunTimesItem *RunTime_) const
+void MTariffsItem::CostFlyPacket(MTariffRunTimesItem &RunTime_) const
 {
 	int StartTime, SizeTime, WorkTime, MaxTime, NeedTime, RealTime;
 	double Cost, LastCost;
 
 	// Выделяем количество минут с начала суток
-	StartTime=ExtractHoursMin(RunTime_->StartTime);
+	StartTime=ExtractHoursMin(RunTime_.StartTime);
 	//
-	SizeTime=RunTime_->SizeTime;
+	SizeTime=RunTime_.SizeTime;
 	WorkTime=0; Cost=LastCost=0.;
 
 	while(true)
@@ -187,22 +187,22 @@ void MTariffsItem::CostFlyPacket(MTariffRunTimesItem *RunTime_) const
 		StartTime+=RealTime; if ( StartTime>=(24*60) ) StartTime-=24*60;
 	}
 	// Корректируем время работы в соответствии с заданным ограничением
-	if ( WorkTime>RunTime_->MaxTime ) WorkTime=RunTime_->MaxTime;
+	if ( WorkTime>RunTime_.MaxTime ) WorkTime=RunTime_.MaxTime;
 
-	RunTime_->WorkTime=WorkTime;
-	RunTime_->Cost=Cost;
+	RunTime_.WorkTime=WorkTime;
+	RunTime_.Cost=Cost;
 }
 
-void MTariffsItem::CostHours(MTariffRunTimesItem *RunTime_) const
+void MTariffsItem::CostHours(MTariffRunTimesItem &RunTime_) const
 {
 	int StartTime, SizeTime, WorkTime, MaxTime, NeedTime, RealTime;
 	double Cost;
 
 	// Выделяем количество минут с начала суток
-	StartTime=ExtractHoursMin(RunTime_->StartTime);
+	StartTime=ExtractHoursMin(RunTime_.StartTime);
 	// Корректируем желаемое время работы в соответствии с заданным ограничением
-	SizeTime=RunTime_->SizeTime;
-	if ( SizeTime>RunTime_->MaxTime ) SizeTime=RunTime_->MaxTime;
+	SizeTime=RunTime_.SizeTime;
+	if ( SizeTime>RunTime_.MaxTime ) SizeTime=RunTime_.MaxTime;
 	//
 	WorkTime=0; Cost=0.;
 
@@ -232,27 +232,27 @@ void MTariffsItem::CostHours(MTariffRunTimesItem *RunTime_) const
 		StartTime+=RealTime; if ( StartTime>=(24*60) ) StartTime-=24*60;
 	}
 
-	RunTime_->WorkTime=WorkTime;
-	RunTime_->Cost=Cost;
+	RunTime_.WorkTime=WorkTime;
+	RunTime_.Cost=Cost;
 }
 
-void MTariffsItem::Cost(MTariffRunTimesItem *RunTime_, double Prec_) const
+void MTariffsItem::Cost(MTariffRunTimesItem &RunTime_, double Prec_) const
 {
-	if ( !CheckForComp(RunTime_->Number) )
+	if ( !CheckForComp(RunTime_.Number) )
 	{
-        RunTime_->WorkTime=0; RunTime_->Cost=0.;
+        RunTime_.WorkTime=0; RunTime_.Cost=0.;
         return;
     }
 
-    switch(RunTime_->Type)
+    switch(RunTime_.Type)
     {
         case mttHours: CostHours(RunTime_); break;
         case mttFlyPacket: CostFlyPacket(RunTime_); break;
         case mttPacket: CostPacket(RunTime_); break;
-        default: RunTime_->WorkTime=0; RunTime_->Cost=0.; break;
+        default: RunTime_.WorkTime=0; RunTime_.Cost=0.; break;
     }
     // Округляем стоимость до желаемой точности
-    RunTime_->Cost=ceil(RunTime_->Cost/Prec_)*Prec_;
+	RunTime_.Cost=ceil(RunTime_.Cost/Prec_)*Prec_;
 }
 
 bool MTariffsItem::CheckForTime(__int64 &Time_) const
@@ -280,28 +280,29 @@ bool MTariffsItem::CheckForComp(char Num_) const
 	return false;
 }
 
-void MTariffsItem::GetInfo(MTariffsInfoItem *Info_) const
+MTariffsInfoItem MTariffsItem::GetInfo() const
 {
-	Info_->ID=gUUID();
-	Info_->Name=Name;
+	MTariffsInfoItem Info;
+
+	Info.ID=gUUID();
+	Info.Name=Name;
+
+	return Info;
 }
 
-void MTariffsItem::GetRunTimes(__int64 &Time_, MTariffRunTimes *RunTimes_) const
+MTariffRunTimes MTariffsItem::GetRunTimes(__int64 Time_) const
 {
-	int SysTime;
-
 	// Выделяем количество минут с начала суток
-	SysTime=ExtractHoursMin(Time_);
-	//
-	RunTimes_->Clear();
+	int SysTime=ExtractHoursMin(Time_);
 
+	MTariffRunTimes ResTimes;
 	// Проверяем возможность запуска на почасовой основе
 	for ( const auto &tt: Times )
 	{
 		if ( (tt.Type!=mttHours)||
 			(tt.MaxWorkTime(SysTime)==0) ) continue;
 
-		MTariffRunTimesItem& rt=RunTimes_->Add();
+		MTariffRunTimesItem& rt=ResTimes.Add();
 		rt.Type=mttHours;
 		break;
 	}
@@ -311,7 +312,7 @@ void MTariffsItem::GetRunTimes(__int64 &Time_, MTariffRunTimes *RunTimes_) const
 		if ( (tt.Type!=mttFlyPacket)||
 			(tt.MaxWorkTime(SysTime)==0) ) continue;
 
-		MTariffRunTimesItem& rt=RunTimes_->Add();
+		MTariffRunTimesItem& rt=ResTimes.Add();
 		rt.Type=mttFlyPacket;
 		rt.SizeTime=tt.SizeTime;
 	}
@@ -321,24 +322,26 @@ void MTariffsItem::GetRunTimes(__int64 &Time_, MTariffRunTimes *RunTimes_) const
 		if ( (tt.Type!=mttPacket)||
 			(tt.MaxWorkTime(SysTime)==0) ) continue;
 
-		MTariffRunTimesItem& rt=RunTimes_->Add();
+		MTariffRunTimesItem& rt=ResTimes.Add();
 		rt.Type=mttPacket;
 		rt.BeginTime=tt.BeginTime;
 		rt.EndTime=tt.EndTime;
 	}
+
+	return ResTimes;
 }
 //---------------------------------------------------------------------------
-void MTariffs::GetForTime(__int64 &Time_, MTariffsInfo *TariffsInfo_) const
+MTariffsInfo MTariffs::GetForTime(__int64 &Time_) const
 {
-	TariffsInfo_->Clear();
+	MTariffsInfo ResInfo;
 
 	for ( const auto &trf: *this )
 	{
 		if ( !trf.CheckForTime(Time_) ) continue;
-
-		MTariffsInfoItem& ti=TariffsInfo_->Add();
-		trf.GetInfo(&ti);
+		ResInfo.Add()=trf.GetInfo();
 	}
+
+	return ResInfo;
 }
 //---------------------------------------------------------------------------
 

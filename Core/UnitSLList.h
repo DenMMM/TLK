@@ -41,6 +41,8 @@ template <
 class MSLListItem:
 	public MListItem <list_type, base_type>
 {
+//	friend MSLList <list_type, base_type>;
+
 public:
 	// Функции определения размера данных производного от MSLListItem класса,
 	// сохранения и восстановления их в/из памяти.
