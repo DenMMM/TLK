@@ -42,8 +42,7 @@ private:	// User declarations
     void SetEdit(bool Edit_);
     void SetListViewFinesLine(TListItem *Item_);
 public:		// User declarations
-    bool Execute(MFines *Fines_, int Left_, int Top_);
-    __fastcall TFormFines(TComponent* Owner);
+	__fastcall TFormFines(TComponent* Owner);
 };
 //---------------------------------------------------------------------------
 #endif

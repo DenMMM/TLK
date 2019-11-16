@@ -25,8 +25,8 @@ bool ProcessComputersState(
 
 	// «аполн€ем таблицу состо€ний начальными данными
 	{
-		auto &rcdds=dynamic_cast<MLogRecords::DataStates&>(*iPos);
-		for ( auto &Ld: rcdds.Items )
+		auto &rcdds=static_cast<const MLogRecords::DataStates&>(*iPos);
+		for ( const auto &Ld: rcdds.Items )
 		{
 			States_.Add().sFromLog(Ld);
 		}
@@ -40,7 +40,7 @@ bool ProcessComputersState(
 		{
 			case MLogRecords::CompRun::TypeID:
 			{
-				auto &rcdr=static_cast<MLogRecords::CompRun&>(*iPos);
+				auto &rcdr=static_cast<const MLogRecords::CompRun&>(*iPos);
 				auto iState=States_.Search(rcdr.Number);
 				if ( iState==States_.end() ) goto error;
 				auto iTariff=Tariffs_.SrchUUID(rcdr.Tariff);
@@ -68,7 +68,7 @@ bool ProcessComputersState(
 
 			case MLogRecords::CompFine::TypeID:
 			{
-				auto &rcdf=static_cast<MLogRecords::CompFine&>(*iPos);
+				auto &rcdf=static_cast<const MLogRecords::CompFine&>(*iPos);
 				auto iState=States_.Search(rcdf.Number);
 				if ( iState==States_.end() ) goto error;
 //                if ( (fine=Fines->Search(rcdf.Fine))==nullptr ) goto error;
@@ -79,7 +79,7 @@ bool ProcessComputersState(
 
 			case MLogRecords::CompExchange::TypeID:
 			{
-				auto &rcde=static_cast<MLogRecords::CompExchange&>(*iPos);
+				auto &rcde=static_cast<const MLogRecords::CompExchange&>(*iPos);
 				auto iState=States_.Search(rcde.From);
 				if ( iState==States_.end() ) goto error;
 				auto iState2=States_.Search(rcde.To);
@@ -93,7 +93,7 @@ bool ProcessComputersState(
 
 			case MLogRecords::ModeLock::TypeID:
 			{
-				auto &rcdl=static_cast<MLogRecords::ModeLock&>(*iPos);
+				auto &rcdl=static_cast<const MLogRecords::ModeLock&>(*iPos);
 				auto iState=States_.Search(rcdl.Number);
 				if ( iState==States_.end() ) goto error;
 
@@ -104,7 +104,7 @@ bool ProcessComputersState(
 
 			case MLogRecords::ModePause::TypeID:
 			{
-				auto &rcdp=static_cast<MLogRecords::ModePause&>(*iPos);
+				auto &rcdp=static_cast<const MLogRecords::ModePause&>(*iPos);
 				auto iState=States_.Search(rcdp.Number);
 				if ( iState==States_.end() ) goto error;
 
@@ -115,7 +115,7 @@ bool ProcessComputersState(
 
 			case MLogRecords::ModeOpen::TypeID:
 			{
-				auto &rcdo=static_cast<MLogRecords::ModeOpen&>(*iPos);
+				auto &rcdo=static_cast<const MLogRecords::ModeOpen&>(*iPos);
 				auto iState=States_.Search(rcdo.Number);
 				if ( iState==States_.end() ) goto error;
 
@@ -126,10 +126,10 @@ bool ProcessComputersState(
 
 			case MLogRecords::DataTariffs::TypeID:
 			{
-				auto &rcddtrf=static_cast<MLogRecords::DataTariffs&>(*iPos);
+				auto &rcddtrf=static_cast<const MLogRecords::DataTariffs&>(*iPos);
 
 				Tariffs_.Clear();
-				for ( auto &Ld: rcddtrf.Items )
+				for ( const auto &Ld: rcddtrf.Items )
 				{
 					Tariffs_.Add().sFromLog(Ld);
 				}
@@ -167,19 +167,19 @@ bool ProcessUsersUpTime(
 			case MLogRecords::AppLogIn::TypeID:
 				if ( uptime!=nullptr ) goto error;      /// throw ?
 				uptime=&UpTimes_.Add();
-				uptime->User=static_cast<MLogRecords::AppLogIn&>(*iPosBegin_).User;
-				uptime->BeginTime=static_cast<MLogRecords::AppLogIn&>(*iPosBegin_).SystemTime;
+				uptime->User=static_cast<const MLogRecords::AppLogIn&>(*iPosBegin_).User;
+				uptime->BeginTime=static_cast<const MLogRecords::AppLogIn&>(*iPosBegin_).SystemTime;
 				break;
 
 			case MLogRecords::AppLogOut::TypeID:
 				if ( uptime==nullptr ) goto error;
-				uptime->EndTime=static_cast<MLogRecords::AppLogOut&>(*iPosBegin_).SystemTime;
+				uptime->EndTime=static_cast<const MLogRecords::AppLogOut&>(*iPosBegin_).SystemTime;
 				uptime=nullptr;
 				break;
 
 			case MLogRecords::CompRun::TypeID:
 				if ( uptime==nullptr ) continue;
-				uptime->Gains+=static_cast<MLogRecords::CompRun&>(*iPosBegin_).Cost;
+				uptime->Gains+=static_cast<const MLogRecords::CompRun&>(*iPosBegin_).Cost;
 				break;
 
 			case MLogRecords::CompFine::TypeID:
@@ -190,10 +190,10 @@ bool ProcessUsersUpTime(
 
 			case MLogRecords::DataUsers::TypeID:
 			{
-				auto &rcddusr=static_cast<MLogRecords::DataUsers&>(*iPosBegin_);
+				auto &rcddusr=static_cast<const MLogRecords::DataUsers&>(*iPosBegin_);
 
 				// ƒобавл€ем новых пользователей в список
-				for ( auto &Ld: rcddusr.Items )
+				for ( const auto &Ld: rcddusr.Items )
 				{
 					auto iUsr=Users_.SrchUUID(Ld.UUID);
 

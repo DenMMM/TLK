@@ -92,14 +92,14 @@ public:
     void SetTransp(bool Transp_);
 
     // Проверка версии поля и получение его значения дочерним процессом
-    bool CheckSysTime(__int64 *SysTime_, unsigned *SysTimeVer_) const;
-    bool CheckCompNum(int *Num_, unsigned *NumVer_) const;
-    bool CheckWorkTime(int *Time_, unsigned *TimeVer_) const;
-    bool CheckWarnMsg(bool *Msg_, unsigned *MsgVer_) const;
-    bool CheckImageMessage(int *Msg_, unsigned *MsgVer_) const;
-    bool CheckGames(unsigned *Games_, unsigned *GamesVer_) const;
-    bool CheckConfigMode(bool *Mode_, unsigned *ModeVer_) const;
-    bool CheckTransp(bool *Transp_, unsigned *TranspVer_) const;
+	bool CheckSysTime(__int64 &SysTime_, unsigned &SysTimeVer_) const;
+	bool CheckCompNum(int &Num_, unsigned &NumVer_) const;
+	bool CheckWorkTime(int &Time_, unsigned &TimeVer_) const;
+	bool CheckWarnMsg(bool &Msg_, unsigned &MsgVer_) const;
+	bool CheckImageMessage(int &Msg_, unsigned &MsgVer_) const;
+	bool CheckGames(unsigned &Games_, unsigned &GamesVer_) const;
+	bool CheckConfigMode(bool &Mode_, unsigned &ModeVer_) const;
+	bool CheckTransp(bool &Transp_, unsigned &TranspVer_) const;
 
     MShared()
     {

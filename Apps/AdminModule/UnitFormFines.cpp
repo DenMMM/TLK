@@ -178,10 +178,10 @@ void TFormFines::SetEdit(bool Edit_)
 //---------------------------------------------------------------------------
 void TFormFines::SetListViewFinesLine(TListItem *Item_)
 {
-    auto *fine=reinterpret_cast<MFinesItem*>(Item_->Data);
-    Item_->Caption=fine->Descr.c_str();
-    if ( fine->Time==(24*60) ) Item_->SubItems->Strings[0]=L"Все время";
-    else Item_->SubItems->Strings[0]=IntToStr(fine->Time)+L" мин.";
+	auto &fine=*reinterpret_cast<const MFinesItem*>(Item_->Data);
+	Item_->Caption=fine.Descr.c_str();
+	if ( fine.Time==(24*60) ) Item_->SubItems->Strings[0]=L"Все время";
+	else Item_->SubItems->Strings[0]=IntToStr(fine.Time)+L" мин.";
 }
 //---------------------------------------------------------------------------
 

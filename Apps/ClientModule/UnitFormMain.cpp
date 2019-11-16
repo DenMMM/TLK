@@ -193,7 +193,7 @@ void TFormMain::SharedProcess()
 {
     // Обновляем номер компьютера
     int CompNum;
-    if ( Shared.CheckCompNum(&CompNum,&CompNumVer) )
+    if ( Shared.CheckCompNum(CompNum,CompNumVer) )
     {
         LabelCompNum->Caption=IntToStr(CompNum);
         LabelCompNumShad->Caption=LabelCompNum->Caption;
@@ -201,7 +201,7 @@ void TFormMain::SharedProcess()
     }
     // Обновляем текущее время
     __int64 SysTime;
-    if ( Shared.CheckSysTime(&SysTime,&SysTimeVer) )
+    if ( Shared.CheckSysTime(SysTime,SysTimeVer) )
     {
         wchar_t line[]=L"--:--";
         SYSTEMTIME st;
@@ -218,7 +218,7 @@ void TFormMain::SharedProcess()
     }
     // Обновляем оставшееся время работы
     int WorkTime;
-    if ( Shared.CheckWorkTime(&WorkTime,&WorkTimeVer) )
+    if ( Shared.CheckWorkTime(WorkTime,WorkTimeVer) )
     {
 		wchar_t line[]=L"--:--";
 
@@ -231,14 +231,14 @@ void TFormMain::SharedProcess()
 	}
 	// Запускаем показ предупреждения об окончании времени
 	bool WarnMsg;
-	if ( Shared.CheckWarnMsg(&WarnMsg,&WarnMsgVer) )
+	if ( Shared.CheckWarnMsg(WarnMsg,WarnMsgVer) )
 	{
         if ( WarnMsg ) WarnMessage.Show();
         else WarnMessage.Stop();
     }
     // Обновляем экран блокировки
     int ImageMsg;
-    if ( Shared.CheckImageMessage(&ImageMsg,&ImageMsgVer) )
+    if ( Shared.CheckImageMessage(ImageMsg,ImageMsgVer) )
     {
         if ( ImageMsg==mimNone ) LockDsk.Hide();
         else
@@ -258,16 +258,16 @@ void TFormMain::SharedProcess()
     }
     // Обновляем список программ
     unsigned Games;
-    if ( Shared.CheckGames(&Games,&GamesVer) ) FormGames->ShowGames(Games);
+    if ( Shared.CheckGames(Games,GamesVer) ) FormGames->ShowGames(Games);
     // Обновляем режим прозрачности
     bool Transp;
-    if ( Shared.CheckTransp(&Transp,&TranspVer) )
+    if ( Shared.CheckTransp(Transp,TranspVer) )
     {
         SetTransp(Transp);
         LockDsk.SetTransp(Transp);
     }
     // Обновляем режим настройки
-    if ( Shared.CheckConfigMode(&ConfigMode,&ConfigModeVer) )
+    if ( Shared.CheckConfigMode(ConfigMode,ConfigModeVer) )
         SpeedButtonOptions->Enabled=ConfigMode;
 }
 //---------------------------------------------------------------------------

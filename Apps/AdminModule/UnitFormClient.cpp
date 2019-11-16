@@ -421,7 +421,7 @@ void TFormClient::CreateGamesTree(const MGames &Games_)
 
 		try
 		{
-			MGamesItem& sGame=Games_.GetItem(i);
+			const MGamesItem& sGame=Games_.GetItem(i);
 
 			dGame->Name=sGame.Name;
 			// Добавим элементы нижних уровней

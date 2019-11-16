@@ -12,17 +12,18 @@ __fastcall TFormLogIn::TFormLogIn(TComponent* Owner)
 {
 }
 //---------------------------------------------------------------------------
-unsigned TFormLogIn::Execute(MUsers *Users_)
+unsigned TFormLogIn::Execute(const MUsers &Users_)
 {
     ID=0;
 
     // Заносим в список активные логины
-	for ( auto &User: *Users_ )
+	for ( const auto &User: Users_ )
 	{
 		if ( !User.Active ) continue;
 		ComboBoxLogin->Items->AddObject(
 			User.Login.c_str(),
-			reinterpret_cast<TObject*>(&User));
+			reinterpret_cast<TObject*>(
+				const_cast<MUsersItem*>(&User)));
 	}
 
     return ShowModal()==mrOk? ID: 0;
@@ -51,23 +52,30 @@ void __fastcall TFormLogIn::ComboBoxLoginClick(TObject *Sender)
 //---------------------------------------------------------------------------
 void __fastcall TFormLogIn::FormCloseQuery(TObject *Sender, bool &CanClose)
 {
-    int Index;
-    MUsersItem *User;
-
 	if ( ModalResult!=mrOk ) return;
-	// Определяем какой пользователь был выбран
-	if ( (Index=ComboBoxLogin->ItemIndex)<0 )
-		{ ActiveControl=ComboBoxLogin; goto error; }
-	User=reinterpret_cast<MUsersItem*>(ComboBoxLogin->Items->Objects[Index]);
-	// Проверяем пароль
-	if ( !User->Pass.Check(EditPassword->Text.c_str()) )
-		{ ActiveControl=EditPassword; goto error; }
-	//
-	ID=User->gUUID();
 
-	return;
-error:
-	CanClose=false;
+	// Определяем какой пользователь был выбран
+	int Index=ComboBoxLogin->ItemIndex;
+	if ( Index<0 )
+	{
+		ActiveControl=ComboBoxLogin;
+		CanClose=false;
+		return;
+	}
+
+	auto &User=*reinterpret_cast<const MUsersItem*>(
+		ComboBoxLogin->Items->Objects[Index]);
+
+	// Проверяем пароль
+	if ( !User.Pass.Check(EditPassword->Text.c_str()) )
+	{
+		ActiveControl=EditPassword;
+		CanClose=false;
+		return;
+	}
+	//
+	ID=User.gUUID();
+
 	return;
 }
 //---------------------------------------------------------------------------

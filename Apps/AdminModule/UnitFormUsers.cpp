@@ -67,10 +67,10 @@ void __fastcall TFormUsers::ListViewUsersSelectItem(TObject *Sender,
     } else
         SetEdit(true);
 
-	auto *user=reinterpret_cast<MUsersItem*>(
+	auto &user=*reinterpret_cast<const MUsersItem*>(
 		ListViewUsers->Selected->Data);
-    EditLogin->Text=user->Login.c_str();
-    EditName->Text=user->Name.c_str();
+	EditLogin->Text=user.Login.c_str();
+    EditName->Text=user.Name.c_str();
 }
 //---------------------------------------------------------------------------
 void __fastcall TFormUsers::EditLoginExit(TObject *Sender)
@@ -78,9 +78,9 @@ void __fastcall TFormUsers::EditLoginExit(TObject *Sender)
     if ( ListViewUsers->Selected==nullptr ) return;
 
     EditLogin->Text=EditLogin->Text.Trim();
-	auto *user=reinterpret_cast<MUsersItem*>(
+	auto &user=*reinterpret_cast<MUsersItem*>(
 		ListViewUsers->Selected->Data);
-    user->Login=EditLogin->Text.c_str();
+    user.Login=EditLogin->Text.c_str();
     SetListViewUsersLine(ListViewUsers->Selected);
 }
 //---------------------------------------------------------------------------
@@ -101,15 +101,15 @@ void __fastcall TFormUsers::EditNameExit(TObject *Sender)
     if ( ListViewUsers->Selected==nullptr ) return;
 
     EditName->Text=EditName->Text.Trim();
-	auto *user=reinterpret_cast<MUsersItem*>(
+	auto &user=*reinterpret_cast<MUsersItem*>(
 		ListViewUsers->Selected->Data);
-    user->Name=EditName->Text.c_str();
+    user.Name=EditName->Text.c_str();
     SetListViewUsersLine(ListViewUsers->Selected);
 }
 //---------------------------------------------------------------------------
 void __fastcall TFormUsers::ButtonPasswordClick(TObject *Sender)
 {
-	auto *user=reinterpret_cast<MUsersItem*>(
+	auto &user=*reinterpret_cast<MUsersItem*>(
 		ListViewUsers->Selected->Data);
     // Подготавливаем координаты
     TPoint dialog_coord;
@@ -138,7 +138,7 @@ void __fastcall TFormUsers::ButtonAddClick(TObject *Sender)
     }
 
     // Добавили в буфер нового пользователя
-	MUsersItem& user=TmpUsers.Add();
+	MUsersItem &user=TmpUsers.Add();
 	user.Login=L"NewUser";
     user.Name=L"Новый пользователь";
     // Добавили строку в список и связали с ним
@@ -210,11 +210,11 @@ void TFormUsers::SetEdit(bool Edit_)
 //---------------------------------------------------------------------------
 void TFormUsers::SetListViewUsersLine(TListItem *Item_)
 {
-    auto *user=reinterpret_cast<MUsersItem*>(Item_->Data);
+	auto &user=*reinterpret_cast<const MUsersItem*>(Item_->Data);
 //    Item_->ImageIndex=user->Active?15:16;
-    Item_->ImageIndex=user->Active?-1:16;
-    Item_->Caption=user->Login.c_str();
-    Item_->SubItems->Strings[0]=user->Name.c_str();
+	Item_->ImageIndex=user.Active?-1:16;
+	Item_->Caption=user.Login.c_str();
+	Item_->SubItems->Strings[0]=user.Name.c_str();
 }
 //---------------------------------------------------------------------------
 

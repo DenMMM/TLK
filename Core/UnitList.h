@@ -180,8 +180,8 @@ public:
 		explicit const_iterator(pointer Init_, const MList *ListInit_):
 			MyPtr(Init_), ListPtr(ListInit_) {}
 
-		const reference operator*() const { return *MyPtr; }
-		const pointer operator->() const { return MyPtr; }
+		const base_type& operator*() const { return *MyPtr; }
+		const base_type* operator->() const { return MyPtr; }
 
 		const_iterator& operator++()
 		{
@@ -265,8 +265,8 @@ public:
 		explicit iterator(pointer Init_, const MList *ListInit_):
 			const_iterator(Init_,ListInit_) {}
 
-		reference operator*() const { return *MyPtr; }
-		pointer operator->() const { return MyPtr; }
+		base_type& operator*() const { return *MyPtr; }
+		base_type* operator->() const { return MyPtr; }
 
 		iterator& operator++()
 		{
@@ -333,7 +333,12 @@ public:
 	}
 
 	base_type& Add(unsigned char TypeID_);
-	base_type& GetItem(size_t Index_) const;
+	const base_type& GetItem(size_t Index_) const;
+	base_type& GetItem(size_t Index_)
+	{
+		const auto *const_this=this;
+		return const_cast<base_type&>(const_this->GetItem(Index_));
+	}
 	void Swap(const_iterator iItem1_, const_iterator iItem2_);
 	iterator Del(const_iterator iPos_);
 
@@ -453,7 +458,7 @@ base_type& MList<list_type,base_type>::Add(unsigned char TypeID_)
 }
 //---------------------------------------------------------------------------
 template <typename list_type, typename base_type>
-base_type& MList<list_type,base_type>::GetItem(size_t Index_) const
+const base_type& MList<list_type,base_type>::GetItem(size_t Index_) const
 {
 	// Нельзя '#ifdef _DEBUG'
 	if ( Index_>=Count )

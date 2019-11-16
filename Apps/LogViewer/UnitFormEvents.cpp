@@ -68,14 +68,18 @@ void __fastcall TFormEvents::ListViewEventsSelectItem(TObject *Sender,
     TItemStates is=TItemStates()<<isSelected;
     for ( TListItem *Item=ListViewEvents->Selected; Item;
         Item=ListViewEvents->GetNextItem(Item,sdAll,is) )
-    {
-        switch(reinterpret_cast<MLogRecordsItem*>(Item->Data)->gTypeID())
-        {
+	{
+		auto &LogItem=*reinterpret_cast<const MLogRecordsItem*>(Item->Data);
+
+		switch ( LogItem.gTypeID() )
+		{
 			case MLogRecords::mlrRun:
-				Time+=reinterpret_cast<MLogRecords::CompRun*>(Item->Data)->WorkTime;
-				Money+=reinterpret_cast<MLogRecords::CompRun*>(Item->Data)->Cost;
-                break;
-            default: break;
+				Time+=static_cast<const MLogRecords::CompRun&>(LogItem).WorkTime;
+				Money+=static_cast<const MLogRecords::CompRun&>(LogItem).Cost;
+				break;
+
+			default:
+				break;
         }
     }
     //
@@ -106,18 +110,18 @@ void __fastcall TFormEvents::ListViewEventsColumnClick(TObject *Sender,
 void __fastcall TFormEvents::ListViewEventsCompare(TObject *Sender,
 	  TListItem *Item1, TListItem *Item2, int Data, int &Compare)
 {
-	auto LogItem1=reinterpret_cast<MLogRecordsItem*>(Item1->Data);
-	auto LogType1=LogItem1->gTypeID();
+	auto &LogItem1=*reinterpret_cast<const MLogRecordsItem*>(Item1->Data);
+	auto LogType1=LogItem1.gTypeID();
 
-	auto LogItem2=reinterpret_cast<MLogRecordsItem*>(Item2->Data);
-	auto LogType2=LogItem2->gTypeID();
+	auto &LogItem2=*reinterpret_cast<const MLogRecordsItem*>(Item2->Data);
+	auto LogType2=LogItem2.gTypeID();
 
 	switch(EventSort)
 	{
 		case 1:
 			Compare=DComp(
-				LogItem1->SystemTime,
-				LogItem2->SystemTime);
+				LogItem1.SystemTime,
+				LogItem2.SystemTime);
 			break;
 		case 2:
 			// Сравниваем номера компьютеров
@@ -135,23 +139,23 @@ void __fastcall TFormEvents::ListViewEventsCompare(TObject *Sender,
 				{
 					case MLogRecords::CompRun::TypeID:
 						Compare=DComp(
-							static_cast<MLogRecords::CompRun*>(LogItem1)->Tariff,
-							static_cast<MLogRecords::CompRun*>(LogItem2)->Tariff);
+							static_cast<const MLogRecords::CompRun&>(LogItem1).Tariff,
+							static_cast<const MLogRecords::CompRun&>(LogItem2).Tariff);
 						break;
 					case MLogRecords::CompFine::TypeID:
 						Compare=DComp(
-							static_cast<MLogRecords::CompFine*>(LogItem1)->Fine,
-							static_cast<MLogRecords::CompFine*>(LogItem2)->Fine);
+							static_cast<const MLogRecords::CompFine&>(LogItem1).Fine,
+							static_cast<const MLogRecords::CompFine&>(LogItem2).Fine);
 						break;
 					case MLogRecords::CompExchange::TypeID:
 						Compare=DComp(
-							static_cast<MLogRecords::CompExchange*>(LogItem1)->To,
-							static_cast<MLogRecords::CompExchange*>(LogItem2)->To);
+							static_cast<const MLogRecords::CompExchange&>(LogItem1).To,
+							static_cast<const MLogRecords::CompExchange&>(LogItem2).To);
 						break;
 					case MLogRecords::AppLogIn::TypeID:
 						Compare=DComp(
-							static_cast<MLogRecords::AppLogIn*>(LogItem1)->User,
-							static_cast<MLogRecords::AppLogIn*>(LogItem2)->User);
+							static_cast<const MLogRecords::AppLogIn&>(LogItem1).User,
+							static_cast<const MLogRecords::AppLogIn&>(LogItem2).User);
 						break;
 					default:
 						Compare=0;
@@ -178,39 +182,39 @@ void __fastcall TFormEvents::ListViewEventsCompare(TObject *Sender,
 				if ( LogType1==MLogRecords::CompRun::TypeID )
 				{
 					const MLogRecords::CompRun
-						*RunItem1=static_cast<MLogRecords::CompRun*>(LogItem1),
-						*RunItem2=static_cast<MLogRecords::CompRun*>(LogItem2);
+						&RunItem1=static_cast<const MLogRecords::CompRun&>(LogItem1),
+						&RunItem2=static_cast<const MLogRecords::CompRun&>(LogItem2);
 
 					Compare=DComp(
-						RunItem1->Type,
-						RunItem2->Type);
+						RunItem1.Type,
+						RunItem2.Type);
 
 					if ( Compare==0 )
 					{
-						switch(RunItem1->Type)
+						switch(RunItem1.Type)
 						{
 							case mttHours:
 								Compare=DComp(
-									RunItem1->WorkTime,
-									RunItem2->WorkTime);
+									RunItem1.WorkTime,
+									RunItem2.WorkTime);
 								break;
 							case mttFlyPacket:
 								Compare=DComp(
-									RunItem1->SizeTime,
-									RunItem2->SizeTime);
+									RunItem1.SizeTime,
+									RunItem2.SizeTime);
 								break;
 							case mttPacket:
 								Compare=DComp(
-									RunItem1->BeginTime,
-									RunItem2->BeginTime);
+									RunItem1.BeginTime,
+									RunItem2.BeginTime);
 								break;
 							default: break;
 						}
 					}
 				} else if ( LogType1==MLogRecords::CompFine::TypeID )
 					Compare=DComp(
-						static_cast<MLogRecords::CompFine*>(LogItem1)->Time,
-						static_cast<MLogRecords::CompFine*>(LogItem2)->Time);
+						static_cast<const MLogRecords::CompFine&>(LogItem1).Time,
+						static_cast<const MLogRecords::CompFine&>(LogItem2).Time);
 				else Compare=0;
 			} else
 			{
@@ -225,12 +229,12 @@ void __fastcall TFormEvents::ListViewEventsCompare(TObject *Sender,
 			if ( LogType1==LogType2 )
 			{
 				const MLogRecords::CompRun
-					*RunItem1=static_cast<MLogRecords::CompRun*>(LogItem1),
-					*RunItem2=static_cast<MLogRecords::CompRun*>(LogItem2);
+					&RunItem1=static_cast<const MLogRecords::CompRun&>(LogItem1),
+					&RunItem2=static_cast<const MLogRecords::CompRun&>(LogItem2);
 
 				Compare=
 					LogType1==MLogRecords::CompRun::TypeID?
-					DComp(RunItem1->Cost, RunItem2->Cost): 0;
+					DComp(RunItem1.Cost, RunItem2.Cost): 0;
 			} else
 			{
 				Compare=
@@ -265,11 +269,11 @@ void __fastcall TFormEvents::ButtonCompUpdClick(TObject *Sender)
 				EventsLog),
 			States, Tariffs) )
 	{
-			UpdateListViewComputers(false, &States, &Tariffs);
+			UpdateListViewComputers(false, States, Tariffs);
 	}
 }
 //---------------------------------------------------------------------------
-bool TFormEvents::CheckFilter(MStatesInfo *Info_, int FreeTime_)
+bool TFormEvents::CheckFilter(const MStatesInfo &Info_, int FreeTime_)
 {
 	bool result=false;
 
@@ -279,11 +283,11 @@ bool TFormEvents::CheckFilter(MStatesInfo *Info_, int FreeTime_)
 			result=true;
 			break;
 		case mcfFree:
-			if ( (Info_->State==mcsFree)||
-				((Info_->State&mcsWork)&&(Info_->ToEndWork<FreeTime_)) ) result=true;
+			if ( (Info_.State==mcsFree)||
+				((Info_.State&mcsWork)&&(Info_.ToEndWork<FreeTime_)) ) result=true;
 			break;
 		case mcfService:
-			if ( Info_->State&mcsOpen ) result=true;
+			if ( Info_.State&mcsOpen ) result=true;
 			break;
 		default: break;
 	}
@@ -291,62 +295,64 @@ bool TFormEvents::CheckFilter(MStatesInfo *Info_, int FreeTime_)
 	return result;
 }
 //---------------------------------------------------------------------------
-int TFormEvents::GetCompNum(const MLogRecordsItem *Item_)
+int TFormEvents::GetCompNum(const MLogRecordsItem &Item_)
 {
-	switch(Item_->gTypeID())
+	switch(Item_.gTypeID())
 	{
 		case MLogRecords::CompRun::TypeID:
-			return static_cast<const MLogRecords::CompRun*>(Item_)->Number;
+			return static_cast<const MLogRecords::CompRun&>(Item_).Number;
 
 		case MLogRecords::CompFine::TypeID:
-			return static_cast<const MLogRecords::CompFine*>(Item_)->Number;
+			return static_cast<const MLogRecords::CompFine&>(Item_).Number;
 
 		case MLogRecords::CompExchange::TypeID:
-			return static_cast<const MLogRecords::CompExchange*>(Item_)->From;
+			return static_cast<const MLogRecords::CompExchange&>(Item_).From;
 
 		case MLogRecords::ModeLock::TypeID:
-			return static_cast<const MLogRecords::ModeLock*>(Item_)->Number;
+			return static_cast<const MLogRecords::ModeLock&>(Item_).Number;
 
 		case MLogRecords::ModePause::TypeID:
-			return static_cast<const MLogRecords::ModePause*>(Item_)->Number;
+			return static_cast<const MLogRecords::ModePause&>(Item_).Number;
 
 		case MLogRecords::ModeOpen::TypeID:
-			return static_cast<const MLogRecords::ModeOpen*>(Item_)->Number;
+			return static_cast<const MLogRecords::ModeOpen&>(Item_).Number;
 
 		case MLogRecords::CmdPowerOn::TypeID:
-			return static_cast<const MLogRecords::CmdPowerOn*>(Item_)->Number;
+			return static_cast<const MLogRecords::CmdPowerOn&>(Item_).Number;
 
 		case MLogRecords::CmdReboot::TypeID:
-			return static_cast<const MLogRecords::CmdReboot*>(Item_)->Number;
+			return static_cast<const MLogRecords::CmdReboot&>(Item_).Number;
 
 		case MLogRecords::CmdShutdown::TypeID:
-			return static_cast<const MLogRecords::CmdShutdown*>(Item_)->Number;
+			return static_cast<const MLogRecords::CmdShutdown&>(Item_).Number;
 
 		default:
 			return -1;
 	}
 }
 //---------------------------------------------------------------------------
-void TFormEvents::SetListViewComputersLine(TListItem *Item_, MStatesInfo *Info_,
-	MTariffs *Tariffs_)
+void TFormEvents::SetListViewComputersLine(
+	TListItem *Item_,
+	const MStatesInfo &Info_,
+	const MTariffs &Tariffs_)
 {
 	TStrings *SubItems=Item_->SubItems;
 	wchar_t line[50];
 	int icon;
 
-    // Номер компьютера
-    if ( Info_->Changes&mdcNumber )
-    {
+	// Номер компьютера
+	if ( Info_.Changes&mdcNumber )
+	{
 		swprintf(
 			line, sizeof(line),
 			L"%i",
-			Info_->Number);
+			Info_.Number);
         SubItems->Strings[0]=line;
     }
     // Режим работы
-    if ( Info_->Changes&mdcState )
+    if ( Info_.Changes&mdcState )
     {
-        unsigned int State=Info_->State;
+        unsigned int State=Info_.State;
 		if ( State&mcsOpen ) { icon=5; wcscpy(line, L"настройка"); }
 		else if ( State&mcsPause ) { icon=4; wcscpy(line, L"приостановлен"); }
 		else if ( State&mcsLock ) { icon=3; wcscpy(line, L"Прикрыт !"); }
@@ -358,19 +364,19 @@ void TFormEvents::SetListViewComputersLine(TListItem *Item_, MStatesInfo *Info_,
         SubItems->Strings[1]=line;
     }
     // Название тарифа
-    if ( Info_->Changes&mdcTariff )
+    if ( Info_.Changes&mdcTariff )
     {
-		auto iTariff=Tariffs_->SrchUUID(Info_->TariffID);
-		if ( iTariff!=Tariffs_->end() ) SubItems->Strings[2]=iTariff->Name.c_str();
+		auto iTariff=Tariffs_.SrchUUID(Info_.TariffID);
+		if ( iTariff!=Tariffs_.end() ) SubItems->Strings[2]=iTariff->Name.c_str();
 		else SubItems->Strings[2]=L"";
 	}
 	// Время работы
-    if ( Info_->Changes&mdcWorkTime )
-    {
-        if ( Info_->State&mcsWork )
-        {
-            swprintf(line, L"%i час. %.2i мин.",Info_->WorkTime/60,Info_->WorkTime%60);
-            SubItems->Strings[3]=line;
+	if ( Info_.Changes&mdcWorkTime )
+	{
+		if ( Info_.State&mcsWork )
+		{
+			swprintf(line, L"%i час. %.2i мин.",Info_.WorkTime/60,Info_.WorkTime%60);
+			SubItems->Strings[3]=line;
         } else
         {
             SubItems->Strings[3]=L"";
@@ -379,19 +385,19 @@ void TFormEvents::SetListViewComputersLine(TListItem *Item_, MStatesInfo *Info_,
         }
     }
     // Сколько времени осталось работать и до скольки
-    if ( Info_->State&mcsWork )
+    if ( Info_.State&mcsWork )
     {
-		swprintf(line, L"%.2i:%.2i",Info_->ToEndWork/60,Info_->ToEndWork%60);
+		swprintf(line, L"%.2i:%.2i",Info_.ToEndWork/60,Info_.ToEndWork%60);
 		SubItems->Strings[4]=line;
-        swprintf(line, L"%.2i:%.2i",Info_->EndWorkTime/60,Info_->EndWorkTime%60);
+        swprintf(line, L"%.2i:%.2i",Info_.EndWorkTime/60,Info_.EndWorkTime%60);
         SubItems->Strings[5]=line;
     }
     // Время штрафа
-    if ( Info_->Changes&mdcFineTime )
+    if ( Info_.Changes&mdcFineTime )
     {
-        if ( Info_->State&mcsFine )
+        if ( Info_.State&mcsFine )
         {
-            swprintf(line, L"%i мин.",Info_->FineTime);
+            swprintf(line, L"%i мин.",Info_.FineTime);
             SubItems->Strings[6]=line;
         } else
         {
@@ -400,34 +406,36 @@ void TFormEvents::SetListViewComputersLine(TListItem *Item_, MStatesInfo *Info_,
         }
     }
     // Сколько времени штрафа осталось
-    if ( Info_->State&mcsFine )
-    {
-        swprintf(line, L"%.2i:%.2i",Info_->ToEndFine/60,Info_->ToEndFine%60);
-        SubItems->Strings[7]=line;
-    }
+	if ( Info_.State&mcsFine )
+	{
+		swprintf(line, L"%.2i:%.2i",Info_.ToEndFine/60,Info_.ToEndFine%60);
+		SubItems->Strings[7]=line;
+	}
 }
 //---------------------------------------------------------------------------
-void TFormEvents::UpdateListViewComputers(bool Full_, MStates *States_, MTariffs *Tariffs_)
+void TFormEvents::UpdateListViewComputers(
+	bool Full_,
+	MStates &States_,
+	const MTariffs &Tariffs_)
 {
 	// Убираем записи, не сопоставленные с состоянием компьютера
 	for ( int i=ListViewComputers->Items->Count-1; i>=0; i-- )
 	{
 		TListItem *Item=ListViewComputers->Items->Item[i];
-		if ( States_->Search((int)Item->Data)!=States_->end() ) Item->Delete();
+		if ( States_.Search((int)Item->Data)!=States_.end() ) Item->Delete();
 	}
 
 	// Убираем из списка компьютеры, не подходящие под фильтр, и добавляем новые
-	for ( auto &State: *States_ )
+	for ( auto &State: States_ )
 	{
 		//
-		MStatesInfo Info;
-		State.StateInfo(&Info);
+		MStatesInfo Info=State.GetInfo();
 		//
 		TListItem *Item=ListViewComputers->FindData(
 			0, reinterpret_cast<void*>(Info.Number),    /// "грязный" cast
 			true, false);
 		// Проверяем подходит ли компьютер под выставленный фильтр
-		if ( !CheckFilter(&Info,2) )
+		if ( !CheckFilter(Info,2) )
 		{
 			if ( Item ) Item->Delete();
 			continue;
@@ -441,7 +449,7 @@ void TFormEvents::UpdateListViewComputers(bool Full_, MStates *States_, MTariffs
 		}
 		// Обновляем информацию в таблице
 		if ( Full_ ) Info.Changes=mdcAll;
-		SetListViewComputersLine(Item, &Info, Tariffs_);
+		SetListViewComputersLine(Item, Info, Tariffs_);
 	}
 }
 //---------------------------------------------------------------------------
@@ -474,34 +482,37 @@ error:
     return false;
 }
 //---------------------------------------------------------------------------
-void TFormEvents::UpdateTariffs(MTariffs *Tariffs_,
-	MLogRecords::DataTariffs *LogRecord_)
+MTariffs TFormEvents::MakeTariffs(
+	const MLogRecords::DataTariffs &LogRecord_)
 {
-	Tariffs_->Clear();
-	for ( auto &Ld: LogRecord_->Items )
+	MTariffs Tariffs;
+	for ( const auto &Ld: LogRecord_.Items )
 	{
-		Tariffs_->Add().sFromLog(Ld);
+		Tariffs.Add().sFromLog(Ld);
 	}
+	return Tariffs;
 }
 //---------------------------------------------------------------------------
-void TFormEvents::UpdateFines(MFines *Fines_,
-	MLogRecords::DataFines *LogRecord_)
+MFines TFormEvents::MakeFines(
+	const MLogRecords::DataFines &LogRecord_)
 {
-	Fines_->Clear();
-	for ( auto &Ld: LogRecord_->Items )
+	MFines Fines;
+	for ( const auto &Ld: LogRecord_.Items )
 	{
-		Fines_->Add().sFromLog(Ld);
+		Fines.Add().sFromLog(Ld);
 	}
+	return Fines;
 }
 //---------------------------------------------------------------------------
-void TFormEvents::UpdateUsers(MUsers *Users_,
-	MLogRecords::DataUsers *LogRecord_)
+MUsers TFormEvents::MakeUsers(
+	const MLogRecords::DataUsers &LogRecord_)
 {
-	Users_->Clear();
-	for ( auto &Ld: LogRecord_->Items )
+	MUsers Users;
+	for ( const auto &Ld: LogRecord_.Items )
 	{
-		Users_->Add().sFromLog(Ld);
+		Users.Add().sFromLog(Ld);
 	}
+	return Users;
 }
 //---------------------------------------------------------------------------
 bool TFormEvents::CheckEventFilter(unsigned char TypeID_)
@@ -579,19 +590,16 @@ void TFormEvents::UpdateListViewEvents()
         switch(Begin_->gTypeID())
         {
 			case MLogRecords::DataTariffs::TypeID:
-				UpdateTariffs(
-					&Tariffs,
-					static_cast<MLogRecords::DataTariffs*>(&*Begin_));
+				Tariffs=MakeTariffs(
+					static_cast<const MLogRecords::DataTariffs&>(*Begin_));
 				break;
 			case MLogRecords::DataFines::TypeID:
-				UpdateFines(
-					&Fines,
-					static_cast<MLogRecords::DataFines*>(&*Begin_));
+				Fines=MakeFines(
+					static_cast<const MLogRecords::DataFines&>(*Begin_));
 				break;
 			case MLogRecords::DataUsers::TypeID:
-				UpdateUsers(
-					&Users,
-					static_cast<MLogRecords::DataUsers*>(&*Begin_));
+				Users=MakeUsers(
+					static_cast<const MLogRecords::DataUsers&>(*Begin_));
 				break;
             default:
                 break;
@@ -603,7 +611,7 @@ void TFormEvents::UpdateListViewEvents()
         // Общие данные
         Item=ListViewEvents->Items->Add();
         Item->ImageIndex=-1;
-        Item->Data=&*Begin_;
+        Item->Data=const_cast<MLogRecordsItem*>(&*Begin_);
         // Время события
         if ( Int64ToSystemTime(Begin_->SystemTime, ss_time) )
 			swprintf(
@@ -636,7 +644,7 @@ void TFormEvents::UpdateListViewEvents()
 
 			case MLogRecords::AppConfig::TypeID:
 				Item->SubItems->Add(L"");
-				if ( static_cast<MLogRecords::AppConfig*>(&*Begin_)->Opened )
+				if ( static_cast<const MLogRecords::AppConfig&>(*Begin_).Opened )
 					Item->SubItems->Add(L"Настройки открыты");
 				else
 					Item->SubItems->Add(L"Настройки закрыты");
@@ -666,7 +674,7 @@ void TFormEvents::UpdateListViewEvents()
 			{
 				Item->SubItems->Add(L"");
 				auto iUsr=Users.SrchUUID(
-					static_cast<MLogRecords::AppLogIn*>(&*Begin_)->User);
+					static_cast<const MLogRecords::AppLogIn&>(*Begin_).User);
 				swprintf(
 					line, sizeof(line),
 					L"Смену начал(а) '%s'",
@@ -681,124 +689,124 @@ void TFormEvents::UpdateListViewEvents()
 
 			case MLogRecords::CompRun::TypeID:
 			{
-				auto rcdr=static_cast<MLogRecords::CompRun*>(&*Begin_);
-				auto iTrf=Tariffs.SrchUUID(rcdr->Tariff);
+				auto &rcdr=static_cast<const MLogRecords::CompRun&>(*Begin_);
+				auto iTrf=Tariffs.SrchUUID(rcdr.Tariff);
 
-				Item->SubItems->Add(IntToStr(rcdr->Number));
+				Item->SubItems->Add(IntToStr(rcdr.Number));
 				Item->SubItems->Add(iTrf!=Tariffs.end()? iTrf->Name.c_str(): L"???");
-				switch(rcdr->Type)
+				switch(rcdr.Type)
 				{
 					case mttHours:
 						swprintf(line, L"%i час. %.2i мин.",
-							rcdr->WorkTime/60,rcdr->WorkTime%60);
+							rcdr.WorkTime/60,rcdr.WorkTime%60);
 						break;
 					case mttFlyPacket:
 						swprintf(line, L"На %i час. %.2i мин. (%i:%.2i)",
-							rcdr->SizeTime/60,rcdr->SizeTime%60,
-							rcdr->WorkTime/60,rcdr->WorkTime%60);
+							rcdr.SizeTime/60,rcdr.SizeTime%60,
+							rcdr.WorkTime/60,rcdr.WorkTime%60);
 						break;
 					case mttPacket:
 						int end;
-						end=rcdr->EndTime>=(24*60)? rcdr->EndTime-24*60: rcdr->EndTime;
+						end=rcdr.EndTime>=(24*60)? rcdr.EndTime-24*60: rcdr.EndTime;
 						swprintf(line, L"С %i:%.2i до %i:%.2i (%i:%.2i)",
-							rcdr->BeginTime/60,rcdr->BeginTime%60,end/60,end%60,
-							rcdr->WorkTime/60,rcdr->WorkTime%60);
+							rcdr.BeginTime/60,rcdr.BeginTime%60,end/60,end%60,
+							rcdr.WorkTime/60,rcdr.WorkTime%60);
 						break;
 					default: *line=0; break;
 				}
 				Item->SubItems->Add(line);
-				Item->SubItems->Add(FloatToStrF(rcdr->Cost,ffCurrency,8,2));
+				Item->SubItems->Add(FloatToStrF(rcdr.Cost,ffCurrency,8,2));
 			}
 				break;
 			case MLogRecords::CompFine::TypeID:
 			{
-				auto rcdf=static_cast<MLogRecords::CompFine*>(&*Begin_);
-				auto iFn=Fines.SrchUUID(rcdf->Fine);
+				auto &rcdf=static_cast<const MLogRecords::CompFine&>(*Begin_);
+				auto iFn=Fines.SrchUUID(rcdf.Fine);
 
-				Item->SubItems->Add(IntToStr(rcdf->Number));
+				Item->SubItems->Add(IntToStr(rcdf.Number));
 				swprintf(
 					line, sizeof(line),
 					L"Штраф '%s'",
 					iFn!=Fines.end()? iFn->Descr.c_str(): L"???");
 				Item->SubItems->Add(line);
-				if ( rcdf->Time==(24*60) )
+				if ( rcdf.Time==(24*60) )
 				{
 					swprintf(
 						line, sizeof(line),
 						L"Все время");
-				} else if ( rcdf->Time<0 )
+				} else if ( rcdf.Time<0 )
 				{
 					swprintf(
 						line, sizeof(line),
 						L"Снято %i мин.",
-						-rcdf->Time);
+						-rcdf.Time);
 				} else
 				{
 					swprintf(
 						line, sizeof(line),
 						L"Ожидание %i мин.",
-						rcdf->Time);
+						rcdf.Time);
 				}
 				Item->SubItems->Add(line);
 			}
 				break;
 			case MLogRecords::CompExchange::TypeID:
 			{
-				auto rcde=static_cast<MLogRecords::CompExchange*>(&*Begin_);
+				auto &rcde=static_cast<const MLogRecords::CompExchange&>(*Begin_);
 
-				Item->SubItems->Add(IntToStr(rcde->From));
+				Item->SubItems->Add(IntToStr(rcde.From));
 				swprintf(
 					line, sizeof(line),
 					L"Пересадка на №%i",
-					rcde->To);
+					rcde.To);
 				Item->SubItems->Add(line);
 			}
 				break;
 			case MLogRecords::ModeLock::TypeID:
 			{
-				auto rcdl=static_cast<MLogRecords::ModeLock*>(&*Begin_);
+				auto &rcdl=static_cast<const MLogRecords::ModeLock&>(*Begin_);
 
-				Item->SubItems->Add(IntToStr(rcdl->Number));
-				Item->SubItems->Add(rcdl->Apply? L"Прикрыт": L"Открыт");
+				Item->SubItems->Add(IntToStr(rcdl.Number));
+				Item->SubItems->Add(rcdl.Apply? L"Прикрыт": L"Открыт");
 			}
 				break;
 			case MLogRecords::ModePause::TypeID:
 			{
-				auto rcdp=static_cast<MLogRecords::ModePause*>(&*Begin_);
+				auto &rcdp=static_cast<const MLogRecords::ModePause&>(*Begin_);
 
-				Item->SubItems->Add(IntToStr(rcdp->Number));
-				Item->SubItems->Add(rcdp->Apply? L"Время приостановлено": L"Время запущено");
+				Item->SubItems->Add(IntToStr(rcdp.Number));
+				Item->SubItems->Add(rcdp.Apply? L"Время приостановлено": L"Время запущено");
 			}
 				break;
 			case MLogRecords::ModeOpen::TypeID:
 			{
-				auto rcdo=static_cast<MLogRecords::ModeOpen*>(&*Begin_);
+				auto &rcdo=static_cast<const MLogRecords::ModeOpen&>(*Begin_);
 
-				Item->SubItems->Add(IntToStr(rcdo->Number));
-				Item->SubItems->Add(rcdo->Apply? L"Открыт для настройки": L"Закрыт после настройки");
+				Item->SubItems->Add(IntToStr(rcdo.Number));
+				Item->SubItems->Add(rcdo.Apply? L"Открыт для настройки": L"Закрыт после настройки");
 			}
 				break;
 			case MLogRecords::CmdPowerOn::TypeID:
 			{
-				auto rcdpwr=static_cast<MLogRecords::CmdPowerOn*>(&*Begin_);
+				auto &rcdpwr=static_cast<const MLogRecords::CmdPowerOn&>(*Begin_);
 
-				Item->SubItems->Add(IntToStr(rcdpwr->Number));
+				Item->SubItems->Add(IntToStr(rcdpwr.Number));
 				Item->SubItems->Add(L"Команда на включение");
 			}
 				break;
 			case MLogRecords::CmdReboot::TypeID:
 			{
-				auto rcdprb=static_cast<MLogRecords::CmdReboot*>(&*Begin_);
+				auto &rcdprb=static_cast<const MLogRecords::CmdReboot&>(*Begin_);
 
-				Item->SubItems->Add(IntToStr(rcdprb->Number));
+				Item->SubItems->Add(IntToStr(rcdprb.Number));
 				Item->SubItems->Add(L"Команда на перезагрузку");
 			}
 				break;
 			case MLogRecords::CmdShutdown::TypeID:
 			{
-				auto rcdpsd=static_cast<MLogRecords::CmdShutdown*>(&*Begin_);
+				auto &rcdpsd=static_cast<const MLogRecords::CmdShutdown&>(*Begin_);
 
-				Item->SubItems->Add(IntToStr(rcdpsd->Number));
+				Item->SubItems->Add(IntToStr(rcdpsd.Number));
 				Item->SubItems->Add(L"Команда на выключение");
 			}
 				break;

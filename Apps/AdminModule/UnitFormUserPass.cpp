@@ -14,26 +14,26 @@ __fastcall TFormUserPass::TFormUserPass(TComponent* Owner)
 {
 }
 //---------------------------------------------------------------------------
-bool TFormUserPass::Execute(MUsersItem *User_, int Left_, int Top_, bool LeftTop_)
+bool TFormUserPass::Execute(MUsersItem &User_, int Left_, int Top_, bool LeftTop_)
 {
-    Users=false;
-    ComboBoxLogin->Enabled=false;
-    SetEdit(false,true);
+	Users=false;
+	ComboBoxLogin->Enabled=false;
+	SetEdit(false,true);
 	ComboBoxLogin->Items->AddObject(
-		User_->Login.c_str(),
-		reinterpret_cast<TObject*>(User_));
-    ComboBoxLogin->ItemIndex=0;
-    ActiveControl=EditNew;
-    SetCoord(Left_,Top_,LeftTop_);
-    return ShowModal()==mrOk;
+		User_.Login.c_str(),
+		reinterpret_cast<TObject*>(&User_));
+	ComboBoxLogin->ItemIndex=0;
+	ActiveControl=EditNew;
+	SetCoord(Left_,Top_,LeftTop_);
+	return ShowModal()==mrOk;
 }
 //---------------------------------------------------------------------------
-bool TFormUserPass::Execute(MUsers *Users_, int Left_, int Top_, bool LeftTop_)
+bool TFormUserPass::Execute(MUsers &Users_, int Left_, int Top_, bool LeftTop_)
 {
     Users=true;
     ComboBoxLogin->Enabled=true;
     SetEdit(false,false);
-	for ( auto &User: *Users_ )
+	for ( auto &User: Users_ )
 	{
 		if ( !User.Active ) continue;
 		ComboBoxLogin->Items->AddObject(
@@ -86,28 +86,37 @@ void __fastcall TFormUserPass::FormShow(TObject *Sender)
 void __fastcall TFormUserPass::FormCloseQuery(TObject *Sender,
       bool &CanClose)
 {
-    int Index;
-    MUsersItem *User;
-
 	if ( ModalResult!=mrOk ) return;
+
 	// Определяем какой пользователь был выбран
-	if ( (Index=ComboBoxLogin->ItemIndex)<0 )
-		{ ActiveControl=ComboBoxLogin; goto error; }
-	User=reinterpret_cast<MUsersItem*>(
+	int Index=ComboBoxLogin->ItemIndex;
+	if ( Index<0 )
+	{
+		ActiveControl=ComboBoxLogin;
+		CanClose=false;
+		return;
+	}
+
+	auto &User=*reinterpret_cast<MUsersItem*>(
 		ComboBoxLogin->Items->Objects[Index]);
+
 	// Проверяем текущий пароль
-	if ( Users&&(!User->Pass.Check(EditPassword->Text.c_str())) )
-		{ ActiveControl=EditPassword; goto error; }
+	if ( Users && (!User.Pass.Check(EditPassword->Text.c_str())) )
+	{
+		ActiveControl=EditPassword;
+		CanClose=false;
+		return;
+	}
 	// Проверяем новый пароль
 	if ( EditNew->Text!=EditConfirm->Text )
-		{ ActiveControl=EditNew; goto error; }
-	//
-	User->Pass.Set(EditNew->Text.c_str());
+	{
+		ActiveControl=EditNew;
+		CanClose=false;
+		return;
+	}
 
-	return;
-error:
-	CanClose=false;
-	return;
+	//
+	User.Pass.Set(EditNew->Text.c_str());
 }
 //---------------------------------------------------------------------------
 void __fastcall TFormUserPass::FormClose(TObject *Sender,

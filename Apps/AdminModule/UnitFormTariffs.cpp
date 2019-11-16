@@ -82,31 +82,31 @@ void __fastcall TFormTariffs::ListViewNamesSelectItem(TObject *Sender,
     } else
         SetEdit(true);
 
-	auto *tariff=reinterpret_cast<MTariffsItem*>(
+	auto &tariff=*reinterpret_cast<const MTariffsItem*>(
 		ListViewNames->Selected->Data);
-    EditName->Text=tariff->Name.c_str();
-    // Проставляем группы программ
-    unsigned Programs=tariff->Programs;
-    CheckListBoxApps->Checked[0]=Programs&mgp1;
-    CheckListBoxApps->Checked[1]=Programs&mgp2;
-    CheckListBoxApps->Checked[2]=Programs&mgp3;
-    CheckListBoxApps->Checked[3]=Programs&mgp4;
-    CheckListBoxApps->Checked[4]=Programs&mgp5;
-    CheckListBoxApps->Checked[5]=Programs&mgp6;
-    CheckListBoxApps->Checked[6]=Programs&mgp7;
-    CheckListBoxApps->Checked[7]=Programs&mgp8;
-    //
-    CheckBoxReboot->Checked=tariff->Reboot;
-    CheckBoxRoute->Checked=tariff->Programs&mgpRoute;
-    CheckBoxDesktop->Checked=tariff->Programs&mgpDesktop;
-    // Проставляем для каких компьютеров используется тариф
-    int i=0;
+	EditName->Text=tariff.Name.c_str();
+	// Проставляем группы программ
+	unsigned Programs=tariff.Programs;
+	CheckListBoxApps->Checked[0]=Programs&mgp1;
+	CheckListBoxApps->Checked[1]=Programs&mgp2;
+	CheckListBoxApps->Checked[2]=Programs&mgp3;
+	CheckListBoxApps->Checked[3]=Programs&mgp4;
+	CheckListBoxApps->Checked[4]=Programs&mgp5;
+	CheckListBoxApps->Checked[5]=Programs&mgp6;
+	CheckListBoxApps->Checked[6]=Programs&mgp7;
+	CheckListBoxApps->Checked[7]=Programs&mgp8;
+	//
+	CheckBoxReboot->Checked=tariff.Reboot;
+	CheckBoxRoute->Checked=tariff.Programs&mgpRoute;
+	CheckBoxDesktop->Checked=tariff.Programs&mgpDesktop;
+	// Проставляем для каких компьютеров используется тариф
+	int i=0;
 	for ( const auto &comp: *Computers )
 	{
 		ListViewComputers->Items->Item[i]->Checked=
-            tariff->CheckForComp(comp.Number);
-        i++;
-    }
+			tariff.CheckForComp(comp.Number);
+		i++;
+	}
 }
 //---------------------------------------------------------------------------
 void __fastcall TFormTariffs::ButtonAddClick(TObject *Sender)
@@ -118,7 +118,7 @@ void __fastcall TFormTariffs::ButtonAddClick(TObject *Sender)
     }
 
     // Добавляем новый тариф в буфер
-	MTariffsItem& tariff=TmpTariffs.Add();
+	auto &tariff=TmpTariffs.Add();
     tariff.Name=L"Новый тариф";
     // Добавляем строку в список и связываем ее с тарифом
     TListItem *item=ListViewNames->Items->Add();
@@ -157,49 +157,49 @@ void __fastcall TFormTariffs::EditNameExit(TObject *Sender)
     if ( ListViewNames->Selected==nullptr ) return;
 
     EditName->Text=EditName->Text.Trim();
-	auto *tariff=reinterpret_cast<MTariffsItem*>(
+	auto &tariff=*reinterpret_cast<MTariffsItem*>(
 		ListViewNames->Selected->Data);
-    tariff->Name=EditName->Text.c_str();
-    SetListViewNamesLine(ListViewNames->Selected);
+	tariff.Name=EditName->Text.c_str();
+	SetListViewNamesLine(ListViewNames->Selected);
 }
 //---------------------------------------------------------------------------
 void __fastcall TFormTariffs::CheckBoxRebootExit(TObject *Sender)
 {
     if ( ListViewNames->Selected==nullptr ) return;
 
-	auto *item=reinterpret_cast<MTariffsItem*>(
+	auto &item=*reinterpret_cast<MTariffsItem*>(
 		ListViewNames->Selected->Data);
 	TCheckBox &cbox=dynamic_cast<TCheckBox&>(*Sender);
 
-	item->Reboot=cbox.Checked;
+	item.Reboot=cbox.Checked;
 }
 //---------------------------------------------------------------------------
 void __fastcall TFormTariffs::CheckBoxRouteExit(TObject *Sender)
 {
 	if ( ListViewNames->Selected==nullptr ) return;
 
-	auto *item=reinterpret_cast<MTariffsItem*>(
+	auto &item=*reinterpret_cast<MTariffsItem*>(
 		ListViewNames->Selected->Data);
 	TCheckBox &cbox=dynamic_cast<TCheckBox&>(*Sender);
 
 	if ( cbox.Checked )
-		item->Programs|=mgpRoute;
+		item.Programs|=mgpRoute;
 	else
-		item->Programs&=~mgpRoute;
+		item.Programs&=~mgpRoute;
 }
 //---------------------------------------------------------------------------
 void __fastcall TFormTariffs::CheckBoxDesktopExit(TObject *Sender)
 {
 	if ( ListViewNames->Selected==nullptr ) return;
 
-	auto *item=reinterpret_cast<MTariffsItem*>(
+	auto &item=*reinterpret_cast<MTariffsItem*>(
 		ListViewNames->Selected->Data);
 	TCheckBox &cbox=dynamic_cast<TCheckBox&>(*Sender);
 
 	if ( cbox.Checked )
-		item->Programs|=mgpDesktop;
+		item.Programs|=mgpDesktop;
 	else
-		item->Programs&=~mgpDesktop;
+		item.Programs&=~mgpDesktop;
 }
 //---------------------------------------------------------------------------
 void __fastcall TFormTariffs::CheckListBoxAppsExit(TObject *Sender)
@@ -243,9 +243,9 @@ void __fastcall TFormTariffs::ListViewComputersExit(TObject *Sender)
 			item->Data)->Number);
 	}
     // Сохраняем копию этого массива в тарифе
-	auto *tariff=reinterpret_cast<MTariffsItem*>(
+	auto &tariff=*reinterpret_cast<MTariffsItem*>(
 		ListViewNames->Selected->Data);
-	tariff->Comps=TmpComps;
+	tariff.Comps=TmpComps;
 }
 //---------------------------------------------------------------------------
 void __fastcall TFormTariffs::ButtonSetSelCompClick(TObject *Sender)
@@ -284,12 +284,12 @@ void __fastcall TFormTariffs::ButtonTimesClick(TObject *Sender)
 
     try
     {
-		auto *tariff=reinterpret_cast<MTariffsItem*>(
+		auto &tariff=*reinterpret_cast<MTariffsItem*>(
 			ListViewNames->Selected->Data);
-        // Открываем диалог редактирования
+		// Открываем диалог редактирования
 		form.reset(new TFormTariffTimes(0));
-		form->Execute(tariff->Times, tariff->Name.c_str(), Left+30, Top+30);
-    }
+		form->Execute(tariff.Times, tariff.Name.c_str(), Left+30, Top+30);
+	}
     catch (Exception &ex)
     {
         Application->ShowException(&ex);
@@ -348,5 +348,4 @@ void TFormTariffs::SetListViewNamesLine(TListItem *Item_)
     Item_->Caption=reinterpret_cast<MTariffsItem*>(Item_->Data)->Name.c_str();
 }
 //---------------------------------------------------------------------------
-
 

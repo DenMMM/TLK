@@ -344,60 +344,67 @@ bool MStatesItem::CmdShutdown(bool Check_)
     return true;
 }
 //---------------------------------------------------------------------------
-void MStatesItem::RunParam(MTariffRunTimesItem *RunTime_)
+MTariffRunTimesItem MStatesItem::GetRunParam() const
 {
-    MWAPI::CRITICAL_SECTION::Lock lckObj(CS_Main);
+	MTariffRunTimesItem RunTime;
 
-    RunTime_->Number=Number;
-    if ( State==mcsFree )
-    {
-        RunTime_->TariffID=0;
-        RunTime_->StartTime=SystemTime;
-        RunTime_->MaxTime=24*60;
+	MWAPI::CRITICAL_SECTION::Lock lckObj(CS_Main);
+
+	RunTime.Number=Number;
+	if ( State==mcsFree )
+	{
+		RunTime.TariffID=0;
+		RunTime.StartTime=SystemTime;
+		RunTime.MaxTime=24*60;
 ///    } else if ( (State&mcsWork)&&(!(State&(mcsPause|mcsOpen))) )
-    } else if ( State&mcsWork )
-    {
-        RunTime_->TariffID=TariffID;
-///        RunTime_->StartTime=StartWorkTime+SizeWorkTime*60*10000000i64;
-        RunTime_->StartTime=StartWorkTime+SizeWorkTime*60*10000000i64+
-            (State&(mcsPause|mcsOpen)?SystemTime-StopTimerTime:0);
-        RunTime_->MaxTime=24*60-SizeWorkTime;
-    } else
-    {
-        RunTime_->TariffID=0;
-        RunTime_->StartTime=0;
-        RunTime_->MaxTime=0;
-    }
+	} else if ( State&mcsWork )
+	{
+		RunTime.TariffID=TariffID;
+///        RunTime.StartTime=StartWorkTime+SizeWorkTime*60*10000000i64;
+		RunTime.StartTime=StartWorkTime+SizeWorkTime*60*10000000i64+
+			(State&(mcsPause|mcsOpen)?SystemTime-StopTimerTime:0);
+		RunTime.MaxTime=24*60-SizeWorkTime;
+	} else
+	{
+		RunTime.TariffID=0;
+		RunTime.StartTime=0;
+		RunTime.MaxTime=0;
+	}
+
+	return RunTime;
 }
 //---------------------------------------------------------------------------
-void MStatesItem::StateInfo(MStatesInfo *Info_)
+MStatesInfo MStatesItem::GetInfo()
 {
-    memset(Info_,0,sizeof(MStatesInfo));
+	MStatesInfo Info;
+	memset(&Info,0,sizeof(Info));
 
     MWAPI::CRITICAL_SECTION::Lock lckObj(CS_Main);
     //
-    Info_->Number=Number;
-    Info_->State=State;
+    Info.Number=Number;
+    Info.State=State;
     if ( State&mcsWork )
     {
-        Info_->TariffID=TariffID;
-        Info_->WorkTime=SizeWorkTime;
-        Info_->ToEndWork=SizeWorkTime-((State&(mcsPause|mcsOpen)?StopTimerTime:SystemTime)-
+        Info.TariffID=TariffID;
+        Info.WorkTime=SizeWorkTime;
+        Info.ToEndWork=SizeWorkTime-((State&(mcsPause|mcsOpen)?StopTimerTime:SystemTime)-
             StartWorkTime)/(60*10000000i64);
-        Info_->EndWorkTime=ExtractHoursMin(StartWorkTime+SizeWorkTime*60*10000000i64+
+        Info.EndWorkTime=ExtractHoursMin(StartWorkTime+SizeWorkTime*60*10000000i64+
             (State&(mcsPause|mcsOpen)?SystemTime-StopTimerTime:0));
     }
     if ( State&mcsFine )
     {
-        Info_->FineTime=SizeFineTime;
-        Info_->ToEndFine=SizeFineTime-(SystemTime-StartFineTime)/(60*10000000i64);
-        Info_->EndFineTime=ExtractHoursMin(StartFineTime+SizeFineTime*60*10000000i64);
+        Info.FineTime=SizeFineTime;
+        Info.ToEndFine=SizeFineTime-(SystemTime-StartFineTime)/(60*10000000i64);
+        Info.EndFineTime=ExtractHoursMin(StartFineTime+SizeFineTime*60*10000000i64);
     }
-    Info_->Commands=Commands;
-    Info_->NetState=NetState&(mnsPresent|mnsSyncNeed);
-    Info_->Changes=Changes;
+    Info.Commands=Commands;
+    Info.NetState=NetState&(mnsPresent|mnsSyncNeed);
+    Info.Changes=Changes;
     //
-    Changes=0;
+	Changes=0;
+
+    return Info;
 }
 //---------------------------------------------------------------------------
 bool MStatesItem::Timer(__int64 SystemTime_)

@@ -56,14 +56,15 @@ void TFormGames::UpdateGames(unsigned Pages_)
 void TFormGames::AddGamesToTree(const MGames &Games_,
 	TTreeNode *TreeNode_, TImageList *ImageList_)
 {
-	TTreeNode *NewTreeNode;
 	HICON icon;
 	wchar_t icon_file[MAX_PrgIconLength+1];    /// надо: [max(MAX_PrgCmdLength,MAX_PrgIconLength)+1]
 	wchar_t *pos1, *pos2;
 
 	for ( const auto &Game: Games_ )
 	{
-		NewTreeNode=TreeViewGames->Items->AddChild(TreeNode_,Game.Name.c_str());
+		TTreeNode *NewTreeNode=
+			TreeViewGames->Items->AddChild(
+				TreeNode_,Game.Name.c_str());
 
 		// Извлечем иконку
 		wcscpy(

@@ -260,7 +260,7 @@ void __fastcall TFormMain::NLogInClick(TObject *Sender)
     {
         // Открываем диалог авторизации
 		form.reset(new TFormLogIn(0));
-		User=form->Execute(Users.get());
+		User=form->Execute(*Users);
         if ( User==0 ) return;
     }
     catch (Exception &ex)
@@ -327,7 +327,7 @@ void __fastcall TFormMain::NConfigOpenClick(TObject *Sender)
         try
         {
 			form.reset(new TFormOpenConfig(0));
-			if ( !form->Execute(Options.get(), Left+20, Top+50, true) ) return;
+			if ( !form->Execute(*Options, Left+20, Top+50, true) ) return;
 		}
         catch (Exception &ex)
         {
@@ -393,7 +393,7 @@ void __fastcall TFormMain::NUsersPasswordsClick(TObject *Sender)
     try
     {
 		form.reset(new TFormUserPass(0));
-		if ( !form->Execute(Users.get(), Left+100, Top+50, true) ) return;
+		if ( !form->Execute(*Users, Left+100, Top+50, true) ) return;
 		if ( Users->Save() ) return;
 //        ShellState->State|=mssErrorConfig; SetShell();  /// не имеет смысла и опасно
 		ResMessageBox(Handle,1,3,MB_APPLMODAL|MB_OK|MB_ICONERROR,Users->gLastErr());
@@ -468,8 +468,7 @@ void __fastcall TFormMain::BitBtnExchangeClick(TObject *Sender)
 		state2=tmpstate;
 	}
 
-	MTariffRunTimesItem time;
-	state1->RunParam(&time);
+	MTariffRunTimesItem time=state1->GetRunParam();
 	// Проверяем применим ли тот же тариф ко второму компьютеру
 	auto iTariff=Tariffs->SrchUUID(time.TariffID);
 	if ( !((iTariff!=Tariffs->end()) && iTariff->CheckForComp(state2->Associated())) )
@@ -895,7 +894,7 @@ void TFormMain::UpdateListViewComputers(bool Full_)
     // Убираем из списка компьютеры, не подходящие под фильтр. Добавляем новые.
 	for ( auto &State: *States )
 	{
-		State.StateInfo(&Info);
+		Info=State.GetInfo();
 		Item=ListViewComputers->FindData(0,&State,true,false);
 		// Проверяем подходит ли компьютер под выставленный фильтр
 		if ( CheckFilter(&Info,Options->FilterFreeTime) )

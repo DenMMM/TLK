@@ -10,11 +10,14 @@
 __fastcall TFormOpenConfig::TFormOpenConfig(TComponent* Owner)
     : TForm(Owner)
 {
+    Options=nullptr;
 }
 //---------------------------------------------------------------------------
-bool TFormOpenConfig::Execute(MOptions *Options_, int Left_, int Top_, bool LeftTop_)
+bool TFormOpenConfig::Execute(
+	const MOptions &Options_,
+	int Left_, int Top_, bool LeftTop_)
 {
-    Options=Options_;
+    Options=&Options_;
     ActiveControl=EditPassword;
     SetCoord(Left_,Top_,LeftTop_);
     return ShowModal()==mrOk;

@@ -72,13 +72,19 @@ private:	// User declarations
 	MLogRecords::const_iterator EventsEnd;
 	int EventSort;
 	int StateFilter;
-	bool CheckFilter(MStatesInfo *Info_, int FreeTime_);
-	int GetCompNum(const MLogRecordsItem *Item_);
-	void SetListViewComputersLine(TListItem *Item_, MStatesInfo *Info_, MTariffs *Tariffs_);
-	void UpdateListViewComputers(bool Full_, MStates *States_, MTariffs *Tariffs_);
-	void UpdateTariffs(MTariffs *Tariffs_, MLogRecords::DataTariffs *LogRecord_);
-	void UpdateFines(MFines *Fines_, MLogRecords::DataFines *LogRecord_);
-	void UpdateUsers(MUsers *Users_, MLogRecords::DataUsers *LogRecord_);
+	bool CheckFilter(const MStatesInfo &Info_, int FreeTime_);
+	int GetCompNum(const MLogRecordsItem &Item_);
+	void SetListViewComputersLine(
+		TListItem *Item_,
+		const MStatesInfo &Info_,
+		const MTariffs &Tariffs_);
+	void UpdateListViewComputers(
+		bool Full_,
+		MStates &States_,
+		const MTariffs &Tariffs_);
+	MTariffs MakeTariffs(const MLogRecords::DataTariffs &LogRecord_);
+	MFines MakeFines(const MLogRecords::DataFines &LogRecord_);
+	MUsers MakeUsers(const MLogRecords::DataUsers &LogRecord_);
 	bool CheckEventFilter(unsigned char TypeID_);
 	void UpdateListViewEvents();
 public:		// User declarations

@@ -186,8 +186,8 @@ public:
 	// Создать объекты синхронизации для компьютеров и связать с их MState
 	void Associate(MStates *States_, MComputers *Computers_);
 	// Пакетная обработка тех же операций для MSyncState
-	bool Start() const;
-	bool Stop() const;
+	bool Start();
+	bool Stop();
 	// Найти объект по IP-адресу
 	const_iterator Search(u_long IP_) const;
 	iterator Search(u_long IP_)

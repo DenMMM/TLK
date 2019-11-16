@@ -280,7 +280,7 @@ void MSyncStates::Associate(MStates *States_, MComputers *Computers_)
 	while( iLastSyncState!=iEnd ) iLastSyncState=Del(iLastSyncState);
 }
 //---------------------------------------------------------------------------
-bool MSyncStates::Start() const
+bool MSyncStates::Start()
 {
 	for ( auto &SyncState: *this )
 	{
@@ -290,7 +290,7 @@ bool MSyncStates::Start() const
 	return true;
 }
 //---------------------------------------------------------------------------
-bool MSyncStates::Stop() const
+bool MSyncStates::Stop()
 {
 	bool NeedSave=false;
 

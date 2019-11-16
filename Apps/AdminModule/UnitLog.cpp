@@ -233,7 +233,7 @@ bool MLog::Open()
 	if ( (iRecord==iEnd)||
 		(iRecord->gTypeID() != MLogRecords::LogBegin::TypeID) ) goto error;
 	// Запоминаем время, когда лог был начат
-	BeginTime=dynamic_cast<MLogRecords::LogBegin&>(*iRecord).SystemTime;
+	BeginTime=dynamic_cast<const MLogRecords::LogBegin&>(*iRecord).SystemTime;
 	//
 	++iRecord;
 	if ( (iRecord==iEnd)||
@@ -267,7 +267,7 @@ bool MLog::Open()
 		if ( type == MLogRecords::AppLogOut::TypeID ) break;
 		else if ( type == MLogRecords::AppLogIn::TypeID )
 		{
-			User=dynamic_cast<MLogRecords::AppLogIn&>(*iRecord).User;
+			User=dynamic_cast<const MLogRecords::AppLogIn&>(*iRecord).User;
 			break;
 		}
 	}

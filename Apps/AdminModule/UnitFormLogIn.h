@@ -29,7 +29,7 @@ __published:	// IDE-managed Components
 private:	// User declarations
     unsigned ID;
 public:		// User declarations
-    unsigned Execute(MUsers *Users_);
+    unsigned Execute(const MUsers &Users_);
     __fastcall TFormLogIn(TComponent* Owner);
 };
 //---------------------------------------------------------------------------

@@ -38,8 +38,8 @@ private:	// User declarations
 public:		// User declarations
 	bool Open(
 		const MLogFile &File_,
-		MLogRecords::const_iterator Begin_,
-		MLogRecords::const_iterator End_);
+		const MLogRecords::const_iterator Begin_,
+		const MLogRecords::const_iterator End_);
     __fastcall TFormUsersUpTime(TComponent* Owner);
 };
 //---------------------------------------------------------------------------

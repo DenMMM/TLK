@@ -37,7 +37,7 @@ __published:	// IDE-managed Components
 private:	// User declarations
     MAuth TmpAuth;
     unsigned char TmpKey[MAC_KeySize];
-    wchar_t HexBuffer[MAC_KeySize*3+1];
+    wchar_t HexBuffer[sizeof(TmpKey)*3+1];
 public:		// User declarations
     __fastcall TFormAuth(TComponent* Owner);
 };

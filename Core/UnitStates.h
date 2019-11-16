@@ -121,8 +121,8 @@ public:
 	bool CmdShutdown(bool Check_);
 
 	// Вспомогательные функции
-	void RunParam(MTariffRunTimesItem *RunTime_);
-	void StateInfo(MStatesInfo *Info_);
+	MTariffRunTimesItem GetRunParam() const;
+	MStatesInfo GetInfo();
 	bool Timer(__int64 SystemTime_);
 
 	// Назначение и проверка связей с другими данными

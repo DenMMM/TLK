@@ -133,67 +133,67 @@ void MShared::SetTransp(bool Transp_)
     NextVer(&pData->TranspVer);
 }
 //---------------------------------------------------------------------------
-bool MShared::CheckSysTime(__int64 *SysTime_, unsigned *SysTimeVer_) const
+bool MShared::CheckSysTime(__int64 &SysTime_, unsigned &SysTimeVer_) const
 {
-    if ( *SysTimeVer_==pData->SysTimeVer ) return false;
-    *SysTime_=pData->SysTime;
-    *SysTimeVer_=pData->SysTimeVer;
+	if ( SysTimeVer_==pData->SysTimeVer ) return false;
+	SysTime_=pData->SysTime;
+	SysTimeVer_=pData->SysTimeVer;
     return true;
 }
 //---------------------------------------------------------------------------
-bool MShared::CheckCompNum(int *Num_, unsigned *NumVer_) const
+bool MShared::CheckCompNum(int &Num_, unsigned &NumVer_) const
 {
-    if ( *NumVer_==pData->CompNumVer ) return false;
-    *Num_=pData->CompNum;
-    *NumVer_=pData->CompNumVer;
+	if ( NumVer_==pData->CompNumVer ) return false;
+	Num_=pData->CompNum;
+    NumVer_=pData->CompNumVer;
     return true;
 }
 //---------------------------------------------------------------------------
-bool MShared::CheckWorkTime(int *Time_, unsigned *TimeVer_) const
+bool MShared::CheckWorkTime(int &Time_, unsigned &TimeVer_) const
 {
-    if ( *TimeVer_==pData->WorkTimeVer ) return false;
-    *Time_=pData->WorkTime;
-    *TimeVer_=pData->WorkTimeVer;
+	if ( TimeVer_==pData->WorkTimeVer ) return false;
+	Time_=pData->WorkTime;
+    TimeVer_=pData->WorkTimeVer;
     return true;
 }
 //---------------------------------------------------------------------------
-bool MShared::CheckWarnMsg(bool *Msg_, unsigned *MsgVer_) const
+bool MShared::CheckWarnMsg(bool &Msg_, unsigned &MsgVer_) const
 {
-    if ( *MsgVer_==pData->WarnMsgVer ) return false;
-    *Msg_=pData->WarnMsg;
-    *MsgVer_=pData->WarnMsgVer;
+	if ( MsgVer_==pData->WarnMsgVer ) return false;
+	Msg_=pData->WarnMsg;
+    MsgVer_=pData->WarnMsgVer;
     return true;
 }
 //---------------------------------------------------------------------------
-bool MShared::CheckImageMessage(int *Msg_, unsigned *MsgVer_) const
+bool MShared::CheckImageMessage(int &Msg_, unsigned &MsgVer_) const
 {
-    if ( *MsgVer_==pData->ImageMsgVer ) return false;
-    *Msg_=pData->ImageMsg;
-    *MsgVer_=pData->ImageMsgVer;
+	if ( MsgVer_==pData->ImageMsgVer ) return false;
+	Msg_=pData->ImageMsg;
+    MsgVer_=pData->ImageMsgVer;
     return true;
 }
 //---------------------------------------------------------------------------
-bool MShared::CheckGames(unsigned *Games_, unsigned *GamesVer_) const
+bool MShared::CheckGames(unsigned &Games_, unsigned &GamesVer_) const
 {
-    if ( *GamesVer_==pData->GamesVer ) return false;
-    *Games_=pData->Games;
-    *GamesVer_=pData->GamesVer;
+	if ( GamesVer_==pData->GamesVer ) return false;
+	Games_=pData->Games;
+    GamesVer_=pData->GamesVer;
     return true;
 }
 //---------------------------------------------------------------------------
-bool MShared::CheckConfigMode(bool *Mode_, unsigned *ModeVer_) const
+bool MShared::CheckConfigMode(bool &Mode_, unsigned &ModeVer_) const
 {
-    if ( *ModeVer_==pData->ConfigModeVer ) return false;
-    *Mode_=pData->ConfigMode;
-    *ModeVer_=pData->ConfigModeVer;
+	if ( ModeVer_==pData->ConfigModeVer ) return false;
+	Mode_=pData->ConfigMode;
+    ModeVer_=pData->ConfigModeVer;
     return true;
 }
 //---------------------------------------------------------------------------
-bool MShared::CheckTransp(bool *Transp_, unsigned *TranspVer_) const
+bool MShared::CheckTransp(bool &Transp_, unsigned &TranspVer_) const
 {
-    if ( *TranspVer_==pData->TranspVer ) return false;
-    *Transp_=pData->Transp;
-    *TranspVer_=pData->TranspVer;
+	if ( TranspVer_==pData->TranspVer ) return false;
+	Transp_=pData->Transp;
+    TranspVer_=pData->TranspVer;
     return true;
 }
 //---------------------------------------------------------------------------
