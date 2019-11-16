@@ -37,7 +37,7 @@ private:	// User declarations
     MUsersUpTime Times;
 public:		// User declarations
 	bool Open(
-		MLogFile *File_,
+		const MLogFile &File_,
 		MLogRecords::const_iterator Begin_,
 		MLogRecords::const_iterator End_);
     __fastcall TFormUsersUpTime(TComponent* Owner);

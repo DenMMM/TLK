@@ -9,13 +9,15 @@
 #include "UnitUsersUpTime.h"
 //---------------------------------------------------------------------------
 bool ProcessComputersState(
-	MLogRecords::const_iterator Position_,
-	MStates *States_, MTariffs *Tariffs_);
+	const MLogRecords &Log_,
+	const MLogRecords::const_iterator iPoint_,
+	MStates &States_, MTariffs &Tariffs_);
 //---------------------------------------------------------------------------
 bool ProcessUsersUpTime(
-	MLogRecords::const_iterator Begin_,
-	MLogRecords::const_iterator End_,
-	MUsers *Users_, MUsersUpTime *UpTimes_);
+//	const MLogRecords &Log_,
+	MLogRecords::const_iterator iBegin_,
+	const MLogRecords::const_iterator iEnd_,
+	MUsers &Users_, MUsersUpTime &UpTimes_);
 //---------------------------------------------------------------------------
 #endif
 

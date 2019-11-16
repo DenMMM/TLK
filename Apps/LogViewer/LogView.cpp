@@ -12,7 +12,7 @@ int WINAPI _tWinMain(HINSTANCE, HINSTANCE, LPTSTR lpCmdLine, int)
 		 Application->Initialize();
          Application->Title = L"TLK - Просмотр логов";
          Application->CreateForm(__classid(TFormMain), &FormMain);
-         Application->Run();
+		Application->Run();
     }
     catch (Exception &exception)
     {

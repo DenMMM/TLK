@@ -43,7 +43,7 @@ __published:	// IDE-managed Components
     void __fastcall NTileClick(TObject *Sender);
 private:	// User declarations
 public:		// User declarations
-    void WindowOpen(MLogFile *File_, TForm *Window_);
+    void WindowOpen(const MLogFile &File_, TForm *Window_);
     void WindowCaption(TForm *Window_, char *Caption_);
     void WindowClose(TForm *Window_);
     __fastcall TFormMain(TComponent* Owner);

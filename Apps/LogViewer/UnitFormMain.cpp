@@ -1,5 +1,6 @@
 //---------------------------------------------------------------------------
 #include <vcl.h>
+#include <memory>
 #pragma hdrstop
 
 #include "UnitFormMain.h"
@@ -17,46 +18,43 @@ __fastcall TFormMain::TFormMain(TComponent* Owner)
 //---------------------------------------------------------------------------
 void __fastcall TFormMain::FormClose(TObject *Sender, TCloseAction &Action)
 {
-    for ( int i=MDIChildCount-1; i>=0; i-- ) MDIChildren[i]->Close();
+	for ( int i=MDIChildCount-1; i>=0; i-- ) MDIChildren[i]->Close();
 }
 //---------------------------------------------------------------------------
 void __fastcall TFormMain::NOpenClick(TObject *Sender)
 {
-	MLogFile *File=nullptr;
 	wchar_t file_name[MAX_PATH+1];
-	TMenuItem *Menu;
 
 	if ( !OpenDialog->Execute() ) return;
 	//
-	File=new MLogFile;                     		/// try {} catch()
+	std::unique_ptr <MLogFile> File(new MLogFile);
 	File->Name=OpenDialog->FileName.c_str();
-    // Загружаем файл лога
-    File->Records.LoadFrom(File->Name,ENC_Code);
-    //
+	// Загружаем файл лога
+	File->Records.LoadFrom(File->Name,ENC_Code);
+	//
 	if ( ::GetFileTitle(
 		File->Name.c_str(),
 		file_name,
-		sizeof(file_name))<0 ) goto error;
+		sizeof(file_name))<0 ) return;
 
-    Menu=new TMenuItem(NWindows);
-    Menu->Caption=file_name;
-    Menu->Tag=(int)File;
-    NWindows->Add(Menu);
-    // Обрабатываем его записи
-    FormEvents=new TFormEvents(this);
+	TMenuItem *Menu=new TMenuItem(NWindows);
+	Menu->Caption=file_name;
+	Menu->Tag=(int)File.release();
+	NWindows->Add(Menu);
+
+	MLogFile &rFile=*((MLogFile*)Menu->Tag);
+	// Обрабатываем его записи
+	FormEvents=new TFormEvents(this);
 	FormEvents->Open(
-		File,
-		File->Records.cbegin(),
-		File->Records.cend());
+		rFile,
+		rFile.Records.cbegin(),
+		rFile.Records.cend());
 
 	FormUsersUpTime=new TFormUsersUpTime(this);
 	FormUsersUpTime->Open(
-		File,
-		File->Records.cbegin(),
-		File->Records.cend());
-
-error:
-    return;
+		rFile,
+		rFile.Records.cbegin(),
+		rFile.Records.cend());
 }
 //---------------------------------------------------------------------------
 void __fastcall TFormMain::NWindowsClick(TObject *Sender)
@@ -74,17 +72,17 @@ void __fastcall TFormMain::NCloseClick(TObject *Sender)
     Close();
 }
 //---------------------------------------------------------------------------
-void TFormMain::WindowOpen(MLogFile *File_, TForm *Window_)
+void TFormMain::WindowOpen(const MLogFile &File_, TForm *Window_)
 {
-    TMenuItem *Menu;
-    for ( int i=NWindows->Count-1; i>=0; i-- )
-    {
-        if ( NWindows->Items[i]->Tag!=((int)File_) ) continue;
-        Menu=new TMenuItem(NWindows->Items[i]);
-        Menu->Caption=Window_->Caption;
-        Menu->Tag=(int)Window_;
-        Menu->OnClick=&NWindowsClick;
-        NWindows->Items[i]->Add(Menu);
+	TMenuItem *Menu;
+	for ( int i=NWindows->Count-1; i>=0; i-- )
+	{
+		if ( NWindows->Items[i]->Tag!=((int)&File_) ) continue;
+		Menu=new TMenuItem(NWindows->Items[i]);
+		Menu->Caption=Window_->Caption;
+		Menu->Tag=(int)Window_;
+		Menu->OnClick=&NWindowsClick;
+		NWindows->Items[i]->Add(Menu);
         break;
     }
 }

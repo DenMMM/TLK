@@ -26,9 +26,9 @@ void __fastcall TFormUsersUpTime::FormClose(TObject *Sender,
 }
 //---------------------------------------------------------------------------
 bool TFormUsersUpTime::Open(
-	MLogFile *File_,
-	MLogRecords::const_iterator Begin_,
-	MLogRecords::const_iterator End_)
+	const MLogFile &File_,
+	MLogRecords::const_iterator iBegin_,
+	MLogRecords::const_iterator iEnd_)
 {
 	__int64 time;
 	int hours, min;
@@ -36,7 +36,7 @@ bool TFormUsersUpTime::Open(
 	int pos;
 	SYSTEMTIME ss_time_b, ss_time_e;
 
-	ProcessUsersUpTime(Begin_,End_,&Users,&Times);
+	ProcessUsersUpTime(iBegin_,iEnd_,Users,Times);
 	ListViewUpTimes->Items->Clear();
 
 	for ( auto &Time: Times )
@@ -50,7 +50,7 @@ bool TFormUsersUpTime::Open(
 		else Item->SubItems->Add(iUser->Name.c_str());
 
 		// Время
-		if ( Int64ToSystemTime(&Time.BeginTime,&ss_time_b) )
+		if ( Int64ToSystemTime(Time.BeginTime,ss_time_b) )
 		{
 			swprintf(
 				line, sizeof(line),
@@ -65,7 +65,7 @@ bool TFormUsersUpTime::Open(
 		//
 		if (
 			Time.EndTime!=0 &&
-			Int64ToSystemTime(&Time.EndTime,&ss_time_e) )
+			Int64ToSystemTime(Time.EndTime,ss_time_e) )
 		{
 			pos=0;
 			if ( ss_time_b.wYear!=ss_time_e.wYear ) goto year;
@@ -96,7 +96,7 @@ day:            pos+=swprintf(line+pos, L"%02d - ",ss_time_e.wDay);
 		Item->SubItems->Add(FloatToStrF(Time.Gains,ffCurrency,8,2));
 	}
 
-	Caption=UnicodeString(L"Смены  -  ")+File_->Name.c_str();
+	Caption=UnicodeString(L"Смены  -  ")+File_.Name.c_str();
 	FormMain->WindowOpen(File_,this);
 	FormMain->WindowCaption(this, "Смены");         /// Unicode support ???
 	return true;

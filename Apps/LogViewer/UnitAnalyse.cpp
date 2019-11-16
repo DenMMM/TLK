@@ -7,41 +7,44 @@
 #pragma package(smart_init)
 //---------------------------------------------------------------------------
 bool ProcessComputersState(
-	MLogRecords::const_iterator Position_,
-	MStates *States_, MTariffs *Tariffs_)
+	const MLogRecords &Log_,
+	const MLogRecords::const_iterator iPoint_,
+	MStates &States_, MTariffs &Tariffs_)
 {
-	States_->Clear();
-	Tariffs_->Clear();
+	States_.Clear();
+	Tariffs_.Clear();
 	// Ищем назад по логу ближайшие данные по состоянию компьютеров
-	MLogRecords::const_iterator Record=Position_;
+	MLogRecords::const_iterator
+		iPos=iPoint_,
+		iBegin=Log_.begin();
 	while(
-		Record &&
-		(Record->gTypeID()!=MLogRecords::DataStates::TypeID)
-		) Record=Record->gPrev();
-	if ( Record==nullptr ) goto error;
+		(iPos!=iBegin) &&    	/// Не совсем чисто, т.к. итератор "прямой"
+		(iPos->gTypeID()!=MLogRecords::DataStates::TypeID)
+		) --iPos;
+	if ( iPos==iBegin ) goto error;
 
 	// Заполняем таблицу состояний начальными данными
 	{
-		auto *rcdds=dynamic_cast<MLogRecords::DataStates*>(Record);
-		for ( auto &Ld: rcdds->Items )
+		auto &rcdds=dynamic_cast<MLogRecords::DataStates&>(*iPos);
+		for ( auto &Ld: rcdds.Items )
 		{
-			States_->Add().sFromLog(Ld);
+			States_.Add().sFromLog(Ld);
 		}
 	}
 	// Начинаем сбор данных за прошедшее время
-	while(Record!=Position_)
+	while(iPos!=iPoint_)
 	{
-		Record=Record->gNext();
+		++iPos;
 
-		switch(Record->gTypeID())
+		switch(iPos->gTypeID())
 		{
 			case MLogRecords::CompRun::TypeID:
 			{
-				auto *rcdr=static_cast<MLogRecords::CompRun*>(Record);
-				auto iState=States_->Search(rcdr->Number);
-				if ( iState==States_->end() ) goto error;
-				auto iTariff=Tariffs_->SrchUUID(rcdr->Tariff);
-				if ( iTariff==Tariffs_->end() ) goto error;
+				auto &rcdr=static_cast<MLogRecords::CompRun&>(*iPos);
+				auto iState=States_.Search(rcdr.Number);
+				if ( iState==States_.end() ) goto error;
+				auto iTariff=Tariffs_.SrchUUID(rcdr.Tariff);
+				if ( iTariff==Tariffs_.end() ) goto error;
 
 				MTariffRunTimesItem runtime;
 ///				memset(&runtime,0,sizeof(runtime));
@@ -56,79 +59,79 @@ bool ProcessComputersState(
 				runtime.MaxTime=0;
 				runtime.Cost=0.;
 
-				runtime.WorkTime=rcdr->WorkTime;
+				runtime.WorkTime=rcdr.WorkTime;
 
-				iState->Timer(rcdr->SystemTime);
+				iState->Timer(rcdr.SystemTime);
 				if ( !iState->CmdRun(&*iTariff,&runtime,false) ) goto error;
 			}
 				break;
 
 			case MLogRecords::CompFine::TypeID:
 			{
-				auto *rcdf=static_cast<MLogRecords::CompFine*>(Record);
-				auto iState=States_->Search(rcdf->Number);
-				if ( iState==States_->end() ) goto error;
-//                if ( (fine=Fines->Search(rcdf->Fine))==nullptr ) goto error;
-				iState->Timer(rcdf->SystemTime);
-				if ( !iState->CmdFine(rcdf->Time,false) ) goto error;
+				auto &rcdf=static_cast<MLogRecords::CompFine&>(*iPos);
+				auto iState=States_.Search(rcdf.Number);
+				if ( iState==States_.end() ) goto error;
+//                if ( (fine=Fines->Search(rcdf.Fine))==nullptr ) goto error;
+				iState->Timer(rcdf.SystemTime);
+				if ( !iState->CmdFine(rcdf.Time,false) ) goto error;
 			}
 				break;
 
 			case MLogRecords::CompExchange::TypeID:
 			{
-				auto *rcde=static_cast<MLogRecords::CompExchange*>(Record);
-				auto iState=States_->Search(rcde->From);
-				if ( iState==States_->end() ) goto error;
-				auto iState2=States_->Search(rcde->To);
-				if ( iState2==States_->end() ) goto error;
+				auto &rcde=static_cast<MLogRecords::CompExchange&>(*iPos);
+				auto iState=States_.Search(rcde.From);
+				if ( iState==States_.end() ) goto error;
+				auto iState2=States_.Search(rcde.To);
+				if ( iState2==States_.end() ) goto error;
 
-				iState->Timer(rcde->SystemTime);
-				iState2->Timer(rcde->SystemTime);
+				iState->Timer(rcde.SystemTime);
+				iState2->Timer(rcde.SystemTime);
 				if ( !iState->CmdExchange(&*iState2,false) ) goto error;
 			}
 				break;
 
 			case MLogRecords::ModeLock::TypeID:
 			{
-				auto *rcdl=static_cast<MLogRecords::ModeLock*>(Record);
-				auto iState=States_->Search(rcdl->Number);
-				if ( iState==States_->end() ) goto error;
+				auto &rcdl=static_cast<MLogRecords::ModeLock&>(*iPos);
+				auto iState=States_.Search(rcdl.Number);
+				if ( iState==States_.end() ) goto error;
 
-				iState->Timer(rcdl->SystemTime);
-				iState->CmdLock(rcdl->Apply,false);
+				iState->Timer(rcdl.SystemTime);
+				iState->CmdLock(rcdl.Apply,false);
 			}
 				break;
 
 			case MLogRecords::ModePause::TypeID:
 			{
-				auto *rcdp=static_cast<MLogRecords::ModePause*>(Record);
-				auto iState=States_->Search(rcdp->Number);
-				if ( iState==States_->end() ) goto error;
+				auto &rcdp=static_cast<MLogRecords::ModePause&>(*iPos);
+				auto iState=States_.Search(rcdp.Number);
+				if ( iState==States_.end() ) goto error;
 
-				iState->Timer(rcdp->SystemTime);
-				iState->CmdPause(rcdp->Apply,false);
+				iState->Timer(rcdp.SystemTime);
+				iState->CmdPause(rcdp.Apply,false);
 			}
 				break;
 
 			case MLogRecords::ModeOpen::TypeID:
 			{
-				auto *rcdo=static_cast<MLogRecords::ModeOpen*>(Record);
-				auto iState=States_->Search(rcdo->Number);
-				if ( iState==States_->end() ) goto error;
+				auto &rcdo=static_cast<MLogRecords::ModeOpen&>(*iPos);
+				auto iState=States_.Search(rcdo.Number);
+				if ( iState==States_.end() ) goto error;
 
-				iState->Timer(rcdo->SystemTime);
-				iState->CmdOpen(rcdo->Apply,false);
+				iState->Timer(rcdo.SystemTime);
+				iState->CmdOpen(rcdo.Apply,false);
 			}
 				break;
 
 			case MLogRecords::DataTariffs::TypeID:
 			{
-				auto *rcddtrf=static_cast<MLogRecords::DataTariffs*>(Record);
+				auto &rcddtrf=static_cast<MLogRecords::DataTariffs&>(*iPos);
 
-				Tariffs_->Clear();
-				for ( auto &Ld: rcddtrf->Items )
+				Tariffs_.Clear();
+				for ( auto &Ld: rcddtrf.Items )
 				{
-					Tariffs_->Add().sFromLog(Ld);
+					Tariffs_.Add().sFromLog(Ld);
 				}
 			}
 				break;
@@ -137,7 +140,7 @@ bool ProcessComputersState(
 		}
 	}
 	// Обновляем состояния
-	States_->Timer(Record->SystemTime);
+	States_.Timer(iPos->SystemTime);
 
 	return true;
 error:
@@ -145,38 +148,38 @@ error:
 }
 //---------------------------------------------------------------------------
 bool ProcessUsersUpTime(
-	MLogRecords::const_iterator Begin_,
-	MLogRecords::const_iterator End_,
-	MUsers *Users_, MUsersUpTime *UpTimes_)
+//	const MLogRecords &Log_,
+	MLogRecords::const_iterator iPosBegin_,
+	const MLogRecords::const_iterator iPosEnd_,
+	MUsers &Users_, MUsersUpTime &UpTimes_)
 {
-	Users_->Clear();
-	UpTimes_->Clear();
-	MUserUpTime *uptime=nullptr;
+	Users_.Clear();
+	UpTimes_.Clear();
 
-	if ( Begin_==nullptr ) goto exit;
-	for ( ; Begin_!=End_->gNext(); Begin_=Begin_->gNext() )
-    {
-        switch(Begin_->gTypeID())
-        {
+	for ( MUserUpTime *uptime=nullptr;
+		iPosBegin_!=iPosEnd_; ++iPosBegin_ )
+	{
+		switch(iPosBegin_->gTypeID())
+		{
 			case MLogRecords::AppConfig::TypeID:
 				break;
 
 			case MLogRecords::AppLogIn::TypeID:
-				if ( uptime!=nullptr ) goto error;
-				uptime=&UpTimes_->Add();
-				uptime->User=static_cast<MLogRecords::AppLogIn*>(Begin_)->User;
-				uptime->BeginTime=static_cast<MLogRecords::AppLogIn*>(Begin_)->SystemTime;
+				if ( uptime!=nullptr ) goto error;      /// throw ?
+				uptime=&UpTimes_.Add();
+				uptime->User=static_cast<MLogRecords::AppLogIn&>(*iPosBegin_).User;
+				uptime->BeginTime=static_cast<MLogRecords::AppLogIn&>(*iPosBegin_).SystemTime;
 				break;
 
 			case MLogRecords::AppLogOut::TypeID:
 				if ( uptime==nullptr ) goto error;
-				uptime->EndTime=static_cast<MLogRecords::AppLogOut*>(Begin_)->SystemTime;
+				uptime->EndTime=static_cast<MLogRecords::AppLogOut&>(*iPosBegin_).SystemTime;
 				uptime=nullptr;
 				break;
 
 			case MLogRecords::CompRun::TypeID:
 				if ( uptime==nullptr ) continue;
-				uptime->Gains+=static_cast<MLogRecords::CompRun*>(Begin_)->Cost;
+				uptime->Gains+=static_cast<MLogRecords::CompRun&>(*iPosBegin_).Cost;
 				break;
 
 			case MLogRecords::CompFine::TypeID:
@@ -187,17 +190,17 @@ bool ProcessUsersUpTime(
 
 			case MLogRecords::DataUsers::TypeID:
 			{
-				auto *rcddusr=static_cast<MLogRecords::DataUsers*>(Begin_);
+				auto &rcddusr=static_cast<MLogRecords::DataUsers&>(*iPosBegin_);
 
 				// Добавляем новых пользователей в список
-				for ( auto &Ld: rcddusr->Items )
+				for ( auto &Ld: rcddusr.Items )
 				{
-					auto iUsr=Users_->SrchUUID(Ld.UUID);
+					auto iUsr=Users_.SrchUUID(Ld.UUID);
 
-					if ( iUsr!=Users_->end() )
+					if ( iUsr!=Users_.end() )
 						iUsr->Name=Ld.Name;
 					else
-						Users_->Add().sFromLog(Ld);
+						Users_.Add().sFromLog(Ld);
 				}
 				break;
 			}
@@ -207,7 +210,6 @@ bool ProcessUsersUpTime(
 		}
 	}
 
-exit:
 	return true;
 error:
 	return false;

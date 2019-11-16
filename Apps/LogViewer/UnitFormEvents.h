@@ -67,6 +67,7 @@ __published:	// IDE-managed Components
     void __fastcall NEventAllClick(TObject *Sender);
     void __fastcall FormCreate(TObject *Sender);
 private:	// User declarations
+    const MLogRecords *EventsLog;
 	MLogRecords::const_iterator EventsBegin;
 	MLogRecords::const_iterator EventsEnd;
 	int EventSort;
@@ -82,7 +83,7 @@ private:	// User declarations
 	void UpdateListViewEvents();
 public:		// User declarations
 	bool Open(
-		MLogFile *File_,
+		const MLogFile &File_,
 		MLogRecords::const_iterator Begin_,
 		MLogRecords::const_iterator End_);
 	__fastcall TFormEvents(TComponent* Owner);

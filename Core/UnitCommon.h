@@ -54,6 +54,15 @@ inline const void *MemGet(const void *Mem_, type *Data_, const void *Limit_)
 	return new_limit;
 }
 
+// Поиск значения в области памяти с контролем выхода за границу
+template <typename type>
+type *MemSrch(type *Mem_, const type *Limit_, type Data_)
+{
+    do { if ( Mem_>=Limit_ ) return nullptr; }
+    while( *(Mem_++)!=Data_ );
+    return Mem_;
+}
+
 // Копирование строк со сдвигом указателя, контролем длины и выхода за границу
 void *MemSetLine(void *Mem_, const std::string &Line__);
 void *MemSetLine(void *Mem__, const std::wstring &Line__);

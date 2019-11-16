@@ -15,6 +15,7 @@ TFormEvents *FormEvents;
 __fastcall TFormEvents::TFormEvents(TComponent* Owner)
     : TForm(Owner)
 {
+	EventsLog=nullptr;
     EventSort=0;
     StateFilter=mcfAll;
 }
@@ -257,10 +258,12 @@ void __fastcall TFormEvents::ButtonCompUpdClick(TObject *Sender)
 //		ListViewEvents->ItemFocused &&
 		PanelState->Height&&ListViewEvents->ItemFocused &&
 		ProcessComputersState(
+            *EventsLog,
 			MLogRecords::const_iterator(
 			reinterpret_cast<MLogRecordsItem*>(
-				ListViewEvents->ItemFocused->Data)),
-			&States, &Tariffs) )
+				ListViewEvents->ItemFocused->Data),
+				EventsLog),
+			States, Tariffs) )
 	{
 			UpdateListViewComputers(false, &States, &Tariffs);
 	}
@@ -443,28 +446,27 @@ void TFormEvents::UpdateListViewComputers(bool Full_, MStates *States_, MTariffs
 }
 //---------------------------------------------------------------------------
 bool TFormEvents::Open(
-	MLogFile *File_,
+	const MLogFile &File_,
 	MLogRecords::const_iterator Begin_,
 	MLogRecords::const_iterator End_)
 {
-    // Чистим интерфейс
-    ListViewEvents->Items->Clear();
-    ListViewComputers->Items->Clear();
-    //
-//    if ( Begin_==nullptr ) goto error;
+	// Чистим интерфейс
+	ListViewEvents->Items->Clear();
+	ListViewComputers->Items->Clear();
 
-	Caption=UnicodeString(L"События  -  ")+File_->Name.c_str();
+	Caption=UnicodeString(L"События  -  ")+File_.Name.c_str();
 
-    EventsBegin=Begin_;
-    EventsEnd=End_;
+	EventsLog=&File_.Records;
+	EventsBegin=Begin_;
+	EventsEnd=End_;
 
-    StateFilter=mcfAll;
-    EventSort=0;
-    CheckBoxCompAUpd->Checked=true;
-    NEventComputers->Checked=true;
-    UpdateListViewEvents();
+	StateFilter=mcfAll;
+	EventSort=0;
+	CheckBoxCompAUpd->Checked=true;
+	NEventComputers->Checked=true;
+	UpdateListViewEvents();
 
-    FormMain->WindowOpen(File_,this);
+	FormMain->WindowOpen(File_,this);
 	FormMain->WindowCaption(this, "События");	/// Unicode support ???
 	return true;
 error:
@@ -603,7 +605,7 @@ void TFormEvents::UpdateListViewEvents()
         Item->ImageIndex=-1;
         Item->Data=&*Begin_;
         // Время события
-        if ( Int64ToSystemTime(&Begin_->SystemTime, &ss_time) )
+        if ( Int64ToSystemTime(Begin_->SystemTime, ss_time) )
 			swprintf(
 				line, sizeof(line),
 				L"%4d.%02d.%02d - %02d:%02d:%02d",
