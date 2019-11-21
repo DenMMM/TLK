@@ -3,11 +3,12 @@ object FormClient: TFormClient
   Top = 174
   BorderIcons = [biSystemMenu, biMaximize]
   Caption = #1053#1072#1089#1090#1088#1086#1081#1082#1072' '#1082#1086#1084#1087#1100#1102#1090#1077#1088#1086#1074
-  ClientHeight = 401
-  ClientWidth = 674
+  ClientHeight = 409
+  ClientWidth = 682
   Color = clBtnFace
-  Constraints.MinHeight = 437
-  Constraints.MinWidth = 690
+  Constraints.MinHeight = 445
+  Constraints.MinWidth = 698
+  DoubleBuffered = True
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
   Font.Height = -11
@@ -17,8 +18,8 @@ object FormClient: TFormClient
   OnClose = FormClose
   OnShow = FormShow
   DesignSize = (
-    674
-    401)
+    682
+    409)
   PixelsPerInch = 96
   TextHeight = 13
   object ListViewComputers: TListView
@@ -58,10 +59,6 @@ object FormClient: TFormClient
     OnChange = PageControlChange
     object TabSheetGames: TTabSheet
       Caption = #1055#1088#1086#1075#1088#1072#1084#1084#1099
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       DesignSize = (
         557
         341)
@@ -194,10 +191,6 @@ object FormClient: TFormClient
     object TabSheetOptions: TTabSheet
       Caption = #1055#1086#1074#1077#1076#1077#1085#1080#1077' '#1082#1083#1080#1077#1085#1090#1072
       ImageIndex = 1
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       DesignSize = (
         557
         341)
@@ -367,7 +360,7 @@ object FormClient: TFormClient
     end
   end
   object ButtonOperations: TButton
-    Left = 400
+    Left = 408
     Top = 380
     Width = 85
     Height = 25
@@ -378,7 +371,7 @@ object FormClient: TFormClient
     OnClick = ButtonOperationsClick
   end
   object ButtonClose: TButton
-    Left = 488
+    Left = 496
     Top = 380
     Width = 85
     Height = 25
@@ -388,7 +381,7 @@ object FormClient: TFormClient
     TabOrder = 3
   end
   object ButtonHelp: TButton
-    Left = 584
+    Left = 592
     Top = 380
     Width = 85
     Height = 25
@@ -398,7 +391,7 @@ object FormClient: TFormClient
     TabOrder = 4
   end
   object ButtonCancel: TButton
-    Left = 19
+    Left = 27
     Top = 379
     Width = 73
     Height = 22

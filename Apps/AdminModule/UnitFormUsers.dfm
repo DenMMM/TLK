@@ -7,6 +7,7 @@ object FormUsers: TFormUsers
   ClientHeight = 342
   ClientWidth = 541
   Color = clBtnFace
+  DoubleBuffered = True
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
   Font.Height = -11
@@ -73,6 +74,7 @@ object FormUsers: TFormUsers
     MultiSelect = True
     ReadOnly = True
     RowSelect = True
+    SmallImages = FormMain.ImageListIcons
     SortType = stText
     TabOrder = 0
     ViewStyle = vsReport
@@ -167,6 +169,7 @@ object FormUsers: TFormUsers
       1F7C1F7C1F7C1F7C1F7C1F7C1F7CEC4F883A473267372633A4211F7C1F7C1F7C
       1F7C1F7C1F7C1F7C1F7C1F7C1F7C1F7CEB4BE943262EE5251F7C1F7C1F7C1F7C
       1F7C1F7C1F7C}
+    ParentDoubleBuffered = True
     TabOrder = 2
     OnClick = BitBtnActiveClick
   end
@@ -196,6 +199,7 @@ object FormUsers: TFormUsers
       1F7C1F7C1F7C1F7C1F7C1F7C1F7C1F7C1F7C117EAE6D0839C7301F7C1F7C1F7C
       1F7C1F7C1F7C1F7C1F7C1F7C1F7C1F7C1F7C1F7C1F7C1F7C1F7C1F7C1F7C1F7C
       1F7C1F7C1F7C}
+    ParentDoubleBuffered = True
     TabOrder = 3
     OnClick = BitBtnActiveClick
   end

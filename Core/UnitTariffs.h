@@ -171,7 +171,7 @@ public:
 	MTariffTimes Times;					// Типы тарифа по времени
 
 	// Проверяет есть ли для заданного времени пакеты по тарифу
-	bool CheckForTime(__int64 &Time_) const;
+	bool CheckForTime(__int64 Time_) const;
 	// Проверяет применим ли тариф к компьютеру
 	bool CheckForComp(char Num_) const;
 	//
@@ -215,7 +215,7 @@ class MTariffs:
 		MTariffsItem>
 {
 public:
-	MTariffsInfo GetForTime(__int64 &Time_) const;
+	MTariffsInfo GetForTime(__int64 Time_) const;
 };
 //---------------------------------------------------------------------------
 #endif

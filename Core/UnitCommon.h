@@ -100,7 +100,7 @@ inline bool MemSlowCmp(const void *Mem1__, const void *Mem2__, size_t Size_)
 		Mem1_++; Mem2_++; Size_--;
 	}
 
-    return diff_cnt==0;
+	return diff_cnt==0;
 }
 //---------------------------------------------------------------------------
 inline bool SystemTimeToInt64(const SYSTEMTIME& rSystemTime, __int64& rInt64)
@@ -111,11 +111,10 @@ inline bool SystemTimeToInt64(const SYSTEMTIME& rSystemTime, __int64& rInt64)
 		LARGE_INTEGER LargeInteger;
 	};
 
-	if ( !::SystemTimeToFileTime(&rSystemTime,&FileTime) ) return false;
-//    memcpy(&LargeInteger,&FileTime,sizeof(LargeInteger));
-    rInt64=LargeInteger.QuadPart;
+	if ( !::SystemTimeToFileTime(&rSystemTime,&FileTime) ) return false;    /// throw ?
+	rInt64=LargeInteger.QuadPart;
 
-    return true;
+	return true;
 }
 
 inline bool Int64ToSystemTime(const __int64 Int64, SYSTEMTIME& rSystemTime)
@@ -134,14 +133,14 @@ inline bool Int64ToSystemTime(const __int64 Int64, SYSTEMTIME& rSystemTime)
 
 inline int ExtractHoursMin(const __int64 Int64)
 {
-    SYSTEMTIME ssTime;
-    if ( !Int64ToSystemTime(Int64,ssTime) ) return -1;
-    return ssTime.wHour*60+ssTime.wMinute;
+	SYSTEMTIME ssTime;
+	if ( !Int64ToSystemTime(Int64,ssTime) ) return -1;
+	return ssTime.wHour*60+ssTime.wMinute;
 }
 
 inline bool GetLocalTimeInt64(__int64& rInt64)
 {
-    SYSTEMTIME ssTime;
+	SYSTEMTIME ssTime;
 	::GetLocalTime(&ssTime);
 	return SystemTimeToInt64(ssTime,rInt64);
 }

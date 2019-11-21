@@ -4,13 +4,14 @@ object FormFine: TFormFine
   BorderIcons = []
   BorderStyle = bsSizeToolWin
   Caption = #1064#1090#1088#1072#1092#1086#1074#1072#1085#1080#1077
-  ClientHeight = 280
-  ClientWidth = 457
+  ClientHeight = 288
+  ClientWidth = 465
   Color = clBtnFace
   Constraints.MaxHeight = 500
-  Constraints.MaxWidth = 473
-  Constraints.MinHeight = 316
-  Constraints.MinWidth = 473
+  Constraints.MaxWidth = 481
+  Constraints.MinHeight = 324
+  Constraints.MinWidth = 481
+  DoubleBuffered = True
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
   Font.Height = -11
@@ -20,8 +21,8 @@ object FormFine: TFormFine
   OnClose = FormClose
   OnShow = FormShow
   DesignSize = (
-    457
-    280)
+    465
+    288)
   PixelsPerInch = 96
   TextHeight = 13
   object Bevel2: TBevel
@@ -145,6 +146,7 @@ object FormFine: TFormFine
     Caption = #1047#1072#1082#1088#1099#1090#1100
     Kind = bkCancel
     NumGlyphs = 2
+    ParentDoubleBuffered = True
     TabOrder = 5
   end
   object BitBtnFine: TBitBtn
@@ -172,6 +174,7 @@ object FormFine: TFormFine
       A224333333333333338F38F300003333333333333A223333333333333338F8F3
       000033333333333333A3333333333333333383330000}
     NumGlyphs = 2
+    ParentDoubleBuffered = True
     TabOrder = 4
     OnClick = BitBtnFineClick
   end

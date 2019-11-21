@@ -4,13 +4,14 @@ object FormRun: TFormRun
   BorderIcons = []
   BorderStyle = bsSizeToolWin
   Caption = #1047#1072#1087#1091#1089#1082' '#1082#1086#1084#1087#1100#1102#1090#1077#1088#1086#1074
-  ClientHeight = 280
-  ClientWidth = 458
+  ClientHeight = 284
+  ClientWidth = 466
   Color = clBtnFace
   Constraints.MaxHeight = 500
-  Constraints.MaxWidth = 474
-  Constraints.MinHeight = 316
-  Constraints.MinWidth = 474
+  Constraints.MaxWidth = 482
+  Constraints.MinHeight = 320
+  Constraints.MinWidth = 482
+  DoubleBuffered = True
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
   Font.Height = -11
@@ -20,21 +21,21 @@ object FormRun: TFormRun
   OnClose = FormClose
   OnShow = FormShow
   DesignSize = (
-    458
-    280)
+    466
+    284)
   PixelsPerInch = 96
   TextHeight = 13
   object Bevel1: TBevel
     Left = 4
     Top = 4
     Width = 457
-    Height = 281
+    Height = 277
     Anchors = [akLeft, akTop, akBottom]
     Style = bsRaised
   end
   object Bevel3: TBevel
     Left = 12
-    Top = 168
+    Top = 164
     Width = 441
     Height = 85
     Anchors = [akLeft, akBottom]
@@ -42,21 +43,21 @@ object FormRun: TFormRun
   end
   object Bevel6: TBevel
     Left = 356
-    Top = 225
+    Top = 219
     Width = 89
     Height = 19
     Anchors = [akLeft, akBottom]
   end
   object Bevel2: TBevel
     Left = 124
-    Top = 259
+    Top = 255
     Width = 217
     Height = 18
     Anchors = [akLeft, akBottom]
   end
   object Label1: TLabel
     Left = 128
-    Top = 261
+    Top = 257
     Width = 112
     Height = 13
     Anchors = [akLeft, akBottom]
@@ -70,7 +71,7 @@ object FormRun: TFormRun
   end
   object LabelAllCost: TLabel
     Left = 244
-    Top = 261
+    Top = 257
     Width = 93
     Height = 13
     Alignment = taRightJustify
@@ -85,7 +86,7 @@ object FormRun: TFormRun
   end
   object LabelRemaindTimeText: TLabel
     Left = 307
-    Top = 228
+    Top = 224
     Width = 45
     Height = 13
     Alignment = taRightJustify
@@ -95,7 +96,7 @@ object FormRun: TFormRun
   end
   object LabelRemaindTime: TLabel
     Left = 360
-    Top = 228
+    Top = 214
     Width = 81
     Height = 13
     Anchors = [akLeft, akBottom]
@@ -104,7 +105,7 @@ object FormRun: TFormRun
   end
   object Bevel4: TBevel
     Left = 12
-    Top = 260
+    Top = 256
     Width = 105
     Height = 16
     Anchors = [akLeft, akBottom]
@@ -114,7 +115,7 @@ object FormRun: TFormRun
     Left = 8
     Top = 8
     Width = 449
-    Height = 125
+    Height = 121
     Anchors = [akLeft, akTop, akBottom]
     Columns = <
       item
@@ -151,7 +152,7 @@ object FormRun: TFormRun
   end
   object ComboBoxTariff: TComboBox
     Left = 12
-    Top = 140
+    Top = 136
     Width = 181
     Height = 21
     Style = csDropDownList
@@ -161,7 +162,7 @@ object FormRun: TFormRun
   end
   object ComboBoxTime: TComboBox
     Left = 196
-    Top = 140
+    Top = 136
     Width = 145
     Height = 21
     Style = csDropDownList
@@ -173,18 +174,19 @@ object FormRun: TFormRun
   end
   object BitBtnClose: TBitBtn
     Left = 348
-    Top = 256
+    Top = 252
     Width = 105
     Height = 25
     Anchors = [akLeft, akBottom]
     Caption = #1047#1072#1082#1088#1099#1090#1100
     Kind = bkCancel
     NumGlyphs = 2
+    ParentDoubleBuffered = True
     TabOrder = 9
   end
   object RadioButtonCash: TRadioButton
     Left = 20
-    Top = 180
+    Top = 174
     Width = 73
     Height = 17
     Anchors = [akLeft, akBottom]
@@ -195,7 +197,7 @@ object FormRun: TFormRun
   end
   object RadioButtonDesc: TRadioButton
     Left = 20
-    Top = 204
+    Top = 197
     Width = 77
     Height = 17
     Anchors = [akLeft, akBottom]
@@ -205,7 +207,7 @@ object FormRun: TFormRun
   end
   object ComboBoxDesc: TComboBox
     Left = 108
-    Top = 200
+    Top = 193
     Width = 337
     Height = 21
     Style = csDropDownList
@@ -216,7 +218,7 @@ object FormRun: TFormRun
   end
   object RadioButtonSubs: TRadioButton
     Left = 20
-    Top = 228
+    Top = 221
     Width = 81
     Height = 17
     Anchors = [akLeft, akBottom]
@@ -226,7 +228,7 @@ object FormRun: TFormRun
   end
   object ComboBoxSubs: TComboBox
     Left = 108
-    Top = 224
+    Top = 217
     Width = 193
     Height = 21
     Anchors = [akLeft, akBottom]
@@ -236,7 +238,7 @@ object FormRun: TFormRun
   end
   object ProgressBarTime: TProgressBar
     Left = 15
-    Top = 263
+    Top = 259
     Width = 99
     Height = 10
     Anchors = [akLeft, akBottom]
@@ -246,7 +248,7 @@ object FormRun: TFormRun
   end
   object BitBtnRun: TBitBtn
     Left = 348
-    Top = 138
+    Top = 134
     Width = 105
     Height = 25
     Anchors = [akLeft, akBottom]
@@ -269,6 +271,7 @@ object FormRun: TFormRun
       A224333333333333338F38F300003333333333333A223333333333333338F8F3
       000033333333333333A3333333333333333383330000}
     NumGlyphs = 2
+    ParentDoubleBuffered = True
     TabOrder = 8
     OnClick = BitBtnRunClick
   end

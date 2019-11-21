@@ -7,6 +7,7 @@ object FormOpenConfig: TFormOpenConfig
   ClientHeight = 86
   ClientWidth = 294
   Color = clBtnFace
+  DoubleBuffered = True
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
   Font.Height = -11
@@ -41,8 +42,8 @@ object FormOpenConfig: TFormOpenConfig
     TabOrder = 0
   end
   object ButtonApply: TButton
-    Left = 60
-    Top = 56
+    Left = 57
+    Top = 55
     Width = 85
     Height = 25
     Caption = #1055#1088#1080#1085#1103#1090#1100

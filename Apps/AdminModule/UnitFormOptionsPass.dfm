@@ -7,6 +7,7 @@ object FormOptionsPass: TFormOptionsPass
   ClientHeight = 174
   ClientWidth = 350
   Color = clBtnFace
+  DoubleBuffered = True
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
   Font.Height = -11

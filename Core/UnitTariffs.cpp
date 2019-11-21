@@ -255,7 +255,7 @@ void MTariffsItem::Cost(MTariffRunTimesItem &RunTime_, double Prec_) const
 	RunTime_.Cost=ceil(RunTime_.Cost/Prec_)*Prec_;
 }
 
-bool MTariffsItem::CheckForTime(__int64 &Time_) const
+bool MTariffsItem::CheckForTime(__int64 Time_) const
 {
     int Time;
 
@@ -331,7 +331,7 @@ MTariffRunTimes MTariffsItem::GetRunTimes(__int64 Time_) const
 	return ResTimes;
 }
 //---------------------------------------------------------------------------
-MTariffsInfo MTariffs::GetForTime(__int64 &Time_) const
+MTariffsInfo MTariffs::GetForTime(__int64 Time_) const
 {
 	MTariffsInfo ResInfo;
 

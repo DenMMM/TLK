@@ -5,6 +5,7 @@ object FormEvents: TFormEvents
   ClientHeight = 455
   ClientWidth = 725
   Color = clBtnFace
+  DoubleBuffered = True
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
   Font.Height = -11

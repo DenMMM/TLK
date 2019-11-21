@@ -7,6 +7,7 @@ object FormMain: TFormMain
   Color = clBtnFace
   Constraints.MinHeight = 500
   Constraints.MinWidth = 740
+  DoubleBuffered = True
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
   Font.Height = -11
@@ -167,6 +168,7 @@ object FormMain: TFormMain
       Font.Height = -11
       Font.Name = 'MS Sans Serif'
       Font.Style = [fsBold]
+      ParentDoubleBuffered = True
       ParentFont = False
       TabOrder = 1
       OnClick = BitBtnRunClick
@@ -182,6 +184,7 @@ object FormMain: TFormMain
       Font.Height = -11
       Font.Name = 'MS Sans Serif'
       Font.Style = [fsBold]
+      ParentDoubleBuffered = True
       ParentFont = False
       TabOrder = 2
       OnClick = BitBtnRunClick
@@ -197,6 +200,7 @@ object FormMain: TFormMain
       Font.Height = -11
       Font.Name = 'MS Sans Serif'
       Font.Style = [fsBold]
+      ParentDoubleBuffered = True
       ParentFont = False
       TabOrder = 3
       OnClick = BitBtnRunClick
@@ -207,6 +211,7 @@ object FormMain: TFormMain
       Width = 124
       Height = 17
       Caption = #1044#1086#1087#1086#1083#1085#1080#1090#1077#1083#1100#1085#1086'...'
+      ParentDoubleBuffered = True
       TabOrder = 8
       OnClick = BitBtnAdditionalsClick
     end
@@ -230,6 +235,7 @@ object FormMain: TFormMain
       Font.Height = -11
       Font.Name = 'MS Sans Serif'
       Font.Style = [fsBold]
+      ParentDoubleBuffered = True
       ParentFont = False
       TabOrder = 5
       OnClick = BitBtnLockClick
@@ -245,6 +251,7 @@ object FormMain: TFormMain
       Font.Height = -11
       Font.Name = 'MS Sans Serif'
       Font.Style = [fsBold]
+      ParentDoubleBuffered = True
       ParentFont = False
       TabOrder = 6
       OnClick = BitBtnLockClick
@@ -255,6 +262,7 @@ object FormMain: TFormMain
       Width = 124
       Height = 17
       Caption = #1060#1080#1083#1100#1090#1088'...'
+      ParentDoubleBuffered = True
       TabOrder = 10
       OnClick = BitBtnAdditionalsClick
     end
@@ -270,6 +278,7 @@ object FormMain: TFormMain
       Font.Height = -11
       Font.Name = 'MS Sans Serif'
       Font.Style = [fsBold]
+      ParentDoubleBuffered = True
       ParentFont = False
       TabOrder = 7
       OnClick = BitBtnRunClick
@@ -294,6 +303,7 @@ object FormMain: TFormMain
       Font.Height = -11
       Font.Name = 'MS Sans Serif'
       Font.Style = [fsBold]
+      ParentDoubleBuffered = True
       ParentFont = False
       TabOrder = 4
       OnClick = BitBtnExchangeClick
@@ -323,6 +333,7 @@ object FormMain: TFormMain
         3333333333333333333888330000333333333333333333333333333333333333
         0000}
       NumGlyphs = 2
+      ParentDoubleBuffered = True
       TabOrder = 11
       OnClick = NClosePrgClick
     end
@@ -332,6 +343,7 @@ object FormMain: TFormMain
       Width = 124
       Height = 17
       Caption = #1057#1080#1089#1090#1077#1084#1085#1099#1077'...'
+      ParentDoubleBuffered = True
       TabOrder = 9
       OnClick = BitBtnAdditionalsClick
     end

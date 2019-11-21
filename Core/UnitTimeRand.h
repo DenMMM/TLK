@@ -39,7 +39,7 @@ protected:
 			{
 				BasicEncode(
 					Ent.data(), Ent.size()*sizeof(result_type),
-					E, 32);
+					E, 8);
 			}
 		}
 

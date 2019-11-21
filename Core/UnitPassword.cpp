@@ -1,10 +1,8 @@
 //---------------------------------------------------------------------------
 #include <array>
-#include <chrono>
 #include <random>
 //#include <windows.h>
 #include <winsock2.h>
-#include <bcrypt.h>
 #pragma hdrstop
 
 #include "UnitPassword.h"

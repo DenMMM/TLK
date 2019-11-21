@@ -5,6 +5,7 @@ object FormUsersUpTime: TFormUsersUpTime
   ClientHeight = 436
   ClientWidth = 727
   Color = clBtnFace
+  DoubleBuffered = True
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
   Font.Height = -11

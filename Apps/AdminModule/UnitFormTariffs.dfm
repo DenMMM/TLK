@@ -7,6 +7,7 @@ object FormTariffs: TFormTariffs
   ClientHeight = 382
   ClientWidth = 649
   Color = clBtnFace
+  DoubleBuffered = True
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
   Font.Height = -11
