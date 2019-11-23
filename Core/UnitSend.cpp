@@ -664,20 +664,20 @@ void MSendCl::ThreadP()
         {
             case mstSendGames:
                 if ( (!RcvObject(&Games,Size,Seed))||
-                    (!State->NewGames(&Games))||
-                    (!SndRequest(mstAccept,Seed,0)) ) goto next;
-                break;
-            case mstSendConfig:
-                if ( (!RcvObject(&Options,Size,Seed))||
-                    (!State->NewOptions(&Options))||
+					(!State->NewGames(Games))||
+					(!SndRequest(mstAccept,Seed,0)) ) goto next;
+				break;
+			case mstSendConfig:
+				if ( (!RcvObject(&Options,Size,Seed))||
+                    (!State->NewOptions(Options))||
                     (!SndRequest(mstAccept,Seed,0)) ) goto next;
                 break;
             case mstGetGames:
-                if ( (!State->GetGames(&Games))||
+				if ( (!State->GetGames(Games))||
                     (!SndObject(&Games,mstAccept,Seed)) ) goto next;
                 break;
             case mstGetConfig:
-                if ( (!State->GetOptions(&Options))||
+                if ( (!State->GetOptions(Options))||
                     (!SndObject(&Options,mstAccept,Seed)) ) goto next;
                 break;
             default: goto next;

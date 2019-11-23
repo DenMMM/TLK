@@ -384,19 +384,19 @@ void __fastcall TFormRun::BitBtnRunClick(TObject *Sender)
 
     while(item)
     {
-        auto *time=reinterpret_cast<MTariffRunTimesItem*>(item->Data);
+		auto &time=*reinterpret_cast<MTariffRunTimesItem*>(item->Data);
 		TListItem *next=ListViewComputers->GetNextItem(item,sdAll,is);
 
 		if (
-			time->TariffID &&
-			(time->Type!=mttUndefined) &&
-			time->WorkTime )
+			time.TariffID &&
+			(time.Type!=mttUndefined) &&
+			time.WorkTime )
 		{
-			auto iState=States->Search(time->Number);     ///
-			auto iTariff=Tariffs->SrchUUID(time->TariffID);
+			auto iState=States->Search(time.Number);     ///
+			auto iTariff=Tariffs->SrchUUID(time.TariffID);
 
 			// Проверяем возможно ли применить команду
-			if ( iState->CmdRun(&*iTariff,time,true) )
+			if ( iState->CmdRun(*iTariff,time,true) )
 			{
 				// Добавляем запись в лог
 				if ( !Log->AddRun(time) )
@@ -406,7 +406,7 @@ void __fastcall TFormRun::BitBtnRunClick(TObject *Sender)
 					break;
 				}
 				// Применяем команду
-				iState->CmdRun(&*iTariff,time,false);
+				iState->CmdRun(*iTariff,time,false);
 				// Удаляем строку из списка
 				item->Delete();
 			}

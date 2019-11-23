@@ -91,36 +91,36 @@ bool MStatesItem::ControlFineTime()
 }
 //---------------------------------------------------------------------------
 bool MStatesItem::CmdRun(
-	MTariffsItem *Tariff_,
-	MTariffRunTimesItem *Time_,
+	const MTariffsItem &Tariff_,
+	const MTariffRunTimesItem &Time_,
 	bool Check_)
 {
     MWAPI::CRITICAL_SECTION::Lock lckObj(CS_Main);
 
     if ( !((State==mcsFree)||(State&mcsWork)) ) return false;
     if ( Check_ ) return true;
-    //
-    if ( State==mcsFree )
-    {
-        // Запуск компьютера в работу
-        State=mcsWork;
-		TariffID=Tariff_->gUUID();
+	//
+	if ( State==mcsFree )
+	{
+		// Запуск компьютера в работу
+		State=mcsWork;
+		TariffID=Tariff_.gUUID();
 		StartWorkTime=SystemTime;
-        SizeWorkTime=Time_->WorkTime;
-        Programs=Tariff_->Programs;
-        Changes|=mdcState|mdcTariff|mdcWorkTime;
-        // Если компьютер после запуска нужно перезагрузить, то делаем нужные пометки
-        if ( Tariff_->Reboot ) { Commands|=mccReboot; Changes|=mdcCommands; }
-    } else
-    {
-        // Добавление времени работающему компьютеру
-        SizeWorkTime+=Time_->WorkTime;
-        if ( SizeWorkTime>(24*60) ) SizeWorkTime=24*60;
-        Changes|=mdcWorkTime;
-    }
-    // Помечаем данные для отправки по сети
-    NetState|=mnsSyncNeed|mnsSyncData; Changes|=mdcNetState;
-    return true;
+		SizeWorkTime=Time_.WorkTime;
+		Programs=Tariff_.Programs;
+		Changes|=mdcState|mdcTariff|mdcWorkTime;
+		// Если компьютер после запуска нужно перезагрузить, то делаем нужные пометки
+		if ( Tariff_.Reboot ) { Commands|=mccReboot; Changes|=mdcCommands; }
+	} else
+	{
+		// Добавление времени работающему компьютеру
+		SizeWorkTime+=Time_.WorkTime;
+		if ( SizeWorkTime>(24*60) ) SizeWorkTime=24*60;
+		Changes|=mdcWorkTime;
+	}
+	// Помечаем данные для отправки по сети
+	NetState|=mnsSyncNeed|mnsSyncData; Changes|=mdcNetState;
+	return true;
 }
 //---------------------------------------------------------------------------
 bool MStatesItem::CmdFine(short FineSize_, bool Check_)
@@ -179,33 +179,33 @@ full:
     return true;
 }
 //---------------------------------------------------------------------------
-bool MStatesItem::CmdExchange(MStatesItem *State_, bool Check_)
+bool MStatesItem::CmdExchange(MStatesItem &State_, bool Check_)
 {
-    MWAPI::CRITICAL_SECTION::DualLock lckObj(CS_Main,State_->CS_Main);
+    MWAPI::CRITICAL_SECTION::DualLock lckObj(CS_Main,State_.CS_Main);
 
-    if ( !((State&mcsWork)&&(State_->State==mcsFree)) ) return false;
+    if ( !((State&mcsWork)&&(State_.State==mcsFree)) ) return false;
     if ( Check_ ) return true;
     // Задаем новые режимы работы
-    State_->State=State&(mcsWork|mcsFine|mcsLock|mcsPause);
-    State_->TariffID=TariffID;
-    State_->StartWorkTime=StartWorkTime;
-    State_->SizeWorkTime=SizeWorkTime;
-    State_->StartFineTime=StartFineTime;
-    State_->SizeFineTime=SizeFineTime;
-    State_->StopTimerTime=StopTimerTime;
-    State_->Programs=Programs;
+    State_.State=State&(mcsWork|mcsFine|mcsLock|mcsPause);
+    State_.TariffID=TariffID;
+    State_.StartWorkTime=StartWorkTime;
+    State_.SizeWorkTime=SizeWorkTime;
+    State_.StartFineTime=StartFineTime;
+    State_.SizeFineTime=SizeFineTime;
+    State_.StopTimerTime=StopTimerTime;
+    State_.Programs=Programs;
     if ( (State&(mcsPause|mcsOpen))==mcsOpen )
     {
-        State_->StartWorkTime+=SystemTime-StopTimerTime;
-        State_->StopTimerTime=0;
+        State_.StartWorkTime+=SystemTime-StopTimerTime;
+        State_.StopTimerTime=0;
     }
-    State_->Changes|=mdcState|mdcTariff|mdcWorkTime|mdcFineTime;
+    State_.Changes|=mdcState|mdcTariff|mdcWorkTime|mdcFineTime;
     // Помечаем данные для отправки по сети
-    State_->NetState|=mnsSyncNeed|mnsSyncData; State_->Changes|=mdcNetState;
-    // Задаем новые режимы работы
-    State=mcsFree|(State&mcsOpen);
-    TariffID=0;
-    StartWorkTime=0; SizeWorkTime=0;
+	State_.NetState|=mnsSyncNeed|mnsSyncData; State_.Changes|=mdcNetState;
+	// Задаем новые режимы работы
+	State=mcsFree|(State&mcsOpen);
+	TariffID=0;
+	StartWorkTime=0; SizeWorkTime=0;
     StartFineTime=0; SizeFineTime=0;
     StopTimerTime=0;
     Programs=0;
@@ -464,24 +464,28 @@ bool MStatesItem::NetSyncNewData()
     return NetState&mnsSyncData;
 }
 //---------------------------------------------------------------------------
-void MStatesItem::NetSyncData(MSyncData *Data_)
+MSyncData MStatesItem::NetSyncData()
 {
-    MWAPI::CRITICAL_SECTION::Lock lckObj(CS_Main);
+	MSyncData ResData;
 
-    // Сбрасываем флаг наличия новых данных
-    NetState&=~mnsSyncData;
-    // Заносим новые данные о режиме работы
-    Data_->SystemTime=SystemTime;
-    Data_->Number=Number;
-    Data_->State=State;
-    Data_->StartWorkTime=StartWorkTime;
-    Data_->SizeWorkTime=SizeWorkTime;
-    Data_->StartFineTime=StartFineTime;
-    Data_->SizeFineTime=SizeFineTime;
-    Data_->StopTimerTime=StopTimerTime;
-    Data_->Programs=Programs;
-    Data_->Commands=Commands;
-    CmdsToReset|=Data_->Commands;
+	MWAPI::CRITICAL_SECTION::Lock lckObj(CS_Main);
+
+	// Сбрасываем флаг наличия новых данных
+	NetState&=~mnsSyncData;
+	// Заносим новые данные о режиме работы
+	ResData.SystemTime=SystemTime;
+	ResData.Number=Number;
+	ResData.State=State;
+	ResData.StartWorkTime=StartWorkTime;
+	ResData.SizeWorkTime=SizeWorkTime;
+	ResData.StartFineTime=StartFineTime;
+	ResData.SizeFineTime=SizeFineTime;
+	ResData.StopTimerTime=StopTimerTime;
+	ResData.Programs=Programs;
+	ResData.Commands=Commands;
+	CmdsToReset|=ResData.Commands;
+
+	return ResData;
 }
 //---------------------------------------------------------------------------
 void MStatesItem::NetSyncExecuted(bool Executed_)
@@ -552,7 +556,7 @@ MStates::const_iterator MStates::Search(int Number_) const
 	return iState;
 }
 //---------------------------------------------------------------------------
-bool MStates::Update(MComputers *Computers_)
+bool MStates::Update(const MComputers &Computers_)
 {
 	bool result=false;
 
@@ -560,10 +564,10 @@ bool MStates::Update(MComputers *Computers_)
 	// или неиспользуемыми компьютерами
 	for ( auto iState=cbegin(), iEnd=cend(); iState!=iEnd; )
 	{
-		auto iComputer=Computers_->Search(iState->Associated());
+		auto iComputer=Computers_.Search(iState->Associated());
 
 		if (
-			(iComputer==Computers_->end())||
+			(iComputer==Computers_.end())||
 			(iComputer->NotUsed) )
 		{
 			result=true;
@@ -574,7 +578,7 @@ bool MStates::Update(MComputers *Computers_)
 		}
 	}
 	// Добавляем состояния для новых компьютеров
-	for ( const auto &Computer: *Computers_ )
+	for ( const auto &Computer: Computers_ )
 	{
 		if ( Computer.NotUsed ) continue;
 		auto iState=Search(Computer.Number);
@@ -696,51 +700,55 @@ bool MStateCl::ControlSyncTime()
     return true;
 }
 //---------------------------------------------------------------------------
-void MStateCl::StateInfo(MStatesInfo *Info_)
+MStatesInfo MStateCl::GetInfo()
 {
-    MWAPI::CRITICAL_SECTION::Lock lckObj(CS_Main);
+	MStatesInfo ResInfo;
+	memset(&ResInfo,0,sizeof(ResInfo));
 
-	memset(Info_,0,sizeof(MStatesInfo));
-    //
-    Info_->Number=Number;
-    Info_->State=State;
+	MWAPI::CRITICAL_SECTION::Lock lckObj(CS_Main);
+
+	//
+    ResInfo.Number=Number;
+    ResInfo.State=State;
     if ( State&mcsWork )
     {
-        Info_->WorkTime=SizeWorkTime;
-        Info_->ToEndWork=SizeWorkTime-((State&(mcsPause|mcsOpen)?StopTimerTime:SystemTime)-
+        ResInfo.WorkTime=SizeWorkTime;
+        ResInfo.ToEndWork=SizeWorkTime-((State&(mcsPause|mcsOpen)?StopTimerTime:SystemTime)-
             StartWorkTime)/(60*10000000i64);
-        Info_->EndWorkTime=ExtractHoursMin(StartWorkTime+SizeWorkTime*60*10000000i64+
+        ResInfo.EndWorkTime=ExtractHoursMin(StartWorkTime+SizeWorkTime*60*10000000i64+
 			(State&(mcsPause|mcsOpen)?SystemTime-StopTimerTime:0));
     }
     if ( State&mcsFine )
-    {
-        Info_->FineTime=SizeFineTime;
-        Info_->ToEndFine=SizeFineTime-(SystemTime-StartFineTime)/(60*10000000i64);
-        Info_->EndFineTime=ExtractHoursMin(StartFineTime+SizeFineTime*60*10000000i64);
-    }
-    Info_->Programs=Programs;
-    Info_->Commands=Commands;
-    Info_->Changes=Changes;
+	{
+		ResInfo.FineTime=SizeFineTime;
+		ResInfo.ToEndFine=SizeFineTime-(SystemTime-StartFineTime)/(60*10000000i64);
+		ResInfo.EndFineTime=ExtractHoursMin(StartFineTime+SizeFineTime*60*10000000i64);
+	}
+	ResInfo.Programs=Programs;
+	ResInfo.Commands=Commands;
+	ResInfo.Changes=Changes;
     //
-    Commands=Changes=0;
+	Commands=Changes=0;
+
+    return ResInfo;
 }
 //---------------------------------------------------------------------------
-bool MStateCl::GetOptions(MClOptions *Options_)
+bool MStateCl::GetOptions(MClOptions &Options_)
 {
-    MWAPI::CRITICAL_SECTION::Lock lckObj(CS_Main);
-    bool result;
+	MWAPI::CRITICAL_SECTION::Lock lckObj(CS_Main);
+	bool result;
 
-    result=Options_->QueryFrom(OptKey,OptPath,OptValue,DefaultCode);
-    if ( result ) AutoLockTime=Options_->AutoLockTime;
+	result=Options_.QueryFrom(OptKey,OptPath,OptValue,DefaultCode);
+    if ( result ) AutoLockTime=Options_.AutoLockTime;
 
     return result;
 }
 //---------------------------------------------------------------------------
-bool MStateCl::GetGames(MGames *Games_)
+bool MStateCl::GetGames(MGames &Games_)
 {
-    MWAPI::CRITICAL_SECTION::Lock lckObj(CS_Main);
+	MWAPI::CRITICAL_SECTION::Lock lckObj(CS_Main);
 
-    return Games_->LoadFrom(PrgFile,DefaultCode);
+    return Games_.LoadFrom(PrgFile,DefaultCode);
 }
 //---------------------------------------------------------------------------
 bool MStateCl::Timer(__int64 SystemTime_)
@@ -769,56 +777,56 @@ void MStateCl::CmdShutdown()
     Commands|=mccShutdown; Changes|=mdcCommands;
 }
 //---------------------------------------------------------------------------
-bool MStateCl::NewSyncData(MSyncData *Data_)
+bool MStateCl::NewSyncData(MSyncData &Data_)
 {
-    bool NeedSave=false;
-    __int64 CurrentTime;
+	bool NeedSave=false;
+	__int64 CurrentTime;
 
-    // Проверяем отклонение системного времени и при необходимости корректируем его
-    GetLocalTimeInt64(CurrentTime);
-    CurrentTime=(CurrentTime-=Data_->SystemTime)<0?-CurrentTime:CurrentTime;
-    if ( CurrentTime>=MAX_TimeShift*10000000i64 ) SetLocalTimeInt64(Data_->SystemTime);
+	// Проверяем отклонение системного времени и при необходимости корректируем его
+	GetLocalTimeInt64(CurrentTime);
+	CurrentTime=(CurrentTime-=Data_.SystemTime)<0?-CurrentTime:CurrentTime;
+	if ( CurrentTime>=MAX_TimeShift*10000000i64 ) SetLocalTimeInt64(Data_.SystemTime);
 
     CS_Main.Enter();
     // Заносим новые данные о режиме работы и помечаем события для оболочки
-    if ( Data_->Number!=Number ) { Number=Data_->Number; Changes|=mdcNumber; NeedSave=true; }
-    if ( Data_->State!=State ) { State=Data_->State; Changes|=mdcState; NeedSave=true; }
-    if ( Data_->StartWorkTime!=StartWorkTime ) { StartWorkTime=Data_->StartWorkTime; Changes|=mdcWorkTime; NeedSave=true; }
-    if ( Data_->SizeWorkTime!=SizeWorkTime ) { SizeWorkTime=Data_->SizeWorkTime; Changes|=mdcWorkTime; NeedSave=true; }
-    if ( Data_->StartFineTime!=StartFineTime ) { StartFineTime=Data_->StartFineTime; Changes|=mdcFineTime; NeedSave=true; }
-    if ( Data_->SizeFineTime!=SizeFineTime ) { SizeFineTime=Data_->SizeFineTime; Changes|=mdcFineTime; NeedSave=true; }
-    if ( Data_->StopTimerTime!=StopTimerTime ) { StopTimerTime=Data_->StopTimerTime; NeedSave=true; }
-    if ( Data_->Programs!=Programs ) { Programs=Data_->Programs; Changes|=mdcPrograms; NeedSave=true; }
-    if ( Data_->Commands!=Commands ) { Commands=Data_->Commands; Changes|=mdcCommands; NeedSave=true; }
-    //
+    if ( Data_.Number!=Number ) { Number=Data_.Number; Changes|=mdcNumber; NeedSave=true; }
+    if ( Data_.State!=State ) { State=Data_.State; Changes|=mdcState; NeedSave=true; }
+    if ( Data_.StartWorkTime!=StartWorkTime ) { StartWorkTime=Data_.StartWorkTime; Changes|=mdcWorkTime; NeedSave=true; }
+    if ( Data_.SizeWorkTime!=SizeWorkTime ) { SizeWorkTime=Data_.SizeWorkTime; Changes|=mdcWorkTime; NeedSave=true; }
+    if ( Data_.StartFineTime!=StartFineTime ) { StartFineTime=Data_.StartFineTime; Changes|=mdcFineTime; NeedSave=true; }
+    if ( Data_.SizeFineTime!=SizeFineTime ) { SizeFineTime=Data_.SizeFineTime; Changes|=mdcFineTime; NeedSave=true; }
+    if ( Data_.StopTimerTime!=StopTimerTime ) { StopTimerTime=Data_.StopTimerTime; NeedSave=true; }
+    if ( Data_.Programs!=Programs ) { Programs=Data_.Programs; Changes|=mdcPrograms; NeedSave=true; }
+	if ( Data_.Commands!=Commands ) { Commands=Data_.Commands; Changes|=mdcCommands; NeedSave=true; }
+	//
     LastSyncTime=::GetTickCount();
     CS_Main.Leafe();
 
     return NeedSave;
 }
 //---------------------------------------------------------------------------
-bool MStateCl::NewGames(MGames *Games_)
+bool MStateCl::NewGames(const MGames &Games_)
 {
-    MWAPI::CRITICAL_SECTION::Lock lckObj(CS_Main);
-    bool result=false;
+	MWAPI::CRITICAL_SECTION::Lock lckObj(CS_Main);
+	bool result=false;
 
-    try { result=Games_->SaveTo(PrgFile,DefaultCode); }
-    catch (std::bad_alloc &e) {}
-    if ( result ) Changes|=mdcPrograms;
+	try { result=Games_.SaveTo(PrgFile,DefaultCode); }
+	catch (std::bad_alloc &e) {}
+	if ( result ) Changes|=mdcPrograms;
 
     return result;
 }
 //---------------------------------------------------------------------------
-bool MStateCl::NewOptions(MClOptions *Options_)
+bool MStateCl::NewOptions(const MClOptions &Options_)
 {
-    MWAPI::CRITICAL_SECTION::Lock lckObj(CS_Main);
-    bool result=false;
+	MWAPI::CRITICAL_SECTION::Lock lckObj(CS_Main);
+	bool result=false;
 
-    try { result=Options_->StoreTo(OptKey,OptPath,OptValue,DefaultCode); }
-    catch (std::bad_alloc &e) {}
-    if ( result ) { AutoLockTime=Options_->AutoLockTime; Changes|=mdcOptions; }
+	try { result=Options_.StoreTo(OptKey,OptPath,OptValue,DefaultCode); }
+	catch (std::bad_alloc &e) {}
+	if ( result ) { AutoLockTime=Options_.AutoLockTime; Changes|=mdcOptions; }
 
-    return result;
+	return result;
 }
 //---------------------------------------------------------------------------
 void MStateCl::SetDefault(

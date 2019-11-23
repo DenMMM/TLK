@@ -2,6 +2,7 @@
 #include <vcl.h>
 #include <stdio.h>
 #include <stdexcept>
+#include <algorithm>
 #pragma hdrstop
 
 #include "UnitFormMain.h"
@@ -126,7 +127,7 @@ void __fastcall TFormMain::FormShow(TObject *Sender)
 		ResMessageBox(Handle,1,7,MB_APPLMODAL|MB_OK|MB_ICONERROR,States->gLastErr());
 	} else
 		// Хоть состояния и загрузились, сверим их с актуальным списком компьютеров
-		States->Update(Computers.get());		/// опасное действие ?
+		States->Update(*Computers);			/// опасное действие ?
 
 	// Загрузим ARP-кэш
 	if ( !Sync->LoadARP() )
@@ -152,11 +153,11 @@ void __fastcall TFormMain::FormShow(TObject *Sender)
 		if ( (iUser==Users->end()) || (!iUser->Active) ) ShellState->User=0;
 		// Сохраним в логе стартовые параметры, чтобы потом четко разобрать все режимы
 		if ( !Log->AddStart(
-			ShellState.get(),
-			States.get(),
-			Tariffs.get(),
-			Fines.get(),
-			Users.get()) )
+			*ShellState,
+			*States,
+			*Tariffs,
+			*Fines,
+			*Users) )
 		{
 			ShellState->State|=mssErrorLog; SetShell();
 			ResMessageBox(Handle,1,4,MB_APPLMODAL|MB_OK|MB_ICONERROR,Log->gLastErr());
@@ -167,11 +168,11 @@ void __fastcall TFormMain::FormShow(TObject *Sender)
 		// попытаемся начать новый файл
 		if ( (Log->gLastErr()!=0)||
 			(!Log->Begin(
-				ShellState.get(),
-				States.get(),
-				Tariffs.get(),
-				Fines.get(),
-				Users.get())) )
+				*ShellState,
+				*States,
+				*Tariffs,
+				*Fines,
+				*Users)) )
 		{
 			ShellState->State|=mssErrorLog; SetShell();
 			ResMessageBox(Handle,1,4,MB_APPLMODAL|MB_OK|MB_ICONERROR,Log->gLastErr());
@@ -302,11 +303,11 @@ void __fastcall TFormMain::NLogOutClick(TObject *Sender)
     // Закрываем текущий лог и начинаем новый
 	if ( !(Log->End()&&
 		Log->Begin(
-			ShellState.get(),
-			States.get(),
-			Tariffs.get(),
-			Fines.get(),
-			Users.get())) )
+			*ShellState,
+			*States,
+			*Tariffs,
+			*Fines,
+			*Users)) )
     {
         ShellState->State|=mssErrorLog; SetShell();
         ResMessageBox(Handle,1,6,MB_APPLMODAL|MB_OK|MB_ICONERROR,Log->gLastErr());
@@ -456,16 +457,14 @@ void __fastcall TFormMain::BitBtnExchangeClick(TObject *Sender)
 
 	// Проверяем возможно ли применить команду
 	// и не нужно ли поменять местами компьютеры
-	if ( !state1->CmdExchange(state2,true) )
+	if ( !state1->CmdExchange(*state2,true) )
 	{
-		if ( !state2->CmdExchange(state1,true) )
+		if ( !state2->CmdExchange(*state1,true) )
 		{
 			ResMessageBox(Handle,0,34,MB_APPLMODAL|MB_OK|MB_ICONINFORMATION);
 			return;
 		}
-		auto tmpstate=state1;
-		state1=state2;
-		state2=tmpstate;
+		std::swap(state1,state2);
 	}
 
 	MTariffRunTimesItem time=state1->GetRunParam();
@@ -487,7 +486,7 @@ void __fastcall TFormMain::BitBtnExchangeClick(TObject *Sender)
     }
 
     // Применяем команду
-    state1->CmdExchange(state2,false);
+    state1->CmdExchange(*state2,false);
     // Сохраняем новые состояния в файле
     if ( !States->Save() )
     {
@@ -974,11 +973,11 @@ void TFormMain::SetShell()
 void __fastcall TFormMain::NLogResetClick(TObject *Sender)
 {
 	if ( Log->Begin(
-		ShellState.get(),
-		States.get(),
-		Tariffs.get(),
-		Fines.get(),
-		Users.get()) )
+		*ShellState,
+		*States,
+		*Tariffs,
+		*Fines,
+		*Users) )
 	{
 		ShellState->State&=~mssErrorLog; SetShell();
 	} else

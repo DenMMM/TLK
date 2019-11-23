@@ -141,6 +141,7 @@ object FormEvents: TFormEvents
         ReadOnly = True
         RowSelect = True
         ParentBiDiMode = False
+        SmallImages = FormMain.ImageList
         SortType = stData
         TabOrder = 0
         ViewStyle = vsReport

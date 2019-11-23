@@ -340,7 +340,7 @@ bool MSvcProcess::OnStart()
     // Загружаем настройки, заменяя их "дефолтом" при необходимости
     if ( !Auth.Load() ) Auth.Save();
     if ( !State.Load() ) State.Save();
-    if ( !State.GetOptions(&Options) )
+	if ( !State.GetOptions(Options) )
     {
         Options.SetShellUser(L"");
         Options.ToEndTime=2;
@@ -349,7 +349,7 @@ bool MSvcProcess::OnStart()
         Options.RebootWait=20;
         Options.AutoLockTime=15;
         Options.Flags=0;
-        State.NewOptions(&Options);
+        State.NewOptions(Options);
     }
 
     // Подготовка сети
@@ -456,12 +456,12 @@ void MSvcProcess::OnTimer()
     if ( TimeToReboot&&((--TimeToReboot)==0) ) State.CmdReboot();
     // Обновляем состояние в соответствии со временем
     if ( State.Timer(SystemTime) ) State.Save();
-    State.StateInfo(&Info);
+    Info=State.GetInfo();
 
     // Запрашиваем новые настройки
     if ( Info.Changes&mdcOptions )
     {
-        State.GetOptions(&Options);
+        State.GetOptions(Options);
         // Обновим режим прозрачности
         Shared.SetTransp(Options.Flags&mcoTransp);
     }

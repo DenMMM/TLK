@@ -215,10 +215,10 @@ void __fastcall TFormComputers::ButtonSaveClick(TObject *Sender)
     }
     // Останавливаем сетевые операции
     Sync->Stop();
-    if ( States->Update(Computers.get()) )
+	if ( States->Update(*Computers) )
     {
         // Запись в логах
-        if ( !Log->AddComputers(States.get()) )
+        if ( !Log->AddComputers(*States) )
         {
             // Настройки сохранили, но без отображения их в логе работать не дадим
             ShellState->State|=mssErrorLog|mssErrorConfig; FormMain->SetShell();

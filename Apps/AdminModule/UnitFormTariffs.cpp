@@ -310,7 +310,7 @@ void __fastcall TFormTariffs::ButtonSaveClick(TObject *Sender)
         return;
     }
     // Запись в логах
-    if ( !Log->AddTariffs(Tariffs.get()) )
+    if ( !Log->AddTariffs(*Tariffs) )
     {
         // Настройки сохранили, но без отображения их в логе работать не дадим
         ShellState->State|=mssErrorLog|mssErrorConfig; FormMain->SetShell();

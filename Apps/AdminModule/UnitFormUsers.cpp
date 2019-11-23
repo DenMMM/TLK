@@ -187,7 +187,7 @@ void __fastcall TFormUsers::ButtonSaveClick(TObject *Sender)
         return;
     }
     // Запись в логах
-    if ( !Log->AddUsers(Users.get()) )
+    if ( !Log->AddUsers(*Users) )
     {
         // Настройки сохранили, но без отображения их в логе работать не дадим
         ShellState->State|=mssErrorLog|mssErrorConfig; FormMain->SetShell();

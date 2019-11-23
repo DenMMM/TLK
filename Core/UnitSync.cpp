@@ -126,8 +126,8 @@ bool MSyncStatesItem::Send(SOCKET Socket_, SOCKET SocketBC_, unsigned Code_, MAu
                 Address.sin_port=::htons(SYNC_Port);
                 Address.sin_addr.s_addr=IP;
 				// «апрашиваем новые данные дл€ синхронизации после обмена hello
-                State->NetSyncData(&SyncData);
-                //
+				SyncData=State->NetSyncData();
+				//
                 Seed=NextSeed();
                 // «аполн€ем заголовок hello-пакета со своим random
                 Packet.Hello.Header.Version=SYNC_Version;
@@ -789,7 +789,7 @@ bool MSyncCl::Send(SOCKET Socket_)
                 // ѕримен€ем новое состо€ние/выполн€ем команду (reboot, shutdown),
                 // если данные были получены и клиент отправл€л подтверждение серверу
                 if ( Process==mspSyncConf )
-                    NeedSave=State->NewSyncData(&SyncData);
+                    NeedSave=State->NewSyncData(SyncData);
                 // ѕереходим в режим ожидани€ новых данных
                 Process=mspWait;
             } else

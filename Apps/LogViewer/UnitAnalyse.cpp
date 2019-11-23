@@ -62,7 +62,7 @@ bool ProcessComputersState(
 				runtime.WorkTime=rcdr.WorkTime;
 
 				iState->Timer(rcdr.SystemTime);
-				if ( !iState->CmdRun(&*iTariff,&runtime,false) ) goto error;
+				if ( !iState->CmdRun(*iTariff,runtime,false) ) goto error;
 			}
 				break;
 
@@ -87,7 +87,7 @@ bool ProcessComputersState(
 
 				iState->Timer(rcde.SystemTime);
 				iState2->Timer(rcde.SystemTime);
-				if ( !iState->CmdExchange(&*iState2,false) ) goto error;
+				if ( !iState->CmdExchange(*iState2,false) ) goto error;
 			}
 				break;
 

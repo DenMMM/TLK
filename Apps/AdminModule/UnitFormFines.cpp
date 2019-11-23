@@ -154,7 +154,7 @@ void __fastcall TFormFines::ButtonSaveClick(TObject *Sender)
         return;
     }
     // Запись в логах
-    if ( !Log->AddFines(Fines.get()) )
+    if ( !Log->AddFines(*Fines) )
     {
         // Настройки сохранили, но без отображения их в логе работать не дадим
         ShellState->State|=mssErrorLog|mssErrorConfig; FormMain->SetShell();

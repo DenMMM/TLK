@@ -108,11 +108,11 @@ private:
 public:
 	// Команды, применяемые к компьютерам
 	bool CmdRun(
-		MTariffsItem *Tariff_,
-		MTariffRunTimesItem *Time_,
+		const MTariffsItem &Tariff_,
+		const MTariffRunTimesItem &Time_,
 		bool Check_);
 	bool CmdFine(short FineSize_, bool Check_);
-	bool CmdExchange(MStatesItem *State_, bool Check_);
+	bool CmdExchange(MStatesItem &State_, bool Check_);
 	bool CmdLock(bool Apply_, bool Check_);
 	bool CmdPause(bool Apply_, bool Check_);
 	bool CmdOpen(bool Apply_, bool Check_);
@@ -133,9 +133,9 @@ public:
 	bool NetBegin();
 	bool NetEnd();
 
-	bool NetSyncNewData();                  // Есть ли что отправить клиенту ?
-	void NetSyncData(MSyncData *Data_);     // Запрос данных для отправки клиенту
-	void NetSyncExecuted(bool Executed_);   //
+	bool NetSyncNewData();					// Есть ли что отправить клиенту ?
+	MSyncData NetSyncData();				// Запрос данных для отправки клиенту
+	void NetSyncExecuted(bool Executed_);	//
 
 	bool NetPwrOnNeed();
 	void NetPwrOnExecuted();
@@ -226,7 +226,7 @@ public:
 		return const_cast_iter(const_this->Search(Number_));
 	}
 
-	bool Update(MComputers *Computers_);
+	bool Update(const MComputers &Computers_);
 	bool Timer(__int64 SystemTime_);
 
 	// Переопределяем функцию сохранения списка в файл
@@ -281,17 +281,17 @@ private:
 
 public:
     // Вспомогательные функции
-    void StateInfo(MStatesInfo *Info_);
-    bool GetOptions(MClOptions *Options_);
-    bool GetGames(MGames *Games_);
+	MStatesInfo GetInfo();
+	bool GetOptions(MClOptions &Options_);
+    bool GetGames(MGames &Games_);
     bool Timer(__int64 SystemTime_);
     void CmdReboot();                       // Нужна ли ?
     void CmdShutdown();
 
     // Операции для сетевого интерфейса
-    bool NewSyncData(MSyncData *Data_);
-    bool NewGames(MGames *Games_);
-    bool NewOptions(MClOptions *Options_);
+	bool NewSyncData(MSyncData &Data_);
+	bool NewGames(const MGames &Games_);
+	bool NewOptions(const MClOptions &Options_);
 
     // Переадресуем обращения для загрузки/сохранения к методам базового класса MSLList
     void SetDefault(
