@@ -374,10 +374,6 @@
             <DependentOn>..\..\Core\UnitUsers.h</DependentOn>
             <BuildOrder>49</BuildOrder>
         </CppCompile>
-        <CppCompile Include="..\..\Core\UnitWinAPI.cpp">
-            <DependentOn>..\..\Core\UnitWinAPI.h</DependentOn>
-            <BuildOrder>49</BuildOrder>
-        </CppCompile>
         <CppCompile Include="..\..\Ext\BrianGladman\SHA\hmac.c">
             <BuildOrder>16</BuildOrder>
             <BuildOrder>104</BuildOrder>

@@ -2,9 +2,12 @@
 #ifndef UnitSendH
 #define UnitSendH
 //---------------------------------------------------------------------------
-#include <winsock2.h>
 #include <vector>
 #include <chrono>
+#include <atomic>
+#include <thread>
+#include <mutex>
+#include <winsock2.h>
 
 #include "UnitSLList.h"
 #include "UnitStates.h"
@@ -186,8 +189,7 @@ class MSend
 private:
     SOCKET lSocket;             // Сокет для ожидания соединений
     SOCKET rSocket;             // Сокет для соединения с клиентом
-    HANDLE Thread;              // Дескриптор потока, осуществляющего отправку/прием
-    DWORD ThreadID;             // ID потока
+	std::thread Thread;			// Дескриптор потока, осуществляющего отправку/прием
     unsigned NetCode;           // Ключ шифрования данных
     MAuth *NetMAC;              // Объект для вычисления и проверки MAC
     bool Init;                  // Флаг выполненной инициализации WinSock,NetCode,NetMAC
@@ -199,7 +201,7 @@ private:
     } Packet;                   // Буфер для отправки/приема запросов
 
 protected:
-    bool Break;                 // Флаг прерывания сетевых операций
+	std::atomic_bool Break;		// Флаг прерывания сетевых операций
 
     // Операции с сокетами
     bool NetInit(unsigned Code_, MAuth *MAC_);  // Инициализация WinSocket
@@ -227,7 +229,6 @@ protected:
 	bool RcvObject(obj_type *Obj_, unsigned Size_, unsigned Seed_);
 
     // Операции с потоком отправки/приема
-    static DWORD WINAPI ThreadF(LPVOID Data);
     virtual void ThreadP()=0;
 
     bool Start();
@@ -237,9 +238,7 @@ public:
 	MSend():
 		lSocket(INVALID_SOCKET),
 		rSocket(INVALID_SOCKET),
-		Thread(nullptr),
-		ThreadID(0),
-		Break(false),
+//		Break(false),
 		NetCode(0),
 		NetMAC(nullptr),
 		Init(false)
@@ -272,11 +271,11 @@ private:
 
 	// Генерация Seed со стороны сервера
 	static MRandCounter SeedRand;
-	static MWAPI::CRITICAL_SECTION CS_Seed;
+	static std::mutex mtxSeed;
 
 	unsigned NextSeed()
 	{
-		MWAPI::CRITICAL_SECTION::Lock lckObj(CS_Seed);  /// Для MSendSrv излишне
+		std::lock_guard <std::mutex> lckObj(mtxSeed);	/// Для MSendSrv излишне
 		return SeedRand++;
 	}
 

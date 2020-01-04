@@ -20,8 +20,8 @@ MRandCounter
 		std::chrono::system_clock::
 		now().time_since_epoch().count());
 
-MWAPI::CRITICAL_SECTION
-	MSyncStatesItem::CS_Seed;
+std::mutex
+	MSyncStatesItem::mtxSeed;
 //---------------------------------------------------------------------------
 unsigned MSyncStatesItem::GetDataSize() const
 {
@@ -333,98 +333,103 @@ bool MSync::NetInit(unsigned Code_, MAuth *MAC_)
 //---------------------------------------------------------------------------
 bool MSync::NetFree()
 {
-    Init=::WSACleanup();
-    return !Init;
+	Init=::WSACleanup();
+	return !Init;
 }
 //---------------------------------------------------------------------------
 bool MSync::Associate(MStates *States_, MComputers *Computers_)
 {
-    States=nullptr;
-    SyncStates.Associate(States_,Computers_);
-    States=States_;
-    // Сохраним кэш MAC-адресов
-    return AutoSaveARP? SyncStates.Save(): true;
+	States=nullptr;
+	SyncStates.Associate(States_,Computers_);
+	States=States_;
+	// Сохраним кэш MAC-адресов
+	return AutoSaveARP? SyncStates.Save(): true;
 }
 //---------------------------------------------------------------------------
 bool MSync::Start()
 {
-    sockaddr_in Address;
-    BOOL SetValue;
+	sockaddr_in Address;
+	BOOL SetValue;
 
-    if ( (!Init)||(States==nullptr)||(Thread!=nullptr) ) return false;
+	if (
+		(!Init) ||
+		(States==nullptr) ||
+		Thread.joinable() ) return false;	/// throw ?
 
-    Socket=SocketBC=INVALID_SOCKET;
-    // Создаем сокет для отправки/приема датаграмм
-    if ( (Socket=::socket(AF_INET,SOCK_DGRAM,
-        IPPROTO_IP))==INVALID_SOCKET ) goto error;
-    // Задаем параметры адреса сокета
-    memset(&Address,0,sizeof(Address));
-    Address.sin_family=AF_INET;
-    Address.sin_port=::htons(0);            // порт выбирает ОС !
-    Address.sin_addr.s_addr=INADDR_ANY;
-    // Присоединяем сокет
-    if ( ::bind(Socket,(sockaddr*)&Address,
-        sizeof(Address))==SOCKET_ERROR ) goto error;
+	Socket=SocketBC=INVALID_SOCKET;
+	// Создаем сокет для отправки/приема датаграмм
+	if ( (Socket=::socket(AF_INET,SOCK_DGRAM,
+		IPPROTO_IP))==INVALID_SOCKET ) goto error;
+	// Задаем параметры адреса сокета
+	memset(&Address,0,sizeof(Address));
+	Address.sin_family=AF_INET;
+	Address.sin_port=::htons(0);            // порт выбирает ОС !
+	Address.sin_addr.s_addr=INADDR_ANY;
+	// Присоединяем сокет
+	if ( ::bind(Socket,(sockaddr*)&Address,
+		sizeof(Address))==SOCKET_ERROR ) goto error;
 
-    // Создаем сокет для отправки широковещательных пакетов
-    if ( (SocketBC=::socket(AF_INET,SOCK_DGRAM,
-        IPPROTO_IP))==INVALID_SOCKET ) goto error;
-    // Устанавливаем для него опцию broadcast
-    SetValue=TRUE;
-    if ( ::setsockopt(SocketBC,SOL_SOCKET,SO_BROADCAST,
-        (char*)&SetValue,sizeof(SetValue))==SOCKET_ERROR ) goto error;
-    // Задаем параметры адреса сокета
-    memset(&Address,0,sizeof(Address));
-    Address.sin_family=AF_INET;
-    Address.sin_port=::htons(0);
-    Address.sin_addr.s_addr=INADDR_ANY;
-    // Присоединяем сокет
-    if ( ::bind(SocketBC,(sockaddr*)&Address,
-        sizeof(Address))==SOCKET_ERROR ) goto error;
+	// Создаем сокет для отправки широковещательных пакетов
+	if ( (SocketBC=::socket(AF_INET,SOCK_DGRAM,
+		IPPROTO_IP))==INVALID_SOCKET ) goto error;
+	// Устанавливаем для него опцию broadcast
+	SetValue=TRUE;
+	if ( ::setsockopt(SocketBC,SOL_SOCKET,SO_BROADCAST,
+		(char*)&SetValue,sizeof(SetValue))==SOCKET_ERROR ) goto error;
+	// Задаем параметры адреса сокета
+	memset(&Address,0,sizeof(Address));
+	Address.sin_family=AF_INET;
+	Address.sin_port=::htons(0);
+	Address.sin_addr.s_addr=INADDR_ANY;
+	// Присоединяем сокет
+	if ( ::bind(SocketBC,(sockaddr*)&Address,
+		sizeof(Address))==SOCKET_ERROR ) goto error;
 
 	//
-    if ( !SyncStates.Start() ) goto error;
+	if ( !SyncStates.Start() ) goto error;      /// try/catch ?
 
-    // Создаем поток для выполнения отправки и приема данных
-    Thread=::CreateThread(nullptr,0,&ThreadFunc,(LPVOID)this,0,&ThreadID);
-    if ( Thread==nullptr ) goto error;
+	IsStopping.store(false);
+	try
+	{
+		std::thread TmpThread(
+			[](MSync *Obj_)
+			{
+				// Запускаем обработчик
+				Obj_->ThreadExecute();
+				// Сбрасываем индикатор - счетчик пакетов
+				Obj_->sPCount(0);
+			}, this);
+		Thread.swap(TmpThread);
+	}
+	catch (std::system_error &e)
+	{
+		goto error;
+	}
 
-    return true;
+	return true;
+
 error:
-    // Закрываем сокеты
-    if ( Socket!=INVALID_SOCKET ) { ::closesocket(Socket); Socket=INVALID_SOCKET; }
-    if ( SocketBC!=INVALID_SOCKET ) { ::closesocket(SocketBC); SocketBC=INVALID_SOCKET; }
-    return false;
+	// Закрываем сокеты
+	if ( Socket!=INVALID_SOCKET ) { ::closesocket(Socket); Socket=INVALID_SOCKET; }
+	if ( SocketBC!=INVALID_SOCKET ) { ::closesocket(SocketBC); SocketBC=INVALID_SOCKET; }
+	return false;
 }
 //---------------------------------------------------------------------------
 void MSync::Stop()
 {
-    if ( Thread==nullptr ) return;
-    // Посылаем потоку сообщение
-    ::PostThreadMessage(ThreadID,WM_USER,0,0);
-    // Ждем завершения потока
-    ::WaitForSingleObject(Thread,INFINITE);
-    // Закрываем описатель потока
-    ::CloseHandle(Thread);
-    Thread=nullptr; ThreadID=0;
-    // Закрываем сокеты
-    ::closesocket(Socket); Socket=INVALID_SOCKET;
-	::closesocket(SocketBC); SocketBC=INVALID_SOCKET;
-	// При необходимости сохраняем состояния компьютеров
+	// Завершим работу потока
+	if ( Thread.joinable() )
+	{
+		IsStopping.store(true);
+		Thread.join();
+	}
+
+	// Закроем сокеты
+	if ( Socket!=INVALID_SOCKET ) { ::closesocket(Socket); Socket=INVALID_SOCKET; }
+	if ( SocketBC!=INVALID_SOCKET ) { ::closesocket(SocketBC); SocketBC=INVALID_SOCKET; }
+
+	// При необходимости сохраним состояния компьютеров
 	if ( SyncStates.Stop() ) States->Save();
-}
-//---------------------------------------------------------------------------
-DWORD WINAPI MSync::ThreadFunc(LPVOID Data)
-{
-    // Создаем очередь сообщений для потока
-    ::PeekMessageW(nullptr,(HWND)-1,0,0,PM_NOREMOVE);
-    // Запускаем обработчик
-    ((MSync*)Data)->ThreadExecute();
-    // Сбрасываем индикатор - счетчик пакетов
-    ((MSync*)Data)->sPCount(0);
-    // Завершаем работу потока
-    ::ExitThread(0);
-    return 0;
 }
 //---------------------------------------------------------------------------
 void MSync::ThreadExecute()
@@ -433,7 +438,7 @@ void MSync::ThreadExecute()
     sockaddr_in FromAddr;
     int RecvSize, AddrSize;
     bool NeedSave;
-    DWORD StartCycleTime;
+	DWORD StartCycleTime;
     unsigned Process;
 
     while(true)
@@ -483,12 +488,13 @@ void MSync::ThreadExecute()
 		sPCount(Process);
 
 		// Проверяем не пора ли завершить работу
-		if ( ::PeekMessage(&Message,(HWND)-1,0,0,PM_REMOVE) ) return;
+		if ( IsStopping.load() ) return;
 
 		// Засыпаем, если пакеты быстро разослали
 		if ( (::GetTickCount()-StartCycleTime)<(SYNC_SendInterval/4) )
 		{
-			::Sleep(SYNC_SendInterval/4);
+			std::this_thread::sleep_for(
+				std::chrono::milliseconds(SYNC_SendInterval/4));
 /*
 			// Добавим энтропии
 			thread_local static unsigned cntr=0;
@@ -594,72 +600,75 @@ bool MSyncCl::Start()
     sockaddr_in Address;
     BOOL SetValue;
 
-    if ( (!Init)||(Thread!=nullptr) ) return false;
+	if (
+		(!Init) ||
+		Thread.joinable() ) return false;	/// throw ?
 
-    Socket=INVALID_SOCKET;
-    // Создаем сокет для приема/отправки датаграмм
-    if ( (Socket=::socket(AF_INET,SOCK_DGRAM,
-        IPPROTO_IP))==INVALID_SOCKET ) goto error;
-    // Задаем параметры адреса сокета
-    memset(&Address,0,sizeof(Address));
-    Address.sin_family=AF_INET;
-    Address.sin_port=::htons(SYNC_Port);
-    Address.sin_addr.s_addr=INADDR_ANY;
-    // Присоединяем сокет
-    if ( ::bind(Socket,(sockaddr*)&Address,
-        sizeof(Address))==SOCKET_ERROR ) goto error;
+	Socket=INVALID_SOCKET;
+	// Создаем сокет для приема/отправки датаграмм
+	if ( (Socket=::socket(AF_INET,SOCK_DGRAM,
+		IPPROTO_IP))==INVALID_SOCKET ) goto error;
+	// Задаем параметры адреса сокета
+	memset(&Address,0,sizeof(Address));
+	Address.sin_family=AF_INET;
+	Address.sin_port=::htons(SYNC_Port);
+	Address.sin_addr.s_addr=INADDR_ANY;
+	// Присоединяем сокет
+	if ( ::bind(Socket,(sockaddr*)&Address,
+		sizeof(Address))==SOCKET_ERROR ) goto error;
 
-    //
-    LastSendTime=::GetTickCount();
+	//
+	LastSendTime=::GetTickCount();
 	Process=mspWait;
 
-    // Создаем поток для выполнения отправки и приема данных
-    Thread=::CreateThread(nullptr,0,&ThreadFunc,(LPVOID)this,0,&ThreadID);
-    if ( Thread==nullptr ) goto error;
+	IsStopping.store(false);
+	try
+	{
+		// Создаем поток для выполнения отправки и приема данных
+		std::thread TmpThread(
+			[](MSyncCl *Obj_)
+			{
+				Obj_->ThreadExecute();
+			}, this);
+		Thread.swap(TmpThread);
+	}
+	catch (std::system_error &e)
+	{
+		goto error;
+	}
 
-    return true;
+	return true;
+
 error:
-    // Закрываем сокет
-    if ( Socket!=INVALID_SOCKET ) { ::closesocket(Socket); Socket=INVALID_SOCKET; }
-    return false;
+	// Закрываем сокет
+	if ( Socket!=INVALID_SOCKET ) { ::closesocket(Socket); Socket=INVALID_SOCKET; }
+	return false;
 }
 //---------------------------------------------------------------------------
 void MSyncCl::Stop()
 {
-    if ( Thread==nullptr ) return;
-    // Посылаем потоку сообщение
-    ::PostThreadMessage(ThreadID,WM_USER,0,0);
-    // Ждем завершения потока
-    ::WaitForSingleObject(Thread,INFINITE);
-    // Закрываем описатель потока
-    ::CloseHandle(Thread); Thread=nullptr; ThreadID=0;
-    // Закрываем сокет
-    ::closesocket(Socket); Socket=INVALID_SOCKET;
-}
-//---------------------------------------------------------------------------
-DWORD WINAPI MSyncCl::ThreadFunc(LPVOID Data)
-{
-    // Создаем очередь сообщений для потока
-    ::PeekMessage(nullptr,(HWND)-1,0,0,PM_NOREMOVE);
+	// Завершаем работу потока
+	if ( Thread.joinable() )
+	{
+		IsStopping.store(true);
+		Thread.join();
+	}
 
-    ((MSyncCl*)Data)->ThreadExecute();
-
-    // Завершаем работу потока
-    ::ExitThread(0);
-    return 0;
+	// Закрываем сокет
+	if ( Socket!=INVALID_SOCKET ) { ::closesocket(Socket); Socket=INVALID_SOCKET; }
 }
 //---------------------------------------------------------------------------
 void MSyncCl::ThreadExecute()
 {
-    MSG Message;
-    sockaddr_in FromAddr;
-    int RecvSize, AddrSize;
-    bool NeedSave;
-    DWORD StartCycleTime;
+	MSG Message;
+	sockaddr_in FromAddr;
+	int RecvSize, AddrSize;
+	bool NeedSave;
+	DWORD StartCycleTime;
 
-    while(true)
-    {
-        StartCycleTime=::GetTickCount();
+	while(true)
+	{
+		StartCycleTime=::GetTickCount();
 
         NeedSave=false;
         // Опустошаем буфер пакетов
@@ -682,12 +691,15 @@ void MSyncCl::ThreadExecute()
             catch (std::bad_alloc &e) {}
         }
 
-        // Проверяем очередь сообщений
-        if ( ::PeekMessage(&Message,(HWND)-1,0,0,PM_REMOVE) ) break;
+		// Проверяем очередь сообщений
+		if ( IsStopping.load() ) break;
 
         // Засыпаем, если быстро управились
-        if ( (::GetTickCount()-StartCycleTime)<(SYNC_SendInterval/4) )
-            ::Sleep(SYNC_SendInterval/4);
+		if ( (::GetTickCount()-StartCycleTime)<(SYNC_SendInterval/4) )
+		{
+			std::this_thread::sleep_for(
+				std::chrono::milliseconds(SYNC_SendInterval/4));
+		}
     }
 }
 //---------------------------------------------------------------------------

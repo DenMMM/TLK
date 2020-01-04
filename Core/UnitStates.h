@@ -2,11 +2,11 @@
 #ifndef UnitStatesH
 #define UnitStatesH
 //---------------------------------------------------------------------------
+#include <string>
+#include <mutex>
 #include <winsock2.h>
 //#include <windows.h>
-#include <string>
 
-#include "UnitWinAPI.h"
 #include "UnitSLList.h"
 #include "UnitComputers.h"
 #include "UnitTariffs.h"
@@ -84,7 +84,7 @@ public:
 	virtual const void *GetData(const void *Data_, const void *Limit_) override;
 
 private:
-	mutable MWAPI::CRITICAL_SECTION CS_Main;    // Объект для синхронизации доступа потоков к данным
+	mutable std::mutex mtxMain;	// Объект для синхронизации доступа потоков к данным
 	__int64 SystemTime;         // Системное время, используемое при всех расчетах
 
 	char Number;                // Номер компьютера, с которым ассоциировано состояние
@@ -155,7 +155,7 @@ public:
 
 	LogData gLogData() const
 	{
-		MWAPI::CRITICAL_SECTION::Lock lckObj(CS_Main);
+		std::lock_guard lckObj(mtxMain);
 
 		LogData ld;
 		ld.Number=Number;
@@ -172,7 +172,7 @@ public:
 
 	void sFromLog(const LogData &Data_)
 	{
-		MWAPI::CRITICAL_SECTION::Lock lckObj(CS_Main);
+		std::lock_guard lckObj(mtxMain);
 
 		Number=Data_.Number;
 		State=Data_.State;
@@ -215,7 +215,7 @@ class MStates:
 		MStatesItem>
 {
 private:
-	MWAPI::CRITICAL_SECTION CS_File;   // Объект для синхронизации
+	std::mutex mtxFile;			// Объект для синхронизации
 
 public:
 	// Вспомогательные функции
@@ -259,7 +259,7 @@ private:
 	std::wstring PrgFile;		// Файл для хранения списка программ
 	unsigned AutoLockTime;		// Время отсутствия связи с сервером до автоблокировки
 
-    mutable MWAPI::CRITICAL_SECTION CS_Main;   // Объект для синхронизации доступа потоков к данным
+	mutable std::mutex mtxMain;	// Объект для синхронизации доступа потоков к данным
     __int64 SystemTime;         // Системное время, используемое при всех расчетах
 
     char Number;                // Номер компьютера

@@ -3,9 +3,9 @@
 #define UnitLockDskH
 //---------------------------------------------------------------------------
 #include <string>
+#include <mutex>
 #include <winsock2.h>
 //#include <windows.h>
-#include "UnitWinAPI.h"
 #include "UnitStates.h"
 //---------------------------------------------------------------------------
 #define LOCKDSK_Name    L"TLK_Lock"
@@ -51,7 +51,7 @@ private:
 	int CompNum;                        // Номер компьютера
 	int WorkTime;                       // Оставшееся время работы
 	std::wstring MsgFile;               // Путь к файлу с картинкой-сообщением
-	mutable MWAPI::CRITICAL_SECTION CS_Param;   // Блокировка доступа к этим параметрам
+	mutable std::mutex mtxParam;		// Блокировка доступа к этим параметрам
 
 	static DWORD WINAPI ThreadF(LPVOID Data_);
 	DWORD ThreadP();

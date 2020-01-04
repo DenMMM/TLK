@@ -2,11 +2,12 @@
 #ifndef UnitSyncH
 #define UnitSyncH
 //---------------------------------------------------------------------------
-#include <atomic>
 #include <chrono>
+#include <atomic>
+#include <thread>
+#include <mutex>
 #include <winsock2.h>
 
-#include "UnitWinAPI.h"
 #include "UnitSLList.h"
 #include "UnitComputers.h"
 #include "UnitStates.h"
@@ -133,11 +134,11 @@ private:
 
 	// Генерация Seed со стороны сервера
 	static MRandCounter SeedRand;
-	static MWAPI::CRITICAL_SECTION CS_Seed;
+	static std::mutex mtxSeed;
 
 	unsigned NextSeed()
 	{
-		MWAPI::CRITICAL_SECTION::Lock lckObj(CS_Seed);  /// Для MSync излишне
+		std::lock_guard <std::mutex> lckObj(mtxSeed);	/// Для MSync излишне
 		return SeedRand++;
 	}
 
@@ -201,10 +202,9 @@ class MSync
 {
 private:
     bool Init;                  // Была ли выполнена инициализация WinSocket
-    bool AutoSaveARP;           // Сохранять ARP-кэш автоматически при обновлении MAC-адресов
-    HANDLE Thread;              // Дескриптор потока, осуществляющего отправку/прием
-    DWORD ThreadID;             // Идентификатор потока
-    SOCKET Socket;              // Сокет для выполнения синхронизации
+	bool AutoSaveARP;           // Сохранять ARP-кэш автоматически при обновлении MAC-адресов
+	std::thread Thread;			// Объект потока, осуществляющего отправку/прием
+	SOCKET Socket;              // Сокет для выполнения синхронизации
     SOCKET SocketBC;            // Сокет для отправки "Magic Packet"
     unsigned NetCode;           // Код шифрования для сетевого обмена
     MAuth *NetMAC;              // Аутентификатор сетевых операций
@@ -219,23 +219,23 @@ private:
         MSyncPConf Conf;
     } Packet;                   // Буфер для принимаемых пакетов
 
-    static DWORD WINAPI ThreadFunc(LPVOID Data);
 	static bool PollData(SOCKET Socket_);
     static bool UpdateMAC(MSyncStates *States_);
-    void ThreadExecute();
+	void ThreadExecute();
+	std::atomic_bool IsStopping;
 
 	void sPCount(unsigned Value_) noexcept { PCount.store(Value_); }
 
 public:
-    bool NetInit(unsigned Code_, MAuth *MAC_);  // Инициализация WinSocket
-    bool NetFree();                             // Освобождение WinSocket
-    bool Associate(MStates *States_, MComputers *Computers_);
-    bool Start();                               // Создание сокетов и запуск потока синхронизации
-    void Stop();                                // Остановка потока синхронизации и закрытие сокетов
+	bool NetInit(unsigned Code_, MAuth *MAC_);  // Инициализация WinSocket
+	bool NetFree();                             // Освобождение WinSocket
+	bool Associate(MStates *States_, MComputers *Computers_);
+	bool Start();                               // Создание сокетов и запуск потока синхронизации
+	void Stop();                                // Остановка потока синхронизации и закрытие сокетов
 
-    void SetARPFile(wchar_t *File_, unsigned Code_, bool AutoSave_);
-    bool SaveARP() const { return SyncStates.Save(); }
-    bool LoadARP() { return SyncStates.Load(); }
+	void SetARPFile(wchar_t *File_, unsigned Code_, bool AutoSave_);
+	bool SaveARP() const { return SyncStates.Save(); }
+	bool LoadARP() { return SyncStates.Load(); }
 	DWORD gLastErr() const noexcept { return SyncStates.gLastErr(); }
 
 	// Индикация процесса снхронизации
@@ -245,8 +245,6 @@ public:
 	MSync():
 		Init(false),
 		AutoSaveARP(false),
-		Thread(nullptr),
-		ThreadID(0),
 		NetCode(0),
 		NetMAC(nullptr),
 		States(nullptr),
@@ -262,7 +260,13 @@ public:
 
 	~MSync()
 	{
-///		Stop();
+		// Уничтожим поток
+		{
+			std::thread TmpThread(std::move(Thread));
+		}
+		// Закроем сокеты
+		if ( Socket!=INVALID_SOCKET ) ::closesocket(Socket);
+		if ( SocketBC!=INVALID_SOCKET ) ::closesocket(SocketBC);
 	}
 };
 //---------------------------------------------------------------------------
@@ -270,8 +274,7 @@ class MSyncCl
 {
 private:
 	bool Init;                  // Была ли выполнена инициализация WinSocket
-	HANDLE Thread;              // Дескриптор потока, осуществляющего прием/отправку
-	DWORD ThreadID;             // Идентификатор потока
+	std::thread Thread;			// Дескриптор потока, осуществляющего прием/отправку
 	SOCKET Socket;              // Сокет для приема/отправки данных
 	DWORD LastSendTime;         // Время последней отправки пакета
 	unsigned Process;           // Состояние процесса синхронизации
@@ -296,9 +299,10 @@ private:
 	int SndPacketSize;          // Размер отправляемого пакета
 	sockaddr_in SndAddr;        // Адрес сервера
 
-	static DWORD WINAPI ThreadFunc(LPVOID Data);
 	static bool PollData(SOCKET Socket_);
 	void ThreadExecute();
+	std::atomic_bool IsStopping;
+
 	bool Recv(sockaddr_in *From_, char *Packet_, int PacketSize_);
 	bool Send(SOCKET Socket_);
 
@@ -315,8 +319,6 @@ public:
 
 	MSyncCl():
 		Init(false),
-		Thread(nullptr),
-		ThreadID(0),
 		Socket(INVALID_SOCKET),
 		NetMAC(nullptr),
 		State(nullptr),
@@ -337,7 +339,12 @@ public:
 
 	~MSyncCl()
 	{
-///		Stop();
+		// Уничтожим поток
+		{
+			std::thread TmpThread(std::move(Thread));
+		}
+		// Закроем сокет
+		if ( Socket!=INVALID_SOCKET ) ::closesocket(Socket);
 	}
 };
 //---------------------------------------------------------------------------

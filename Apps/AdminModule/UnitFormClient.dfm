@@ -191,6 +191,10 @@ object FormClient: TFormClient
     object TabSheetOptions: TTabSheet
       Caption = #1055#1086#1074#1077#1076#1077#1085#1080#1077' '#1082#1083#1080#1077#1085#1090#1072
       ImageIndex = 1
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       DesignSize = (
         557
         341)

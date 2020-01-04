@@ -96,9 +96,9 @@ protected:
 	{
 	private:
 		// Функции механизма сохранения/загрузки данных
-		unsigned GetDataSize() const override;
-		void *SetData(void *Data_) const override;
-		const void *GetData(const void *Data_, const void *Limit_) override;
+		virtual unsigned GetDataSize() const override;
+		virtual void *SetData(void *Data_) const override;
+		virtual const void *GetData(const void *Data_, const void *Limit_) override;
 
 	public:
 		char Number;            // Номер компьютера
@@ -114,9 +114,9 @@ protected:
 	{
 	private:
 		// Функции механизма сохранения/загрузки данных
-		unsigned GetDataSize() const override;
-		void *SetData(void *Data_) const override;
-		const void *GetData(const void *Data_, const void *Limit_) override;
+		virtual unsigned GetDataSize() const override;
+		virtual void *SetData(void *Data_) const override;
+		virtual const void *GetData(const void *Data_, const void *Limit_) override;
 
 	public:
 		unsigned State;         // Состояние оболочки

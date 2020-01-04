@@ -5,11 +5,11 @@
 #include <random>
 #include <chrono>
 #include <array>
+#include <mutex>
 //#include <windows.h>
 #include <winsock2.h>
 
 #include "UnitEncode.h"
-#include "UnitWinAPI.h"
 //---------------------------------------------------------------------------
 class MTimeRand;
 //---------------------------------------------------------------------------
@@ -18,9 +18,9 @@ class MTimeRand
 public:
 	typedef uint_fast32_t result_type;
 
-	static result_type min() {
+	static constexpr result_type min() {
 		return std::numeric_limits<result_type>::min(); }
-	static result_type max() {
+	static constexpr result_type max() {
 		return std::numeric_limits<result_type>::max(); }
 
 protected:
@@ -52,7 +52,7 @@ protected:
 			EntSel(0)
 		{
 //			Ent.fill(0);
-			result_type Num=0; for ( auto &E: Ent ) E=(++Num);
+			result_type Num=1; for ( auto &E: Ent ) E=(Num++);
 		}
 
 		MEntropy(std::seed_seq &Seed_):
@@ -73,7 +73,7 @@ protected:
 	};
 
 	MEntropy Entropy;
-	MWAPI::CRITICAL_SECTION CS_Entropy;
+	std::mutex mtxEntropy;
 
 	auto GetTimers() noexcept
 	{
@@ -83,7 +83,7 @@ protected:
 		Timers[0]=std::chrono::system_clock::
 			now().time_since_epoch().count();
 		// ... и значение "непрерывного" счетчика
-		Timers[1]=[]() {
+		Timers[1]=[]() {                /// std::chrono::steady_clock ?
 			LARGE_INTEGER cntr;
 			return
 				::QueryPerformanceCounter(&cntr)?
@@ -92,9 +92,8 @@ protected:
 		}();
 
 		// Используем ID потока, чтобы исключить совпадения
-		DWORD ThreadId=::GetCurrentThreadId();
-		Timers[0]^=ThreadId;
-		Timers[1]^=ThreadId;
+		DWORD ThreadId=::GetCurrentThreadId();  /// std::this_thread::get_id();
+		for ( auto &T: Timers ) T^=ThreadId;
 
 		return Timers;
 	}
@@ -102,7 +101,7 @@ protected:
 	template <typename timers_cont>
 	void UpdateEntropy(timers_cont Timers_) noexcept
 	{
-		MWAPI::CRITICAL_SECTION::Lock lckObj(CS_Entropy);
+		std::lock_guard <std::mutex> lckObj(mtxEntropy);
 
 		// Перестроим буфер энтропий
 		Entropy.Update(Timers_);
@@ -111,7 +110,7 @@ protected:
 	template <typename timers_cont>
 	auto GetEntropy(timers_cont Timers_)
 	{
-		MWAPI::CRITICAL_SECTION::Lock lckObj(CS_Entropy);
+		std::lock_guard <std::mutex> lckObj(mtxEntropy);
 
 		// Перестроим буфер энтропий
 		Entropy.Update(Timers_);        /// медленно, зато безопасно (?)

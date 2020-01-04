@@ -259,10 +259,6 @@
             <DependentOn>..\..\Core\UnitTariffs.h</DependentOn>
             <BuildOrder>29</BuildOrder>
         </CppCompile>
-        <CppCompile Include="..\..\Core\UnitWinAPI.cpp">
-            <DependentOn>..\..\Core\UnitWinAPI.h</DependentOn>
-            <BuildOrder>29</BuildOrder>
-        </CppCompile>
         <CppCompile Include="..\..\Ext\BrianGladman\SHA\hmac.c">
             <BuildOrder>41</BuildOrder>
             <BuildOrder>13</BuildOrder>
@@ -407,13 +403,13 @@
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
-                <DeployFile Condition="'$(DynamicRTL)'=='true' And '$(Multithreaded)'!='true'" LocalName="$(BDS)\bin\cc32260.dll" Class="DependencyModule">
-                    <Platform Name="Win32">
+                <DeployFile Condition="'$(DynamicRTL)'=='true' And '$(Multithreaded)'=='true'" LocalName="$(BDS)\bin64\cc64260mt.dll" Class="DependencyModule">
+                    <Platform Name="Win64">
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
-                <DeployFile Condition="'$(DynamicRTL)'=='true' And '$(Multithreaded)'=='true'" LocalName="$(BDS)\bin64\cc64260mt.dll" Class="DependencyModule">
-                    <Platform Name="Win64">
+                <DeployFile Condition="'$(DynamicRTL)'=='true' And '$(Multithreaded)'!='true'" LocalName="$(BDS)\bin\cc32260.dll" Class="DependencyModule">
+                    <Platform Name="Win32">
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>

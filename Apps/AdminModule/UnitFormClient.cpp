@@ -621,7 +621,9 @@ void __fastcall TFormClient::Dispatch(void *Message)
             PanelProcess->Caption=L"Ошибка";
             break;
 
-        case WM_USER+mseFreeParam:
+		case WM_USER+mseFreeParam:
+			//
+            Send.Stop();
             // Удаляем мусор
             SendComps.clear();
             TmpGames.Clear();

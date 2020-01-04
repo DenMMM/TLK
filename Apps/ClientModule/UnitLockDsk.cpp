@@ -251,43 +251,44 @@ void MLockDsk::UpdBkg(HWND hBkg_, HWND hText_)
     // Обновим картинку под STATIC'ом
 //    ::RedrawWindow(hBkg_,&rect,nullptr,
 //        RDW_INVALIDATE|RDW_NOCHILDREN|RDW_UPDATENOW);   /// что лучше ?
-    ::InvalidateRect(hBkg_,&rect,FALSE);
-    ::UpdateWindow(hBkg_);
+	::InvalidateRect(hBkg_,&rect,FALSE);
+	::UpdateWindow(hBkg_);
 }
 //---------------------------------------------------------------------------
 void MLockDsk::UpdTransp() const
 {
-    MWAPI::CRITICAL_SECTION::Lock lckObj(CS_Param);
+	std::lock_guard <std::mutex> lckObj(mtxParam);
 
-    // Выставим режим прозрачности окна и параметры цвета
-    if ( Transp )
-    {
-        ::SetWindowLong(hwMain,GWL_EXSTYLE,WS_EX_LAYERED);
-        ::SetLayeredWindowAttributes(hwMain,TCOLOR_TRANSPARENT,255,LWA_COLORKEY);
-    } else
-        ::SetWindowLong(hwMain,GWL_EXSTYLE,0);
-    // Обновим содержимое
-    ::InvalidateRect(hwMain,nullptr,TRUE);
-    ::UpdateWindow(hwMain);
+	// Выставим режим прозрачности окна и параметры цвета
+	if ( Transp )
+	{
+		::SetWindowLong(hwMain,GWL_EXSTYLE,WS_EX_LAYERED);
+		::SetLayeredWindowAttributes(hwMain,TCOLOR_TRANSPARENT,255,LWA_COLORKEY);
+	} else
+		::SetWindowLong(hwMain,GWL_EXSTYLE,0);
+	// Обновим содержимое
+	::InvalidateRect(hwMain,nullptr,TRUE);
+	::UpdateWindow(hwMain);
 }
 //---------------------------------------------------------------------------
 bool MLockDsk::LoadImg()
 {
-    CS_Param.Enter();
-	hMsgImg=::LoadImage(nullptr, MsgFile.c_str(), IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
-	CS_Param.Leafe();
+	{
+		std::lock_guard <std::mutex> lckObj(mtxParam);
+		hMsgImg=::LoadImage(nullptr, MsgFile.c_str(), IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+	}
 
-    if ( hMsgImg==nullptr ) return false;
-    ::SendMessage(hwMsgImg,STM_SETIMAGE,(WPARAM)IMAGE_BITMAP,(LPARAM)hMsgImg);
-    return true;
+	if ( hMsgImg==nullptr ) return false;
+	::SendMessage(hwMsgImg,STM_SETIMAGE,(WPARAM)IMAGE_BITMAP,(LPARAM)hMsgImg);
+	return true;
 }
 //---------------------------------------------------------------------------
 void MLockDsk::UpdCompNum() const
 {
-    MWAPI::CRITICAL_SECTION::Lock lckObj(CS_Param);
-	wchar_t line[]=L"99";
+	std::lock_guard <std::mutex> lckObj(mtxParam);
 
 	// Номер компьютера
+	wchar_t line[]=L"99";
 	swprintf(
 		line, sizeof(line),
 		L"%2i",
@@ -299,28 +300,28 @@ void MLockDsk::UpdCompNum() const
 //---------------------------------------------------------------------------
 void MLockDsk::UpdSysTime() const
 {
-    MWAPI::CRITICAL_SECTION::Lock lckObj(CS_Param);
-    wchar_t line[]=L"--:--";
-    SYSTEMTIME st;
+	std::lock_guard <std::mutex> lckObj(mtxParam);
 
-    // Текущее время
-    if ( Int64ToSystemTime(SysTime,st) )
-    {
+	// Текущее время
+	SYSTEMTIME st;
+	if ( Int64ToSystemTime(SysTime,st) )
+	{
+		wchar_t line[]=L"--:--";
 		swprintf(
 			line, sizeof(line),
 			L"%.2i:%.2i",
 			st.wHour, st.wMinute);
 
 		::SetWindowText(hwSysTime, line);
-    }
+	}
 }
 //---------------------------------------------------------------------------
 void MLockDsk::UpdWorkTime() const
 {
-    MWAPI::CRITICAL_SECTION::Lock lckObj(CS_Param);
-	wchar_t line[]=L"--:--";
+	std::lock_guard <std::mutex> lckObj(mtxParam);
 
-    // Сколько осталось работать
+	// Сколько осталось работать
+	wchar_t line[]=L"--:--";
 	if ( WorkTime==0 ) swprintf(
 		line,  sizeof(line),
 		L"--:--");
@@ -358,11 +359,12 @@ bool MLockDsk::SetTransp(bool Transp_)
 //---------------------------------------------------------------------------
 bool MLockDsk::Show(const wchar_t *File_)
 {
-    // Скопируем параметры в буфер потока
-    CS_Param.Enter();
-	if ( wcslen(File_)>MAX_PATH ) MsgFile.clear();
-    else MsgFile=File_;     /// проверить bad_alloc или выделить память заранее
-    CS_Param.Leafe();
+	// Скопируем параметры в буфер потока
+	{
+		std::lock_guard <std::mutex> lckObj(mtxParam);
+		if ( wcslen(File_)>MAX_PATH ) MsgFile.clear();
+		else MsgFile=File_;     /// проверить bad_alloc или выделить память заранее
+	}
 
     // Отправим сообщение работающему потоку
     if ( hThread!=nullptr ) return ThreadMsg(MSG_UpdMsg);
@@ -376,27 +378,30 @@ bool MLockDsk::Show(const wchar_t *File_)
 //---------------------------------------------------------------------------
 bool MLockDsk::UpdateCompNum(int Num_)
 {
-    CS_Param.Enter();
-    CompNum=Num_;
-    CS_Param.Leafe();
+	{
+		std::lock_guard <std::mutex> lckObj(mtxParam);
+		CompNum=Num_;
+	}
 
     return ThreadMsg(MSG_UpdCompNum);
 }
 //---------------------------------------------------------------------------
 bool MLockDsk::UpdateSysTime(__int64 Time_)
 {
-    CS_Param.Enter();
-    SysTime=Time_;
-    CS_Param.Leafe();
+	{
+		std::lock_guard <std::mutex> lckObj(mtxParam);
+		SysTime=Time_;
+	}
 
     return ThreadMsg(MSG_UpdSysTime);
 }
 //---------------------------------------------------------------------------
 bool MLockDsk::UpdateWorkTime(int Time_)
 {
-    CS_Param.Enter();
-    WorkTime=Time_;
-    CS_Param.Leafe();
+	{
+		std::lock_guard <std::mutex> lckObj(mtxParam);
+		WorkTime=Time_;
+	}
 
     return ThreadMsg(MSG_UpdWorkTime);
 }

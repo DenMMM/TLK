@@ -15,8 +15,8 @@ MRandCounter
 		std::chrono::system_clock::
 		now().time_since_epoch().count());
 
-MWAPI::CRITICAL_SECTION
-	MSendSrv::CS_Seed;
+std::mutex
+	MSendSrv::mtxSeed;
 //---------------------------------------------------------------------------
 bool MSend::NetInit(unsigned Code_, MAuth *MAC_)
 {
@@ -77,12 +77,9 @@ bool MSend::Listen()
     timeout.tv_sec=0; timeout.tv_usec=100*1000;
     do
     {
-        if ( ::PeekMessage(&Msg,(HWND)-1,0,0,PM_REMOVE) )
-        {
-            Break=true;
-            goto exit;
-        }
-        FD_ZERO(&fds); FD_SET(lSocket,&fds);
+		if ( Break.load() ) goto exit;
+
+		FD_ZERO(&fds); FD_SET(lSocket,&fds);
         if ( (result=::select(0,&fds,nullptr,nullptr,&timeout))==SOCKET_ERROR ) goto exit;
     } while((result!=1)||(!FD_ISSET(lSocket,&fds)));
 
@@ -129,41 +126,35 @@ bool MSend::Connect(const wchar_t *IP_, unsigned Time_)
     timeout.tv_sec=0; timeout.tv_usec=100*1000;
     do
     {
-        if ( ::PeekMessage(&Msg,(HWND)-1,0,0,PM_REMOVE) )
-        {
-            Break=true;
-            goto exit;
-        }
+		if ( Break.load() ) goto exit;
+
         // Ожидаем возможности передать еще данные
-        FD_ZERO(&w_fds); FD_SET(rSocket,&w_fds);
-        FD_ZERO(&e_fds); FD_SET(rSocket,&e_fds);
-        if ( (result=::select(0,nullptr,&w_fds,&e_fds,&timeout))==0 ) continue;
-        if ( (result==SOCKET_ERROR)||FD_ISSET(rSocket,&e_fds) ) goto exit;
-        if ( FD_ISSET(rSocket,&w_fds) ) return true;
-    } while((::GetTickCount()-stime)<Time_);
+		FD_ZERO(&w_fds); FD_SET(rSocket,&w_fds);
+		FD_ZERO(&e_fds); FD_SET(rSocket,&e_fds);
+		if ( (result=::select(0,nullptr,&w_fds,&e_fds,&timeout))==0 ) continue;
+		if ( (result==SOCKET_ERROR)||FD_ISSET(rSocket,&e_fds) ) goto exit;
+		if ( FD_ISSET(rSocket,&w_fds) ) return true;
+	} while((::GetTickCount()-stime)<Time_);
 
 exit:
-    return false;
+	return false;
 }
 //---------------------------------------------------------------------------
 bool MSend::Snd(char *Data_, unsigned Size_, unsigned Time_)
 {
-    MSG Msg;
-    fd_set w_fds, e_fds;
-    timeval timeout;
-    DWORD stime;
-    int result;
+	MSG Msg;
+	fd_set w_fds, e_fds;
+	timeval timeout;
+	DWORD stime;
+	int result;
 
-    Time_*=1000; stime=::GetTickCount();
-    timeout.tv_sec=0; timeout.tv_usec=100*1000;
-    do
-    {
-        if ( ::PeekMessage(&Msg,(HWND)-1,0,0,PM_REMOVE) )
-        {
-            Break=true;
-            goto exit;
-        }
-        // Ожидаем возможности передать еще данные
+	Time_*=1000; stime=::GetTickCount();
+	timeout.tv_sec=0; timeout.tv_usec=100*1000;
+	do
+	{
+		if ( Break.load() ) goto exit;
+
+		// Ожидаем возможности передать еще данные
         FD_ZERO(&w_fds); FD_SET(rSocket,&w_fds);
         FD_ZERO(&e_fds); FD_SET(rSocket,&e_fds);
         if ( (result=::select(0,nullptr,&w_fds,&e_fds,&timeout))==0 ) continue;
@@ -190,11 +181,8 @@ bool MSend::Rcv(char *Data_, unsigned Size_, unsigned Time_)
     timeout.tv_sec=0; timeout.tv_usec=100*1000;
     do
     {
-        if ( ::PeekMessage(&Msg,(HWND)-1,0,0,PM_REMOVE) )
-        {
-            Break=true;
-            goto exit;
-        }
+		if ( Break.load() ) goto exit;
+
         // Ожидаем возможности принять еще данные
         FD_ZERO(&r_fds); FD_SET(rSocket,&r_fds);
         FD_ZERO(&e_fds); FD_SET(rSocket,&e_fds);
@@ -227,11 +215,8 @@ bool MSend::Disconnect(unsigned Time_)
     timeout.tv_sec=0; timeout.tv_usec=100*1000;
     do
     {
-        if ( ::PeekMessage(&Msg,(HWND)-1,0,0,PM_REMOVE) )
-        {
-            Break=true;
-            goto exit;
-        }
+		if ( Break.load() ) goto exit;
+
         // Ожидаем возможности принять еще данные
         FD_ZERO(&r_fds); FD_SET(rSocket,&r_fds);
         FD_ZERO(&e_fds); FD_SET(rSocket,&e_fds);
@@ -395,44 +380,39 @@ error:
     return false;
 }
 //---------------------------------------------------------------------------
-DWORD WINAPI MSend::ThreadF(LPVOID Data)
-{
-    MSG msg;
-    
-    // Создаем очередь сообщений для потока
-///    ::PeekMessage(nullptr,(HWND)-1,0,0,PM_NOREMOVE);
-    ::PeekMessage(&msg,nullptr,WM_USER,WM_USER,PM_NOREMOVE);
-    ((MSend*)Data)->Break=false;
-    // Обработка тела потока
-    ((MSend*)Data)->ThreadP();
-    // Завершаем работу потока
-    ::ExitThread(0);
-    return 0;
-}
-//---------------------------------------------------------------------------
 bool MSend::Start()
 {
-    if ( !Init ) return false;
-    // Создаем поток для выполнения отправки и приема данных
-    return (Thread=::CreateThread(nullptr,0,&ThreadF,
-        (LPVOID)this,0,&ThreadID))!=nullptr;
+	if (
+		(!Init) ||
+		Thread.joinable() ) return false;   /// throw ?
+//		(!Init) ) return false;
+//	if ( Thread.joinable() ) Thread.join();
+
+	Break.store(false);
+	try
+	{
+		// Создаем поток для выполнения отправки и приема данных
+		std::thread TmpThread(
+			[](MSend *Obj_)
+			{
+				Obj_->ThreadP();
+			}, this);
+		Thread.swap(TmpThread);
+	}
+	catch (std::system_error &e)
+	{
+		return false;
+	}
+
+	return true;
 }
 //---------------------------------------------------------------------------
 void MSend::Stop()
 {
-    DWORD ExitCode;
-    // Проверяем работает ли поток
-    if ( Thread==nullptr ) return;
-    if ( ::GetExitCodeThread(Thread,&ExitCode)&&(ExitCode==STILL_ACTIVE) )
-    {
-        // Посылаем потоку сообщение и ждем завершения его работы
-        ::PostThreadMessage(ThreadID,WM_USER,0,0);
-        ::WaitForSingleObject(Thread,INFINITE);
-    }
-    // Закрываем описатель потока
-    ::CloseHandle(Thread);
-    Thread=nullptr;
-    ThreadID=0;
+	if ( !Thread.joinable() ) return;
+
+	Break.store(true);
+	Thread.join();
 }
 //---------------------------------------------------------------------------
 void MSendSrv::Event(MComputersItem *Computer_, int Event_)
@@ -470,7 +450,7 @@ void MSendSrv::ThreadSend()
     unsigned char Type;
 	MComputersItem *pComp;
 
-	for ( unsigned i=0; i<Comps->size(); i++ )
+	for ( size_t i=0; i<Comps->size(); i++ )
 	{
 		// Создаем сокет для исходящего соединения
 		if ( !Create(true) ) goto next;
@@ -512,7 +492,7 @@ void MSendSrv::ThreadSend()
 		Event(pComp,mseExecute);
 next:
 		rClose();
-		if ( Break ) break;
+		if ( Break.load() ) break;
 	}
 }
 //---------------------------------------------------------------------------
