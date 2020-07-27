@@ -27,9 +27,9 @@ __published:	// IDE-managed Components
     void __fastcall FormClose(TObject *Sender, TCloseAction &Action);
     void __fastcall ComboBoxLoginClick(TObject *Sender);
 private:	// User declarations
-    unsigned ID;
+    std::uint32_t ID;
 public:		// User declarations
-    unsigned Execute(const MUsers &Users_);
+    std::uint32_t  Execute(const MUsers &Users_);
     __fastcall TFormLogIn(TComponent* Owner);
 };
 //---------------------------------------------------------------------------

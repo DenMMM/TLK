@@ -8,7 +8,7 @@
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
 //---------------------------------------------------------------------------
-unsigned MStatesItem::GetDataSize() const
+std::size_t MStatesItem::GetDataSize() const
 {
 	return
 		sizeof(Number)+
@@ -409,7 +409,7 @@ MStatesInfo MStatesItem::GetInfo()
 	return Info;
 }
 //---------------------------------------------------------------------------
-bool MStatesItem::Timer(__int64 SystemTime_)
+bool MStatesItem::Timer(std::int64_t SystemTime_)
 {
 	std::lock_guard <std::mutex> lckObj(mtxMain);
 
@@ -417,7 +417,7 @@ bool MStatesItem::Timer(__int64 SystemTime_)
 	return ControlWorkTime()||ControlFineTime();
 }
 //---------------------------------------------------------------------------
-void MStatesItem::Associate(int Number_)
+void MStatesItem::Associate(std::int8_t Number_)
 {
 	Number=Number_;
 	State=mcsFree;
@@ -543,7 +543,7 @@ bool MStates::Save()
 	return MSLList::Save(true,true);
 }
 //---------------------------------------------------------------------------
-MStates::const_iterator MStates::Search(int Number_) const
+MStates::const_iterator MStates::Search(std::int8_t Number_) const
 {
 	auto iState=begin();
 	auto iEnd=end();
@@ -603,7 +603,7 @@ bool MStates::Update(const MComputers &Computers_)
 	return result;
 }
 //---------------------------------------------------------------------------
-bool MStates::Timer(__int64 SystemTime_)
+bool MStates::Timer(std::int64_t SystemTime_)
 {
 	bool result=false;
 	//
@@ -612,7 +612,7 @@ bool MStates::Timer(__int64 SystemTime_)
 	return result;
 }
 //---------------------------------------------------------------------------
-unsigned MStateCl::GetDataSize() const
+std::size_t MStateCl::GetDataSize() const
 {
 	return
 		sizeof(Number)+
@@ -756,7 +756,7 @@ bool MStateCl::GetGames(MGames &Games_)
 		DefaultCode);
 }
 //---------------------------------------------------------------------------
-bool MStateCl::Timer(__int64 SystemTime_)
+bool MStateCl::Timer(std::int64_t SystemTime_)
 {
 	std::lock_guard <std::mutex> lckObj(mtxMain);
 
@@ -784,7 +784,7 @@ void MStateCl::CmdShutdown()
 bool MStateCl::NewSyncData(MSyncData &Data_)
 {
 	bool NeedSave=false;
-	__int64 CurrentTime;
+	std::int64_t CurrentTime;
 
 	// Проверяем отклонение системного времени и при необходимости корректируем его
 	GetLocalTimeInt64(CurrentTime);
@@ -840,7 +840,7 @@ void MStateCl::SetDefault(
         const std::wstring &OptPath_,
         const std::wstring &OptValue_,
         const std::wstring &PrgFile_,
-        unsigned RegCode_)
+        std::uint32_t RegCode_)
 {
     MSLList::SetDefaultKey(RegKey_,RegPath_,RegValue_,RegCode_);
 

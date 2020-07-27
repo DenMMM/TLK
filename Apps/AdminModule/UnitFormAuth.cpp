@@ -36,22 +36,22 @@ void __fastcall TFormAuth::MemoHEXKeyPress(TObject *Sender, char &Key)
 	TMemo *const Memo=&dynamic_cast<TMemo&>(*Sender);
 	const wchar_t ku[]=L"ABCDEF0123456789";
 	const wchar_t kl[]=L"abcdef";
-	wchar_t *pos, *text;
+	const wchar_t *pos, *text;
 	unsigned curs;
 
-    if ( Memo->SelLength>1 ) goto nokey;
+	if ( Memo->SelLength>1 ) goto nokey;
 
-    pos=wcschr(kl,Key);
-    if ( pos!=nullptr ) Key=ku[pos-kl];
-    else
-    {
+	pos=wcschr(kl,Key);
+	if ( pos!=nullptr ) Key=ku[pos-kl];
+	else
+	{
 		pos=wcschr(ku,Key);
-        if ( pos==nullptr ) goto nokey;
-    }
-    Memo->SelLength=1;
+		if ( pos==nullptr ) goto nokey;
+	}
+	Memo->SelLength=1;
 
-    curs=Memo->SelStart;
-    text=Memo->Lines->GetText();
+	curs=Memo->SelStart;
+	text=Memo->Lines->GetText();
 	if ( (text[curs]!=L' ')&&
 		(text[curs]!=L'\r')&&
         (text[curs]!=L'\n') ) return;

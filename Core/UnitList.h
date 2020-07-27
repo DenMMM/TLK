@@ -4,6 +4,7 @@
 //---------------------------------------------------------------------------
 #include <stddef.h>
 #include <cstddef>
+#include <cstdint>
 #include <vector>
 #include <iterator>
 #include <stdexcept>
@@ -14,7 +15,7 @@ class MListItem;
 
 template <
 	typename parent_item, typename base_type,
-	typename item_type, unsigned char type_id>
+	typename item_type, std::uint8_t type_id>
 class MListItemTyped;
 
 template <typename parent_item,	typename item_type>
@@ -41,7 +42,7 @@ private:
 
 public:
 	// Возвращает [двоичный] ID, ассоциированный с типом элемента
-	virtual unsigned char gTypeID() const noexcept = 0;
+	virtual std::uint8_t gTypeID() const noexcept = 0;
 	// Объявим виртуальное копирование через базовый тип
 	virtual base_type& operator=(const base_type&) = 0;
 	virtual base_type& operator=(base_type&&) = 0;
@@ -62,13 +63,13 @@ template <
 	typename parent_item,		// Родительский класс
 	typename base_type,			// Базовый тип его элементов
 	typename item_type,     	// Создаваемый тип элемента
-	unsigned char type_id>  	// Его двоичный ID
+	std::uint8_t type_id>		// Его двоичный ID
 class MListItemTyped: public parent_item
 {
 public:
-	static const unsigned char TypeID = type_id;
+	static const std::uint8_t TypeID = type_id;
 
-	virtual unsigned char gTypeID() const noexcept override final
+	virtual std::uint8_t gTypeID() const noexcept override final
 	{
 		return type_id;			// TypeID
 	}
@@ -133,7 +134,7 @@ protected:
 	template <typename new_item_type>
 	void TypesIDSet()
 	{
-		const size_t ID_=new_item_type::TypeID;
+		const std::size_t ID_=new_item_type::TypeID;
 
 #ifdef _DEBUG
 		// Проверим, что функция для этого ID_ еще не задана
@@ -332,9 +333,9 @@ public:
 			);
 	}
 
-	base_type& Add(unsigned char TypeID_);
-	const base_type& GetItem(size_t Index_) const;
-	base_type& GetItem(size_t Index_)
+	base_type& Add(std::uint8_t TypeID_);
+	const base_type& GetItem(std::size_t Index_) const;
+	base_type& GetItem(std::size_t Index_)
 	{
 		const auto *const_this=this;
 		return const_cast<base_type&>(const_this->GetItem(Index_));
@@ -438,7 +439,7 @@ base_type *MList<list_type,base_type>::Add(base_type *NewItem_)
 }
 //---------------------------------------------------------------------------
 template <typename list_type, typename base_type>
-base_type& MList<list_type,base_type>::Add(unsigned char TypeID_)
+base_type& MList<list_type,base_type>::Add(std::uint8_t TypeID_)
 {
 	base_type* (*NewF)()=NewForTypeDef;
 

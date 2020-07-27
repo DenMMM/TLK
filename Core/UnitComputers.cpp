@@ -6,7 +6,7 @@
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
 //---------------------------------------------------------------------------
-unsigned MComputersItem::GetDataSize() const
+std::size_t MComputersItem::GetDataSize() const
 {
     return
 		sizeof(Number)+
@@ -26,15 +26,15 @@ void *MComputersItem::SetData(void *Data_) const
 
 const void *MComputersItem::GetData(const void *Data_, const void *Limit_)
 {
-    return
+	return
 		(Data_=MemGet(Data_,&Number,Limit_)) &&
 		(Data_=MemGet(Data_,&Color,Limit_)) &&
 		(Data_=MemGetLine(Data_,Address,MAX_CompAddrLen,Limit_)) &&
 		(Data_=MemGet(Data_,&NotUsed,Limit_))
-        ? Data_: nullptr;
+		? Data_: nullptr;
 }
 //---------------------------------------------------------------------------
-MComputers::const_iterator MComputers::Search(char Number_) const
+MComputers::const_iterator MComputers::Search(std::int8_t Number_) const
 {
 	auto iComputer=begin();
 	auto iEnd=end();

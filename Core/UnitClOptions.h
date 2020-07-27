@@ -21,18 +21,18 @@ class MClOptions:
 {
 public:
     // Функции механизма сохранения/загрузки данных
-	virtual unsigned GetDataSize() const override;
+	virtual std::size_t GetDataSize() const override;
 	virtual void *SetData(void *Data_) const override;
 	virtual const void *GetData(const void *Data_, const void *Limit_) override;
 
 public:
-	std::wstring ShellUser;   			// Логин пользователя для блокировки TLK shell
-	short ToEndTime;                    // За сколько минут предупреждать об окончании времени (0-no show)
-	short MessageTime;                  // Сколько секунд показывать предупреждение
-	short MsgEndTime;                   // Время показа сообщения об окончании времени, секунд (0-no show)
-	short RebootWait;                   // Секунд до перезагрузки после окончании времени (0-no reboot)
-	short AutoLockTime;                 // Минут без связи с сервером до блокировки (0-no lock)
-	unsigned Flags;                     // Остальные настройки - флаги
+	std::wstring ShellUser;				// Логин пользователя для блокировки TLK shell
+	std::int16_t ToEndTime;				// За сколько минут предупреждать об окончании времени (0-no show)
+	std::int16_t MessageTime;			// Сколько секунд показывать предупреждение
+	std::int16_t MsgEndTime;			// Время показа сообщения об окончании времени, секунд (0-no show)
+	std::int16_t RebootWait;			// Секунд до перезагрузки после окончании времени (0-no reboot)
+	std::int16_t AutoLockTime;			// Минут без связи с сервером до блокировки (0-no lock)
+	std::uint32_t Flags;				// Остальные настройки - флаги
 
 	void SetShellUser(const std::wstring &Name_);
 

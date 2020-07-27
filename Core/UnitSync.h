@@ -114,29 +114,29 @@ class MSyncStatesItem:
 {
 private:
 	MStatesItem *State;					// Состояние компьютера, с которым связана запись
-	u_long IP;                          // IP-адрес компьютера-клиента
-	sockaddr_in Address;                // Адрес в формате socket
-	bool KnownMAC;                      // Индикатор наличия известного MAC-адреса
-	unsigned char MAC[MAC_AddrLength];  // MAC-адрес сетевой платы компьютера
-	unsigned Process;                   // Состояние процесса синхронизации
-	unsigned Seed;                      // ID сеанса
-	unsigned SendCount;                 // Счетчик посланных за сеанс пакетов
-	DWORD LastSendTime;                 // Время последней отправки пакета
+	u_long IP;							// IP-адрес компьютера-клиента
+	sockaddr_in Address;				// Адрес в формате socket
+	bool KnownMAC;						// Индикатор наличия известного MAC-адреса
+	unsigned char MAC[MAC_AddrLength];	// MAC-адрес сетевой платы компьютера
+	unsigned Process;					// Состояние процесса синхронизации
+	std::uint32_t Seed;					// ID сеанса
+	unsigned SendCount;					// Счетчик посланных за сеанс пакетов
+	DWORD LastSendTime;					// Время последней отправки пакета
 
-	MSyncData SyncData;                 // Данные запрошенные у MState, но еще не отправленные
+	MSyncData SyncData;					// Данные запрошенные у MState, но еще не отправленные
 	union MPacket
 	{
 		MSyncPHello Hello;
 		MSyncPData Data;
 		MSyncPWOL WOL;
-	} Packet;                           // Пакет, отправляемый клиенту
-	int PacketSize;                     // Размер отправляемого пакета
+	} Packet;							// Пакет, отправляемый клиенту
+	int PacketSize;						// Размер отправляемого пакета
 
 	// Генерация Seed со стороны сервера
 	static MRandCounter SeedRand;
 	static std::mutex mtxSeed;
 
-	unsigned NextSeed()
+	std::uint32_t NextSeed()
 	{
 		std::lock_guard <std::mutex> lckObj(mtxSeed);	/// Для MSync излишне
 		return SeedRand++;
@@ -144,7 +144,7 @@ private:
 
 public:
 	// Функции механизма сохранения/загрузки данных
-	virtual unsigned GetDataSize() const override;
+	virtual std::size_t GetDataSize() const override;
 	virtual void *SetData(void *Data_) const override;
 	virtual const void *GetData(const void *Data_, const void *Limit_) override;
 
@@ -155,9 +155,9 @@ public:
 	// Завершить операции, проверить нужно ли сохранить MState
 	bool Stop();
 	// Выполнить операцию отправки пакета, если требуется
-	bool Send(SOCKET Socket_, SOCKET SocketBC_, unsigned Code_, MAuth *MAC_);
+	bool Send(SOCKET Socket_, SOCKET SocketBC_, std::uint32_t Code_, MAuth *MAC_);
 	// Обработать принятый с ассоциированного IP пакет
-	bool Recv(char *Packet_, int PacketSize_, unsigned Code_, MAuth *MAC_);
+	bool Recv(char *Packet_, int PacketSize_, std::uint32_t Code_, MAuth *MAC_);
 	// Пытаемся обновить MAC для этого IP
 	bool UpdateMAC(unsigned char *MAC_);
 	// Узнать IP, с которым обмениваемся пакетами
@@ -201,39 +201,39 @@ public:
 class MSync
 {
 private:
-    bool Init;                  // Была ли выполнена инициализация WinSocket
-	bool AutoSaveARP;           // Сохранять ARP-кэш автоматически при обновлении MAC-адресов
-	std::thread Thread;			// Объект потока, осуществляющего отправку/прием
-	SOCKET Socket;              // Сокет для выполнения синхронизации
-    SOCKET SocketBC;            // Сокет для отправки "Magic Packet"
-    unsigned NetCode;           // Код шифрования для сетевого обмена
-    MAuth *NetMAC;              // Аутентификатор сетевых операций
-    MStates *States;            // Cостояния компьютеров для синхронизации
-    MSyncStates SyncStates;     // Объекты процесса синхронизации
+	bool Init;				// Была ли выполнена инициализация WinSocket
+	bool AutoSaveARP;		// Сохранять ARP-кэш автоматически при обновлении MAC-адресов
+	std::thread Thread;		// Объект потока, осуществляющего отправку/прием
+	SOCKET Socket;			// Сокет для выполнения синхронизации
+	SOCKET SocketBC;		// Сокет для отправки "Magic Packet"
+	std::uint32_t NetCode;	// Код шифрования для сетевого обмена
+	MAuth *NetMAC;			// Аутентификатор сетевых операций
+	MStates *States;		// Cостояния компьютеров для синхронизации
+	MSyncStates SyncStates;	// Объекты процесса синхронизации
 
 	std::atomic_uint PCount;	// Счетчик отправленных пакетов (индикация)
 
-    union MPacket
-    {
-        MSyncPHello Hello;
-        MSyncPConf Conf;
-    } Packet;                   // Буфер для принимаемых пакетов
+	union MPacket
+	{
+		MSyncPHello Hello;
+		MSyncPConf Conf;
+	} Packet;				// Буфер для принимаемых пакетов
 
 	static bool PollData(SOCKET Socket_);
-    static bool UpdateMAC(MSyncStates *States_);
+	static bool UpdateMAC(MSyncStates *States_);
 	void ThreadExecute();
 	std::atomic_bool IsStopping;
 
 	void sPCount(unsigned Value_) noexcept { PCount.store(Value_); }
 
 public:
-	bool NetInit(unsigned Code_, MAuth *MAC_);  // Инициализация WinSocket
-	bool NetFree();                             // Освобождение WinSocket
+	bool NetInit(std::uint32_t Code_, MAuth *MAC_);	// Инициализация WinSocket
+	bool NetFree();                             	// Освобождение WinSocket
 	bool Associate(MStates *States_, MComputers *Computers_);
-	bool Start();                               // Создание сокетов и запуск потока синхронизации
-	void Stop();                                // Остановка потока синхронизации и закрытие сокетов
+	bool Start();                               	// Создание сокетов и запуск потока синхронизации
+	void Stop();                                	// Остановка потока синхронизации и закрытие сокетов
 
-	void SetARPFile(wchar_t *File_, unsigned Code_, bool AutoSave_);
+	void SetARPFile(wchar_t *File_, std::uint32_t Code_, bool AutoSave_);
 	bool SaveARP() const { return SyncStates.Save(); }
 	bool LoadARP() { return SyncStates.Load(); }
 	DWORD gLastErr() const noexcept { return SyncStates.gLastErr(); }
@@ -273,31 +273,31 @@ public:
 class MSyncCl
 {
 private:
-	bool Init;                  // Была ли выполнена инициализация WinSocket
-	std::thread Thread;			// Дескриптор потока, осуществляющего прием/отправку
-	SOCKET Socket;              // Сокет для приема/отправки данных
-	DWORD LastSendTime;         // Время последней отправки пакета
-	unsigned Process;           // Состояние процесса синхронизации
-	unsigned SendCount;         // Счетчик посланных за сеанс пакетов
-	unsigned Seed;              // ID сеанса
-	unsigned NetCode;           // Код шифрования для сетевого обмена
-	MAuth *NetMAC;              // Аутентификатор сетевых операций
-	MStateCl *State;            // Состояние, с которым ассоциирован сетевой интерфейс
-	MSyncData SyncData;         // Новые данные состояния
+	bool Init;				// Была ли выполнена инициализация WinSocket
+	std::thread Thread;		// Дескриптор потока, осуществляющего прием/отправку
+	SOCKET Socket;			// Сокет для приема/отправки данных
+	DWORD LastSendTime;		// Время последней отправки пакета
+	unsigned Process;		// Состояние процесса синхронизации
+	unsigned SendCount;		// Счетчик посланных за сеанс пакетов
+	std::uint32_t Seed;		// ID сеанса
+	std::uint32_t NetCode;	// Код шифрования для сетевого обмена
+	MAuth *NetMAC;			// Аутентификатор сетевых операций
+	MStateCl *State;		// Состояние, с которым ассоциирован сетевой интерфейс
+	MSyncData SyncData;		// Новые данные состояния
 
 	union MRcvPacket
 	{
 		MSyncPHello Hello;
 		MSyncPData Data;
-	} RcvPacket;                // Буфер для принимаемых от сервера пакетов
+	} RcvPacket;			// Буфер для принимаемых от сервера пакетов
 
 	union MSndPacket
 	{
 		MSyncPHello Hello;
 		MSyncPConf Conf;
-	} SndPacket;                // Буфер для отправляемых серверу пакетов
-	int SndPacketSize;          // Размер отправляемого пакета
-	sockaddr_in SndAddr;        // Адрес сервера
+	} SndPacket;			// Буфер для отправляемых серверу пакетов
+	int SndPacketSize;		// Размер отправляемого пакета
+	sockaddr_in SndAddr;	// Адрес сервера
 
 	static bool PollData(SOCKET Socket_);
 	void ThreadExecute();
@@ -308,11 +308,11 @@ private:
 
 	// Генерация Seed со стороны клиента
 	MRandCounter SeedRand;
-	unsigned NextSeed() { return SeedRand++; }
+	std::uint32_t NextSeed() { return SeedRand++; }
 
 public:
-	bool NetInit(unsigned Code_, MAuth *MAC_);  // Инициализация WinSocket
-	bool NetFree();                             // Освобождение WinSocket
+	bool NetInit(std::uint32_t Code_, MAuth *MAC_);	// Инициализация WinSocket
+	bool NetFree();                             	// Освобождение WinSocket
 	void Associate(MStateCl *State_);
 	bool Start();
 	void Stop();

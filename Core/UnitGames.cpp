@@ -6,7 +6,7 @@
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
 //---------------------------------------------------------------------------
-unsigned MGamesItem::GetDataSize() const
+std::size_t MGamesItem::GetDataSize() const
 {
     const MGames vGames;            // Заглушка для SubGames=nullptr
 

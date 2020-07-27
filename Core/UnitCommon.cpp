@@ -46,7 +46,7 @@ const void *MemGetLine(const void *Mem__, std::string &Line_,
 	const char *Mem_=static_cast<const char*>(Mem__);
 	const char *Limit_=static_cast<const char*>(Limit__);
 
-	if ( (size_t)(Limit_-Mem_)>(++MaxLength_) ) Limit_=Mem_+MaxLength_;
+	if ( (std::size_t)(Limit_-Mem_)>(++MaxLength_) ) Limit_=Mem_+MaxLength_;
 	Line_.clear();
 	Line_.reserve(MaxLength_);      			// оптимизация
 
@@ -84,17 +84,17 @@ const void *MemGetLine(const void *Mem__, std::wstring &Line_,
 	return Mem_;
 }
 //---------------------------------------------------------------------------
-void TimeRand(void *Buff__, size_t Size_)
+void TimeRand(void *Buff__, std::size_t Size_)
 {
-	std::uniform_int_distribution <unsigned> dist(
+	std::uniform_int_distribution <std::uint32_t> dist(
 		std::numeric_limits<unsigned char>::min(),
 		std::numeric_limits<unsigned char>::max());
 
 	unsigned char *Buff_=static_cast<unsigned char*>(Buff__);
-	for ( size_t i=0; i<Size_; i++ ) Buff_[i]=dist(BasicRand);
+	for ( std::size_t i=0; i<Size_; i++ ) Buff_[i]=dist(BasicRand);
 }
 
-bool CngRand(void *Buff_, size_t Size_)
+bool CngRand(void *Buff_, std::size_t Size_)
 {
 /*
 	BCRYPT_ALG_HANDLE hAlg;
@@ -111,8 +111,8 @@ bool CngRand(void *Buff_, size_t Size_)
 	return true;
 }
 //---------------------------------------------------------------------------
-size_t ByteToHEX(const void *Bytes__, size_t BytesCount_,
-	wchar_t *Line_, size_t LineSize_, wchar_t Delim_)
+size_t ByteToHEX(const void *Bytes__, std::size_t BytesCount_,
+	wchar_t *Line_, std::size_t LineSize_, wchar_t Delim_)
 {
 	static const wchar_t sym[]={
 		L'0', L'1', L'2', L'3', L'4', L'5', L'6', L'7',
@@ -155,7 +155,7 @@ size_t ByteToHEX(const void *Bytes__, size_t BytesCount_,
 	return pout;
 }
 
-size_t HEXToByte(const wchar_t *Line_, void *Buff__, size_t BuffSize_)
+std::size_t HEXToByte(const wchar_t *Line_, void *Buff__, std::size_t BuffSize_)
 {
 	static const wchar_t sym[]={
 		L'0', L'1', L'2', L'3', L'4', L'5', L'6', L'7',
@@ -164,7 +164,7 @@ size_t HEXToByte(const wchar_t *Line_, void *Buff__, size_t BuffSize_)
 		L'8', L'9', L'a', L'b', L'c', L'd', L'e', L'f'};
 	unsigned char *Buff_=static_cast<unsigned char*>(Buff__);
 
-    size_t pin=0, pout=0;
+    std::size_t pin=0, pout=0;
     const wchar_t *pos;
     unsigned char byte;
 

@@ -5,17 +5,17 @@
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
 //---------------------------------------------------------------------------
-void BasicEncode(void *Data__, size_t DataSize_, unsigned Code_, int Round_)
+void BasicEncode(void *Data__, std::size_t DataSize_, std::uint32_t Code_, int Round_)
 {
 	unsigned char *Data_=static_cast<unsigned char*>(Data__);
 	unsigned char *limit;
-	unsigned blk;
+	std::uint32_t blk;
 
 	if ( DataSize_<sizeof(blk) ) return;
 
 	limit=Data_+DataSize_-sizeof(blk);
 	// Считаем начальный блок целиком
-	blk=*((unsigned*)Data_);
+	blk=*((std::uint32_t*)Data_);
 	goto begin;
 
 	do
@@ -24,7 +24,7 @@ void BasicEncode(void *Data__, size_t DataSize_, unsigned Code_, int Round_)
 		Data_[0]=blk;
 		// Сдвинем блок вправо и загрузим старший байт из входа
 		blk>>=8;
-		blk|=( (unsigned)Data_[sizeof(blk)] )<<(sizeof(blk)*8-8);
+		blk|=( (std::uint32_t)Data_[sizeof(blk)] )<<(sizeof(blk)*8-8);
 		++Data_;
 begin:
 		// Перемешаем биты блока
@@ -33,39 +33,39 @@ begin:
 	} while(Data_!=limit);
 
 	// Сохраним в выход последний блок целиком
-	*((unsigned*)Data_)=blk;
+	*((std::uint32_t*)Data_)=blk;
 }
 //---------------------------------------------------------------------------
-void BasicDecode(void *Data__, size_t DataSize_, unsigned Code_, int Round_)
+void BasicDecode(void *Data__, std::size_t DataSize_, std::uint32_t Code_, int Round_)
 {
 	unsigned char *Data_=static_cast<unsigned char*>(Data__);
 	unsigned char *limit;
-    unsigned blk;
+	std::uint32_t blk;
 
-    if ( DataSize_<sizeof(blk) ) return;
+	if ( DataSize_<sizeof(blk) ) return;
 
 	limit=Data_;
-    Data_+=DataSize_-sizeof(blk);
+	Data_+=DataSize_-sizeof(blk);
 
-    // Считаем начальный блок целиком
-    blk=*((unsigned*)Data_);
-    goto begin;
+	// Считаем начальный блок целиком
+	blk=*((std::uint32_t*)Data_);
+	goto begin;
 
-    do
-    {
-        --Data_;
-        // Сохраним в выход старший байт блока
-        Data_[sizeof(blk)]=blk>>(sizeof(blk)*8-8);
-        // Сдвинем блок влево и загрузим младший байт из входа
-        blk<<=8;
-        blk|=Data_[0];
+	do
+	{
+		--Data_;
+		// Сохраним в выход старший байт блока
+		Data_[sizeof(blk)]=blk>>(sizeof(blk)*8-8);
+		// Сдвинем блок влево и загрузим младший байт из входа
+		blk<<=8;
+		blk|=Data_[0];
 begin:
-        // Перемешаем биты блока
-        for ( int i=Round_; i; i-- )
-            blk=BasicDecodeRound(blk,Code_);
-    } while(Data_!=limit);
+		// Перемешаем биты блока
+		for ( int i=Round_; i; i-- )
+			blk=BasicDecodeRound(blk,Code_);
+	} while(Data_!=limit);
 
-    // Сохраним в выход последний блок целиком
-    *((unsigned*)Data_)=blk;
+	// Сохраним в выход последний блок целиком
+	*((std::uint32_t*)Data_)=blk;
 }
 //---------------------------------------------------------------------------

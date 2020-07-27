@@ -10,6 +10,8 @@
 #include <ExtCtrls.hpp>
 #include <Buttons.hpp>
 //---------------------------------------------------------------------------
+#include <cstdint>
+
 #include "UnitStates.h"
 #include "UnitComputers.h"
 #include "UnitTariffs.h"
@@ -51,7 +53,7 @@ __published:	// IDE-managed Components
     void __fastcall ListViewComputersSelectItem(TObject *Sender,
           TListItem *Item, bool Selected);
 private:	// User declarations
-    __int64 OpenDialogTime;
+    std::int64_t OpenDialogTime;
 	MTariffsInfo UseTariffs;		// Список тарифов, доступных на время открытия диалога
 	MTariffRunTimes UseTimes;	// Список пакетов для выбранного тарифа
 	MTariffRunTimes CompTimes;	// Буфер для хранения времени и стоимости по каждому компьютеру

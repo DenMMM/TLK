@@ -27,7 +27,7 @@ class MPassword:
 {
 public:
 	// Функции механизма сохранения/загрузки данных
-	virtual unsigned GetDataSize() const override;
+	virtual std::size_t GetDataSize() const override;
 	virtual void *SetData(void *Data_) const override;
 	virtual const void *GetData(const void *Data_, const void *Limit_) override;
 
@@ -38,7 +38,7 @@ private:
 public:
 	void Set(const std::wstring &Pass_);
 	bool Check(const std::wstring &Pass_) const;
-	static std::wstring New(size_t Len_, bool Cap_, bool Low_, bool Num_);
+	static std::wstring New(std::size_t Len_, bool Cap_, bool Low_, bool Num_);
 
 	MPassword()
 	{

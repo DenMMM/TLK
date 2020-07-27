@@ -13,13 +13,13 @@ USEFORM("UnitFormMain.cpp", FormMain);
 USEFORM("UnitFormComputers.cpp", FormComputers);
 USEFORM("UnitFormClient.cpp", FormClient);
 USEFORM("UnitFormAuth.cpp", FormAuth);
-USEFORM("UnitFormOptions.cpp", FormOptions);
-USEFORM("UnitFormTariffs.cpp", FormTariffs);
+USEFORM("UnitFormUsers.cpp", FormUsers);
 USEFORM("UnitFormRun.cpp", FormRun);
 USEFORM("UnitFormOptionsPass.cpp", FormOptionsPass);
-USEFORM("UnitFormUsers.cpp", FormUsers);
+USEFORM("UnitFormOptions.cpp", FormOptions);
 USEFORM("UnitFormUserPass.cpp", FormUserPass);
 USEFORM("UnitFormTariffTimes.cpp", FormTariffTimes);
+USEFORM("UnitFormTariffs.cpp", FormTariffs);
 //---------------------------------------------------------------------------
 int WINAPI _tWinMain(HINSTANCE, HINSTANCE, LPTSTR lpCmdLine, int)
 {

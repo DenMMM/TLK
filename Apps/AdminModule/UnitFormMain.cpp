@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdexcept>
 #include <algorithm>
+#include <cstdint>
 #pragma hdrstop
 
 #include "UnitFormMain.h"
@@ -230,7 +231,7 @@ void __fastcall TFormMain::FormClose(TObject *Sender, TCloseAction &Action)
 //---------------------------------------------------------------------------
 void __fastcall TFormMain::TimerTimer(TObject *Sender)
 {
-    __int64 SystemTime;
+	std::int64_t SystemTime;
 
     // Берем системное время
     GetLocalTimeInt64(SystemTime);

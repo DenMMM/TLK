@@ -3,6 +3,7 @@
 #define UnitComputersH
 //---------------------------------------------------------------------------
 #include <string>
+#include <cstdint>
 
 #include "UnitSLList.h"
 //---------------------------------------------------------------------------
@@ -25,13 +26,13 @@ class MComputersItem:
 {
 public:
 	// Функции механизма сохранения/загрузки данных
-	virtual unsigned GetDataSize() const override;
+	virtual std::size_t GetDataSize() const override;
 	virtual void *SetData(void *Data_) const override;
 	virtual const void *GetData(const void *Data_, const void *Limit_) override;
 
 public:
-	char Number;						// Номер компьютера
-	char Color;							// Цвет группы
+	std::int8_t Number;					// Номер компьютера
+	std::uint8_t Color;					// Цвет группы
 	std::wstring Address;				// IP-адрес компьютера
 	bool NotUsed;						// Игнорировать компьютер
 
@@ -49,8 +50,8 @@ class MComputers:
 		MComputersItem>
 {
 public:
-	const_iterator Search(char Number_) const;
-	iterator Search(char Number_)
+	const_iterator Search(std::int8_t Number_) const;
+	iterator Search(std::int8_t Number_)
 	{
 		const auto *const_this=this;
 		return const_cast_iter(const_this->Search(Number_));

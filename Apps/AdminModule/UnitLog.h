@@ -3,6 +3,8 @@
 #define UnitLogH
 //---------------------------------------------------------------------------
 #include <string>
+#include <cstdint>
+
 #include "UnitLogRecords.h"
 #include "UnitShellState.h"
 #include "UnitStates.h"
@@ -18,13 +20,13 @@
 class MLog
 {
 private:
-	__int64 SystemTime;		// Системное время для синхронизации с описателями состояний компьютеров
-	__int64 BeginTime;		// Время, когда лог был начат
-	std::wstring Directory;	// Директория для хранения файлов логов
-	bool Opened;			// Лог был успешно открыт/начат
-//    bool Transaction;       // Флаг-не очищать буфер записей до "сброса" на диск
-	MLogRecords Records;	// Буфер для записей
-	unsigned User;			// Пользователь, открывший смену последним
+	std::int64_t SystemTime;	// Системное время для синхронизации с описателями состояний компьютеров
+	std::int64_t BeginTime;		// Время, когда лог был начат
+	std::wstring Directory;		// Директория для хранения файлов логов
+	bool Opened;				// Лог был успешно открыт/начат
+//    bool Transaction;			// Флаг-не очищать буфер записей до "сброса" на диск
+	MLogRecords Records;		// Буфер для записей
+	std::uint32_t User;			// Пользователь, открывший смену последним
 	DWORD LastError;
 
     // Добавить в буфер событие/данные
@@ -51,7 +53,7 @@ public:
 	bool Open();							// Открыть существующий файл
 	bool End();								// Закончить заполнение файла
 	bool CheckPeriod(int Period_) const;	// Проверить не пора ли сменить файл лога
-	unsigned LastUser() const;				// Вернуть ID последнего залогиненного пользователя
+	std::uint32_t LastUser() const;			// Вернуть ID последнего залогиненного пользователя
 
 	// Админский модуль
 	bool AddStart(
@@ -71,7 +73,7 @@ public:
 	bool AddOptions();							// Изменены общие настройки
 
 	// Пользователи
-	bool AddLogIn(unsigned UserID_);		// Пользователь начал смену
+	bool AddLogIn(std::uint32_t UserID_);	// Пользователь начал смену
 	bool AddLogOut();						// Пользователь закончил смену
 
 	// Управление буферизацией следующих ниже команд
@@ -79,17 +81,17 @@ public:
 //    bool Apply();
 	// Команды, применяемые к компьютерам
 	bool AddRun(const MTariffRunTimesItem &Time_);
-	bool AddFine(char Number_, unsigned FineID_, short Time_);
-	bool AddExchange(char From_, char To_);
-	bool AddLock(char Number_, bool Apply_);
-	bool AddPause(char Number_, bool Apply_);
-	bool AddOpen(char Number_, bool Apply_);
-	bool AddPowerOn(char Number_);
-	bool AddReboot(char Number_);
-	bool AddShutdown(char Number_);
+	bool AddFine(std::int8_t Number_, std::uint32_t FineID_, std::int16_t Time_);
+	bool AddExchange(std::int8_t From_, std::int8_t To_);
+	bool AddLock(std::int8_t Number_, bool Apply_);
+	bool AddPause(std::int8_t Number_, bool Apply_);
+	bool AddOpen(std::int8_t Number_, bool Apply_);
+	bool AddPowerOn(std::int8_t Number_);
+	bool AddReboot(std::int8_t Number_);
+	bool AddShutdown(std::int8_t Number_);
 
 	void SetDefault(const std::wstring &Dir_, unsigned Code_);
-	void Timer(__int64 SystemTime_);
+	void Timer(std::int64_t SystemTime_);
 	DWORD gLastErr() const { return Records.gLastErr(); }
 
 	MLog();

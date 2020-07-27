@@ -3,6 +3,7 @@
 #define UnitEncodeH
 //---------------------------------------------------------------------------
 #include <cstddef>
+#include <cstdint>
 //---------------------------------------------------------------------------
 // Побитовый циклический сдвиг влево
 template <typename type>
@@ -39,7 +40,7 @@ inline type BasicDecodeRound(type Blk_, type Code_) noexcept
 }
 
 // Простейшее блочно-потоковое шифрование/дешифрование
-void BasicEncode(void *Data__, size_t DataSize_, unsigned Code_, int Round_=8);
-void BasicDecode(void *Data__, size_t DataSize_, unsigned Code_, int Round_=8);
+void BasicEncode(void *Data__, std::size_t DataSize_, std::uint32_t Code_, int Round_=8);
+void BasicDecode(void *Data__, std::size_t DataSize_, std::uint32_t Code_, int Round_=8);
 //---------------------------------------------------------------------------
 #endif

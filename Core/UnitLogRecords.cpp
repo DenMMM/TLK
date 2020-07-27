@@ -6,7 +6,7 @@
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
 //---------------------------------------------------------------------------
-unsigned MLogRecords::EventBase::GetDataSize() const
+std::size_t MLogRecords::EventBase::GetDataSize() const
 {
 	return
 		sizeof(SystemTime);
@@ -25,7 +25,7 @@ const void *MLogRecords::EventBase::GetData(const void *Data_, const void *Limit
 		? Data_: nullptr;
 }
 //---------------------------------------------------------------------------
-unsigned MLogRecords::AppConfigBase::GetDataSize() const
+std::size_t MLogRecords::AppConfigBase::GetDataSize() const
 {
 	return
 		sizeof(SystemTime)+
@@ -48,7 +48,7 @@ const void *MLogRecords::AppConfigBase::GetData(const void *Data_, const void *L
 		? Data_: nullptr;
 }
 //---------------------------------------------------------------------------
-unsigned MLogRecords::AppLogInBase::GetDataSize() const
+std::size_t MLogRecords::AppLogInBase::GetDataSize() const
 {
 	return
 		sizeof(SystemTime)+
@@ -71,7 +71,7 @@ const void *MLogRecords::AppLogInBase::GetData(const void *Data_, const void *Li
 		? Data_: nullptr;
 }
 //---------------------------------------------------------------------------
-unsigned MLogRecords::CompRunBase::GetDataSize() const
+std::size_t MLogRecords::CompRunBase::GetDataSize() const
 {
 	return
 		sizeof(SystemTime)+
@@ -118,7 +118,7 @@ const void *MLogRecords::CompRunBase::GetData(const void *Data_, const void *Lim
 		? Data_: nullptr;
 }
 //---------------------------------------------------------------------------
-unsigned MLogRecords::CompFineBase::GetDataSize() const
+std::size_t MLogRecords::CompFineBase::GetDataSize() const
 {
     return
         sizeof(SystemTime)+
@@ -147,7 +147,7 @@ const void *MLogRecords::CompFineBase::GetData(const void *Data_, const void *Li
 		? Data_: nullptr;
 }
 //---------------------------------------------------------------------------
-unsigned MLogRecords::CompExchangeBase::GetDataSize() const
+std::size_t MLogRecords::CompExchangeBase::GetDataSize() const
 {
     return
         sizeof(SystemTime)+
@@ -173,7 +173,7 @@ const void *MLogRecords::CompExchangeBase::GetData(const void *Data_, const void
 		? Data_: nullptr;
 }
 //---------------------------------------------------------------------------
-unsigned MLogRecords::ModeBase::GetDataSize() const
+std::size_t MLogRecords::ModeBase::GetDataSize() const
 {
     return
         sizeof(SystemTime)+
@@ -199,7 +199,7 @@ const void *MLogRecords::ModeBase::GetData(const void *Data_, const void *Limit_
 		? Data_: nullptr;
 }
 //---------------------------------------------------------------------------
-unsigned MLogRecords::CmdBase::GetDataSize() const
+std::size_t MLogRecords::CmdBase::GetDataSize() const
 {
 	return
 		sizeof(SystemTime)+
@@ -221,7 +221,7 @@ const void *MLogRecords::CmdBase::GetData(const void *Data_, const void *Limit_)
 		? Data_: nullptr;
 }
 //---------------------------------------------------------------------------
-unsigned MLogRecords::DataShellBase::GetDataSize() const
+std::size_t MLogRecords::DataShellBase::GetDataSize() const
 {
     return
         sizeof(SystemTime)+
@@ -246,13 +246,11 @@ const void *MLogRecords::DataShellBase::GetData(const void *Data_, const void *L
 		? Data_: nullptr;
 }
 //---------------------------------------------------------------------------
-unsigned MLogRecords::DataStatesBase::GetDataSize() const
+std::size_t MLogRecords::DataStatesBase::GetDataSize() const
 {
-    unsigned Size;
-
-    Size=
-            sizeof(SystemTime)+
-            sizeof(unsigned);                   // —четчик состо€ний
+	std::size_t Size=
+		sizeof(SystemTime)+
+		sizeof(std::uint32_t);					// —четчик состо€ний
 
 	Size+=(
 		sizeof(Items[0].Number)+
@@ -271,8 +269,8 @@ void *MLogRecords::DataStatesBase::SetData(void *Data_) const
 {
 	Data_=MemSet(Data_,SystemTime);
 
-	unsigned Count=Items.size();
-	Data_=MemSet(Data_,Count);
+	std::size_t Count=Items.size();         	/// проверить значение
+	Data_=MemSet(Data_, static_cast<std::uint32_t>(Count));
 
 	for ( const auto &Ld: Items )
 	{
@@ -291,7 +289,7 @@ void *MLogRecords::DataStatesBase::SetData(void *Data_) const
 
 const void *MLogRecords::DataStatesBase::GetData(const void *Data_, const void *Limit_)
 {
-	unsigned Count=0;
+	std::uint32_t Count=0;
 
 	if ( !(
 		(Data_=MemGet(Data_,&SystemTime,Limit_)) &&
@@ -319,11 +317,11 @@ const void *MLogRecords::DataStatesBase::GetData(const void *Data_, const void *
 	return Data_;
 }
 //---------------------------------------------------------------------------
-unsigned MLogRecords::DataTariffsBase::GetDataSize() const
+std::size_t MLogRecords::DataTariffsBase::GetDataSize() const
 {
-	unsigned Size=
+	std::size_t Size=
 		sizeof(SystemTime)+
-		sizeof(unsigned);                   // —четчик тарифов
+		sizeof(std::uint32_t);					// —четчик тарифов
 
 	for ( const auto &Ld: Items )
 	{
@@ -339,8 +337,8 @@ void *MLogRecords::DataTariffsBase::SetData(void *Data_) const
 {
 	Data_=MemSet(Data_,SystemTime);
 
-	unsigned Count=Items.size();
-	Data_=MemSet(Data_,Count);
+	std::size_t Count=Items.size();             /// проверить значение
+	Data_=MemSet(Data_, static_cast<std::uint32_t>(Count));
 
 	for ( const auto &Ld: Items )
 	{
@@ -353,7 +351,7 @@ void *MLogRecords::DataTariffsBase::SetData(void *Data_) const
 
 const void *MLogRecords::DataTariffsBase::GetData(const void *Data_, const void *Limit_)
 {
-    unsigned Count=0;
+    std::uint32_t Count=0;
 
 	if ( !(
 		(Data_=MemGet(Data_,&SystemTime,Limit_)) &&
@@ -375,11 +373,11 @@ const void *MLogRecords::DataTariffsBase::GetData(const void *Data_, const void 
 	return Data_;
 }
 //---------------------------------------------------------------------------
-unsigned MLogRecords::DataFinesBase::GetDataSize() const
+std::size_t MLogRecords::DataFinesBase::GetDataSize() const
 {
-	unsigned Size=
+	std::size_t Size=
 		sizeof(SystemTime)+
-		sizeof(unsigned);                   // —четчик массива
+		sizeof(std::uint32_t);					// —четчик штрафов
 
 	for ( const auto &Ld: Items )
 	{
@@ -395,8 +393,8 @@ void *MLogRecords::DataFinesBase::SetData(void *Data_) const
 {
 	Data_=MemSet(Data_,SystemTime);
 
-	unsigned Count=Items.size();
-	Data_=MemSet(Data_,Count);
+	std::size_t Count=Items.size();             /// проверить значение
+	Data_=MemSet(Data_, static_cast<std::uint32_t>(Count));
 
 	for ( const auto &Ld: Items )
 	{
@@ -409,7 +407,7 @@ void *MLogRecords::DataFinesBase::SetData(void *Data_) const
 
 const void *MLogRecords::DataFinesBase::GetData(const void *Data_, const void *Limit_)
 {
-    unsigned Count=0;
+	std::uint32_t Count=0;
 
 	if ( !(
 		(Data_=MemGet(Data_,&SystemTime,Limit_)) &&
@@ -431,11 +429,11 @@ const void *MLogRecords::DataFinesBase::GetData(const void *Data_, const void *L
 	return Data_;
 }
 //---------------------------------------------------------------------------
-unsigned MLogRecords::DataUsersBase::GetDataSize() const
+std::size_t MLogRecords::DataUsersBase::GetDataSize() const
 {
-	unsigned Size=
+	std::size_t Size=
 		sizeof(SystemTime)+
-		sizeof(unsigned);                       // —четчик пользователей
+		sizeof(std::uint32_t);					// —четчик пользователей
 
 	for ( const auto &Ld: Items )
 	{
@@ -452,8 +450,8 @@ void *MLogRecords::DataUsersBase::SetData(void *Data_) const
 {
 	Data_=MemSet(Data_,SystemTime);
 
-	unsigned Count=Items.size();
-	Data_=MemSet(Data_,Count);
+	std::size_t Count=Items.size();             /// проверить значение
+	Data_=MemSet(Data_, static_cast<std::uint32_t>(Count));
 
 	for ( const auto &Ld: Items )
 	{
@@ -467,7 +465,7 @@ void *MLogRecords::DataUsersBase::SetData(void *Data_) const
 
 const void *MLogRecords::DataUsersBase::GetData(const void *Data_, const void *Limit_)
 {
-    unsigned Count=0;
+	std::uint32_t Count=0;
 
 	if ( !(
 		(Data_=MemGet(Data_,&SystemTime,Limit_)) &&

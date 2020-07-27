@@ -9,7 +9,7 @@
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
 //---------------------------------------------------------------------------
-unsigned MTariffTimesItem::GetDataSize() const
+std::size_t MTariffTimesItem::GetDataSize() const
 {
 	return
 		sizeof(Type)+
@@ -40,11 +40,10 @@ const void *MTariffTimesItem::GetData(const void *Data_, const void *Limit_)
 		? Data_: nullptr;
 }
 
-int MTariffTimesItem::MaxWorkTime(int Time_) const
+std::int16_t MTariffTimesItem::MaxWorkTime(std::int16_t Time_) const
 {
-	int WorkTime;
-
-	WorkTime=EndTime - (Time_<BeginTime? Time_+24*60: Time_);
+	std::int16_t
+		WorkTime=EndTime - (Time_<BeginTime? Time_+24*60: Time_);
 	if ( WorkTime<0 ) WorkTime=0;
 	else if ( (Type==mttFlyPacket)&&(WorkTime>SizeTime) ) WorkTime=SizeTime;
 
@@ -52,7 +51,7 @@ int MTariffTimesItem::MaxWorkTime(int Time_) const
 }
 //---------------------------------------------------------------------------
 MTariffsInfo::const_iterator
-	MTariffsInfo::Search(unsigned ID_) const
+	MTariffsInfo::Search(std::uint32_t ID_) const
 {
 	auto iTi=begin();
 	auto iEnd=end();
@@ -66,15 +65,14 @@ MTariffsInfo::const_iterator
 	return iTi;
 }
 //---------------------------------------------------------------------------
-unsigned MTariffsItem::GetDataSize() const
+std::size_t MTariffsItem::GetDataSize() const
 {
     return
         MIDListItem::GetDataSize()+
         sizeofLine(Name)+
         sizeof(Programs)+
         sizeof(Reboot)+
-        sizeof(char)+
-		sizeof(char)*Comps.size()+
+		sizeof(std::uint8_t)+sizeof(std::int8_t)*Comps.size()+  /// проверить size()
 		Times.GetAllDataSize();
 }
 
@@ -84,7 +82,7 @@ void *MTariffsItem::SetData(void *Data_) const
 	Data_=MemSetLine(Data_,Name);
 	Data_=MemSet(Data_,Programs);
 	Data_=MemSet(Data_,Reboot);
-	Data_=MemSet(Data_,(char)Comps.size());
+	Data_=MemSet(Data_,static_cast<std::uint8_t>(Comps.size()));
 	for ( auto Comp: Comps ) Data_=MemSet(Data_,Comp);
 	Data_=Times.SetAllData(Data_);
 	return Data_;
@@ -92,7 +90,7 @@ void *MTariffsItem::SetData(void *Data_) const
 
 const void *MTariffsItem::GetData(const void *Data_, const void *Limit_)
 {
-	char CompsCnt=0;
+	std::uint8_t CompsCnt=0;
 
 	if ( !(
 		(Data_=MIDListItem::GetData(Data_,Limit_)) &&
@@ -107,7 +105,7 @@ const void *MTariffsItem::GetData(const void *Data_, const void *Limit_)
 	Comps.clear();
 	for ( ; CompsCnt>0; --CompsCnt )
 	{
-		char Comp;
+		std::int8_t Comp;
 		if ( !(Data_=MemGet(Data_,&Comp,Limit_)) ) return nullptr;
 		Comps.push_back(Comp);
 	}
@@ -255,7 +253,7 @@ void MTariffsItem::Cost(MTariffRunTimesItem &RunTime_, double Prec_) const
 	RunTime_.Cost=ceil(RunTime_.Cost/Prec_)*Prec_;
 }
 
-bool MTariffsItem::CheckForTime(__int64 Time_) const
+bool MTariffsItem::CheckForTime(std::int64_t Time_) const
 {
     int Time;
 
@@ -270,9 +268,9 @@ bool MTariffsItem::CheckForTime(__int64 Time_) const
 	return false;
 }
 
-bool MTariffsItem::CheckForComp(char Num_) const
+bool MTariffsItem::CheckForComp(std::int8_t Num_) const
 {
-	for ( char Comp: Comps )
+	for ( auto Comp: Comps )
 	{
 		if ( Comp==Num_ ) return true;
 	}
@@ -290,7 +288,7 @@ MTariffsInfoItem MTariffsItem::GetInfo() const
 	return Info;
 }
 
-MTariffRunTimes MTariffsItem::GetRunTimes(__int64 Time_) const
+MTariffRunTimes MTariffsItem::GetRunTimes(std::int64_t Time_) const
 {
 	// Выделяем количество минут с начала суток
 	int SysTime=ExtractHoursMin(Time_);
@@ -331,7 +329,7 @@ MTariffRunTimes MTariffsItem::GetRunTimes(__int64 Time_) const
 	return ResTimes;
 }
 //---------------------------------------------------------------------------
-MTariffsInfo MTariffs::GetForTime(__int64 Time_) const
+MTariffsInfo MTariffs::GetForTime(std::int64_t Time_) const
 {
 	MTariffsInfo ResInfo;
 

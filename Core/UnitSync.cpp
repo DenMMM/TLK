@@ -23,10 +23,10 @@ MRandCounter
 std::mutex
 	MSyncStatesItem::mtxSeed;
 //---------------------------------------------------------------------------
-unsigned MSyncStatesItem::GetDataSize() const
+std::size_t MSyncStatesItem::GetDataSize() const
 {
-    return KnownMAC?
-        sizeof(IP)+
+	return KnownMAC?
+		sizeof(IP)+
         sizeof(MAC): 0;
 }
 //---------------------------------------------------------------------------
@@ -93,7 +93,7 @@ bool MSyncStatesItem::Stop()
     return NeedSave;
 }
 //---------------------------------------------------------------------------
-bool MSyncStatesItem::Send(SOCKET Socket_, SOCKET SocketBC_, unsigned Code_, MAuth *MAC_)
+bool MSyncStatesItem::Send(SOCKET Socket_, SOCKET SocketBC_, std::uint32_t Code_, MAuth *MAC_)
 {
     bool NeedSave=false;
 
@@ -175,7 +175,7 @@ bool MSyncStatesItem::Send(SOCKET Socket_, SOCKET SocketBC_, unsigned Code_, MAu
     return NeedSave;
 }
 //---------------------------------------------------------------------------
-bool MSyncStatesItem::Recv(char *Packet_, int PacketSize_, unsigned Code_, MAuth *MAC_)
+bool MSyncStatesItem::Recv(char *Packet_, int PacketSize_, std::uint32_t Code_, MAuth *MAC_)
 {
     MSyncPHeader *RecvHeader=(MSyncPHeader*)Packet_;
     bool NeedSave=false;
@@ -316,13 +316,13 @@ MSyncStates::const_iterator MSyncStates::Search(u_long IP_) const
 	return iSyncState;
 }
 //---------------------------------------------------------------------------
-void MSync::SetARPFile(wchar_t *File_, unsigned Code_, bool AutoSave_)
+void MSync::SetARPFile(wchar_t *File_, std::uint32_t Code_, bool AutoSave_)
 {
     AutoSaveARP=AutoSave_;
     SyncStates.SetDefaultFile(File_,Code_);
 }
 //---------------------------------------------------------------------------
-bool MSync::NetInit(unsigned Code_, MAuth *MAC_)
+bool MSync::NetInit(std::uint32_t Code_, MAuth *MAC_)
 {
     WSADATA WSAData;
     NetCode=Code_;
@@ -575,7 +575,7 @@ bool MSyncCl::PollData(SOCKET Socket_)
 	return ::select(0,&WaitSockets,nullptr,nullptr,&WaitTimer)==1;
 }
 //---------------------------------------------------------------------------
-bool MSyncCl::NetInit(unsigned Code_, MAuth *MAC_)
+bool MSyncCl::NetInit(std::uint32_t Code_, MAuth *MAC_)
 {
 	WSADATA WSAData;
 	NetCode=Code_;

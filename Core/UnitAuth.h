@@ -23,7 +23,7 @@ class MAuth:
 {
 public:
     // Функции механизма сохранения/загрузки данных
-	virtual unsigned GetDataSize() const override;
+	virtual std::size_t GetDataSize() const override;
 	virtual void *SetData(void *Data_) const override;
 	virtual const void *GetData(const void *Data_, const void *Limit_) override;
 
@@ -31,10 +31,10 @@ private:
 	unsigned char Key[MAC_KeySize];
 
 public:
-	void SetKey(const void *Key_, size_t Size_);
-    void GetKey(void *Buff_, size_t Size_) const;
-    void Calc(const void *Data_, size_t DataSize_, void *MAC_, size_t MACSize_) const;
-    bool Check(const void *Data_, size_t DataSize_, const void *MAC_, size_t MACSize_) const;
+	void SetKey(const void *Key_, std::size_t Size_);
+    void GetKey(void *Buff_, std::size_t Size_) const;
+	void Calc(const void *Data_, std::size_t DataSize_, void *MAC_, std::size_t MACSize_) const;
+    bool Check(const void *Data_, std::size_t DataSize_, const void *MAC_, std::size_t MACSize_) const;
 
 	MAuth()
 	{

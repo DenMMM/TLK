@@ -6,15 +6,15 @@
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
 //---------------------------------------------------------------------------
-unsigned MOptions::GetDataSize() const
+std::size_t MOptions::GetDataSize() const
 {
-    return
-        sizeof(LogPeriod)+
-        sizeof(FilterFreeTime)+
-        sizeof(CostDialogTime)+
-        sizeof(CostPrecision)+
-        sizeof(UsersRights)+
-        Pass.GetDataSize();
+	return
+		sizeof(LogPeriod)+
+		sizeof(FilterFreeTime)+
+		sizeof(CostDialogTime)+
+		sizeof(CostPrecision)+
+		sizeof(UsersRights)+
+		Pass.GetDataSize();
 }
 
 void *MOptions::SetData(void *Data_) const

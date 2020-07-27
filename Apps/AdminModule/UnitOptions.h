@@ -23,15 +23,15 @@ class MOptions:
 	public MSLList <MOptions, MOptionsStub>       /// private ?
 {
 public:
-	char LogPeriod;             // Период ведения файла лога
-	short FilterFreeTime;       // Время до окончания работы компьютера, когда он подпадает под фильтр свободных (в минутах)
-	short CostDialogTime;       // Время использования диалогов с расчетом цен (в минутах)
-	double CostPrecision;       // Точность расчета цен
-	unsigned UsersRights;       // Права пользователей (администраторов)
-	MPassword Pass;             // Пароль на изменение настроек
+	std::uint8_t LogPeriod;			// Период ведения файла лога
+	std::int16_t FilterFreeTime;	// Время до окончания работы компьютера, когда он подпадает под фильтр свободных (в минутах)
+	std::int16_t CostDialogTime;	// Время использования диалогов с расчетом цен (в минутах)
+	double CostPrecision;			// Точность расчета цен
+	std::uint32_t UsersRights;		// Права пользователей (администраторов)
+	MPassword Pass;					// Пароль на изменение настроек
 
 	// Функции механизма сохранения/загрузки данных
-	virtual unsigned GetDataSize() const override;
+	virtual std::size_t GetDataSize() const override;
 	virtual void *SetData(void *Data_) const override;
 	virtual const void *GetData(const void *Data_, const void *Limit_) override;
 

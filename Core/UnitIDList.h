@@ -2,6 +2,8 @@
 #ifndef UnitIDListH
 #define UnitIDListH
 //---------------------------------------------------------------------------
+#include <cstdint>
+
 #include "UnitSLList.h"
 #include "UnitCommon.h"
 //---------------------------------------------------------------------------
@@ -11,7 +13,7 @@ class MIDListItem;
 
 template <
 	typename parent_item, typename base_type,
-	typename item_type, unsigned char type_id>
+	typename item_type, std::uint8_t type_id>
 using MIDListItemTyped = MSLListItemTyped <parent_item, base_type, item_type, type_id>;
 
 template <typename parent_item, typename item_type>
@@ -33,11 +35,11 @@ class MIDListItem:
 	friend MIDList <list_type, base_type>;
 
 protected:
-	unsigned UUID;
+	std::uint32_t UUID;
 
 public:
 	// Функции механизма сохранения/загрузки данных
-	virtual unsigned GetDataSize() const override
+	virtual std::size_t GetDataSize() const override
 		{ return sizeof(UUID); }
 	virtual void *SetData(void *Data_) const override
 		{ return MemSet(Data_,UUID); }
@@ -45,7 +47,7 @@ public:
 		{ return MemGet(Data_,&UUID,Limit_); }
 
 public:
-	unsigned gUUID() const noexcept { return UUID; }
+	std::uint32_t gUUID() const noexcept { return UUID; }
 
 	MIDListItem():
 		UUID(0)
@@ -61,14 +63,14 @@ class MIDList:
 	public MSLList <list_type, base_type>
 {
 private:
-	unsigned LastUUID;
+	std::uint32_t LastUUID;
 
-	static unsigned FirstUUID();
-	unsigned NextUUID(unsigned LastUUID_) const;
+	static std::uint32_t FirstUUID();
+	std::uint32_t NextUUID(std::uint32_t LastUUID_) const;
 
 public:
 	// Функции механизма сохранения/загрузки данных
-	virtual unsigned GetDataSize() const override
+	virtual std::size_t GetDataSize() const override
 		{ return sizeof(LastUUID); }
 	virtual void *SetData(void *Data_) const override
 		{ return MemSet(Data_,LastUUID); }
@@ -84,8 +86,8 @@ public:
 	typedef typename MSLList <list_type, base_type> ::iterator iterator;
 	typedef typename MSLList <list_type, base_type> ::const_iterator const_iterator;
 
-	const_iterator SrchUUID(unsigned UUID_) const;
-	iterator SrchUUID(unsigned UUID_)
+	const_iterator SrchUUID(std::uint32_t UUID_) const;
+	iterator SrchUUID(std::uint32_t UUID_)
 	{
 		const auto *const_this=this;
 		return const_cast_iter(const_this->SrchUUID(UUID_));
@@ -101,10 +103,10 @@ public:
 //---------------------------------------------------------------------------
 //---------------------------------------------------------------------------
 template <typename list_type, typename base_type>
-unsigned MIDList<list_type,base_type>::FirstUUID()
+std::uint32_t MIDList<list_type,base_type>::FirstUUID()
 {
-	__int64 time;
-	unsigned id;
+	std::int64_t time;
+	std::uint32_t id;
 
 	if ( !GetLocalTimeInt64(time) )
 	{
@@ -122,7 +124,7 @@ unsigned MIDList<list_type,base_type>::FirstUUID()
 }
 //---------------------------------------------------------------------------
 template <typename list_type, typename base_type>
-unsigned MIDList<list_type,base_type>::NextUUID(unsigned LastUUID_) const
+std::uint32_t MIDList<list_type,base_type>::NextUUID(std::uint32_t LastUUID_) const
 {
 	auto iEnd=end();
 	// Перебираем ID (пропуская '0') пока не найдем свободный
@@ -134,7 +136,7 @@ unsigned MIDList<list_type,base_type>::NextUUID(unsigned LastUUID_) const
 //---------------------------------------------------------------------------
 template <typename list_type, typename base_type>
 typename MIDList<list_type,base_type>::const_iterator
-	MIDList<list_type,base_type>::SrchUUID(unsigned UUID_) const
+	MIDList<list_type,base_type>::SrchUUID(std::uint32_t UUID_) const
 {
 	auto iItem=begin();
 	auto iEnd=end();
@@ -151,7 +153,7 @@ typename MIDList<list_type,base_type>::const_iterator
 /*
 template <typename list_type, typename base_type>
 typename MIDList<list_type,base_type>::iterator
-	MIDList<list_type,base_type>::SrchUUID(unsigned UUID_)
+	MIDList<list_type,base_type>::SrchUUID(std::uint32_t UUID_)
 {
 	auto iConst=const_cast<const MIDList*>(this)->SrchUUID(UUID_);
 	const auto *pConst=static_cast<const MIDListItem<list_type,base_type>*>(&*iConst);
@@ -159,7 +161,7 @@ typename MIDList<list_type,base_type>::iterator
 }
 
 template <typename list_type, typename base_type>
-auto MIDList<list_type,base_type>::SrchUUID(unsigned UUID_)
+auto MIDList<list_type,base_type>::SrchUUID(std::uint32_t UUID_)
 {
 	const MIDList* ConstThis=this;
 	const auto ConstRes=ConstThis->SrchUUID(UUID_);
@@ -172,7 +174,7 @@ auto MIDList<list_type,base_type>::SrchUUID(unsigned UUID_)
 template <typename list_type, typename base_type>
 void MIDList<list_type,base_type>::SetUUIDs()
 {
-	unsigned uuid;
+	std::uint32_t uuid;
 
 	// Если еще не задавали ID, генерируем начальное значенение
 	uuid=(LastUUID!=0)? LastUUID: FirstUUID();

@@ -3,6 +3,7 @@
 #define UnitFinesH
 //---------------------------------------------------------------------------
 #include <string>
+#include <cstdint>
 
 #include "UnitIDList.h"
 //---------------------------------------------------------------------------
@@ -19,18 +20,18 @@ class MFinesItem:
 {
 public:
 	// Функции механизма сохранения/загрузки данных
-	virtual unsigned GetDataSize() const override;
+	virtual std::size_t GetDataSize() const override;
 	virtual void *SetData(void *Data_) const override;
 	virtual const void *GetData(const void *Data_, const void *Limit_) override;
 
 public:
-	short Time;                   	// Время штрафа
+	std::int16_t Time;				// Время штрафа
 	std::wstring Descr;             // Описание штрафа
 
 	// Поддержка логов
 	struct LogData
 	{
-		unsigned UUID;				// ID-номер штрафа
+		std::uint32_t UUID;			// ID-номер штрафа
 		std::wstring Descr;         // Описание штрафа
 	};
 

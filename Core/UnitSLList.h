@@ -6,6 +6,7 @@
 #include <vector>
 #include <stdexcept>
 #include <cwchar>
+#include <cstdint>
 #include <stdio.h>
 #include <winsock2.h>
 //#include <windows.h>
@@ -22,7 +23,7 @@ class MSLListItem;
 
 template <
 	typename parent_item, typename base_type,
-	typename item_type, unsigned char type_id>
+	typename item_type, std::uint8_t type_id>
 using MSLListItemTyped = MListItemTyped <parent_item, base_type, item_type, type_id>;
 
 template <typename parent_item, typename item_type>
@@ -46,7 +47,7 @@ class MSLListItem:
 public:
 	// Функции определения размера данных производного от MSLListItem класса,
 	// сохранения и восстановления их в/из памяти.
-	virtual unsigned GetDataSize() const = 0;
+	virtual std::size_t GetDataSize() const = 0;
 	virtual void *SetData(void *Data_) const = 0;
 	virtual const void *GetData(const void *Data_, const void *Limit_) = 0;
 };
@@ -69,32 +70,32 @@ public:      /// ??? проверить MLog
 	HKEY DefaultKey;			// HKCR/HKCU/HKLM/HKU
 	std::wstring DefaultFile;	// путь к файлу на диске / раздел реестра
 	std::wstring DefaultValue;	// имя параметра в реестре
-	unsigned DefaultCode;		// двоичный ключ шифрования данных
+	std::uint32_t DefaultCode;	// двоичный ключ шифрования данных
 	mutable DWORD LastError;	// код ошибки последней операции с файлом/реестром
 
 public:
 	// Функции определения размера данных производного от MSLList класса,
 	// сохранения и восстановления их в/из памяти.
 	// Заглушки. MList не предполагает дополнения атрибутами, а MSLList-да.
-	virtual unsigned GetDataSize() const { return 0; }
+	virtual std::size_t GetDataSize() const { return 0; }
 	virtual void *SetData(void *Data_) const { return Data_; }
 	virtual const void *GetData(const void *Data_, const void *Limit_) { return Data_; }
 
 public:
 	// Функции определения размера данных всех элементов списка,
 	// сохранения и восстановления их в/из памяти.
-	unsigned GetAllDataSize(bool Header_=true) const;
+	std::size_t GetAllDataSize(bool Header_=true) const;
 	void *SetAllData(void *Data_, bool Header_=true) const;
 	const void *GetAllData(const void *Data_, const void *Limit_);
 
-	bool SaveTo(const std::wstring &File_, unsigned Code_, bool Always_=true, bool Safe_=false) const;
-	bool AttachTo(const std::wstring &File_, unsigned Code_, bool Safe_=false) const;
-	bool LoadFrom(const std::wstring &File_, unsigned Code_);
-	bool StoreTo(HKEY Key_, const std::wstring &SubKey_, const std::wstring &Value_, unsigned Code_) const;
-	bool QueryFrom(HKEY Key_, const std::wstring &SubKey_, const std::wstring &Value_, unsigned Code_);
-	bool SaveAsReg(const std::wstring &File_, HKEY Key_, const std::wstring &SubKey_, const std::wstring &Value_, unsigned Code_) const;
-	void SetDefaultFile(const std::wstring &File_, unsigned Code_);
-	void SetDefaultKey(HKEY Key_, const std::wstring &SubKey_, const std::wstring &Value_, unsigned Code_);
+	bool SaveTo(const std::wstring &File_, std::uint32_t Code_, bool Always_=true, bool Safe_=false) const;
+	bool AttachTo(const std::wstring &File_, std::uint32_t Code_, bool Safe_=false) const;
+	bool LoadFrom(const std::wstring &File_, std::uint32_t Code_);
+	bool StoreTo(HKEY Key_, const std::wstring &SubKey_, const std::wstring &Value_, std::uint32_t Code_) const;
+	bool QueryFrom(HKEY Key_, const std::wstring &SubKey_, const std::wstring &Value_, std::uint32_t Code_);
+	bool SaveAsReg(const std::wstring &File_, HKEY Key_, const std::wstring &SubKey_, const std::wstring &Value_, std::uint32_t Code_) const;
+	void SetDefaultFile(const std::wstring &File_, std::uint32_t Code_);
+	void SetDefaultKey(HKEY Key_, const std::wstring &SubKey_, const std::wstring &Value_, std::uint32_t Code_);
 	bool Save(bool Always_=true, bool Safe_=false) const;
 	bool Attach(bool Safe_=false) const;
 	bool Load();
@@ -109,24 +110,52 @@ public:
 //---------------------------------------------------------------------------
 //---------------------------------------------------------------------------
 template <typename list_type, typename base_type>
-unsigned MSLList<list_type,base_type>::GetAllDataSize(bool Header_) const
+std::size_t MSLList<list_type,base_type>::GetAllDataSize(bool Header_) const
 {
-	unsigned DataSize=0, Size;
-	bool typed=isTyped();
+	std::size_t DataSize=0;
 
 	// Берем размер заголовка
-	if ( Header_&&((Size=GetDataSize())!=0) ) DataSize+=sizeof(unsigned)+Size;
+	std::size_t Size=GetDataSize();
+	if ( Size > std::numeric_limits<std::uint32_t>::max() )
+	{
+		throw std::out_of_range(
+			"MSLList::GetAllDataSize()\n"
+			"Размер заголовка превышает max(uint32_t).");
+	}
+	// Не забываем добавить поле для размера данных заголовка
+	if ( Header_&&(Size!=0) ) DataSize+=sizeof(std::uint32_t)+Size;
+
 	// Берем размер элементов списка (игнорируя элементы с нулевым размером данных)
+	bool typed=isTyped();
 	for ( const auto &Item: *this )
 	{
-		Size=Item.GetDataSize(); if ( Size==0 ) continue;
-		// Не забываем добавить поле для размера данных элемента
-		DataSize+=Size+sizeof(unsigned);
+		std::size_t Size=Item.GetDataSize();
+		if ( Size==0 ) continue;
+
 		// Если список типизированный, добавляем размер поля типа
-		if ( typed ) DataSize+=sizeof(unsigned char);
+		if ( typed ) Size+=sizeof(std::uint8_t);
+
+		if ( Size > std::numeric_limits<std::uint32_t>::max() )
+		{
+			throw std::out_of_range(
+				"MSLList::GetAllDataSize()\n"
+				"Размер элемента превышает max(uint32_t).");
+		}
+
+		// Не забываем добавить поле для размера данных элемента
+		DataSize+=sizeof(std::uint32_t)+Size;
 	}
 	// Маркер конца списка
-	DataSize+=sizeof(unsigned);
+	DataSize+=sizeof(std::uint32_t);
+
+	// Будем считать (для совместимости), что размер данных укладывается в uint32_t
+	if ( DataSize > std::numeric_limits<std::uint32_t>::max() )
+	{
+		throw std::out_of_range(
+			"MSLList::GetAllDataSize()\n"
+			"Размер списка превышает max(uint32_t).");
+	}
+
 	return DataSize;
 }
 //---------------------------------------------------------------------------
@@ -134,50 +163,54 @@ template <typename list_type, typename base_type>
 void *MSLList<list_type,base_type>::SetAllData(void *Data__, bool Header_) const
 {
 	const bool typed=isTyped();
-	unsigned BlockSize;
-    char *Data_=static_cast<char*>(Data__);
+	std::size_t BlockSize;
+	char *Data_=static_cast<char*>(Data__);
 	char *NextData;
 
 	if ( Header_ )
 	{
 		// Оставляем поле для размера данных заголовка
-		Data_+=sizeof(unsigned);
-        // Сохраняем данные заголовка и вычисляем его реальный размер
+		Data_+=sizeof(std::uint32_t);
+		// Сохраняем данные заголовка и вычисляем его реальный размер
 		NextData=static_cast<char*>(SetData(Data_));
-		BlockSize=static_cast<unsigned>(NextData-Data_);
-        // Проверяем нужно ли было сохранять заголовок (были ли записаны данные)
-        if ( BlockSize==0 ) Data_-=sizeof(unsigned);
-        else
-        {
-            // Сохраняем размер заголовка
-            MemSet(Data_-sizeof(unsigned),BlockSize);
-            // Переходим далее
-            Data_=NextData;
-        }
-    }
+		BlockSize=NextData-Data_;
+		// Проверяем нужно ли было сохранять заголовок (были ли записаны данные)
+		if ( BlockSize==0 ) Data_-=sizeof(std::uint32_t);
+		else
+		{
+			// Сохраняем размер заголовка
+			MemSet(
+				Data_-sizeof(std::uint32_t),
+				static_cast<std::uint32_t>(BlockSize));
+			// Переходим далее
+			Data_=NextData;
+		}
+	}
 
 	for ( const auto &Item: *this )
 	{
 		// Оставляем поле для размера данных блока
-        Data_+=sizeof(unsigned);
-        // Если список типизированный, то оставляем поле для типа элемента
-        NextData=typed? Data_+sizeof(unsigned char): Data_;
+		Data_+=sizeof(std::uint32_t);
+		// Если список типизированный, то оставляем поле для типа элемента
+		NextData=typed? Data_+sizeof(std::uint8_t): Data_;
 		// Сохраняем данные блока и вычисляем его реальный размер (включая поле типа)
 		NextData=static_cast<char*>(Item.SetData(NextData));
-		BlockSize=static_cast<unsigned>(NextData-Data_);
+		BlockSize=NextData-Data_;
 		// Проверяем нужно ли было сохранять блок (были ли записаны данные)
 		if ( BlockSize!=0 )
 		{
 			// Сохраняем размер данных блока
-			Data_=static_cast<char*>(MemSet(Data_-sizeof(unsigned),BlockSize));
+			Data_=static_cast<char*>(MemSet(
+				Data_-sizeof(std::uint32_t),
+				static_cast<std::uint32_t>(BlockSize)));
 			// Если список типизированный, сохраняем тип элемента
 			if ( typed ) MemSet(Data_,Item.gTypeID());
 			// Переходим далее
 			Data_=NextData;
-		} else Data_-=sizeof(unsigned);
+		} else Data_-=sizeof(std::uint32_t);
 	}
 	// Маркер конца списка
-	Data_=static_cast<char*>(MemSet(Data_,(unsigned)0));
+	Data_=static_cast<char*>(MemSet(Data_,(std::uint32_t)0));
 
 	return Data_;
 }
@@ -188,8 +221,8 @@ const void *MSLList<list_type,base_type>::GetAllData(const void *Data__, const v
 	const bool typed=isTyped();
 	const char *Data_=static_cast<const char*>(Data__);
 	const char *Limit;
-	unsigned DataSize;
-	unsigned char TypeID;
+	std::uint32_t DataSize;
+	std::uint8_t TypeID;
 
 	// Очищаем список для профилактики
 	Clear();
@@ -205,7 +238,7 @@ const void *MSLList<list_type,base_type>::GetAllData(const void *Data__, const v
 	{
 		const char *result=static_cast<const char*>(GetData(Data_,Limit));
 		// Если ничего не считали, значит у списка нет заголовка
-		if ( Data_==result ) Data_-=sizeof(unsigned);
+		if ( Data_==result ) Data_-=sizeof(std::uint32_t);
 		else if ( result!=Limit ) goto error;
 		else Data_=result;
 	}
@@ -250,7 +283,7 @@ error:
 }
 //---------------------------------------------------------------------------
 template <typename list_type, typename base_type>
-bool MSLList<list_type,base_type>::SaveTo(const std::wstring &File_, unsigned Code_, bool Always_, bool Safe_) const
+bool MSLList<list_type,base_type>::SaveTo(const std::wstring &File_, std::uint32_t Code_, bool Always_, bool Safe_) const
 {
 	HANDLE file=INVALID_HANDLE_VALUE;
 	DWORD data_size, rw_size;
@@ -258,8 +291,8 @@ bool MSLList<list_type,base_type>::SaveTo(const std::wstring &File_, unsigned Co
 
 	LastError=0;
 	// Определяем размер данных и проверяем на допустимость
-	data_size=GetAllDataSize();
-    if ( data_size>MAX_SLFileSize )
+	data_size=GetAllDataSize();         /// value limited to int32_t
+	if ( data_size>MAX_SLFileSize )
     {
 		throw std::runtime_error (      /// заменить на return false ?
 			"MSLList::SaveTo()\n"
@@ -268,7 +301,7 @@ bool MSLList<list_type,base_type>::SaveTo(const std::wstring &File_, unsigned Co
     // Выделяем память под данные.
     // bad_alloc не ловим, т.к. ничего еще не начали делать
 	all_data.resize(data_size);
-	// Сохраняем весть список в памяти и сверяем реальный размер данных
+	// Сохраняем весь список в памяти и сверяем реальный размер данных
 	if ( SetAllData(all_data.data()) != &all_data[all_data.size()] )
 	{
 		throw std::runtime_error (
@@ -305,7 +338,7 @@ api_error:
 }
 //---------------------------------------------------------------------------
 template <typename list_type, typename base_type>
-bool MSLList<list_type,base_type>::AttachTo(const std::wstring &File_, unsigned Code_, bool Safe_) const
+bool MSLList<list_type,base_type>::AttachTo(const std::wstring &File_, std::uint32_t Code_, bool Safe_) const
 {
 	HANDLE file=INVALID_HANDLE_VALUE;
 	DWORD file_sizel, file_sizeh;
@@ -321,7 +354,7 @@ bool MSLList<list_type,base_type>::AttachTo(const std::wstring &File_, unsigned 
 	// Определяем размер файла и проверяем на допустимость
     if ( (file_sizel=::GetFileSize(file,&file_sizeh))==0xFFFFFFFF ) goto api_error;
     if ( (file_sizeh!=0)||
-         (file_sizel<sizeof(unsigned))||    // короче маркера конца списка быть не может
+         (file_sizel<sizeof(std::uint32_t))||    // короче маркера конца списка быть не может
          (file_sizel>=MAX_SLFileSize) ) goto error;
     // Определяем размер данных для добавления к файлу, его допустимость
     // и не превысит ли ограничение увеличившийся файл (иначе потом не откроем его)
@@ -337,9 +370,9 @@ bool MSLList<list_type,base_type>::AttachTo(const std::wstring &File_, unsigned 
     read_size=file_sizel;
     // Ограничиваем область чтения двойным размером
     // блока шифрования (особенность алгоритма)
-    if ( read_size>(sizeof(unsigned)*2) ) read_size=sizeof(unsigned)*2;
+    if ( read_size>(sizeof(std::uint32_t)*2) ) read_size=sizeof(std::uint32_t)*2;
     // Определяем общий размер данных для записи
-    data_size+=read_size-sizeof(unsigned);
+    data_size+=read_size-sizeof(std::uint32_t);
     // Выделяем память под новые данные и часть старых из файла
     try { all_data.resize(data_size); }
 	catch ( std::bad_alloc &e )
@@ -355,10 +388,10 @@ bool MSLList<list_type,base_type>::AttachTo(const std::wstring &File_, unsigned 
         (rw_size!=read_size) ) goto api_error;  /// ошибка обработки rw_size ?
     // Расшифровываем их и проверяем наличие маркера конца списка (0x00000000)
     BasicDecode(all_data.data(),read_size,Code_);
-    if ( ((unsigned*)&all_data[read_size])[-1]!=0 ) goto error;
+    if ( ((std::uint32_t*)&all_data[read_size])[-1]!=0 ) goto error;
 
     // Сохраняем список без заголовка в памяти и сверяем реальный размер данных
-	if ( SetAllData(&all_data[read_size-sizeof(unsigned)],false) !=
+	if ( SetAllData(&all_data[read_size-sizeof(std::uint32_t)],false) !=
 		&all_data[all_data.size()] )
 	{
         throw std::runtime_error (
@@ -395,7 +428,7 @@ error:
 }
 //---------------------------------------------------------------------------
 template <typename list_type, typename base_type>
-bool MSLList<list_type,base_type>::LoadFrom(const std::wstring &File_, unsigned Code_)
+bool MSLList<list_type,base_type>::LoadFrom(const std::wstring &File_, std::uint32_t Code_)
 {
 	HANDLE file=INVALID_HANDLE_VALUE;
 	DWORD file_sizel, file_sizeh, rw_size;
@@ -439,11 +472,11 @@ error:
 //---------------------------------------------------------------------------
 template <typename list_type, typename base_type>
 bool MSLList<list_type,base_type>::StoreTo(HKEY Key_, const std::wstring &SubKey_,
-	const std::wstring &Value_, unsigned Code_) const
+	const std::wstring &Value_, std::uint32_t Code_) const
 {
 	HKEY key=nullptr;
-	std::vector <BYTE> data;
-	unsigned size;
+	std::vector <char> data;
+	std::size_t size;
 
 	LastError=0;
 	// Определяем размер данных и проверяем на допустимость
@@ -472,7 +505,7 @@ bool MSLList<list_type,base_type>::StoreTo(HKEY Key_, const std::wstring &SubKey
 		&key,nullptr)!=ERROR_SUCCESS ) goto api_error;
 	// Сохраняем параметр
 	if ( ::RegSetValueEx(key,Value_.c_str(),0,REG_BINARY,
-		data.data(),size)!=ERROR_SUCCESS ) goto api_error;
+		(LPBYTE)data.data(),size)!=ERROR_SUCCESS ) goto api_error;
 
     ::RegCloseKey(key);
     return true;
@@ -483,16 +516,17 @@ api_error:
 }
 //---------------------------------------------------------------------------
 template <typename list_type, typename base_type>
-bool MSLList<list_type,base_type>::QueryFrom(HKEY Key_, const std::wstring &SubKey_, const std::wstring &Value_, unsigned Code_)
+bool MSLList<list_type,base_type>::QueryFrom(HKEY Key_, const std::wstring &SubKey_, const std::wstring &Value_, std::uint32_t Code_)
 {
 	HKEY key=nullptr;
 	DWORD size;
-	std::vector <BYTE> data;
+	std::vector <char> data;
 
 	LastError=0;
 	// Открываем ключ реестра
-	if ( ::RegOpenKeyEx(Key_,SubKey_.c_str(),
+	if ( ::RegOpenKeyExW(Key_,SubKey_.c_str(),
 		0,KEY_QUERY_VALUE,&key)!=ERROR_SUCCESS ) goto api_error;
+
 	// Сразу выделяем память под данные (для реестра буфер маленький)
 	try { data.resize(MAX_SLRegSize); }
 	catch ( std::bad_alloc &e )
@@ -504,7 +538,7 @@ bool MSLList<list_type,base_type>::QueryFrom(HKEY Key_, const std::wstring &SubK
 	// Считываем сколько есть по-факту данных
 	size=MAX_SLRegSize;
 	if ( ::RegQueryValueEx(key,Value_.c_str(),
-		nullptr,nullptr,data.data(),&size)!=ERROR_SUCCESS ) goto api_error;
+		nullptr,nullptr,(LPBYTE)data.data(),&size)!=ERROR_SUCCESS ) goto api_error;
 	// Закрываем ключ реестра
 	::RegCloseKey(key); key=nullptr;
 
@@ -527,7 +561,7 @@ bool MSLList<list_type,base_type>::SaveAsReg(
 	HKEY Key_,
 	const std::wstring &SubKey_,
 	const std::wstring &Value_,
-	unsigned Code_) const
+	std::uint32_t Code_) const
 {
 	LastError=0;
 	// Определяем размер данных и проверяем на допустимость
@@ -596,7 +630,7 @@ api_error:
 //---------------------------------------------------------------------------
 template <typename list_type, typename base_type>
 void MSLList<list_type,base_type>::SetDefaultFile(
-	const std::wstring &File_, unsigned Code_)
+	const std::wstring &File_, std::uint32_t Code_)
 {
 	DefaultFile=File_;
 	DefaultValue.clear();
@@ -605,7 +639,7 @@ void MSLList<list_type,base_type>::SetDefaultFile(
 //---------------------------------------------------------------------------
 template <typename list_type, typename base_type>
 void MSLList<list_type,base_type>::SetDefaultKey(
-	HKEY Key_, const std::wstring &SubKey_, const std::wstring &Value_, unsigned Code_)
+	HKEY Key_, const std::wstring &SubKey_, const std::wstring &Value_, std::uint32_t Code_)
 {
 	DefaultFile=SubKey_;
 	DefaultValue=Value_;

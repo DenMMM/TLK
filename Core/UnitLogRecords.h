@@ -3,6 +3,8 @@
 #define UnitLogRecordsH
 //---------------------------------------------------------------------------
 #include <vector>
+#include <cstdint>
+
 #include "UnitSLList.h"
 #include "UnitStates.h"
 #include "UnitTariffs.h"
@@ -16,7 +18,7 @@ class MLogRecordsItem:
 	public MSLListItem <MLogRecords, MLogRecordsItem>
 {
 public:
-	__int64 SystemTime;     // Время создания записи
+	std::int64_t SystemTime;		// Время создания записи
 
 	MLogRecordsItem():
 		SystemTime(0)
@@ -66,7 +68,7 @@ protected:
 	{
 	private:
 		// Функции механизма сохранения/загрузки данных
-		virtual unsigned GetDataSize() const override;
+		virtual std::size_t GetDataSize() const override;
 		virtual void *SetData(void *Data_) const override;
 		virtual const void *GetData(const void *Data_, const void *Limit_) override;
 	};
@@ -76,12 +78,12 @@ protected:
 	{
 	private:
 		// Функции механизма сохранения/загрузки данных
-		virtual unsigned GetDataSize() const override;
+		virtual std::size_t GetDataSize() const override;
 		virtual void *SetData(void *Data_) const override;
 		virtual const void *GetData(const void *Data_, const void *Limit_) override;
 
 	public:
-		char Number;            // Номер компьютера
+		std::int8_t Number;		// Номер компьютера
 		bool Apply;				// Режим был установлен/снят
 
 		ModeBase():
@@ -96,12 +98,12 @@ protected:
 	{
 	private:
 		// Функции механизма сохранения/загрузки данных
-		virtual unsigned GetDataSize() const override;
+		virtual std::size_t GetDataSize() const override;
 		virtual void *SetData(void *Data_) const override;
 		virtual const void *GetData(const void *Data_, const void *Limit_) override;
 
 	public:
-		char Number;            // Номер компьютера
+		std::int8_t Number;		// Номер компьютера
 
 		CmdBase():
 			Number(0)
@@ -114,13 +116,13 @@ protected:
 	{
 	private:
 		// Функции механизма сохранения/загрузки данных
-		virtual unsigned GetDataSize() const override;
+		virtual std::size_t GetDataSize() const override;
 		virtual void *SetData(void *Data_) const override;
 		virtual const void *GetData(const void *Data_, const void *Limit_) override;
 
 	public:
-		unsigned State;         // Состояние оболочки
-		unsigned User;          // Текущий пользователь (чья смена открыта)
+		std::uint32_t State;	// Состояние оболочки
+		std::uint32_t User;		// Текущий пользователь (чья смена открыта)
 
 		DataShellBase():
 			State(0),
@@ -134,7 +136,7 @@ protected:
 	{
 	private:
 		// Функции механизма сохранения/загрузки данных
-		virtual unsigned GetDataSize() const override;
+		virtual std::size_t GetDataSize() const override;
 		virtual void *SetData(void *Data_) const override;
 		virtual const void *GetData(const void *Data_, const void *Limit_) override;
 
@@ -147,7 +149,7 @@ protected:
 	{
 	private:
 		// Функции механизма сохранения/загрузки данных
-		virtual unsigned GetDataSize() const override;
+		virtual std::size_t GetDataSize() const override;
 		virtual void *SetData(void *Data_) const override;
 		virtual const void *GetData(const void *Data_, const void *Limit_) override;
 
@@ -160,7 +162,7 @@ protected:
 	{
 	private:
 		// Функции механизма сохранения/загрузки данных
-		virtual unsigned GetDataSize() const override;
+		virtual std::size_t GetDataSize() const override;
 		virtual void *SetData(void *Data_) const override;
 		virtual const void *GetData(const void *Data_, const void *Limit_) override;
 
@@ -173,7 +175,7 @@ protected:
 	{
 	private:
 		// Функции механизма сохранения/загрузки данных
-		virtual unsigned GetDataSize() const override;
+		virtual std::size_t GetDataSize() const override;
 		virtual void *SetData(void *Data_) const override;
 		virtual const void *GetData(const void *Data_, const void *Limit_) override;
 
@@ -186,7 +188,7 @@ protected:
 	{
 	private:
 		// Функции механизма сохранения/загрузки данных
-		virtual unsigned GetDataSize() const override ;
+		virtual std::size_t GetDataSize() const override ;
 		virtual void *SetData(void *Data_) const override ;
 		virtual const void *GetData(const void *Data_, const void *Limit_) override ;
 
@@ -204,12 +206,12 @@ protected:
 	{
 	private:
 		// Функции механизма сохранения/загрузки данных
-		virtual unsigned GetDataSize() const override;
+		virtual std::size_t GetDataSize() const override;
 		virtual void *SetData(void *Data_) const override;
 		virtual const void *GetData(const void *Data_, const void *Limit_) override;
 
 	public:
-		unsigned User;          // ID-номер пользователя
+		std::uint32_t User;		// ID-номер пользователя
 
 		AppLogInBase():
 			User(0)
@@ -222,20 +224,20 @@ protected:
 	{
 	private:
 		// Функции механизма сохранения/загрузки данных
-		virtual unsigned GetDataSize() const override;
+		virtual std::size_t GetDataSize() const override;
 		virtual void *SetData(void *Data_) const override;
 		virtual const void *GetData(const void *Data_, const void *Limit_) override;
 
 	public:
-		char Number;                            // Номер компьютера
-		unsigned Tariff;                        // ID-номер тарифа
-		__int64 StartTime;                      // Время, относительно которого посчитана стоимость
-		char Type;                              // =
-		short BeginTime;                        // =    Информация о пакете
-		short EndTime;                          // =
-		short SizeTime;                         // =
-		short WorkTime;                         // Поставленное время работы
-		double Cost;                            // Стоимость работы на компьютере в течении 'WorkTime'
+		std::int8_t Number;			// Номер компьютера
+		std::uint32_t Tariff;		// ID-номер тарифа
+		std::int64_t StartTime;		// Время, относительно которого посчитана стоимость
+		std::uint8_t Type;          // =
+		std::int16_t BeginTime;		// =    Информация о пакете
+		std::int16_t EndTime;		// =
+		std::int16_t SizeTime;		// =
+		std::int16_t WorkTime;		// Поставленное время работы
+		double Cost;				// Стоимость работы на компьютере в течении 'WorkTime'
 
 		CompRunBase():
 			Number(0),
@@ -256,14 +258,14 @@ protected:
 	{
 	private:
 		// Функции механизма сохранения/загрузки данных
-		virtual unsigned GetDataSize() const override;
+		virtual std::size_t GetDataSize() const override;
 		virtual void *SetData(void *Data_) const override;
 		virtual const void *GetData(const void *Data_, const void *Limit_) override;
 
 	public:
-		char Number;                        // Номер компьютера
-		unsigned Fine;                      // ID-номер штрафа
-		short Time;                         // Время штрафа
+		std::int8_t Number;			// Номер компьютера
+		std::uint32_t Fine;			// ID-номер штрафа
+		std::int16_t Time;			// Время штрафа
 
 		CompFineBase():
 			Number(0),
@@ -278,13 +280,13 @@ protected:
 	{
 	private:
 		// Функции механизма сохранения/загрузки данных
-		virtual unsigned GetDataSize() const override;
+		virtual std::size_t GetDataSize() const override;
 		virtual void *SetData(void *Data_) const override;
 		virtual const void *GetData(const void *Data_, const void *Limit_) override;
 
 	public:
-		char From;                          // С какого компьютера было взято время
-		char To;                            // На какой компьютер время было поставлено
+		std::int8_t From;			// С какого компьютера было взято время
+		std::int8_t To;				// На какой компьютер время было поставлено
 
 		CompExchangeBase():
 			From(0),

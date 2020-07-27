@@ -7,7 +7,7 @@
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
 //---------------------------------------------------------------------------
-unsigned MAuth::GetDataSize() const
+std::size_t MAuth::GetDataSize() const
 {
     return
         sizeof(Key);
@@ -26,7 +26,7 @@ const void *MAuth::GetData(const void *Data_, const void *Limit_)
 		? Data_: nullptr;
 }
 
-void MAuth::SetKey(const void *Key_, size_t Size_)
+void MAuth::SetKey(const void *Key_, std::size_t Size_)
 {
 	if ( Size_!=sizeof(Key) )
 	{
@@ -37,7 +37,7 @@ void MAuth::SetKey(const void *Key_, size_t Size_)
 	memcpy(Key,Key_,sizeof(Key));
 }
 
-void MAuth::GetKey(void *Buff_, size_t Size_) const
+void MAuth::GetKey(void *Buff_, std::size_t Size_) const
 {
     if ( Size_!=sizeof(Key) )
     {
@@ -48,7 +48,7 @@ void MAuth::GetKey(void *Buff_, size_t Size_) const
     memcpy(Buff_,Key,sizeof(Key));
 }
 
-void MAuth::Calc(const void *Data_, size_t DataSize_, void *MAC_, size_t MACSize_) const
+void MAuth::Calc(const void *Data_, std::size_t DataSize_, void *MAC_, std::size_t MACSize_) const
 {
 	hmac_sha(
 		MAC_Alg,
@@ -57,7 +57,7 @@ void MAuth::Calc(const void *Data_, size_t DataSize_, void *MAC_, size_t MACSize
 		static_cast<unsigned char*>(MAC_), MACSize_);
 }
 
-bool MAuth::Check(const void *Data_, size_t DataSize_, const void *MAC_, size_t MACSize_) const
+bool MAuth::Check(const void *Data_, std::size_t DataSize_, const void *MAC_, std::size_t MACSize_) const
 {
     unsigned char mac[MAC_Size];
 

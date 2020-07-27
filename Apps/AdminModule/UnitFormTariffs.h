@@ -15,6 +15,8 @@
 #include <ExtDlgs.hpp>
 #include <CheckLst.hpp>
 //---------------------------------------------------------------------------
+#include <cstdint>
+
 #include "UnitTariffs.h"
 //---------------------------------------------------------------------------
 class TFormTariffs : public TForm
@@ -64,8 +66,8 @@ __published:	// IDE-managed Components
     void __fastcall ButtonSaveClick(TObject *Sender);
     void __fastcall CheckBoxDesktopExit(TObject *Sender);
 private:	// User declarations
-	MTariffs TmpTariffs;				// Буфер для списка тарифов
-	std::vector <char> TmpComps;		// Буфер для списка компьютеров редактируемого тарифа
+	MTariffs TmpTariffs;					// Буфер для списка тарифов
+	std::vector <std::int8_t> TmpComps;		// Буфер для списка компьютеров редактируемого тарифа
 	void SetEdit(bool Edit_);
     void SetListViewNamesLine(TListItem *Item_);
 public:		// User declarations

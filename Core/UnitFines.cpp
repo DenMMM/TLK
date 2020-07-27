@@ -8,7 +8,7 @@
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
 //---------------------------------------------------------------------------
-unsigned MFinesItem::GetDataSize() const
+std::size_t MFinesItem::GetDataSize() const
 {
 	return
 		MIDListItem::GetDataSize()+				// ID-םמלונ רענאפא

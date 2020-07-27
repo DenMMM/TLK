@@ -9,26 +9,26 @@ class MRandCounter;
 class MRandCounter
 {
 private:
-	unsigned Counter;       // Последовательно возрастающий счетчик
-	unsigned Seed;          // Код, которым шифруется его значение
+	std::uint32_t Counter;		// Последовательно возрастающий счетчик
+	std::uint32_t Seed;			// Код, которым шифруется его значение
 
 public:
-	unsigned operator++()
+	std::uint32_t operator++()
 	{
-		unsigned Res=(++Counter);
+		std::uint32_t Res=(++Counter);
 		BasicEncode(&Res, sizeof(Res), Seed, 32);
 		return Res;
 	}
 
-	unsigned operator++(int)
+	std::uint32_t operator++(int)
 	{
-		unsigned Res=(Counter++);
+		std::uint32_t Res=(Counter++);
 		BasicEncode(&Res, sizeof(Res), Seed, 32);
 		return Res;
 	}
 
 	MRandCounter() = delete;
-	MRandCounter(unsigned Seed_):
+	MRandCounter(std::uint32_t Seed_):
 		Counter(0),
 		Seed(Seed_)
 	{

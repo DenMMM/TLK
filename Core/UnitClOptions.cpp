@@ -17,7 +17,7 @@ void MClOptions::SetShellUser(const std::wstring &Name_)
 	ShellUser=Name_;
 }
 
-unsigned MClOptions::GetDataSize() const
+std::size_t MClOptions::GetDataSize() const
 {
     return
 		sizeofLine(ShellUser)+

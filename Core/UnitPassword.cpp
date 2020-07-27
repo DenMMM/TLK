@@ -9,7 +9,7 @@
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
 //---------------------------------------------------------------------------
-unsigned MPassword::GetDataSize() const
+std::size_t MPassword::GetDataSize() const
 {
     return
         sizeof(Salt)+
@@ -62,7 +62,7 @@ bool MPassword::Check(const std::wstring &Pass_) const
 //    return memcmp(tmp, Hash, sizeof(Hash)) == 0;
 }
 
-std::wstring MPassword::New(size_t Len_, bool Cap_, bool Low_, bool Num_)
+std::wstring MPassword::New(std::size_t Len_, bool Cap_, bool Low_, bool Num_)
 {
 	const std::wstring cap(L"ABCDEFGHIJKLMNOPQRSTUVWXYZ");
 	const std::wstring low(L"abcdefghijklmnopqrstuvwxyz");
@@ -77,7 +77,7 @@ std::wstring MPassword::New(size_t Len_, bool Cap_, bool Low_, bool Num_)
 	if ( dict.empty() ) return L"";
 
 	// Подготовим распределитель значений по словарю
-	std::uniform_int_distribution <size_t> rnd_distr(0, dict.length()-1);
+	std::uniform_int_distribution <std::size_t> rnd_distr(0, dict.length()-1);
 
 	// Заполним последовательность инициализации
 	/// 96 бит достаточно для 16-символьных паролей из 52 знаков ?

@@ -2,6 +2,8 @@
 #ifndef UnitSyncMsgsH
 #define UnitSyncMsgsH
 //---------------------------------------------------------------------------
+#include <cstdint>
+
 #include "UnitAuth.h"
 //---------------------------------------------------------------------------
 struct MSyncData;
@@ -17,23 +19,23 @@ struct MSyncPWOL;
 
 struct MSyncData
 {
-    __int64 SystemTime;         // Системное время, используемое при всех расчетах
-    char Number;                // Номер компьютера, с которым ассоциировано состояние
-    unsigned State;             // Состояние компьютера (режимы работы)
-    __int64 StartWorkTime;      // Время запуска в работу (абсолютное время)
-    int SizeWorkTime;           // На какое время запущен (в минутах)
-    __int64 StartFineTime;      // Время, когда был применен штраф (абсолютное время)
-    int SizeFineTime;           // Время ожидания в режиме штрафа (в минутах)
-    __int64 StopTimerTime;      // Время остановки отсчета времени (абсолютное время)
-    unsigned Programs;          // Групы программ, разрешенных для запуска
-    unsigned Commands;          // Дополнительные команды
+	std::int64_t SystemTime;	// Системное время, используемое при всех расчетах
+	std::uint8_t Number;		// Номер компьютера, с которым ассоциировано состояние
+	std::uint32_t State;		// Состояние компьютера (режимы работы)
+	std::int64_t StartWorkTime;	// Время запуска в работу (абсолютное время)
+	std::int32_t SizeWorkTime;	// На какое время запущен (в минутах)       	/// int16_t ?
+	std::int64_t StartFineTime;	// Время, когда был применен штраф (абсолютное время)
+	std::int32_t SizeFineTime;	// Время ожидания в режиме штрафа (в минутах)   /// int16_t ?
+	std::int64_t StopTimerTime;	// Время остановки отсчета времени (абсолютное время)
+	std::uint32_t Programs;		// Групы программ, разрешенных для запуска
+	std::uint32_t Commands;		// Дополнительные команды
 };
 
 struct MSyncPHeader
 {
-    unsigned char Version;      // Версия сетевого интерфейса
-    unsigned char Type;         // Тип пакета
-    unsigned int Seed;          // Сеансовый ID (функция от random сервера и клиента)
+	std::uint8_t Version;		// Версия сетевого интерфейса
+	std::uint8_t Type;			// Тип пакета
+	std::uint32_t Seed;			// Сеансовый ID (функция от random сервера и клиента)
 };
 
 struct MSyncPHello
@@ -57,9 +59,9 @@ struct MSyncPConf
 
 struct MSyncPWOL
 {
-    unsigned int ZeroFirst;                     // Нули в начале пакета
-    unsigned char Sync[MAC_AddrLength];         // Последовательность для синхронизации
-    unsigned char Magic[16][MAC_AddrLength];    // 16 раз MAC-адрес
+	std::uint32_t ZeroFirst;					// Нули в начале пакета
+	unsigned char Sync[MAC_AddrLength];			// Последовательность для синхронизации
+	unsigned char Magic[16][MAC_AddrLength];	// 16 раз MAC-адрес
 };
 
 #pragma pack(pop)

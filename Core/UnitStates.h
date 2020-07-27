@@ -4,6 +4,7 @@
 //---------------------------------------------------------------------------
 #include <string>
 #include <mutex>
+#include <cstdint>
 #include <winsock2.h>
 //#include <windows.h>
 
@@ -57,19 +58,19 @@ class MStateCl;
 //---------------------------------------------------------------------------
 struct MStatesInfo
 {
-	char Number;                // Номер компьютера
-	unsigned State;             // Состояние компьютера (режимы работы)
-	unsigned TariffID;          // ID-номер тарифа, по которому работает компьютер
-	short WorkTime;             // На какое время был запущен компьютер (в минутах)
-	short ToEndWork;            // Оставшееся время работы (в минутах)
-	short EndWorkTime;          // До скольки еще ждать окончания работы (в минутах с начала суток)
-	short FineTime;             // Время ожидания в режиме штрафа (в минутах)
-	short ToEndFine;            // Оставшееся время штрафа (в минутах)
-	short EndFineTime;          // До скольки еще ждать окончания штрафа (в минутах с начала суток)
-	unsigned Programs;          // Групы программ, разрешенных для запуска
-	unsigned Commands;          // Дополнительные команды для компьютера
-	unsigned NetState;          // Состояние сети
-	unsigned Changes;           // Изменения данных для оболочки со времени их последнего запроса
+	std::uint8_t Number;		// Номер компьютера
+	std::uint32_t State;		// Состояние компьютера (режимы работы)
+	std::uint32_t TariffID;		// ID-номер тарифа, по которому работает компьютер
+	std::int16_t WorkTime;		// На какое время был запущен компьютер (в минутах)
+	std::int16_t ToEndWork;		// Оставшееся время работы (в минутах)
+	std::int16_t EndWorkTime;	// До скольки еще ждать окончания работы (в минутах с начала суток)
+	std::int16_t FineTime;		// Время ожидания в режиме штрафа (в минутах)
+	std::int16_t ToEndFine;		// Оставшееся время штрафа (в минутах)
+	std::int16_t EndFineTime;	// До скольки еще ждать окончания штрафа (в минутах с начала суток)
+	std::uint32_t Programs;		// Групы программ, разрешенных для запуска
+	std::uint32_t Commands;		// Дополнительные команды для компьютера
+	std::uint32_t NetState;		// Состояние сети
+	std::uint32_t Changes;		// Изменения данных для оболочки со времени их последнего запроса
 };
 //---------------------------------------------------------------------------
 class MStatesItem:
@@ -79,27 +80,27 @@ class MStatesItem:
 {
 public:
 	// Функции механизма сохранения/загрузки данных
-	virtual unsigned GetDataSize() const override;
+	virtual std::size_t GetDataSize() const override;
 	virtual void *SetData(void *Data_) const override;
 	virtual const void *GetData(const void *Data_, const void *Limit_) override;
 
 private:
 	mutable std::mutex mtxMain;	// Объект для синхронизации доступа потоков к данным
-	__int64 SystemTime;         // Системное время, используемое при всех расчетах
+	std::int64_t SystemTime;	// Системное время, используемое при всех расчетах
 
-	char Number;                // Номер компьютера, с которым ассоциировано состояние
-	unsigned State;             // Состояние компьютера (режимы работы)
-	unsigned TariffID;          // ID-номер тарифа, по которому работает компьютер
-	__int64 StartWorkTime;      // Время запуска компьютера в работу (абсолютное время)
-	short SizeWorkTime;         // На какое время запущен компьютер (в минутах)
-	__int64 StartFineTime;      // Время, когда был применен штраф (абсолютное время)
-	short SizeFineTime;         // Время ожидания в режиме штрафа (в минутах)
-	__int64 StopTimerTime;      // Время остановки отсчета времени (абсолютное время)
-	unsigned Programs;          // Групы программ, разрешенных для запуска
-	unsigned Commands;          // Дополнительные команды для компьютера
-	unsigned CmdsToReset;       // Команды требующие отмены по окончании выполнения
-	unsigned NetState;          // Состояние сети
-	unsigned Changes;           // Изменения данных для оболочки со времени их последнего запроса
+	std::int8_t Number;			// Номер компьютера, с которым ассоциировано состояние
+	std::uint32_t State;		// Состояние компьютера (режимы работы)
+	std::uint32_t TariffID;		// ID-номер тарифа, по которому работает компьютер
+	std::int64_t StartWorkTime;	// Время запуска компьютера в работу (абсолютное время)
+	std::int16_t SizeWorkTime;	// На какое время запущен компьютер (в минутах)
+	std::int64_t StartFineTime;	// Время, когда был применен штраф (абсолютное время)
+	std::int16_t SizeFineTime;	// Время ожидания в режиме штрафа (в минутах)
+	std::int64_t StopTimerTime;	// Время остановки отсчета времени (абсолютное время)
+	std::uint32_t Programs;		// Групы программ, разрешенных для запуска
+	std::uint32_t Commands;		// Дополнительные команды для компьютера
+	std::uint32_t CmdsToReset;	// Команды требующие отмены по окончании выполнения
+	std::uint32_t NetState;		// Состояние сети
+	std::uint32_t Changes;		// Изменения данных для оболочки со времени их последнего запроса
 
 	// Функции проверки окончания времени работы и времени штрафа
 	bool ControlWorkTime();
@@ -123,11 +124,11 @@ public:
 	// Вспомогательные функции
 	MTariffRunTimesItem GetRunParam() const;
 	MStatesInfo GetInfo();
-	bool Timer(__int64 SystemTime_);
+	bool Timer(std::int64_t SystemTime_);
 
 	// Назначение и проверка связей с другими данными
-	int Associated() const { return Number; }
-	void Associate(int Number_);
+	std::int8_t Associated() const { return Number; }
+	void Associate(std::int8_t Number_);
 
 	// Операции для сетевого интерфейса
 	bool NetBegin();
@@ -143,14 +144,14 @@ public:
 	// Поддержка логов
 	struct LogData
 	{
-		char Number;                // Номер компьютера
-		unsigned State;             // Состояние компьютера (режимы работы)
-		unsigned TariffID;          // ID-номер тарифа, по которому работает компьютер
-		__int64 StartWorkTime;      // Время запуска компьютера в работу (абсолютное время)
-		short SizeWorkTime;         // На какое время запущен компьютер (в минутах)
-		__int64 StartFineTime;      // Время, когда был применен штраф (абсолютное время)
-		short SizeFineTime;         // Время ожидания в режиме штрафа (в минутах)
-		__int64 StopTimerTime;      // Время остановки отсчета времени (абсолютное время)
+		std::uint8_t Number;		// Номер компьютера
+		std::uint32_t State;		// Состояние компьютера (режимы работы)
+		std::uint32_t TariffID;		// ID-номер тарифа, по которому работает компьютер
+		std::int64_t StartWorkTime;	// Время запуска компьютера в работу (абсолютное время)
+		std::int16_t SizeWorkTime;	// На какое время запущен компьютер (в минутах)
+		std::int64_t StartFineTime;	// Время, когда был применен штраф (абсолютное время)
+		std::int16_t SizeFineTime;	// Время ожидания в режиме штрафа (в минутах)
+		std::int64_t StopTimerTime;	// Время остановки отсчета времени (абсолютное время)
 	};
 
 	LogData gLogData() const
@@ -219,15 +220,15 @@ private:
 
 public:
 	// Вспомогательные функции
-	const_iterator Search(int Number_) const;
-	iterator Search(int Number_)
+	const_iterator Search(std::int8_t Number_) const;
+	iterator Search(std::int8_t Number_)
 	{
 		const auto *const_this=this;
 		return const_cast_iter(const_this->Search(Number_));
 	}
 
 	bool Update(const MComputers &Computers_);
-	bool Timer(__int64 SystemTime_);
+	bool Timer(std::int64_t SystemTime_);
 
 	// Переопределяем функцию сохранения списка в файл
 	bool Save();
@@ -248,7 +249,7 @@ class MStateCl:
 {
 public:
 	// Функции механизма сохранения/загрузки данных
-	virtual unsigned GetDataSize() const override;
+	virtual std::size_t GetDataSize() const override;
 	virtual void *SetData(void *Data_) const override;
 	virtual const void *GetData(const void *Data_, const void *Limit_) override;
 
@@ -257,22 +258,22 @@ private:
 	std::wstring OptPath;		//
 	std::wstring OptValue;		//
 	std::wstring PrgFile;		// Файл для хранения списка программ
-	unsigned AutoLockTime;		// Время отсутствия связи с сервером до автоблокировки
+	std::uint32_t AutoLockTime;	// Время отсутствия связи с сервером до автоблокировки
 
 	mutable std::mutex mtxMain;	// Объект для синхронизации доступа потоков к данным
-    __int64 SystemTime;         // Системное время, используемое при всех расчетах
+	std::int64_t SystemTime;	// Системное время, используемое при всех расчетах
 
-    char Number;                // Номер компьютера
-    unsigned State;             // Состояние компьютера (режимы работы)
-    __int64 StartWorkTime;      // Время запуска компьютера в работу (абсолютное время)
-    short SizeWorkTime;         // На какое время запущен компьютер (в минутах)
-    __int64 StartFineTime;      // Время, когда был применен штраф (абсолютное время)
-    short SizeFineTime;         // Время ожидания в режиме штрафа (в минутах)
-    __int64 StopTimerTime;      // Время остановки отсчета времени (абсолютное время)
-    __int64 LastSyncTime;       // Время последнего поступления данных от админского модуля
-    unsigned Programs;          // Групы программ, разрешенных для запуска
-    unsigned Commands;          // Дополнительные команды для компьютера
-    unsigned Changes;           // Изменения данных для оболочки со времени их последнего запроса
+	std::uint8_t Number;		// Номер компьютера
+	std::uint32_t State;		// Состояние компьютера (режимы работы)
+	std::int64_t StartWorkTime;	// Время запуска компьютера в работу (абсолютное время)
+	std::int16_t SizeWorkTime;	// На какое время запущен компьютер (в минутах)
+	std::int64_t StartFineTime;	// Время, когда был применен штраф (абсолютное время)
+	std::int16_t SizeFineTime;	// Время ожидания в режиме штрафа (в минутах)
+	std::int64_t StopTimerTime;	// Время остановки отсчета времени (абсолютное время)
+	std::int64_t LastSyncTime;	// Время последнего поступления данных от админского модуля
+	std::uint32_t Programs;		// Групы программ, разрешенных для запуска
+	std::uint32_t Commands;		// Дополнительные команды для компьютера
+	std::uint32_t Changes;		// Изменения данных для оболочки со времени их последнего запроса
 
     // Функции проверки окончания времени работы и времени штрафа
     bool ControlWorkTime();
@@ -284,7 +285,7 @@ public:
 	MStatesInfo GetInfo();
 	bool GetOptions(MClOptions &Options_);
     bool GetGames(MGames &Games_);
-    bool Timer(__int64 SystemTime_);
+    bool Timer(std::int64_t SystemTime_);
     void CmdReboot();                       // Нужна ли ?
     void CmdShutdown();
 
@@ -302,7 +303,7 @@ public:
         const std::wstring &OptPath_,
         const std::wstring &OptValue_,
         const std::wstring &PrgFile_,
-        unsigned RegCode_);
+        std::uint32_t RegCode_);
 
 	MStateCl():
 		OptKey(nullptr),

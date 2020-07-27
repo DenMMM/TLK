@@ -28,7 +28,7 @@ protected:
 	{
 	private:
 		std::array <result_type, 32> Ent;
-		mutable size_t EntSel;
+		mutable std::size_t EntSel;
 
 	public:
 		template <typename ent_cont>

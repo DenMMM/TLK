@@ -263,7 +263,7 @@ bool MLog::Open()
 	{
 		--iRecord;		// безопасно, т.к. список явно не пустой
 
-		unsigned char type=iRecord->gTypeID();
+		std::uint8_t type=iRecord->gTypeID();
 		if ( type == MLogRecords::AppLogOut::TypeID ) break;
 		else if ( type == MLogRecords::AppLogIn::TypeID )
 		{
@@ -320,7 +320,7 @@ error:
     return result;
 }
 //---------------------------------------------------------------------------
-unsigned MLog::LastUser() const
+std::uint32_t MLog::LastUser() const
 {
     return Opened? User: 0;
 }
@@ -455,7 +455,7 @@ bool MLog::AddOptions()
     return AddEvent(MLogRecords::mlrOptions);
 }
 //---------------------------------------------------------------------------
-bool MLog::AddLogIn(unsigned UserID_)
+bool MLog::AddLogIn(std::uint32_t UserID_)
 {
     bool result=false;
 
@@ -515,7 +515,7 @@ error:
     return result;
 }
 //---------------------------------------------------------------------------
-bool MLog::AddFine(char Number_, unsigned FineID_, short Time_)
+bool MLog::AddFine(std::int8_t Number_, std::uint32_t FineID_, std::int16_t Time_)
 {
     bool result=false;
 
@@ -539,7 +539,7 @@ error:
     return result;
 }
 //---------------------------------------------------------------------------
-bool MLog::AddExchange(char From_, char To_)
+bool MLog::AddExchange(std::int8_t From_, std::int8_t To_)
 {
     bool result=false;
 
@@ -562,46 +562,46 @@ error:
     return result;
 }
 //---------------------------------------------------------------------------
-bool MLog::AddLock(char Number_, bool Apply_)
+bool MLog::AddLock(std::int8_t Number_, bool Apply_)
 {
 	return AddMode(MLogRecords::mlrLock, Number_, Apply_);
 }
 //---------------------------------------------------------------------------
-bool MLog::AddPause(char Number_, bool Apply_)
+bool MLog::AddPause(std::int8_t Number_, bool Apply_)
 {
 	return AddMode(MLogRecords::mlrPause, Number_, Apply_);
 }
 //---------------------------------------------------------------------------
-bool MLog::AddOpen(char Number_, bool Apply_)
+bool MLog::AddOpen(std::int8_t Number_, bool Apply_)
 {
-    return AddMode(MLogRecords::mlrOpen, Number_, Apply_);
+	return AddMode(MLogRecords::mlrOpen, Number_, Apply_);
 }
 //---------------------------------------------------------------------------
-bool MLog::AddPowerOn(char Number_)
+bool MLog::AddPowerOn(std::int8_t Number_)
 {
-    return true;
+	return true;
 //    return AddCmd(MLogRecords::mlrPowerOn, Number_);   /// отключил, чтобы не засорять лог
 }
 //---------------------------------------------------------------------------
-bool MLog::AddReboot(char Number_)
+bool MLog::AddReboot(std::int8_t Number_)
 {
-    return true;
+	return true;
 //    return AddCmd(MLogRecords::mlrReboot, Number_);
 }
 //---------------------------------------------------------------------------
-bool MLog::AddShutdown(char Number_)
+bool MLog::AddShutdown(std::int8_t Number_)
 {
 	return true;
 //    return AddCmd(MLogRecords::mlrShutdown, Number_);
 }
 //---------------------------------------------------------------------------
-void MLog::SetDefault(const std::wstring &Dir_, unsigned Code_)
+void MLog::SetDefault(const std::wstring &Dir_, std::uint32_t Code_)
 {
     Directory=Dir_;
     Records.SetDefaultFile(Dir_+L"\\CURRENT.TLG",Code_);
 }
 //---------------------------------------------------------------------------
-void MLog::Timer(__int64 SystemTime_)
+void MLog::Timer(std::int64_t SystemTime_)
 {
     SystemTime=SystemTime_;
 }

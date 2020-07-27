@@ -12,7 +12,7 @@ __fastcall TFormLogIn::TFormLogIn(TComponent* Owner)
 {
 }
 //---------------------------------------------------------------------------
-unsigned TFormLogIn::Execute(const MUsers &Users_)
+std::uint32_t TFormLogIn::Execute(const MUsers &Users_)
 {
     ID=0;
 

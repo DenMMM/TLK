@@ -18,7 +18,7 @@ MRandCounter
 std::mutex
 	MSendSrv::mtxSeed;
 //---------------------------------------------------------------------------
-bool MSend::NetInit(unsigned Code_, MAuth *MAC_)
+bool MSend::NetInit(std::uint32_t Code_, MAuth *MAC_)
 {
     WSADATA WSAData;
     NetCode=Code_;
@@ -140,7 +140,7 @@ exit:
 	return false;
 }
 //---------------------------------------------------------------------------
-bool MSend::Snd(char *Data_, unsigned Size_, unsigned Time_)
+bool MSend::Snd(char *Data_, std::size_t Size_, unsigned Time_)
 {
 	MSG Msg;
 	fd_set w_fds, e_fds;
@@ -169,7 +169,7 @@ exit:
     return false;
 }
 //---------------------------------------------------------------------------
-bool MSend::Rcv(char *Data_, unsigned Size_, unsigned Time_)
+bool MSend::Rcv(char *Data_, std::size_t Size_, unsigned Time_)
 {
     MSG Msg;
     fd_set r_fds, e_fds;
@@ -251,22 +251,22 @@ void MSend::rClose()
     rSocket=INVALID_SOCKET;
 }
 //---------------------------------------------------------------------------
-bool MSend::SndHello(unsigned Seed_)
+bool MSend::SndHello(std::uint32_t Seed_)
 {
-    // Заполняем hello-блок со своим random
-    Packet.Hello.Version=SEND_Version;
-    Packet.Hello.Seed=Seed_;
-    // Добавляем MAC и шифруем
-    NetMAC->Calc((char*)&Packet.Hello,
-        sizeof(Packet.Hello)-sizeof(Packet.Hello.MAC),
-        Packet.Hello.MAC,sizeof(Packet.Hello.MAC));
-    BasicEncode((char*)&Packet.Hello,sizeof(Packet.Hello),NetCode);
+	// Заполняем hello-блок со своим random
+	Packet.Hello.Version=SEND_Version;
+	Packet.Hello.Seed=Seed_;
+	// Добавляем MAC и шифруем
+	NetMAC->Calc((char*)&Packet.Hello,
+		sizeof(Packet.Hello)-sizeof(Packet.Hello.MAC),
+		Packet.Hello.MAC,sizeof(Packet.Hello.MAC));
+	BasicEncode((char*)&Packet.Hello,sizeof(Packet.Hello),NetCode);
 
-    // Отправляем клиенту hello
-    return Snd((char*)&Packet.Hello,sizeof(Packet.Hello),3);
+	// Отправляем клиенту hello
+	return Snd((char*)&Packet.Hello,sizeof(Packet.Hello),3);
 }
 //---------------------------------------------------------------------------
-bool MSend::RcvHello(unsigned *Seed_)
+bool MSend::RcvHello(std::uint32_t *Seed_)
 {
     if ( !Rcv((char*)&Packet.Hello,sizeof(Packet.Hello),3) ) goto error;
     BasicDecode((char*)&Packet.Hello,sizeof(Packet.Hello),NetCode);
@@ -283,7 +283,7 @@ error:
     return false;
 }
 //---------------------------------------------------------------------------
-bool MSend::SndRequest(unsigned char Type_, unsigned Seed_, unsigned Size_)
+bool MSend::SndRequest(std::uint8_t Type_, std::uint32_t Seed_, std::size_t Size_)
 {
     // Заполняем блок-информер
     Packet.Request.Type=Type_;
@@ -299,7 +299,7 @@ bool MSend::SndRequest(unsigned char Type_, unsigned Seed_, unsigned Size_)
     return Snd((char*)&Packet.Request,sizeof(Packet.Request),3);
 }
 //---------------------------------------------------------------------------
-bool MSend::RcvRequest(unsigned char *Type_, unsigned Seed_, unsigned *Size_)
+bool MSend::RcvRequest(std::uint8_t *Type_, std::uint32_t Seed_, std::size_t *Size_)
 {
     if ( !Rcv((char*)&Packet.Request,sizeof(Packet.Request),3) ) goto error;
     BasicDecode((char*)&Packet.Request,sizeof(Packet.Request),NetCode);
@@ -318,19 +318,17 @@ error:
 }
 //---------------------------------------------------------------------------
 template <typename obj_type>
-bool MSend::SndObject(obj_type *Obj_, unsigned Type_, unsigned Seed_)
+bool MSend::SndObject(obj_type *Obj_, std::uint8_t Type_, std::uint32_t Seed_)
 {
 	std::vector <char> Data;
-	char *pt;
-	unsigned Size;
 
 	try
 	{
 		// Определяем размер данных и выделяем память под буффер (+ seed,MAC)
-		Size=Obj_->GetAllDataSize()+sizeof(unsigned)+MAC_Size;
+		std::size_t Size=Obj_->GetAllDataSize()+sizeof(decltype(Seed_))+MAC_Size;
 		Data.resize(Size);
 		// Заполняем его
-		pt=static_cast<char*>(MemSet(&Data[0],(unsigned)Seed_));
+		char *pt=static_cast<char*>(MemSet(&Data[0], Seed_));
 		pt=static_cast<char*>(Obj_->SetAllData(pt));
 		// Добавляем MAC и шифруем
 		NetMAC->Calc(&Data[0],pt-&Data[0],pt,&Data[0]+Size-pt);
@@ -348,7 +346,7 @@ error:
 }
 //---------------------------------------------------------------------------
 template <typename obj_type>
-bool MSend::RcvObject(obj_type *Obj_, unsigned Size_, unsigned Seed_)
+bool MSend::RcvObject(obj_type *Obj_, std::size_t Size_, std::uint32_t Seed_)
 {
     std::vector <char> Data;
 
@@ -363,12 +361,12 @@ bool MSend::RcvObject(obj_type *Obj_, unsigned Size_, unsigned Seed_)
         if ( !Rcv(&Data[0],Size_,10) ) goto error;
         BasicDecode(&Data[0],Size_,NetCode);
         // Сверяем seed и MAC
-        if ( (*((unsigned*)&Data[0])!=Seed_)||
+        if ( (*((decltype(Seed_)*)&Data[0])!=Seed_)||
             (!NetMAC->Check(&Data[0],Size_-MAC_Size,
             &Data[0]+(Size_-MAC_Size),MAC_Size)) ) goto error;
 
         // Восстанавливаем объект из принятых данных (за вычетом seed и MAC)
-        if ( !Obj_->GetAllData(&Data[0]+sizeof(unsigned),
+		if ( !Obj_->GetAllData(&Data[0]+sizeof(decltype(Seed_)),
             &Data[0]+(Size_-MAC_Size)) ) goto error;
     }
     catch (std::bad_alloc &e) { goto error; }
@@ -446,11 +444,12 @@ void MSendSrv::ThreadP()
 //---------------------------------------------------------------------------
 void MSendSrv::ThreadSend()
 {
-	unsigned Seed, RmtSeed, Size;
-    unsigned char Type;
+	std::uint32_t Seed, RmtSeed;
+	std::size_t Size;
+    std::uint8_t Type;
 	MComputersItem *pComp;
 
-	for ( size_t i=0; i<Comps->size(); i++ )
+	for ( std::size_t i=0; i<Comps->size(); i++ )
 	{
 		// Создаем сокет для исходящего соединения
 		if ( !Create(true) ) goto next;
@@ -498,8 +497,9 @@ next:
 //---------------------------------------------------------------------------
 void MSendSrv::ThreadGet()
 {
-	unsigned Seed, RmtSeed, Size;
-	unsigned char Type;
+	std::uint32_t Seed, RmtSeed;
+	std::size_t Size;
+	std::uint8_t Type;
 
 	if ( !Create(true) ) goto error;
 	// Устанавливаем соединение
@@ -619,8 +619,9 @@ void MSendSrv::Stop()
 //---------------------------------------------------------------------------
 void MSendCl::ThreadP()
 {
-    unsigned Seed, RmtSeed, Size;
-    unsigned char Type;
+	std::uint32_t Seed, RmtSeed;
+	std::size_t Size;
+	std::uint8_t Type;
 
     // Создаем принимающий (слушающий) сокет
     if ( !Create(false) ) return;

@@ -22,12 +22,12 @@ inline int DComp(type D1_, type D2_)
 	return D1_==D2_? 0: (D1_<D2_? -1: 1);
 }
 //---------------------------------------------------------------------------
-size_t sizeofLine(const std::wstring &Line_)
+inline size_t sizeofLine(const std::wstring &Line_)
 {
 	return (Line_.length()+1)*sizeof(wchar_t);
 }
 
-size_t sizeofLine(const std::string &Line_)
+inline size_t sizeofLine(const std::string &Line_)
 {
 	return (Line_.length()+1)*sizeof(char);
 }
@@ -71,13 +71,13 @@ const void *MemGetLine(const void *Mem__, std::string &Line_,
 const void *MemGetLine(const void *Mem__, std::wstring &Line_,
 	size_t MaxLength_, const void *Limit_);
 
-inline void *MemSetBin(void *Mem_, const void *Line_, unsigned Size_)
+inline void *MemSetBin(void *Mem_, const void *Line_, std::size_t Size_)
 {
     memcpy(Mem_,Line_,Size_);
 	return static_cast<char*>(Mem_)+Size_;
 }
 
-inline const void *MemGetBin(const void *Mem_, void *Line_, unsigned Size_, const void *Limit_)
+inline const void *MemGetBin(const void *Mem_, void *Line_, std::size_t Size_, const void *Limit_)
 {
 	const void *new_limit=
 		static_cast<const char*>(Mem_)+Size_;
@@ -88,7 +88,7 @@ inline const void *MemGetBin(const void *Mem_, void *Line_, unsigned Size_, cons
 	return new_limit;
 }
 
-inline bool MemSlowCmp(const void *Mem1__, const void *Mem2__, size_t Size_)
+inline bool MemSlowCmp(const void *Mem1__, const void *Mem2__, std::size_t Size_)
 {
 	const char *Mem1_=static_cast<const char*>(Mem1__);
 	const char *Mem2_=static_cast<const char*>(Mem2__);
@@ -103,7 +103,7 @@ inline bool MemSlowCmp(const void *Mem1__, const void *Mem2__, size_t Size_)
 	return diff_cnt==0;
 }
 //---------------------------------------------------------------------------
-inline bool SystemTimeToInt64(const SYSTEMTIME& rSystemTime, __int64& rInt64)
+inline bool SystemTimeToInt64(const SYSTEMTIME& rSystemTime, std::int64_t& rInt64)
 {
 	union
 	{
@@ -117,7 +117,7 @@ inline bool SystemTimeToInt64(const SYSTEMTIME& rSystemTime, __int64& rInt64)
 	return true;
 }
 
-inline bool Int64ToSystemTime(const __int64 Int64, SYSTEMTIME& rSystemTime)
+inline bool Int64ToSystemTime(const std::int64_t Int64, SYSTEMTIME& rSystemTime)
 {
 	union
 	{
@@ -131,21 +131,21 @@ inline bool Int64ToSystemTime(const __int64 Int64, SYSTEMTIME& rSystemTime)
 	return ::FileTimeToSystemTime(&FileTime,&rSystemTime);
 }
 
-inline int ExtractHoursMin(const __int64 Int64)
+inline int ExtractHoursMin(const std::int64_t Int64)
 {
 	SYSTEMTIME ssTime;
 	if ( !Int64ToSystemTime(Int64,ssTime) ) return -1;
 	return ssTime.wHour*60+ssTime.wMinute;
 }
 
-inline bool GetLocalTimeInt64(__int64& rInt64)
+inline bool GetLocalTimeInt64(std::int64_t& rInt64)
 {
 	SYSTEMTIME ssTime;
 	::GetLocalTime(&ssTime);
 	return SystemTimeToInt64(ssTime,rInt64);
 }
 
-inline bool SetLocalTimeInt64(const __int64 Int64)
+inline bool SetLocalTimeInt64(const std::int64_t Int64)
 {
 	SYSTEMTIME ssTime;
 	return Int64ToSystemTime(Int64,ssTime)&&
@@ -153,12 +153,12 @@ inline bool SetLocalTimeInt64(const __int64 Int64)
 }
 //---------------------------------------------------------------------------
 extern MTimeRand BasicRand;
-void TimeRand(void *Buff__, size_t Size_);
-bool CngRand(void *Buff_, size_t Size_);
+void TimeRand(void *Buff__, std::size_t Size_);
+bool CngRand(void *Buff_, std::size_t Size_);
 //---------------------------------------------------------------------------
-size_t ByteToHEX(const void *Bytes__, size_t BytesCount_,
-	wchar_t *Line_, size_t LineSize_, wchar_t Delim_=L'\0');
-size_t HEXToByte(const wchar_t *Line_, void *Buff__, size_t BuffSize_);
+size_t ByteToHEX(const void *Bytes__, std::size_t BytesCount_,
+	wchar_t *Line_, std::size_t LineSize_, wchar_t Delim_=L'\0');
+size_t HEXToByte(const wchar_t *Line_, void *Buff__, std::size_t BuffSize_);
 //---------------------------------------------------------------------------
 int ResMessageBox(HWND Owner_, UINT uCaption, UINT uMessage, UINT Type_, DWORD LastErr_=0);
 //---------------------------------------------------------------------------

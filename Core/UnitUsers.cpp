@@ -7,7 +7,7 @@
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
 //---------------------------------------------------------------------------
-unsigned MUsersItem::GetDataSize() const
+std::size_t MUsersItem::GetDataSize() const
 {
 	return
 		sizeofLine(Login)+
@@ -40,9 +40,9 @@ const void *MUsersItem::GetData(const void *Data_, const void *Limit_)
 		? Data_: nullptr;
 }
 //---------------------------------------------------------------------------
-unsigned MUsers::ActiveCount() const
+std::size_t MUsers::ActiveCount() const
 {
-	size_t count=0;
+	std::size_t count=0;
 
 	for ( auto &User: *this )
 	{
