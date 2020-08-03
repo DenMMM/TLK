@@ -1,4 +1,6 @@
 //---------------------------------------------------------------------------
+#include <limits>
+#include <stdexcept>
 #pragma hdrstop
 
 #include "UnitLogRecords.h"
@@ -252,6 +254,13 @@ std::size_t MLogRecords::DataStatesBase::GetDataSize() const
 		sizeof(SystemTime)+
 		sizeof(std::uint32_t);					// —четчик состо€ний
 
+	if ( Items.size() > std::numeric_limits<std::uint32_t>::max() )
+	{
+		throw std::out_of_range(
+			"MLogRecords::DataStatesBase::GetDataSize()\n"
+			"Items.size() превышает max(uint32_t).");
+	}
+
 	Size+=(
 		sizeof(Items[0].Number)+
 		sizeof(Items[0].State)+
@@ -269,8 +278,8 @@ void *MLogRecords::DataStatesBase::SetData(void *Data_) const
 {
 	Data_=MemSet(Data_,SystemTime);
 
-	std::size_t Count=Items.size();         	/// проверить значение
-	Data_=MemSet(Data_, static_cast<std::uint32_t>(Count));
+	auto Count=static_cast<std::uint32_t>(Items.size());
+	Data_=MemSet(Data_, Count);
 
 	for ( const auto &Ld: Items )
 	{
@@ -323,6 +332,13 @@ std::size_t MLogRecords::DataTariffsBase::GetDataSize() const
 		sizeof(SystemTime)+
 		sizeof(std::uint32_t);					// —четчик тарифов
 
+	if ( Items.size() > std::numeric_limits<std::uint32_t>::max() )
+	{
+		throw std::out_of_range(
+			"MLogRecords::DataTariffsBase::GetDataSize()\n"
+			"Items.size() превышает max(uint32_t).");
+	}
+
 	for ( const auto &Ld: Items )
 	{
 		Size+=
@@ -337,8 +353,8 @@ void *MLogRecords::DataTariffsBase::SetData(void *Data_) const
 {
 	Data_=MemSet(Data_,SystemTime);
 
-	std::size_t Count=Items.size();             /// проверить значение
-	Data_=MemSet(Data_, static_cast<std::uint32_t>(Count));
+	auto Count=static_cast<std::uint32_t>(Items.size());
+	Data_=MemSet(Data_, Count);
 
 	for ( const auto &Ld: Items )
 	{
@@ -379,6 +395,13 @@ std::size_t MLogRecords::DataFinesBase::GetDataSize() const
 		sizeof(SystemTime)+
 		sizeof(std::uint32_t);					// —четчик штрафов
 
+	if ( Items.size() > std::numeric_limits<std::uint32_t>::max() )
+	{
+		throw std::out_of_range(
+			"MLogRecords::DataFinesBase::GetDataSize()\n"
+			"Items.size() превышает max(uint32_t).");
+	}
+
 	for ( const auto &Ld: Items )
 	{
 		Size+=
@@ -393,8 +416,8 @@ void *MLogRecords::DataFinesBase::SetData(void *Data_) const
 {
 	Data_=MemSet(Data_,SystemTime);
 
-	std::size_t Count=Items.size();             /// проверить значение
-	Data_=MemSet(Data_, static_cast<std::uint32_t>(Count));
+	auto Count=static_cast<std::uint32_t>(Items.size());
+	Data_=MemSet(Data_, Count);
 
 	for ( const auto &Ld: Items )
 	{
@@ -435,6 +458,13 @@ std::size_t MLogRecords::DataUsersBase::GetDataSize() const
 		sizeof(SystemTime)+
 		sizeof(std::uint32_t);					// —четчик пользователей
 
+	if ( Items.size() > std::numeric_limits<std::uint32_t>::max() )
+	{
+		throw std::out_of_range(
+			"MLogRecords::DataUsersBase::GetDataSize()\n"
+			"Items.size() превышает max(uint32_t).");
+	}
+
 	for ( const auto &Ld: Items )
 	{
 		Size+=
@@ -443,15 +473,15 @@ std::size_t MLogRecords::DataUsersBase::GetDataSize() const
 			sizeofLine(Ld.Name);
 	}
 
-    return Size;
+	return Size;
 }
 
 void *MLogRecords::DataUsersBase::SetData(void *Data_) const
 {
 	Data_=MemSet(Data_,SystemTime);
 
-	std::size_t Count=Items.size();             /// проверить значение
-	Data_=MemSet(Data_, static_cast<std::uint32_t>(Count));
+	auto Count=static_cast<std::uint32_t>(Items.size());
+	Data_=MemSet(Data_, Count);
 
 	for ( const auto &Ld: Items )
 	{
