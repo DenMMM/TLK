@@ -35,7 +35,7 @@ void __fastcall TFormMain::NOpenClick(TObject *Sender)
 	if ( ::GetFileTitle(
 		File->Name.c_str(),
 		file_name,
-		sizeof(file_name))<0 ) return;
+		sizeof(file_name)/sizeof(file_name[0]))<0 ) return;
 
 	TMenuItem *Menu=new TMenuItem(NWindows);
 	Menu->Caption=file_name;

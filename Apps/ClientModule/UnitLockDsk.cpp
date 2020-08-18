@@ -290,7 +290,7 @@ void MLockDsk::UpdCompNum() const
 	// Номер компьютера
 	wchar_t line[]=L"99";
 	swprintf(
-		line, sizeof(line),
+		line, sizeof(line)/sizeof(line[0]),
 		L"%2i",
 		CompNum);
 
@@ -308,7 +308,7 @@ void MLockDsk::UpdSysTime() const
 	{
 		wchar_t line[]=L"--:--";
 		swprintf(
-			line, sizeof(line),
+			line, sizeof(line)/sizeof(line[0]),
 			L"%.2i:%.2i",
 			st.wHour, st.wMinute);
 
@@ -323,10 +323,10 @@ void MLockDsk::UpdWorkTime() const
 	// Сколько осталось работать
 	wchar_t line[]=L"--:--";
 	if ( WorkTime==0 ) swprintf(
-		line,  sizeof(line),
+		line,  sizeof(line)/sizeof(line[0]),
 		L"--:--");
 	else swprintf(
-		line, sizeof(line),
+		line, sizeof(line)/sizeof(line[0]),
 		L"%.2i:%.2i",
 		WorkTime/60, WorkTime%60);
 

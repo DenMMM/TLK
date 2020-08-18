@@ -516,7 +516,8 @@ api_error:
 }
 //---------------------------------------------------------------------------
 template <typename list_type, typename base_type>
-bool MSLList<list_type,base_type>::QueryFrom(HKEY Key_, const std::wstring &SubKey_, const std::wstring &Value_, std::uint32_t Code_)
+bool MSLList<list_type,base_type>::QueryFrom(HKEY Key_, const std::wstring &SubKey_,
+	const std::wstring &Value_, std::uint32_t Code_)
 {
 	HKEY key=nullptr;
 	DWORD size;
@@ -586,7 +587,7 @@ bool MSLList<list_type,base_type>::SaveAsReg(
 	BasicEncode(data.data(),data.size(),Code_);
 	// Конвертируем в HEX
 	std::vector <wchar_t> hex_data;
-	hex_data.resize((data.size()*3+1)*sizeof(wchar_t));
+	hex_data.resize(data.size()*3+1);
 	ByteToHEX(
 		data.data(), data.size(),
 		hex_data.data(), hex_data.size(),

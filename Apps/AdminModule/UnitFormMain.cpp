@@ -790,7 +790,9 @@ void TFormMain::SetListViewComputersLine(TListItem *Item_, MStatesInfo *Info_)
 	{
 		auto iComp=Computers->Search(Info_->Number);
 		Item_->SubItemImages[0]=GetCompColorIcon(&*iComp);
-		swprintf(line, sizeof(line), L"%i", Info_->Number);
+		swprintf(
+			line, sizeof(line)/sizeof(line[0]),
+			L"%i", Info_->Number);
         SubItems->Strings[0]=line;
     }
     // Состояние сети
@@ -829,7 +831,7 @@ void TFormMain::SetListViewComputersLine(TListItem *Item_, MStatesInfo *Info_)
         if ( Info_->State&mcsWork )
         {
 			swprintf(
-				line, sizeof(line),
+				line, sizeof(line)/sizeof(line[0]),
 				L"%i час. %.2i мин.",
 				Info_->WorkTime/60,
 				Info_->WorkTime%60);
@@ -845,7 +847,7 @@ void TFormMain::SetListViewComputersLine(TListItem *Item_, MStatesInfo *Info_)
     if ( Info_->State&mcsWork )
     {
 		swprintf(
-			line, sizeof(line),
+			line, sizeof(line)/sizeof(line[0]),
 			L"%.2i:%.2i",
 			Info_->ToEndWork/60,
 			Info_->ToEndWork%60);
@@ -862,7 +864,7 @@ void TFormMain::SetListViewComputersLine(TListItem *Item_, MStatesInfo *Info_)
         if ( Info_->State&mcsFine )
         {
 			swprintf(
-				line, sizeof(line),
+				line, sizeof(line)/sizeof(line[0]),
 				L"%i мин.",
 				Info_->FineTime);
 			SubItems->Strings[7]=line;
@@ -876,7 +878,7 @@ void TFormMain::SetListViewComputersLine(TListItem *Item_, MStatesInfo *Info_)
 	if ( Info_->State&mcsFine )
 	{
 		swprintf(
-			line, sizeof(line),
+			line, sizeof(line)/sizeof(line[0]),
 			L"%.2i:%.2i",
 			Info_->ToEndFine/60,
 			Info_->ToEndFine%60);

@@ -119,6 +119,16 @@ size_t ByteToHEX(const void *Bytes__, std::size_t BytesCount_,
 		L'8', L'9', L'A', L'B', L'C', L'D', L'E', L'F'};
 	const unsigned char *Bytes_=static_cast<const unsigned char*>(Bytes__);
 
+	// Проверим достаточность размера буфера строки
+	if (
+		((Delim_==L'\0') && (LineSize_<(BytesCount_*2+1))) ||
+		((Delim_!=L'\0') && (LineSize_<(BytesCount_*3))) )
+	{
+		throw std::runtime_error (
+			"ByteToHEX()\n"
+			"Не достаточный размер буфера для HEX-строки.");
+	}
+
 	size_t pin=0, pout=0;
 	if ( Delim_==L'\0' )
 	{
@@ -139,14 +149,6 @@ size_t ByteToHEX(const void *Bytes__, std::size_t BytesCount_,
 			pout+=3;
 			pin++;
 		}
-	}
-
-	// Буфер для строки закончился раньше, чем считали все байты
-	if ( pin!=BytesCount_ )
-	{
-		throw std::runtime_error (
-			"ByteToHEX()\n"
-			"Не достаточный размер буфера для HEX-строки.");
 	}
 
 	// Последний разделитель заменим концом строки
@@ -198,17 +200,19 @@ std::size_t HEXToByte(const wchar_t *Line_, void *Buff__, std::size_t BuffSize_)
 //---------------------------------------------------------------------------
 int ResMessageBox(HWND Owner_, UINT uCaption_, UINT uMessage_, UINT Type_, DWORD LastErr_)
 {
-    wchar_t Caption[128], Message[128+2+128];
-    HINSTANCE HInstance;
-    DWORD Error;
+	wchar_t Caption[128], Message[128+2+128];
+	HINSTANCE HInstance;
+	DWORD Error;
 
-    HInstance=::GetModuleHandle(nullptr);
-    // Загружаем заголовок сообщения
+	HInstance=::GetModuleHandle(nullptr);
+	// Загружаем заголовок сообщения
 	if ( ::LoadString(HInstance, uCaption_, Caption, 128)==0 )
-		swprintf(Caption, sizeof(Caption), L"<< Текст заголовка не найден ! >>");
+		swprintf(Caption, sizeof(Caption)/sizeof(Caption[0]),
+			L"<< Текст заголовка не найден ! >>");
 	// Загружаем сообщение
 	if ( ::LoadString(HInstance,uMessage_,Message,128)==0 )
-		swprintf(Message, sizeof(Caption), L"<< Текст сообщения не найден ! >>");
+		swprintf(Message, sizeof(Message)/sizeof(Message[0]),
+			L"<< Текст сообщения не найден ! >>");
 
     if ( LastErr_!=0 )
     {

@@ -86,11 +86,11 @@ void __fastcall TFormEvents::ListViewEventsSelectItem(TObject *Sender,
     hours=Time/60; min=Time%60;
 	pos=0;
 	if ( hours>0 ) pos=swprintf(
-		line+pos, sizeof(line)-pos,
+		line+pos, sizeof(line)/sizeof(line[0])-pos,
 		L"%.2i час. ",
 		hours);
 	swprintf(
-		line+pos, sizeof(line)-pos,
+		line+pos, sizeof(line)/sizeof(line[0])-pos,
 		L"%.2i мин.",
 		min);
     LabelSelTime->Caption=line;
@@ -344,7 +344,7 @@ void TFormEvents::SetListViewComputersLine(
 	if ( Info_.Changes&mdcNumber )
 	{
 		swprintf(
-			line, sizeof(line),
+			line, sizeof(line)/sizeof(line[0]),
 			L"%i",
 			Info_.Number);
         SubItems->Strings[0]=line;
@@ -615,7 +615,7 @@ void TFormEvents::UpdateListViewEvents()
         // Время события
         if ( Int64ToSystemTime(Begin_->SystemTime, ss_time) )
 			swprintf(
-				line, sizeof(line),
+				line, sizeof(line)/sizeof(line[0]),
 				L"%4d.%02d.%02d - %02d:%02d:%02d",
 				ss_time.wYear, ss_time.wMonth, ss_time.wDay,
 				ss_time.wHour, ss_time.wMinute, ss_time.wSecond);
@@ -676,7 +676,7 @@ void TFormEvents::UpdateListViewEvents()
 				auto iUsr=Users.SrchUUID(
 					static_cast<const MLogRecords::AppLogIn&>(*Begin_).User);
 				swprintf(
-					line, sizeof(line),
+					line, sizeof(line)/sizeof(line[0]),
 					L"Смену начал(а) '%s'",
 					iUsr!=Users.end()? iUsr->Name.c_str(): L"???");
 				Item->SubItems->Add(line);
@@ -725,25 +725,25 @@ void TFormEvents::UpdateListViewEvents()
 
 				Item->SubItems->Add(IntToStr(rcdf.Number));
 				swprintf(
-					line, sizeof(line),
+					line, sizeof(line)/sizeof(line[0]),
 					L"Штраф '%s'",
 					iFn!=Fines.end()? iFn->Descr.c_str(): L"???");
 				Item->SubItems->Add(line);
 				if ( rcdf.Time==(24*60) )
 				{
 					swprintf(
-						line, sizeof(line),
+						line, sizeof(line)/sizeof(line[0]),
 						L"Все время");
 				} else if ( rcdf.Time<0 )
 				{
 					swprintf(
-						line, sizeof(line),
+						line, sizeof(line)/sizeof(line[0]),
 						L"Снято %i мин.",
 						-rcdf.Time);
 				} else
 				{
 					swprintf(
-						line, sizeof(line),
+						line, sizeof(line)/sizeof(line[0]),
 						L"Ожидание %i мин.",
 						rcdf.Time);
 				}
@@ -756,7 +756,7 @@ void TFormEvents::UpdateListViewEvents()
 
 				Item->SubItems->Add(IntToStr(rcde.From));
 				swprintf(
-					line, sizeof(line),
+					line, sizeof(line)/sizeof(line[0]),
 					L"Пересадка на №%i",
 					rcde.To);
 				Item->SubItems->Add(line);

@@ -430,7 +430,9 @@ void TFormClient::CreateGamesTree(const MGames &Games_)
 		{
 			// Если узла верхнего уровня нет, зададим имя по-умолчанию
 			wchar_t str[5+1];
-			swprintf(str, sizeof(str), L"Page%i", i+1);
+			swprintf(
+				str, sizeof(str)/sizeof(str[0]),
+				L"Page%i", i+1);
 			dGame->Name=str;
 		}
 		//

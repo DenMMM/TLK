@@ -166,7 +166,9 @@ void __fastcall TFormComputers::ButtonAddClick(TObject *Sender)
 	comp.Number= selcomp ? selcomp->Number+1 : 1;
 
 	wchar_t Address[MAX_CompAddrLen+1];
-	swprintf(Address, sizeof(Address), L"192.168.1.%i", comp.Number);
+	swprintf(
+		Address, sizeof(Address)/sizeof(Address[0]),
+		L"192.168.1.%i", comp.Number);
 	comp.Address=Address;
 
     // Добавили строку в список и связали с компьютером

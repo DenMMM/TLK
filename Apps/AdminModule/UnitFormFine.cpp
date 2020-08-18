@@ -54,7 +54,9 @@ void __fastcall TFormFine::FormShow(TObject *Sender)
 		else
 		{
 			wchar_t time[8+1];
-			swprintf(time, sizeof(time), L"%.2i мин.)", fine.Time);
+			swprintf(
+				time, sizeof(time)/sizeof(time[0]),
+				L"%.2i мин.)", fine.Time);
 			line+=time;
 		}
 

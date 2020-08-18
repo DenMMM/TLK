@@ -155,20 +155,20 @@ bool MLog::Rename() const
 
     // Путь к файлу
 	name_length=swprintf(
-		file_name, sizeof(file_name),
+		file_name, sizeof(file_name)/sizeof(file_name[0]),
 		L"%s\\", Directory.c_str());
 	// Полная дата создания файла
 	name_length+=swprintf(
-		file_name+name_length, sizeof(file_name)-name_length,
+		file_name+name_length, sizeof(file_name)/sizeof(file_name[0])-name_length,
 		L"%4d.%02d.%02d - ", begin_time.wYear, begin_time.wMonth, begin_time.wDay);
     // Если года отличаются, то добавляем год закрытия файла
     if ( begin_time.wYear!=end_time.wYear )
 		name_length+=swprintf(
-			file_name+name_length, sizeof(file_name)-name_length,
+			file_name+name_length, sizeof(file_name)/sizeof(file_name[0])-name_length,
 			L"%4d.", end_time.wYear);
     // Месяц и число закрытия файла
 	name_length+=swprintf(
-		file_name+name_length, sizeof(file_name)-name_length,
+		file_name+name_length, sizeof(file_name)/sizeof(file_name[0])-name_length,
 		L"%02d.%02d", end_time.wMonth, end_time.wDay);
     // Если файл открыт и закрыт в один день, добавляем метку уникальности
     if ( (begin_time.wYear==end_time.wYear)&&
@@ -176,12 +176,12 @@ bool MLog::Rename() const
         (begin_time.wDay==end_time.wDay) )
     {
 		name_length+=swprintf(
-			file_name+name_length, sizeof(file_name)-name_length,
+			file_name+name_length, sizeof(file_name)/sizeof(file_name[0])-name_length,
 			L" (%03x)", end_time.wMilliseconds);
     }
     // Окончание имени файла
 	swprintf(
-		file_name+name_length, sizeof(file_name)-name_length,
+		file_name+name_length, sizeof(file_name)/sizeof(file_name[0])-name_length,
 		L".TLG");
     // Переименовываем файл
 	if ( !::MoveFile(Records.DefaultFile.c_str(), file_name) ) goto error;

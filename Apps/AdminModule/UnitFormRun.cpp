@@ -238,7 +238,7 @@ void __fastcall TFormRun::ComboBoxTariffClick(TObject *Sender)
 		{
 			case mttFlyPacket:
 				swprintf(
-					line, sizeof(line),
+					line, sizeof(line)/sizeof(line[0]),
 					L"На %i час. %.2i мин.",
 					iTime->SizeTime/60,
 					iTime->SizeTime%60);
@@ -247,7 +247,7 @@ void __fastcall TFormRun::ComboBoxTariffClick(TObject *Sender)
 				int EndTime;
 				EndTime=iTime->EndTime; if ( EndTime>=(24*60) ) EndTime-=24*60;
 				swprintf(
-					line, sizeof(line),
+					line, sizeof(line)/sizeof(line[0]),
 					L"С %i:%.2i до %i:%.2i",
 					iTime->BeginTime/60,
 					iTime->BeginTime%60,
@@ -441,7 +441,7 @@ void TFormRun::SetListViewComputersLine(TListItem *Item_)
 
     Item_->SubItemImages[0]=FormMain->GetCompColorIcon(&*iComputer);
 	swprintf(
-		line, sizeof(line),
+		line, sizeof(line)/sizeof(line[0]),
 		L"%i",
 		RunTime->Number);
 	SubItems->Strings[0]=line;
@@ -464,7 +464,7 @@ void TFormRun::SetListViewComputersLine(TListItem *Item_)
             else icon =-1;
             Item_->SubItemImages[2]=icon;
 			swprintf(
-				line, sizeof(line),
+				line, sizeof(line)/sizeof(line[0]),
 				L"%i час. %.2i мин.",
 				RunTime->WorkTime/60,
 				RunTime->WorkTime%60);

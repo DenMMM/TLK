@@ -209,7 +209,7 @@ void TFormMain::SharedProcess()
         if ( Int64ToSystemTime(SysTime,st) )
         {
 			swprintf(
-				line, sizeof(line),
+				line, sizeof(line)/sizeof(line[0]),
 				L"%.2i:%.2i",
 				st.wHour, st.wMinute);
             LabelSysTime->Caption=line;
@@ -223,7 +223,7 @@ void TFormMain::SharedProcess()
 		wchar_t line[]=L"--:--";
 
 		if ( WorkTime!=0 ) swprintf(
-			line, sizeof(line),
+			line, sizeof(line)/sizeof(line[0]),
 			L"%.2i:%.2i",
 			WorkTime/60, WorkTime%60);
 		LabelWorkTime->Caption=line;

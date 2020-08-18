@@ -18,7 +18,10 @@ void __fastcall TFormAuth::FormShow(TObject *Sender)
 {
     Auth->GetKey(TmpKey,sizeof(TmpKey));
     // Переводим BYTE в HEX-строку
-	ByteToHEX(TmpKey, sizeof(TmpKey), HexBuffer, sizeof(HexBuffer), L' ');
+	ByteToHEX(
+		TmpKey, sizeof(TmpKey),
+		HexBuffer, sizeof(HexBuffer)/sizeof(HexBuffer[0]),
+		L' ');
 	// Подаем на редактирование
     MemoHEX->Lines->SetText(HexBuffer);
 
@@ -106,7 +109,10 @@ void __fastcall TFormAuth::ButtonNewClick(TObject *Sender)
     // Генерируем ключ
 	if ( !CngRand(TmpKey,sizeof(TmpKey)) ) TimeRand(TmpKey,sizeof(TmpKey));
     // Переводим BYTE в HEX-строку
-    ByteToHEX(TmpKey,sizeof(TmpKey),HexBuffer,sizeof(HexBuffer),L' ');
+	ByteToHEX(
+		TmpKey,sizeof(TmpKey),
+		HexBuffer,sizeof(HexBuffer)/sizeof(HexBuffer[0]),
+		L' ');
     // Подаем на редактирование
     MemoHEX->Lines->SetText(HexBuffer);
 }

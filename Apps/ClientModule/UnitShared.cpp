@@ -18,7 +18,10 @@ std::wstring MShared::InhToHEX() const
     // Зашифруем
 	BasicEncode(&Data,sizeof(Data),ENC_Code);	/// смысл есть ?
 	// Сконвертируем в HEX-строку
-	ByteToHEX(&Data, sizeof(Data), hex, sizeof(hex)-1, L'\0');
+	ByteToHEX(
+		&Data, sizeof(Data),
+		hex, sizeof(hex)/sizeof(hex[0]),
+		L'\0');
 
 	return std::wstring(hex);
 }

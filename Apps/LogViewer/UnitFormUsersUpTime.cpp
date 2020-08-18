@@ -53,7 +53,7 @@ bool TFormUsersUpTime::Open(
 		if ( Int64ToSystemTime(Time.BeginTime,ss_time_b) )
 		{
 			swprintf(
-				line, sizeof(line),
+				line, sizeof(line)/sizeof(line[0]),
 				L"%4d.%02d.%02d - %02d:%02d:%02d",
 				ss_time_b.wYear, ss_time_b.wMonth, ss_time_b.wDay,
 				ss_time_b.wHour, ss_time_b.wMinute, ss_time_b.wSecond);
@@ -126,11 +126,11 @@ void __fastcall TFormUsersUpTime::ListViewUpTimesSelectItem(
 	hours=Time/(60*60*10000000i64);
 	min=(Time%(60*60*10000000i64))/(60*10000000i64);
 	pos=0; if ( hours>0 ) pos=swprintf(
-		line+pos, sizeof(line)-pos,
+		line+pos, sizeof(line)/sizeof(line[0])-pos,
 		L"%.2i час. ",
 		hours);
 	swprintf(
-		line+pos, sizeof(line)-pos,
+		line+pos, sizeof(line)/sizeof(line[0])-pos,
 		L"%.2i мин.",
 		min);
     LabelSelTime->Caption=line;
