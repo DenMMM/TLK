@@ -49,7 +49,7 @@ void __fastcall TFormRun::FormShow(TObject *Sender)
 			if ( (iTariff==Tariffs->end())||
 				(!iTariff->CheckForComp(tmptime.Number)) ) continue;
 			// Добавляем тариф в список для использования, если он еще не добавлен
-			if ( UseTariffs.Search(tmptime.TariffID)!=UseTariffs.end() )
+			if ( UseTariffs.Search(tmptime.TariffID)==UseTariffs.end() )
 			{
 				UseTariffs.Add()=iTariff->GetInfo();
 			}
@@ -452,7 +452,12 @@ void TFormRun::SetListViewComputersLine(TListItem *Item_)
 		SubItems->Strings[3]=L"";
 	} else
 	{
-		SubItems->Strings[1]=UseTariffs.Search(RunTime->TariffID)->Name.c_str();
+		auto iT=UseTariffs.Search(RunTime->TariffID);
+		SubItems->Strings[1]=
+			iT==UseTariffs.end()?
+			L"???":		/// throw ?
+			iT->Name.c_str();
+
 		if ( RunTime->Type==mttUndefined )
 		{
 			SubItems->Strings[2]=L"";
