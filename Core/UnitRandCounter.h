@@ -2,6 +2,8 @@
 #ifndef UnitRandCounterH
 #define UnitRandCounterH
 //---------------------------------------------------------------------------
+#include "fasthash.h"
+
 #include "UnitEncode.h"
 //---------------------------------------------------------------------------
 class MRandCounter;
@@ -9,28 +11,28 @@ class MRandCounter;
 class MRandCounter
 {
 private:
-	std::uint32_t Counter;		// Последовательно возрастающий счетчик
-	std::uint32_t Seed;			// Код, которым шифруется его значение
+	std::uint64_t Counter;		// Последовательно возрастающий счетчик
+	std::uint64_t Seed;			// Код, которым шифруется его значение
 
 public:
-	std::uint32_t operator++()
+	std::uint64_t operator++()
 	{
-		std::uint32_t Res=(++Counter);
-		BasicEncode(&Res, sizeof(Res), Seed, 32);
-		return Res;
+		auto Res=(++Counter);
+		// Не криптографический хэш вместо PRNG
+		return fasthash64(&Res, sizeof(Res), Seed); /// А так можно ?
 	}
 
-	std::uint32_t operator++(int)
+	std::uint64_t operator++(int)
 	{
-		std::uint32_t Res=(Counter++);
-		BasicEncode(&Res, sizeof(Res), Seed, 32);
-		return Res;
+		auto Res=(Counter++);
+		return fasthash64(&Res, sizeof(Res), Seed);
 	}
 
 	MRandCounter() = delete;
-	MRandCounter(std::uint32_t Seed_):
-		Counter(0),
-		Seed(Seed_)
+	MRandCounter(
+		std::uint64_t Seed_):
+			Counter(0),
+			Seed(Seed_)
 	{
 	}
 };

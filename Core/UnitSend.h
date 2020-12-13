@@ -24,7 +24,7 @@ class MSend;
 class MSendSrv;
 class MSendCl;
 //---------------------------------------------------------------------------
-#define SEND_Version        0x31    // Версия сетевого интерфейса
+#define SEND_Version        0x32    // Версия сетевого интерфейса
 #define SEND_Port           7005    // Номер порта клиента
 // Ограничения на размер данных в процессе обмена (MSendRequest.Size)
 #define SEND_MinData        (sizeof(std::uint32_t)+MAC_Size)
@@ -170,14 +170,14 @@ class MSendCl;
 struct MSendHello
 {
 	std::uint8_t Version;		// Версия сетевого интерфейса
-	std::uint32_t Seed;			// random сервера/клиента
+	std::uint64_t SessId;		// random сервера/клиента
 	unsigned char MAC[MAC_Size];// MAC пакета
 };
 
 struct MSendRequest
 {
 	std::uint8_t Type;			// Тип запроса
-	std::uint32_t Seed;			// Сеансовый ID (функция от random сервера и клиента)
+	std::uint64_t SessId;		// Сеансовый ID (функция от random сервера и клиента)
 	std::uint32_t Size;			// Размер последующих данных для приема
 	unsigned char MAC[MAC_Size];// MAC пакета
 };
@@ -217,16 +217,16 @@ protected:
     void rClose();          // Закрыть сокет удаленного соединения
 
     // Примитивы протокола
-	bool SndHello(std::uint32_t Seed_);
-	bool RcvHello(std::uint32_t *Seed_);
-	bool SndRequest(std::uint8_t Type_, std::uint32_t Seed_, std::size_t Size_);
-	bool RcvRequest(std::uint8_t *Type_, std::uint32_t Seed_, std::size_t *Size_);
+	bool SndHello(std::uint64_t SessId_);
+	bool RcvHello(std::uint64_t *SessId_);
+	bool SndRequest(std::uint8_t Type_, std::uint64_t SessId_, std::size_t Size_);
+	bool RcvRequest(std::uint8_t *Type_, std::uint64_t SessId_, std::size_t *Size_);
 
 	template <typename obj_type>
-	bool SndObject(obj_type *Obj_, std::uint8_t Type_, std::uint32_t Seed_);
+	bool SndObject(obj_type *Obj_, std::uint8_t Type_, std::uint64_t SessId_);
 
 	template <typename obj_type>
-	bool RcvObject(obj_type *Obj_, std::size_t Size_, std::uint32_t Seed_);
+	bool RcvObject(obj_type *Obj_, std::size_t Size_, std::uint64_t SessId_);
 
     // Операции с потоком отправки/приема
     virtual void ThreadP()=0;
@@ -270,13 +270,13 @@ private:
 	void Event(MComputersItem *Computer_, int Event_);
 
 	// Генерация Seed со стороны сервера
-	static MRandCounter SeedRand;
-	static std::mutex mtxSeed;
+	static MRandCounter SessIdRand;
+	static std::mutex mtxSessId;
 
-	unsigned NextSeed()
+	auto NextSessId()
 	{
-		std::lock_guard <std::mutex> lckObj(mtxSeed);	/// Для MSendSrv излишне
-		return SeedRand++;
+		std::lock_guard <std::mutex> lckObj(mtxSessId);	/// Для MSendSrv излишне
+		return SessIdRand++;
 	}
 
 public:
@@ -313,8 +313,8 @@ private:
     void ThreadP();
 
 	// Генерация Seed со стороны клиента
-	MRandCounter SeedRand;
-	unsigned NextSeed() { return SeedRand++; }
+	MRandCounter SessIdRand;
+	auto NextSessId() { return SessIdRand++; }
 
 public:
 	bool NetInit(MStateCl *State_, std::uint32_t Code_, MAuth *MAC_);
@@ -324,9 +324,24 @@ public:
 
 	MSendCl():
 		State(nullptr),
-		SeedRand(
-			std::chrono::system_clock::
-			now().time_since_epoch().count())
+		SessIdRand(
+			[]() -> std::uint64_t {				/// rand ?
+				std::array <std::uint64_t, 4> rnd_v;
+
+				LARGE_INTEGER cntr;
+				rnd_v[0]=
+					::QueryPerformanceCounter(&cntr)?
+					cntr.QuadPart:
+					::GetTickCount();
+
+				rnd_v[1]=std::chrono::system_clock::
+					now().time_since_epoch().count();
+				rnd_v[2]=CalcHwMacHash();		/// заменить на IP-адрес ?
+				rnd_v[3]=0x4E4C432D444E4553;	// ASCII 'SEND-CLN'
+
+				return fasthash64(&rnd_v, sizeof(rnd_v), 0);
+			}()
+        )
 	{
 	}
 

@@ -13,13 +13,14 @@
 #include "UnitStates.h"
 #include "UnitSyncMsgs.h"
 #include "UnitRandCounter.h"
+#include "fasthash.h"
 //---------------------------------------------------------------------------
 class MSyncStatesItem;
 class MSyncStates;
 class MSync;
 class MSyncCl;
 //---------------------------------------------------------------------------
-#define SYNC_Version        0x31    // Версия сетевого интерфейса
+#define SYNC_Version        0x32    // Версия сетевого интерфейса
 #define SYNC_Port           7005    // Номер порта клиента
 #define SYNC_WaitInterval   3000    // Интервал между сеансами посылки данных (в мсек.)
 #define SYNC_SendInterval   256     // Задержка между посылками пакетов в сеансе (в мсек.)
@@ -28,17 +29,18 @@ class MSyncCl;
 #define SYNC_MaxSize        sizeof(MSyncPData)
 //---------------------------------------------------------------------------
 // Этапы процесса синхронизации
-#define mspNone             0       //
-#define mspWait             1       // Ожидание новых данных/сеанса
-#define mspHello            2       // Отправка своей части сеансового ID - seed
-#define mspSyncData         3       // Отправка данных (сервер)
-#define mspSyncConf         4       // Отправка данных (клиент)
-#define mspMagic            5       // Отправка WOL magic-пакета (сервер)
+#define mspNone				0		//
+#define mspWait				1		// Ожидание новых данных/сеанса
+#define mspHello			2		// Отправка своей части сеансового ID
+#define mspSyncData			3		// Отправка данных (сервер)
+#define mspSyncConf			4		// Отправка данных (клиент)
+#define mspMagic			5		// Отправка WOL magic-пакета (сервер)
 //---------------------------------------------------------------------------
 // Типы пакетов при обмене клиента и сервера (MPacketHeader.Type)
-#define mptHello            1       // hello от сервера клиенту и наоборот
-#define mptSyncData         2       // Пакет с данными для клиента (сервер)
-#define mptSyncConf         3       // Подтверждение о получении данных (клиент)
+#define mptHelloS			1		// hello сервера
+#define mptHelloC			2		// hello клиента
+#define mptSyncData			3		// Пакет с данными для клиента (сервер)
+#define mptSyncConf			4		// Подтверждение о получении данных (клиент)
 //---------------------------------------------------------------------------
 /*
  сервер:mspWait       <>      клиент:mspWait
@@ -50,23 +52,23 @@ class MSyncCl;
  сервер:mspHello      =>      клиент:mspWait
  ===================================================
  MSyncPHello.Header.Version=SYNC_Version;
- MSyncPHello.Header.Type=mptHello;
- MSyncPHello.Header.Seed=random1;
+ MSyncPHello.Header.Type=mptHelloS;
+ MSyncPHello.Header.SessId=random1;
  MSyncPHello.MAC=hmac(MSyncPHello.Header,MAuth);
- encode(MSyncPHello,ENC_Net1);
-                            check:
-                                    Header.Version,
-                                    Header.Type,
-                                    MAC
+ encode(MSyncPHello,ENC_Net);
+							check:
+									Header.Version,
+									Header.Type,
+									MAC
 
  сервер:mspHello      <=      клиент:mspHello
  ===================================================
  MSyncPHello.Header.Version=SYNC_Version;
- MSyncPHello.Header.Type=mptHello;
- MSyncPHello.Header.Seed=random2;
+ MSyncPHello.Header.Type=mptHelloC;
+ MSyncPHello.Header.SessId=random2;
  MSyncPHello.MAC=hmac(MSyncPHello.Header,MAuth);
- encode(MSyncPHello,ENC_Net1);
-    check:
+ encode(MSyncPHello,ENC_Net);
+	check:
             Header.Version,
             Header.Type,
             MAC
@@ -75,27 +77,27 @@ class MSyncCl;
  ===================================================
  MSyncPData.Header.Version=SYNC_Version;
  MSyncPData.Header.Type=mptSyncData;
- MSyncPData.Header.Seed=mix(random1,random2);
+ MSyncPData.Header.SessId=mix(random1,random2);
  MSyncPData.Data...
  MSyncPData.MAC=mac(MSyncPData.Header+MSyncPData.Data,MAuth);
- encode(MSyncPData,ENC_Net1);
-                            check:
-                                    Header.Version,
-                                    Header.Type,
-                                    Header.Seed, (anti-replay)
-                                    MAC
+ encode(MSyncPData,ENC_Net);
+							check:
+									Header.Version,
+									Header.Type,
+									Header.SessId, (anti-replay)
+									MAC
 
  сервер:mspSyncData   <=      клиент:mspSyncConf
  ===================================================
  MSyncPConf.Header.Version=SYNC_Version;
  MSyncPConf.Header.Type=mptSynConf;
- MSyncPConf.Header.Seed=mix(random1,random2);
+ MSyncPConf.Header.SessId=mix(random1,random2);
  MSyncPData.MAC=mac(MSyncPConf.Header,MAuth);
- encode(MSyncPData,ENC_Net1);
-    check:
-            Header.Version,
-            Header.Type,
-            Header.Seed, (anti-replay)
+ encode(MSyncPData,ENC_Net);
+	check:
+			Header.Version,
+			Header.Type,
+			Header.SessId, (anti-replay)
 			MAC
 	attempt:
 			MState::NetSyncExecuted(true);
@@ -119,7 +121,7 @@ private:
 	bool KnownMAC;						// Индикатор наличия известного MAC-адреса
 	unsigned char MAC[MAC_AddrLength];	// MAC-адрес сетевой платы компьютера
 	unsigned Process;					// Состояние процесса синхронизации
-	std::uint32_t Seed;					// ID сеанса
+	std::uint64_t SessId;				// ID сеанса
 	unsigned SendCount;					// Счетчик посланных за сеанс пакетов
 	DWORD LastSendTime;					// Время последней отправки пакета
 
@@ -132,14 +134,14 @@ private:
 	} Packet;							// Пакет, отправляемый клиенту
 	int PacketSize;						// Размер отправляемого пакета
 
-	// Генерация Seed со стороны сервера
-	static MRandCounter SeedRand;
-	static std::mutex mtxSeed;
+	// Генерация session ID со стороны сервера
+	static MRandCounter SessIdRand;
+	static std::mutex mtxSessId;
 
-	std::uint32_t NextSeed()
+	auto NextSessId()
 	{
-		std::lock_guard <std::mutex> lckObj(mtxSeed);	/// Для MSync излишне
-		return SeedRand++;
+		std::lock_guard <std::mutex> lckObj(mtxSessId);	/// Для MSync излишне
+		return SessIdRand++;
 	}
 
 public:
@@ -173,7 +175,7 @@ public:
 		PacketSize(0),
 		SendCount(0),
 		LastSendTime(0),
-		Seed(0)
+		SessId(0)
 	{
 	}
 };
@@ -279,7 +281,7 @@ private:
 	DWORD LastSendTime;		// Время последней отправки пакета
 	unsigned Process;		// Состояние процесса синхронизации
 	unsigned SendCount;		// Счетчик посланных за сеанс пакетов
-	std::uint32_t Seed;		// ID сеанса
+	std::uint64_t SessId;	// ID сеанса
 	std::uint32_t NetCode;	// Код шифрования для сетевого обмена
 	MAuth *NetMAC;			// Аутентификатор сетевых операций
 	MStateCl *State;		// Состояние, с которым ассоциирован сетевой интерфейс
@@ -306,9 +308,9 @@ private:
 	bool Recv(sockaddr_in *From_, char *Packet_, int PacketSize_);
 	bool Send(SOCKET Socket_);
 
-	// Генерация Seed со стороны клиента
-	MRandCounter SeedRand;
-	std::uint32_t NextSeed() { return SeedRand++; }
+	// Генерация session ID со стороны клиента
+	MRandCounter SessIdRand;
+	auto NextSessId() { return SessIdRand++; }
 
 public:
 	bool NetInit(std::uint32_t Code_, MAuth *MAC_);	// Инициализация WinSocket
@@ -326,9 +328,24 @@ public:
 		SendCount(0),
 		LastSendTime(0),
 		NetCode(0),
-		SeedRand(
-			std::chrono::system_clock::
-			now().time_since_epoch().count())
+		SessIdRand(
+			[]() -> std::uint64_t {
+				std::array <std::uint64_t, 4> rnd_v;
+
+				LARGE_INTEGER cntr;
+				rnd_v[0]=
+					::QueryPerformanceCounter(&cntr)?
+					cntr.QuadPart:
+					::GetTickCount();
+
+				rnd_v[1]=std::chrono::system_clock::
+					now().time_since_epoch().count();
+				rnd_v[2]=CalcHwMacHash();
+				rnd_v[3]=0x4E4C432D434E5953;		// ASCII 'SYNC-CLN'
+
+				return fasthash64(&rnd_v, sizeof(rnd_v), 0);
+			}()
+		)
 	{
 	}
 

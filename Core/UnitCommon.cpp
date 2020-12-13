@@ -16,7 +16,7 @@ MTimeRand BasicRand([]() -> std::seed_seq& {
 	static std::seed_seq seq(
 		std::initializer_list<uint_fast32_t>({
 			::GetCurrentProcessId(),
-			CalcHwMacHash()
+			static_cast<uint_fast32_t>(CalcHwMacHash())     /// 64bit -> 32
 		}));
 	return seq;
 }());
@@ -337,14 +337,14 @@ void RegExecList(HKEY hKey_, LPCWSTR SubKey_, HANDLE hToken_)
 	if ( lpEnv!=nullptr ) ::DestroyEnvironmentBlock(lpEnv);
 }
 //---------------------------------------------------------------------------
-uint32_t CalcHwMacHash()
+std::uint64_t CalcHwMacHash()
 {
 	// Запросим таблицу сетевых интерфейсов
 	PMIB_IF_TABLE2 pTable=nullptr;
 	if ( ::GetIfTable2(&pTable)!=NO_ERROR ) return 0;       /// throw ?
 
 	// Посчитаем хэш MAC-адресов
-	uint32_t uHash=0;
+	std::uint64_t uHash=0;
 	for ( ULONG i=0, j=pTable->NumEntries; i<j; ++i )
 	{
 		PMIB_IF_ROW2 pRow=&pTable->Table[i];
@@ -352,10 +352,10 @@ uint32_t CalcHwMacHash()
 		// Учтем только физические интерфейсы
 		if ( !pRow->InterfaceAndOperStatusFlags.HardwareInterface ) continue;
 
-		uHash=fasthash32(
+		uHash=fasthash64(
 			pRow->PhysicalAddress,
 			pRow->PhysicalAddressLength,
-			uHash);
+			uHash);         			/// можно так дополнять хэш ?
 	}
 
 	// Освободим память

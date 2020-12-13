@@ -35,7 +35,7 @@ struct MSyncPHeader
 {
 	std::uint8_t Version;		// Версия сетевого интерфейса
 	std::uint8_t Type;			// Тип пакета
-	std::uint32_t Seed;			// Сеансовый ID (функция от random сервера и клиента)
+	std::uint64_t SessId;		// Сеансовый ID (функция от random сервера и клиента)
 };
 
 struct MSyncPHello

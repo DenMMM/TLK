@@ -169,7 +169,7 @@ bool WinExit(UINT uFlags);
 void RegExecList(HKEY hKey_, LPCWSTR SubKey_, HANDLE hToken_=INVALID_HANDLE_VALUE);
 //---------------------------------------------------------------------------
 // Вычисляет хэш MAC-адресов всех физических сетевых адаптеров
-uint32_t CalcHwMacHash();    		/// uint64_t ?
+std::uint64_t CalcHwMacHash();
 //---------------------------------------------------------------------------
 #endif
 

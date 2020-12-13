@@ -7,6 +7,11 @@
 //#include <Mstcpip.h>
 #include <ntstatus.h>
 #include <iphlpapi.h>
+
+#ifdef _TEST_SYN
+#include <iostream>
+#endif
+
 #pragma hdrstop
 
 #include "UnitSync.h"
@@ -16,12 +21,27 @@
 #pragma package(smart_init)
 //---------------------------------------------------------------------------
 MRandCounter
-	MSyncStatesItem::SeedRand(
-		std::chrono::system_clock::
-		now().time_since_epoch().count());
+	MSyncStatesItem::SessIdRand(
+		[]() -> std::uint64_t {				/// rand ?
+			std::array <std::uint64_t, 4> rnd_v;
+
+			LARGE_INTEGER cntr;
+			rnd_v[0]=
+				::QueryPerformanceCounter(&cntr)?
+				cntr.QuadPart:
+				::GetTickCount();
+
+			rnd_v[1]=std::chrono::system_clock::
+				now().time_since_epoch().count();
+			rnd_v[2]=CalcHwMacHash();		/// заменить на IP-адрес ?
+			rnd_v[3]=0x5652532D434E5953;	// ASCII 'SYNC-SRV'
+
+			return fasthash64(&rnd_v, sizeof(rnd_v), 0);
+		}()
+	);
 
 std::mutex
-	MSyncStatesItem::mtxSeed;
+	MSyncStatesItem::mtxSessId;
 //---------------------------------------------------------------------------
 std::size_t MSyncStatesItem::GetDataSize() const
 {
@@ -128,12 +148,12 @@ bool MSyncStatesItem::Send(SOCKET Socket_, SOCKET SocketBC_, std::uint32_t Code_
 				// Запрашиваем новые данные для синхронизации после обмена hello
 				SyncData=State->NetSyncData();
 				//
-                Seed=NextSeed();
+                SessId=NextSessId();
                 // Заполняем заголовок hello-пакета со своим random
                 Packet.Hello.Header.Version=SYNC_Version;
-                Packet.Hello.Header.Type=mptHello;
-                Packet.Hello.Header.Seed=Seed;
-                // Добавляем MAC
+                Packet.Hello.Header.Type=mptHelloS;
+				Packet.Hello.Header.SessId=SessId;
+				// Добавляем MAC
 				MAC_->Calc(&Packet.Hello,
 					sizeof(Packet.Hello)-sizeof(Packet.Hello.MAC),
 					Packet.Hello.MAC,sizeof(Packet.Hello.MAC));
@@ -141,7 +161,7 @@ bool MSyncStatesItem::Send(SOCKET Socket_, SOCKET SocketBC_, std::uint32_t Code_
 				PacketSize=sizeof(Packet.Hello);
                 BasicEncode(&Packet,PacketSize,Code_);
                 // Включаем отправку, отложив ее на случайное время
-                LastSendTime=::GetTickCount()-Seed%SYNC_SendInterval;
+                LastSendTime=::GetTickCount()-SessId%SYNC_SendInterval;
                 SendCount=0; Process=mspHello;
             } else NeedSave=State->NetEnd();
             break;
@@ -160,81 +180,93 @@ bool MSyncStatesItem::Send(SOCKET Socket_, SOCKET SocketBC_, std::uint32_t Code_
                 // Переходим в режим ожидания новых данных
                 Process=mspWait;
             } else
-            {
+			{
                 // Отправляем пакет
                 ::sendto(Process==mspMagic?SocketBC_:Socket_,
                     (char*)&Packet,PacketSize,0,
-                    (sockaddr*)&Address,sizeof(Address));
-                // Сохраняем время отправки пакета и увеличиваем счетчик
+					(sockaddr*)&Address,sizeof(Address));
+#ifdef _TEST_SYN
+				std::cout << "Srv [" << Process << "]=> Cl\r\n";
+				::Beep(3000,100);
+#endif
+				// Сохраняем время отправки пакета и увеличиваем счетчик
                 LastSendTime=::GetTickCount(); SendCount++;
-            }
-            break;
-        default: break;
-    }
+			}
+			break;
+		default: break;
+	}
 
-    return NeedSave;
+	return NeedSave;
 }
 //---------------------------------------------------------------------------
 bool MSyncStatesItem::Recv(char *Packet_, int PacketSize_, std::uint32_t Code_, MAuth *MAC_)
 {
-    MSyncPHeader *RecvHeader=(MSyncPHeader*)Packet_;
-    bool NeedSave=false;
+	MSyncPHeader *RecvHeader=(MSyncPHeader*)Packet_;
+	bool NeedSave=false;
 
-    if ( Process==mspNone ) goto error;
-    // Проверяем допустимые размеры пакета
-    if ( (PacketSize_<SYNC_MinSize)||
-        (PacketSize_>SYNC_MaxSize) ) goto error;
-    // Расшифровываем его
-    BasicDecode(Packet_,PacketSize_,Code_);
-    // Сверяем версию и MAC
-    if ( (RecvHeader->Version!=SYNC_Version)||
-        (!MAC_->Check(Packet_,PacketSize_-MAC_Size,
-        Packet_+PacketSize_-MAC_Size,MAC_Size)) ) goto error;
+	if ( Process==mspNone ) goto error;
+	// Проверяем допустимые размеры пакета
+	if ( (PacketSize_<SYNC_MinSize)||
+		(PacketSize_>SYNC_MaxSize) ) goto error;
+	// Расшифровываем его
+	BasicDecode(Packet_,PacketSize_,Code_);
+	// Сверяем версию и MAC
+	if ( (RecvHeader->Version!=SYNC_Version)||
+		(!MAC_->Check(Packet_,PacketSize_-MAC_Size,
+		Packet_+PacketSize_-MAC_Size,MAC_Size)) ) goto error;
 
-    // Обрабатываем пакет
-    switch((int)RecvHeader->Type)
-    {
-        case mptHello:
-            // Ждем ли мы этот пакет и верный ли у него размер ?
-            if ( (Process!=mspHello)||
-                (PacketSize_!=sizeof(MSyncPHello)) ) break;
-            // Адрес получателя не трогаем, он заполнен для mspHello
+	// Обрабатываем пакет
+	switch((int)RecvHeader->Type)
+	{
+		case mptHelloC:
+			// Ждем ли мы этот пакет и верный ли у него размер ?
+			if ( (Process!=mspHello)||
+				(PacketSize_!=sizeof(MSyncPHello)) ) break;
+			// Адрес получателя не трогаем, он заполнен для mspHello
 //            memset(&Address,0,sizeof(Address));
 //            Address.sin_family=AF_INET;
 //            Address.sin_port=::htons(SYNC_Port);
 //            Address.sin_addr.s_addr=::inet_addr(IP);
-            // Можем сгенерировать сеансовый ID из своего random и клиента
-            Seed^=RecvHeader->Seed;
-            // Заполняем заголовок пакета
-            Packet.Data.Header.Version=SYNC_Version;
-            Packet.Data.Header.Type=mptSyncData;
-            Packet.Data.Header.Seed=Seed;
-            // Копируем в пакет запрошенные еще на этапе hello данные для синхронизации
-            Packet.Data.Data=SyncData;
-            // Добавляем MAC
-            MAC_->Calc(&Packet.Data,
-                sizeof(Packet.Data)-sizeof(Packet.Data.MAC),
-                Packet.Data.MAC,sizeof(Packet.Data.MAC));
-            // Задаем размер пакета для отправки и шифруем его
-            PacketSize=sizeof(Packet.Data);
-            BasicEncode(&Packet,PacketSize,Code_);
-            //  Включаем отправку
-            LastSendTime=::GetTickCount()-SYNC_SendInterval;
-            SendCount=0; Process=mspSyncData;
-            break;
-        case mptSyncConf:
-            // Ждем ли мы этот пакет, верный ли у него размер и seed ?
-            if ( (Process!=mspSyncData)||
-                (PacketSize_!=sizeof(MSyncPConf))||
-                (RecvHeader->Seed!=Seed) ) break;
-            // Завершаем сетевые операции с компьютером успешно
-            State->NetSyncExecuted(true);
-            NeedSave=State->NetEnd();
-            // Переходим в режим ожидания новых данных
-            Process=mspWait;
-            break;
-        default: break;
-    }
+			// Можем сгенерировать сеансовый ID из своего random и клиента
+			{
+				std::array <decltype(SessId),2> IdV;
+				IdV[0]=SessId;
+				IdV[1]=RecvHeader->SessId;
+				SessId=fasthash64(&IdV,sizeof(IdV),Code_);  /// Тут бы отдельный 'Code_'
+#ifdef _TEST_SYN
+				std::cout << "SessId:\t\t" << SessId << "\r\n";
+#endif
+			}
+			// Заполняем заголовок пакета
+			Packet.Data.Header.Version=SYNC_Version;
+			Packet.Data.Header.Type=mptSyncData;
+			Packet.Data.Header.SessId=SessId;
+			// Копируем в пакет запрошенные еще на этапе hello данные для синхронизации
+			Packet.Data.Data=SyncData;
+			// Добавляем MAC
+			MAC_->Calc(&Packet.Data,
+				sizeof(Packet.Data)-sizeof(Packet.Data.MAC),
+				Packet.Data.MAC,sizeof(Packet.Data.MAC));
+			// Задаем размер пакета для отправки и шифруем его
+			PacketSize=sizeof(Packet.Data);
+			BasicEncode(&Packet,PacketSize,Code_);
+			//  Включаем отправку
+			LastSendTime=::GetTickCount()-SYNC_SendInterval;
+			SendCount=0; Process=mspSyncData;
+			break;
+		case mptSyncConf:
+			// Ждем ли мы этот пакет, верный ли у него размер и seed ?
+			if ( (Process!=mspSyncData)||
+				(PacketSize_!=sizeof(MSyncPConf))||
+				(RecvHeader->SessId!=SessId) ) break;
+			// Завершаем сетевые операции с компьютером успешно
+			State->NetSyncExecuted(true);
+			NeedSave=State->NetEnd();
+			// Переходим в режим ожидания новых данных
+			Process=mspWait;
+			break;
+		default: break;
+	}
 
 error:
     return NeedSave;
@@ -677,146 +709,153 @@ void MSyncCl::ThreadExecute()
             // Читаем данные из сокета
             memset(&FromAddr,0,sizeof(FromAddr)); AddrSize=sizeof(FromAddr);
             RecvSize=::recvfrom(Socket,(char*)&RcvPacket,sizeof(RcvPacket),
-                0,(sockaddr*)&FromAddr,&AddrSize);
-            if ( (RecvSize==0)||(RecvSize==SOCKET_ERROR) ) continue;
-            // Передаем для обработки и отправки ответа
-            NeedSave|=Recv(&FromAddr,(char*)&RcvPacket,RecvSize);
-        }
-        NeedSave|=Send(Socket);
-        // Сохраняем обновленное состояние, если нужно
-        if ( NeedSave )
-        {
-            // Скроем возможные ошибки выделения памяти
-            try { State->Save(); }
-            catch (std::bad_alloc &e) {}
-        }
+				0,(sockaddr*)&FromAddr,&AddrSize);
+			if ( (RecvSize==0)||(RecvSize==SOCKET_ERROR) ) continue;
+			// Передаем для обработки и отправки ответа
+			NeedSave|=Recv(&FromAddr,(char*)&RcvPacket,RecvSize);
+		}
+		NeedSave|=Send(Socket);
+		// Сохраняем обновленное состояние, если нужно
+		if ( NeedSave )
+		{
+			// Скроем возможные ошибки выделения памяти
+			try { State->Save(); }
+			catch (std::bad_alloc &e) {}
+		}
 
 		// Проверяем очередь сообщений
 		if ( IsStopping.load() ) break;
 
-        // Засыпаем, если быстро управились
+		// Засыпаем, если быстро управились
 		if ( (::GetTickCount()-StartCycleTime)<(SYNC_SendInterval/4) )
 		{
 			std::this_thread::sleep_for(
 				std::chrono::milliseconds(SYNC_SendInterval/4));
 		}
-    }
+	}
 }
 //---------------------------------------------------------------------------
 bool MSyncCl::Recv(sockaddr_in *From_, char *Packet_, int PacketSize_)
 {
-    MSyncPHeader *RecvHeader=(MSyncPHeader*)Packet_;
-    bool NeedSave=false;
+	MSyncPHeader *RecvHeader=(MSyncPHeader*)Packet_;
+	bool NeedSave=false;
 
-    if ( Process==mspNone ) goto error;
-    // Если сеанс начат, игнорируем пакеты с других IP
-    if ( (Process!=mspWait)&&
-        (SndAddr.sin_addr.s_addr!=From_->sin_addr.s_addr) ) goto error;
-    // Проверяем допустимые размеры пакета
-    if ( (PacketSize_<SYNC_MinSize)||
-        (PacketSize_>SYNC_MaxSize) ) goto error;
-    // Расшифровываем его
-    BasicDecode(Packet_,PacketSize_,NetCode);
-    // Сверяем версию и MAC
-    if ( (RecvHeader->Version!=SYNC_Version)||
-        (!NetMAC->Check(Packet_,PacketSize_-MAC_Size,
-        Packet_+PacketSize_-MAC_Size,MAC_Size)) ) goto error;
+	if ( Process==mspNone ) goto error;
+	// Если сеанс начат, игнорируем пакеты с других IP
+	if ( (Process!=mspWait)&&
+		(SndAddr.sin_addr.s_addr!=From_->sin_addr.s_addr) ) goto error;
+	// Проверяем допустимые размеры пакета
+	if ( (PacketSize_<SYNC_MinSize)||
+		(PacketSize_>SYNC_MaxSize) ) goto error;
+	// Расшифровываем его
+	BasicDecode(Packet_,PacketSize_,NetCode);
+	// Сверяем версию и MAC
+	if ( (RecvHeader->Version!=SYNC_Version)||
+		(!NetMAC->Check(Packet_,PacketSize_-MAC_Size,
+		Packet_+PacketSize_-MAC_Size,MAC_Size)) ) goto error;
 
-    // Обрабатываем пакет
-    switch((int)RecvHeader->Type)
-    {
-        case mptHello:
-            // Ждем ли мы этот пакет и верный ли у него размер ?
-            if ( (Process!=mspWait)||
-                (PacketSize_!=sizeof(MSyncPHello)) ) break;
-            // Запоминаем адрес сервера, с которым начали обмен
-            SndAddr=*From_;
+	// Обрабатываем пакет
+	switch((int)RecvHeader->Type)
+	{
+		case mptHelloS:
+			// Ждем ли мы этот пакет и верный ли у него размер ?
+			if ( (Process!=mspWait)||
+				(PacketSize_!=sizeof(MSyncPHello)) ) break;
+			// Запоминаем адрес сервера, с которым начали обмен
+			SndAddr=*From_;
 //            memset(&SndAddr,0,sizeof(SndAddr));
 //            SndAddr.sin_family=AF_INET;
 //            SndAddr.sin_port=From_->sin_port;
 //            SndAddr.sin_addr.s_addr=From_->sin_addr.s_addr;
-            // Заполняем заголовок hello-пакета со своим random
-            SndPacket.Hello.Header.Version=SYNC_Version;
-            SndPacket.Hello.Header.Type=mptHello;
-            SndPacket.Hello.Header.Seed=NextSeed();
-            // И сразу генерируем сеансовый ID, т.к. random сервера уже приняли
-			Seed=
-				SndPacket.Hello.Header.Seed^
-				RecvHeader->Seed;
-            // Добавляем к пакету MAC
-            NetMAC->Calc((char*)&SndPacket.Hello,
-                sizeof(SndPacket.Hello)-sizeof(SndPacket.Hello.MAC),
-                SndPacket.Hello.MAC,sizeof(SndPacket.Hello.MAC));
-            // Задаем размер пакета для отправки и шифруем его
-            SndPacketSize=sizeof(SndPacket.Hello);
-            BasicEncode((char*)&SndPacket,SndPacketSize,NetCode);
-            // Включаем отправку
-            LastSendTime=::GetTickCount()-SYNC_SendInterval;
-            SendCount=0; Process=mspHello;
-            break;
-        case mptSyncData:
-            // Ждем ли мы этот пакет и верный ли у него размер ?
-            if ( (Process!=mspHello)||
-                (SendCount==0)||            // защита от replay brute-force 
-                (PacketSize_!=sizeof(MSyncPData))||
-                (RecvHeader->Seed!=Seed) ) break;
-            // Извлекаем новый режим работы клиента, но применим его
-            // только после отправки подтверждения серверу
-            SyncData=((MSyncPData*)Packet_)->Data;
-            // Заполняем пакет c ответом серверу
-            SndPacket.Conf.Header.Version=SYNC_Version;
-            SndPacket.Conf.Header.Type=mptSyncConf;
-            SndPacket.Conf.Header.Seed=Seed;
-            // Добавляем к пакету MAC
-            NetMAC->Calc((char*)&SndPacket.Conf,
-                sizeof(SndPacket.Conf)-sizeof(SndPacket.Conf.MAC),
-                SndPacket.Conf.MAC,sizeof(SndPacket.Conf.MAC));
-            // Задаем размер пакета для отправки и шифруем его
-            SndPacketSize=sizeof(SndPacket.Conf);
-            BasicEncode((char*)&SndPacket,SndPacketSize,NetCode);
-            // Включаем отправку
-            LastSendTime=::GetTickCount()-SYNC_SendInterval;
-            SendCount=0; Process=mspSyncConf;
-            break;
-        default: break;
-    }
+			// Заполняем заголовок hello-пакета со своим random
+			SndPacket.Hello.Header.Version=SYNC_Version;
+			SndPacket.Hello.Header.Type=mptHelloC;
+			SndPacket.Hello.Header.SessId=NextSessId();
+			// И сразу генерируем сеансовый ID, т.к. random сервера уже приняли
+			{
+				std::array <decltype(SessId),2> IdV;
+				IdV[0]=RecvHeader->SessId;
+				IdV[1]=SndPacket.Hello.Header.SessId;
+				SessId=fasthash64(&IdV,sizeof(IdV),NetCode);    /// Тут бы отдельный 'NetCode'
+			}
+			// Добавляем к пакету MAC
+			NetMAC->Calc((char*)&SndPacket.Hello,
+				sizeof(SndPacket.Hello)-sizeof(SndPacket.Hello.MAC),
+				SndPacket.Hello.MAC,sizeof(SndPacket.Hello.MAC));
+			// Задаем размер пакета для отправки и шифруем его
+			SndPacketSize=sizeof(SndPacket.Hello);
+			BasicEncode((char*)&SndPacket,SndPacketSize,NetCode);
+			// Включаем отправку
+			LastSendTime=::GetTickCount()-SYNC_SendInterval;
+			SendCount=0; Process=mspHello;
+			break;
+		case mptSyncData:
+			// Ждем ли мы этот пакет и верный ли у него размер ?
+			if ( (Process!=mspHello)||
+				(SendCount==0)||            // защита от replay brute-force
+				(PacketSize_!=sizeof(MSyncPData))||
+				(RecvHeader->SessId!=SessId) ) break;
+			// Извлекаем новый режим работы клиента, но применим его
+			// только после отправки подтверждения серверу
+			SyncData=((MSyncPData*)Packet_)->Data;
+			// Заполняем пакет c ответом серверу
+			SndPacket.Conf.Header.Version=SYNC_Version;
+			SndPacket.Conf.Header.Type=mptSyncConf;
+			SndPacket.Conf.Header.SessId=SessId;
+			// Добавляем к пакету MAC
+			NetMAC->Calc((char*)&SndPacket.Conf,
+				sizeof(SndPacket.Conf)-sizeof(SndPacket.Conf.MAC),
+				SndPacket.Conf.MAC,sizeof(SndPacket.Conf.MAC));
+			// Задаем размер пакета для отправки и шифруем его
+			SndPacketSize=sizeof(SndPacket.Conf);
+			BasicEncode((char*)&SndPacket,SndPacketSize,NetCode);
+			// Включаем отправку
+			LastSendTime=::GetTickCount()-SYNC_SendInterval;
+			SendCount=0; Process=mspSyncConf;
+			break;
+		default: break;
+	}
 
 error:
-    return NeedSave;
+	return NeedSave;
 }
 //---------------------------------------------------------------------------
 bool MSyncCl::Send(SOCKET Socket_)
 {
-    bool NeedSave=false;
+	bool NeedSave=false;
 
-    switch(Process)
-    {
-        case mspHello:
-        case mspSyncConf:
-            // Проверяем не пора ли отправить следующий пакет
-            if ( (::GetTickCount()-LastSendTime)<SYNC_SendInterval ) break;
-            // Проверяем не отправлено ли заданное количество пакетов
-            if ( SendCount>=SYNC_SendRetryes )
-            {
-                // Применяем новое состояние/выполняем команду (reboot, shutdown),
-                // если данные были получены и клиент отправлял подтверждение серверу
-                if ( Process==mspSyncConf )
-                    NeedSave=State->NewSyncData(SyncData);
-                // Переходим в режим ожидания новых данных
-                Process=mspWait;
-            } else
-            {
-                // Отправляем пакет
-                ::sendto(Socket_,(char*)&SndPacket,SndPacketSize,
-                    0,(sockaddr*)&SndAddr,sizeof(SndAddr));
-                // Сохраняем время отправки пакета и увеличиваем счетчик
-                LastSendTime=::GetTickCount(); SendCount++;
-            }
-            break;
-        default: break;
-    }
+	switch(Process)
+	{
+		case mspHello:
+		case mspSyncConf:
+			// Проверяем не пора ли отправить следующий пакет
+			if ( (::GetTickCount()-LastSendTime)<SYNC_SendInterval ) break;
+			// Проверяем не отправлено ли заданное количество пакетов
+			if ( SendCount>=SYNC_SendRetryes )
+			{
+				// Применяем новое состояние/выполняем команду (reboot, shutdown),
+				// если данные были получены и клиент отправлял подтверждение серверу
+				if ( Process==mspSyncConf )
+					NeedSave=State->NewSyncData(SyncData);
+				// Переходим в режим ожидания новых данных
+				Process=mspWait;
+			} else
+			{
+				// Отправляем пакет
+				::sendto(Socket_,(char*)&SndPacket,SndPacketSize,
+					0,(sockaddr*)&SndAddr,sizeof(SndAddr));
+#ifdef _TEST_SYN
+				std::cout << "Srv <=[" << Process << "] Cl\r\n";
+				::Beep(5000,100);
+#endif
+				// Сохраняем время отправки пакета и увеличиваем счетчик
+				LastSendTime=::GetTickCount(); SendCount++;
+			}
+			break;
+		default: break;
+	}
 
-    return NeedSave;
+	return NeedSave;
 }
 //---------------------------------------------------------------------------
 

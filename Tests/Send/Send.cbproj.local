@@ -1,0 +1,44 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<BorlandProject>
+	<Transactions>
+    <Transaction>1899.12.30 00:00:00.000.526,=D:\MMM\Desktop\TLK_3.12_d3_src\Ext\BrianGladman\SHA\sha2.c</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.541,=D:\MMM\Desktop\TLK_3.12_d3_src\Ext\BrianGladman\SHA\sha1.h</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.697,D:\MMM\Documents\Embarcadero\Studio\Projects\Project1.cbproj=D:\MMM\Desktop\TLK_3.12_d3_src\Tests\Send\Send.cbproj</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.959,=D:\MMM\Desktop\TLK_3.12_d3_src\Ext\BrianGladman\SHA\hmac.h</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.799,=D:\MMM\Desktop\TLK_3.12_d3_src\Core\BCRYPT.a</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.856,=D:\MMM\Documents\Embarcadero\Studio\Projects\Unit1.cpp</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.541,=D:\MMM\Documents\Embarcadero\Studio\Projects\Unit1.cpp</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.288,=D:\MMM\Desktop\TLK_3.12_d3_src\Core\UnitClOptions.cpp</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.099,=D:\MMM\Desktop\TLK_3.12_d3_src\Core\UnitStates.cpp</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.272,=D:\MMM\Desktop\TLK_3.12_d3_src\Core\UnitAuth.cpp</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.673,=D:\MMM\Desktop\TLK_3.12_d3_src\Ext\ZilongTan\fast-hash\fasthash.c</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.606,=D:\MMM\Desktop\TLK_3.12_d3_src\Core\UnitEncode.cpp</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.659,=D:\MMM\Desktop\TLK_3.12_d3_src\Core\BCRYPT.lib</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.622,=D:\MMM\Desktop\TLK_3.12_d3_src\Core\UnitList.cpp</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.288,=D:\MMM\Desktop\TLK_3.12_d3_src\Core\UnitGames.cpp</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.762,=D:\MMM\Desktop\TLK_3.12_d3_src\Ext\BrianGladman\SHA\hmac.c</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.557,=D:\MMM\Desktop\TLK_3.12_d3_src\Ext\BrianGladman\SHA\sha2.h</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.689,=D:\MMM\Desktop\TLK_3.12_d3_src\Ext\ZilongTan\fast-hash\fasthash.h</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.752,=D:\MMM\Desktop\TLK_3.12_d3_src\Core\NTDLL.lib</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.512,=D:\MMM\Documents\Embarcadero\Studio\Projects\Unit1.cpp</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.442,=D:\MMM\Documents\Embarcadero\Studio\Projects\File1.cpp</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.590,=D:\MMM\Desktop\TLK_3.12_d3_src\Core\UnitCommon.cpp</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.510,=D:\MMM\Desktop\TLK_3.12_d3_src\Ext\BrianGladman\SHA\sha1.c</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.439,D:\MMM\Documents\Embarcadero\Studio\Projects\Project1PCH1.h=D:\MMM\Desktop\TLK_3.12_d3_src\Tests\Send\SendPCH1.h</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.543,D:\MMM\Documents\Embarcadero\Studio\Projects\File1.cpp=D:\MMM\Desktop\TLK_3.12_d3_src\Tests\Send\UnitMain.cpp</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.690,=D:\MMM\Desktop\TLK_3.12_d3_src\Core\iphlpapi.lib</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.303,=D:\MMM\Desktop\TLK_3.12_d3_src\Core\UnitSend.cpp</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.639,=D:\MMM\Desktop\TLK_3.12_d3_src\Core\UnitSLList.cpp</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.846,=D:\MMM\Desktop\TLK_3.12_d3_src\Core\NTDLL.a</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.946,=D:\MMM\Documents\Embarcadero\Studio\Projects\Project1PCH1.h</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.477,=D:\MMM\Documents\Embarcadero\Studio\Projects\Project1PCH1.h</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.076,=D:\MMM\Documents\Embarcadero\Studio\Projects\Unit1.cpp</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.423,=D:\MMM\Documents\Embarcadero\Studio\Projects\Unit1.cpp</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.899,=D:\MMM\Documents\Embarcadero\Studio\Projects\Unit1.cpp</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.075,=D:\MMM\Documents\Embarcadero\Studio\Projects\Project1PCH1.h</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.590,=D:\MMM\Documents\Embarcadero\Studio\Projects\Project1PCH1.h</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.826,=D:\MMM\Documents\Embarcadero\Studio\Projects\Project1PCH1.h</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.331,=D:\MMM\Documents\Embarcadero\Studio\Projects\Project1PCH1.h</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.189,=D:\MMM\Documents\Embarcadero\Studio\Projects\Project1PCH1.h</Transaction>
+  </Transactions>
+</BorlandProject>

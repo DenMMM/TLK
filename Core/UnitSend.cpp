@@ -11,12 +11,27 @@
 #pragma package(smart_init)
 //---------------------------------------------------------------------------
 MRandCounter
-	MSendSrv::SeedRand(
-		std::chrono::system_clock::
-		now().time_since_epoch().count());
+	MSendSrv::SessIdRand(
+		[]() -> std::uint64_t {				/// rand ?
+			std::array <std::uint64_t, 4> rnd_v;
+
+			LARGE_INTEGER cntr;
+			rnd_v[0]=
+				::QueryPerformanceCounter(&cntr)?
+				cntr.QuadPart:
+				::GetTickCount();
+
+			rnd_v[1]=std::chrono::system_clock::
+				now().time_since_epoch().count();
+			rnd_v[2]=CalcHwMacHash();		/// заменить на IP-адрес ?
+			rnd_v[3]=0x5652532D444E4553;	// ASCII 'SEND-SRV'
+
+			return fasthash64(&rnd_v, sizeof(rnd_v), 0);
+		}()
+	);
 
 std::mutex
-	MSendSrv::mtxSeed;
+	MSendSrv::mtxSessId;
 //---------------------------------------------------------------------------
 bool MSend::NetInit(std::uint32_t Code_, MAuth *MAC_)
 {
@@ -251,11 +266,11 @@ void MSend::rClose()
     rSocket=INVALID_SOCKET;
 }
 //---------------------------------------------------------------------------
-bool MSend::SndHello(std::uint32_t Seed_)
+bool MSend::SndHello(std::uint64_t SessId_)
 {
 	// Заполняем hello-блок со своим random
 	Packet.Hello.Version=SEND_Version;
-	Packet.Hello.Seed=Seed_;
+	Packet.Hello.SessId=SessId_;
 	// Добавляем MAC и шифруем
 	NetMAC->Calc((char*)&Packet.Hello,
 		sizeof(Packet.Hello)-sizeof(Packet.Hello.MAC),
@@ -266,7 +281,7 @@ bool MSend::SndHello(std::uint32_t Seed_)
 	return Snd((char*)&Packet.Hello,sizeof(Packet.Hello),3);
 }
 //---------------------------------------------------------------------------
-bool MSend::RcvHello(std::uint32_t *Seed_)
+bool MSend::RcvHello(std::uint64_t *SessId_)
 {
     if ( !Rcv((char*)&Packet.Hello,sizeof(Packet.Hello),3) ) goto error;
     BasicDecode((char*)&Packet.Hello,sizeof(Packet.Hello),NetCode);
@@ -276,18 +291,18 @@ bool MSend::RcvHello(std::uint32_t *Seed_)
         sizeof(Packet.Hello)-sizeof(Packet.Hello.MAC),
         Packet.Hello.MAC,sizeof(Packet.Hello.MAC))) ) goto error;
     // Возвращаем результат
-    *Seed_=Packet.Hello.Seed;
+    *SessId_=Packet.Hello.SessId;
 
     return true;
 error:
     return false;
 }
 //---------------------------------------------------------------------------
-bool MSend::SndRequest(std::uint8_t Type_, std::uint32_t Seed_, std::size_t Size_)
+bool MSend::SndRequest(std::uint8_t Type_, std::uint64_t SessId_, std::size_t Size_)
 {
     // Заполняем блок-информер
     Packet.Request.Type=Type_;
-    Packet.Request.Seed=Seed_;
+    Packet.Request.SessId=SessId_;
     Packet.Request.Size=Size_;
     // Добавляем к блоку MAC и шифруем его
     NetMAC->Calc((char*)&Packet.Request,
@@ -299,12 +314,12 @@ bool MSend::SndRequest(std::uint8_t Type_, std::uint32_t Seed_, std::size_t Size
     return Snd((char*)&Packet.Request,sizeof(Packet.Request),3);
 }
 //---------------------------------------------------------------------------
-bool MSend::RcvRequest(std::uint8_t *Type_, std::uint32_t Seed_, std::size_t *Size_)
+bool MSend::RcvRequest(std::uint8_t *Type_, std::uint64_t SessId_, std::size_t *Size_)
 {
     if ( !Rcv((char*)&Packet.Request,sizeof(Packet.Request),3) ) goto error;
     BasicDecode((char*)&Packet.Request,sizeof(Packet.Request),NetCode);
     // Сверяем seed и MAC
-    if ( (Packet.Request.Seed!=Seed_)||
+    if ( (Packet.Request.SessId!=SessId_)||
         (!NetMAC->Check((char*)&Packet.Request,
         sizeof(Packet.Request)-sizeof(Packet.Request.MAC),
         Packet.Request.MAC,sizeof(Packet.Request.MAC))) ) goto error;
@@ -318,24 +333,24 @@ error:
 }
 //---------------------------------------------------------------------------
 template <typename obj_type>
-bool MSend::SndObject(obj_type *Obj_, std::uint8_t Type_, std::uint32_t Seed_)
+bool MSend::SndObject(obj_type *Obj_, std::uint8_t Type_, std::uint64_t SessId_)
 {
 	std::vector <char> Data;
 
 	try
 	{
 		// Определяем размер данных и выделяем память под буффер (+ seed,MAC)
-		std::size_t Size=Obj_->GetAllDataSize()+sizeof(decltype(Seed_))+MAC_Size;
+		std::size_t Size=Obj_->GetAllDataSize()+sizeof(decltype(SessId_))+MAC_Size;
 		Data.resize(Size);
 		// Заполняем его
-		char *pt=static_cast<char*>(MemSet(&Data[0], Seed_));
+		char *pt=static_cast<char*>(MemSet(&Data[0], SessId_));
 		pt=static_cast<char*>(Obj_->SetAllData(pt));
 		// Добавляем MAC и шифруем
 		NetMAC->Calc(&Data[0],pt-&Data[0],pt,&Data[0]+Size-pt);
 		BasicEncode(&Data[0],Size,NetCode);
 
 		// Отправляем клиенту информер и данные
-		if ( (!SndRequest(Type_,Seed_,Size))||
+		if ( (!SndRequest(Type_,SessId_,Size))||
 			(!Snd(&Data[0],Size,10)) ) goto error;
 	}
 	catch (std::bad_alloc &e) { goto error; }
@@ -346,7 +361,7 @@ error:
 }
 //---------------------------------------------------------------------------
 template <typename obj_type>
-bool MSend::RcvObject(obj_type *Obj_, std::size_t Size_, std::uint32_t Seed_)
+bool MSend::RcvObject(obj_type *Obj_, std::size_t Size_, std::uint64_t SessId_)
 {
     std::vector <char> Data;
 
@@ -361,12 +376,12 @@ bool MSend::RcvObject(obj_type *Obj_, std::size_t Size_, std::uint32_t Seed_)
         if ( !Rcv(&Data[0],Size_,10) ) goto error;
         BasicDecode(&Data[0],Size_,NetCode);
         // Сверяем seed и MAC
-        if ( (*((decltype(Seed_)*)&Data[0])!=Seed_)||
+        if ( (*((decltype(SessId_)*)&Data[0])!=SessId_)||
             (!NetMAC->Check(&Data[0],Size_-MAC_Size,
             &Data[0]+(Size_-MAC_Size),MAC_Size)) ) goto error;
 
         // Восстанавливаем объект из принятых данных (за вычетом seed и MAC)
-		if ( !Obj_->GetAllData(&Data[0]+sizeof(decltype(Seed_)),
+		if ( !Obj_->GetAllData(&Data[0]+sizeof(decltype(SessId_)),
             &Data[0]+(Size_-MAC_Size)) ) goto error;
     }
     catch (std::bad_alloc &e) { goto error; }
@@ -444,7 +459,7 @@ void MSendSrv::ThreadP()
 //---------------------------------------------------------------------------
 void MSendSrv::ThreadSend()
 {
-	std::uint32_t Seed, RmtSeed;
+	std::uint64_t SessId, RmtSessId;
 	std::size_t Size;
     std::uint8_t Type;
 	MComputersItem *pComp;
@@ -460,20 +475,27 @@ void MSendSrv::ThreadSend()
 		Event(pComp,mseSending);
 
 		// Выполнем обмен hello и генерируем ID сеанса
-		Seed=NextSeed();
-		if ( (!SndHello(Seed))||
-			(!RcvHello(&RmtSeed)) ) { Event(pComp,mseProtError); goto next; }
-		Seed^=RmtSeed;
+		SessId=NextSessId();
+		if ( (!SndHello(SessId))||
+			(!RcvHello(&RmtSessId)) ) { Event(pComp,mseProtError); goto next; }
+
+		// Можем сгенерировать сеансовый ID из своего random и клиента
+		{
+			std::array <decltype(SessId),2> IdV;
+			IdV[0]=SessId;
+			IdV[1]=RmtSessId;
+			SessId=fasthash64(&IdV,sizeof(IdV),0);	/// Нужно использовать Hash-IV
+		}
 
 		// Отправляем блок-информер и данные
 		switch(Mode)
 		{
 			case mssSendGames:
-				if ( !SndObject(ObjGames,mstSendGames,Seed) ) {
+				if ( !SndObject(ObjGames,mstSendGames,SessId) ) {
 					Event(pComp,mseProtError); goto next; }
 				break;
 			case mssSendConfig:
-				if ( !SndObject(ObjOptions,mstSendConfig,Seed) ) {
+				if ( !SndObject(ObjOptions,mstSendConfig,SessId) ) {
 					Event(pComp,mseProtError); goto next; }
 				break;
 			default:
@@ -481,7 +503,7 @@ void MSendSrv::ThreadSend()
 		}
 
 		// Принимаем подтверждение
-		if ( !RcvRequest(&Type,Seed,&Size) ) { Event(pComp,mseProtError); goto next; }
+		if ( !RcvRequest(&Type,SessId,&Size) ) { Event(pComp,mseProtError); goto next; }
 		if ( (Type!=mstAccept)||(Size!=0) ) { Event(pComp,mseProtError); goto next; }
 
 		// Завершаем соединение
@@ -497,7 +519,7 @@ next:
 //---------------------------------------------------------------------------
 void MSendSrv::ThreadGet()
 {
-	std::uint32_t Seed, RmtSeed;
+	std::uint64_t SessId, RmtSessId;
 	std::size_t Size;
 	std::uint8_t Type;
 
@@ -508,10 +530,17 @@ void MSendSrv::ThreadGet()
 	Event(Comp,mseReceiving);
 
 	// Выполнем обмен hello и генерируем ID сеанса
-	Seed=NextSeed();
-	if ( (!SndHello(Seed))||
-		(!RcvHello(&RmtSeed)) ) { Event(Comp,mseProtError); goto error; }
-	Seed^=RmtSeed;
+	SessId=NextSessId();
+	if ( (!SndHello(SessId))||
+		(!RcvHello(&RmtSessId)) ) { Event(Comp,mseProtError); goto error; }
+
+	// Можем сгенерировать сеансовый ID из своего random и клиента
+	{
+		std::array <decltype(SessId),2> IdV;
+		IdV[0]=SessId;
+		IdV[1]=RmtSessId;
+		SessId=fasthash64(&IdV,sizeof(IdV),0);	/// Нужно использовать Hash-IV
+	}
 
 	// Отправляем запрос на данные
 	switch(Mode)
@@ -520,19 +549,19 @@ void MSendSrv::ThreadGet()
 		case mssGetConfig:  Type=mstGetConfig; break;
 		default: goto error;
 	}
-	if ( !SndRequest(Type,Seed,0) ) { Event(Comp,mseProtError); goto error; }
+	if ( !SndRequest(Type,SessId,0) ) { Event(Comp,mseProtError); goto error; }
 
 	// Принимаем ответ и данные
-	if ( (!RcvRequest(&Type,Seed,&Size))||
+	if ( (!RcvRequest(&Type,SessId,&Size))||
 		(Type!=mstAccept) ) { Event(Comp,mseProtError); goto error; }
 	switch(Mode)
 	{
 		case mssGetGames:
-			if ( !RcvObject(ObjGames,Size,Seed) ) {
+			if ( !RcvObject(ObjGames,Size,SessId) ) {
 				Event(Comp,mseProtError); goto error; }
 			break;
 		case mssGetConfig:
-			if ( !RcvObject(ObjOptions,Size,Seed) ) {
+			if ( !RcvObject(ObjOptions,Size,SessId) ) {
 				Event(Comp,mseProtError); goto error; }
 			break;
 		default:
@@ -619,48 +648,53 @@ void MSendSrv::Stop()
 //---------------------------------------------------------------------------
 void MSendCl::ThreadP()
 {
-	std::uint32_t Seed, RmtSeed;
+	std::uint64_t SessId, RmtSessId;
 	std::size_t Size;
 	std::uint8_t Type;
 
-    // Создаем принимающий (слушающий) сокет
-    if ( !Create(false) ) return;
-    // Обрабатываем поступающие соединения
-    while(Listen())
-    {
-        // Принимаем соединение
-        if ( !Accept() ) continue;
+	// Создаем принимающий (слушающий) сокет
+	if ( !Create(false) ) return;
+	// Обрабатываем поступающие соединения
+	while(Listen())
+	{
+		// Принимаем соединение
+		if ( !Accept() ) continue;
 
-        // Принимаем hello и random сервера
-        if ( !RcvHello(&RmtSeed) ) goto next;
-        // Отправляем свой
-        Seed=NextSeed();
-        if ( !SndHello(Seed) ) goto next;
-        // Формируем сеансовый ID и принимаем запрос
-		Seed^=RmtSeed;
-		if ( !RcvRequest(&Type,Seed,&Size) ) goto next;
+		// Принимаем hello и random сервера
+		if ( !RcvHello(&RmtSessId) ) goto next;
+		// Отправляем свой
+		SessId=NextSessId();
+		if ( !SndHello(SessId) ) goto next;
+		// Формируем сеансовый ID и принимаем запрос
+		{
+			std::array <decltype(SessId),2> IdV;
+			IdV[0]=RmtSessId;
+			IdV[1]=SessId;
+			SessId=fasthash64(&IdV,sizeof(IdV),0);	/// Нужно использовать Hash-IV
+		}
+		if ( !RcvRequest(&Type,SessId,&Size) ) goto next;
 
         // Обрабатываем запрос
         switch(Type)
         {
             case mstSendGames:
-                if ( (!RcvObject(&Games,Size,Seed))||
+				if ( (!RcvObject(&Games,Size,SessId))||
 					(!State->NewGames(Games))||
-					(!SndRequest(mstAccept,Seed,0)) ) goto next;
+					(!SndRequest(mstAccept,SessId,0)) ) goto next;
 				break;
 			case mstSendConfig:
-				if ( (!RcvObject(&Options,Size,Seed))||
-                    (!State->NewOptions(Options))||
-                    (!SndRequest(mstAccept,Seed,0)) ) goto next;
-                break;
-            case mstGetGames:
+				if ( (!RcvObject(&Options,Size,SessId))||
+					(!State->NewOptions(Options))||
+					(!SndRequest(mstAccept,SessId,0)) ) goto next;
+				break;
+			case mstGetGames:
 				if ( (!State->GetGames(Games))||
-                    (!SndObject(&Games,mstAccept,Seed)) ) goto next;
-                break;
-            case mstGetConfig:
-                if ( (!State->GetOptions(Options))||
-                    (!SndObject(&Options,mstAccept,Seed)) ) goto next;
-                break;
+					(!SndObject(&Games,mstAccept,SessId)) ) goto next;
+				break;
+			case mstGetConfig:
+				if ( (!State->GetOptions(Options))||
+					(!SndObject(&Options,mstAccept,SessId)) ) goto next;
+				break;
             default: goto next;
         }
 
