@@ -1,4 +1,4 @@
-//---------------------------------------------------------------------------
+ï»¿//---------------------------------------------------------------------------
 #include <vcl.h>
 #pragma hdrstop
 
@@ -34,7 +34,7 @@ void __fastcall TFormOpenConfig::FormShow(TObject *Sender)
     EditPassword->MaxLength=MAX_OptPassLen;
 	EditPassword->PasswordChar=PASS_Char;
 
-	// Äîáàâèì ýíòðîïèè
+	// Ð”Ð¾Ð±Ð°Ð²Ð¸Ð¼ ÑÐ½Ñ‚Ñ€Ð¾Ð¿Ð¸Ð¸
 	BasicRand.event();
 }
 //---------------------------------------------------------------------------
@@ -42,7 +42,7 @@ void __fastcall TFormOpenConfig::FormCloseQuery(TObject *Sender,
       bool &CanClose)
 {
     if ( ModalResult!=mrOk ) return;
-    // Ïðîâåðÿåì ïàðîëü
+    // ÐŸÑ€Ð¾Ð²ÐµÑ€ÑÐµÐ¼ Ð¿Ð°Ñ€Ð¾Ð»ÑŒ
     if ( !Options->Pass.Check(EditPassword->Text.c_str()) )
         { ActiveControl=EditPassword; CanClose=false; }
     return;

@@ -1,4 +1,4 @@
-//---------------------------------------------------------------------------
+п»ї//---------------------------------------------------------------------------
 #ifndef UnitFormMainH
 #define UnitFormMainH
 //---------------------------------------------------------------------------
@@ -24,10 +24,10 @@
 #include "UnitSync.h"
 #include "UnitLog.h"
 //---------------------------------------------------------------------------
-// Какие компьютеры отображать в основном окне
-#define mcfAll                  1       // Все компьютеры
-#define mcfFree                 2       // Свободные и скоро освобождающиеся
-#define mcfService              3       // Открытые для обслуживания
+// РљР°РєРёРµ РєРѕРјРїСЊСЋС‚РµСЂС‹ РѕС‚РѕР±СЂР°Р¶Р°С‚СЊ РІ РѕСЃРЅРѕРІРЅРѕРј РѕРєРЅРµ
+#define mcfAll                  1       // Р’СЃРµ РєРѕРјРїСЊСЋС‚РµСЂС‹
+#define mcfFree                 2       // РЎРІРѕР±РѕРґРЅС‹Рµ Рё СЃРєРѕСЂРѕ РѕСЃРІРѕР±РѕР¶РґР°СЋС‰РёРµСЃСЏ
+#define mcfService              3       // РћС‚РєСЂС‹С‚С‹Рµ РґР»СЏ РѕР±СЃР»СѓР¶РёРІР°РЅРёСЏ
 //---------------------------------------------------------------------------
 class TFormMain : public TForm
 {
@@ -152,12 +152,12 @@ __published:	// IDE-managed Components
     void __fastcall NOptionsPasswordClick(TObject *Sender);
     void __fastcall TimerNetTimer(TObject *Sender);
 private:	// User declarations
-    bool EnableConfig;          // Настройка модуля
-//    bool EnableLogReSet;        // Ручное заведение нового файла лога
-//    bool EnableCompCmd;         // Команды для компьютеров
+    bool EnableConfig;          // РќР°СЃС‚СЂРѕР№РєР° РјРѕРґСѓР»СЏ
+//    bool EnableLogReSet;        // Р СѓС‡РЅРѕРµ Р·Р°РІРµРґРµРЅРёРµ РЅРѕРІРѕРіРѕ С„Р°Р№Р»Р° Р»РѕРіР°
+//    bool EnableCompCmd;         // РљРѕРјР°РЅРґС‹ РґР»СЏ РєРѕРјРїСЊСЋС‚РµСЂРѕРІ
 //    bool EnableCommon;        ///
     bool ConfigMode;
-    int Filter;                 // Режим фильтрации показываемых в списке компьютеров
+    int Filter;                 // Р РµР¶РёРј С„РёР»СЊС‚СЂР°С†РёРё РїРѕРєР°Р·С‹РІР°РµРјС‹С… РІ СЃРїРёСЃРєРµ РєРѕРјРїСЊСЋС‚РµСЂРѕРІ
     bool CheckFilter(MStatesInfo *Info_, int FreeTime_);
     void SetListViewComputersLine(TListItem *Item_, MStatesInfo *Info_);
 public:		// User declarations

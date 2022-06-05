@@ -1,4 +1,4 @@
-//---------------------------------------------------------------------------
+п»ї//---------------------------------------------------------------------------
 #include <stdio.h>
 #include <memory>
 #include <vector>
@@ -59,14 +59,14 @@ VOID WINAPI ServiceMain(DWORD dwArgc, LPTSTR *lpszArgv)
     SERVICE_STATUS service_status;
 	std::unique_ptr <MSvcProcess> Svc;
 
-    // Берем идентификатор потока для его использования обработчиком запросов от SCM
+    // Р‘РµСЂРµРј РёРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ РїРѕС‚РѕРєР° РґР»СЏ РµРіРѕ РёСЃРїРѕР»СЊР·РѕРІР°РЅРёСЏ РѕР±СЂР°Р±РѕС‚С‡РёРєРѕРј Р·Р°РїСЂРѕСЃРѕРІ РѕС‚ SCM
     ServiceThreadID=::GetCurrentThreadId();
-    // Создаем очередь сообщений для потока
+    // РЎРѕР·РґР°РµРј РѕС‡РµСЂРµРґСЊ СЃРѕРѕР±С‰РµРЅРёР№ РґР»СЏ РїРѕС‚РѕРєР°
     ::PeekMessage(nullptr,nullptr,0,0,PM_NOREMOVE);
-    // Регистрируем обработчик запросов от SCM к службе
+    // Р РµРіРёСЃС‚СЂРёСЂСѓРµРј РѕР±СЂР°Р±РѕС‚С‡РёРє Р·Р°РїСЂРѕСЃРѕРІ РѕС‚ SCM Рє СЃР»СѓР¶Р±Рµ
     service_status_handle=::RegisterServiceCtrlHandlerEx(SVC_Name, &HandlerEx, nullptr);
 
-    // Информируем SCM о том, что идет запуск службы
+    // РРЅС„РѕСЂРјРёСЂСѓРµРј SCM Рѕ С‚РѕРј, С‡С‚Рѕ РёРґРµС‚ Р·Р°РїСѓСЃРє СЃР»СѓР¶Р±С‹
     service_status.dwServiceType=SERVICE_WIN32_OWN_PROCESS;
     service_status.dwCurrentState=SERVICE_START_PENDING;
     service_status.dwControlsAccepted=
@@ -84,7 +84,7 @@ VOID WINAPI ServiceMain(DWORD dwArgc, LPTSTR *lpszArgv)
 
         if ( Svc->OnStart() )
         {
-            // Информируем SCM об успешном запуске службы
+            // РРЅС„РѕСЂРјРёСЂСѓРµРј SCM РѕР± СѓСЃРїРµС€РЅРѕРј Р·Р°РїСѓСЃРєРµ СЃР»СѓР¶Р±С‹
             service_status.dwCurrentState=SERVICE_RUNNING;
             service_status.dwCheckPoint=0;
             service_status.dwWaitHint=0;
@@ -100,7 +100,7 @@ VOID WINAPI ServiceMain(DWORD dwArgc, LPTSTR *lpszArgv)
     catch (std::exception &e)
     {
 		::MessageBoxA(nullptr, e.what(),
-            "TLK - ошибка",MB_SERVICE_NOTIFICATION);
+            "TLK - РѕС€РёР±РєР°",MB_SERVICE_NOTIFICATION);
     }
 
     service_status.dwCurrentState=SERVICE_STOP_PENDING;
@@ -112,7 +112,7 @@ VOID WINAPI ServiceMain(DWORD dwArgc, LPTSTR *lpszArgv)
 
     Svc->OnStop();
 
-    // Информируем SCM об успешном останове службы
+    // РРЅС„РѕСЂРјРёСЂСѓРµРј SCM РѕР± СѓСЃРїРµС€РЅРѕРј РѕСЃС‚Р°РЅРѕРІРµ СЃР»СѓР¶Р±С‹
     service_status.dwCurrentState=SERVICE_STOPPED;
     service_status.dwWin32ExitCode=NO_ERROR;
     service_status.dwServiceSpecificExitCode=0;
@@ -132,7 +132,7 @@ bool MSvcProcess::CheckUser(HANDLE hUser_, const wchar_t *Login_)
     DWORD dwDomainNameSize;
     SID_NAME_USE SidNameUse;
 
-    // Выделяем память для токена пользователя
+    // Р’С‹РґРµР»СЏРµРј РїР°РјСЏС‚СЊ РґР»СЏ С‚РѕРєРµРЅР° РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ
     dwTokenSize=0;
     if ( (!::GetTokenInformation(
 		hUser_, TokenUser, nullptr,
@@ -142,12 +142,12 @@ bool MSvcProcess::CheckUser(HANDLE hUser_, const wchar_t *Login_)
     vUserToken.resize(dwTokenSize);
 	pUserToken=(PTOKEN_USER)vUserToken.data();
 
-    // Запрашиваем его в буфер
+    // Р—Р°РїСЂР°С€РёРІР°РµРј РµРіРѕ РІ Р±СѓС„РµСЂ
     if ( !::GetTokenInformation(
         hUser_,TokenUser,pUserToken,
         dwTokenSize,&dwTokenSize) ) goto error;
 
-    // Выделяем память для логина пользователя и имени домена
+    // Р’С‹РґРµР»СЏРµРј РїР°РјСЏС‚СЊ РґР»СЏ Р»РѕРіРёРЅР° РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ Рё РёРјРµРЅРё РґРѕРјРµРЅР°
     dwUserNameSize=0;
     dwDomainNameSize=0;
 	if ( (!::LookupAccountSid(
@@ -160,13 +160,13 @@ bool MSvcProcess::CheckUser(HANDLE hUser_, const wchar_t *Login_)
     vUserName.resize(dwUserNameSize);
     vDomainName.resize(dwDomainNameSize);
     
-    // Запрашиваем логин и пароль
+    // Р—Р°РїСЂР°С€РёРІР°РµРј Р»РѕРіРёРЅ Рё РїР°СЂРѕР»СЊ
 	if ( !::LookupAccountSid(
 		nullptr, pUserToken->User.Sid,
 		vUserName.data(), &dwUserNameSize,
 		vDomainName.data(), &dwDomainNameSize,
 		&SidNameUse) ) goto error;
-	// Тип полученных данных верный ?
+	// РўРёРї РїРѕР»СѓС‡РµРЅРЅС‹С… РґР°РЅРЅС‹С… РІРµСЂРЅС‹Р№ ?
     if ( SidNameUse!=SidTypeUser ) goto error;
 
 #ifdef _DEBUG
@@ -176,8 +176,8 @@ bool MSvcProcess::CheckUser(HANDLE hUser_, const wchar_t *Login_)
 		MB_SERVICE_NOTIFICATION);
 #endif
 
-    // Сравниваем логин
-//    return strcmpi(vUserName.data(), Login_)==0;    /// совместимо с не ASCII ?
+    // РЎСЂР°РІРЅРёРІР°РµРј Р»РѕРіРёРЅ
+//    return strcmpi(vUserName.data(), Login_)==0;    /// СЃРѕРІРјРµСЃС‚РёРјРѕ СЃ РЅРµ ASCII ?
 	return wcscmp(vUserName.data(), Login_)==0;
 error:
     return false;
@@ -185,14 +185,14 @@ error:
 //---------------------------------------------------------------------------
 HANDLE MSvcProcess::StartChild(HANDLE hProcess_, const wchar_t *Cmd_)
 {
-    // Если пользователь не залогинен, то и запускать нечего
+    // Р•СЃР»Рё РїРѕР»СЊР·РѕРІР°С‚РµР»СЊ РЅРµ Р·Р°Р»РѕРіРёРЅРµРЅ, С‚Рѕ Рё Р·Р°РїСѓСЃРєР°С‚СЊ РЅРµС‡РµРіРѕ
     if ( hUserToken==INVALID_HANDLE_VALUE ) return hProcess_;
 
-    // Проверим был ли процесс уже запущен и активен ли он еще
+    // РџСЂРѕРІРµСЂРёРј Р±С‹Р» Р»Рё РїСЂРѕС†РµСЃСЃ СѓР¶Рµ Р·Р°РїСѓС‰РµРЅ Рё Р°РєС‚РёРІРµРЅ Р»Рё РѕРЅ РµС‰Рµ
     if ( (hProcess_!=INVALID_HANDLE_VALUE)&&
         (::WaitForSingleObject(hProcess_,0)==WAIT_TIMEOUT) ) return hProcess_;
 
-    // Сформируем командную строку с параметрами
+    // РЎС„РѕСЂРјРёСЂСѓРµРј РєРѕРјР°РЅРґРЅСѓСЋ СЃС‚СЂРѕРєСѓ СЃ РїР°СЂР°РјРµС‚СЂР°РјРё
 	std::wstring cmd_line;
     cmd_line=ExeName;
 	cmd_line+=L" ";
@@ -210,7 +210,7 @@ HANDLE MSvcProcess::StartChild(HANDLE hProcess_, const wchar_t *Cmd_)
 	::MessageBox(nullptr, cmd_line.c_str(), L"debug", MB_SERVICE_NOTIFICATION);
 #endif
 
-	// Запустим процесс в сеансе залогиненного пользователя
+	// Р—Р°РїСѓСЃС‚РёРј РїСЂРѕС†РµСЃСЃ РІ СЃРµР°РЅСЃРµ Р·Р°Р»РѕРіРёРЅРµРЅРЅРѕРіРѕ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ
 	std::vector <wchar_t> cmd_line_buff(cmd_line.length()+1);
 	wcscpy(cmd_line_buff.data(), cmd_line.c_str());
 
@@ -240,43 +240,43 @@ void MSvcProcess::Route(bool Enable_)
     std::vector <char> vTable;
     PIP_ADAPTER_ADDRESSES pAdapter;
 
-    // Запрашиваем таблицу адресов
+    // Р—Р°РїСЂР°С€РёРІР°РµРј С‚Р°Р±Р»РёС†Сѓ Р°РґСЂРµСЃРѕРІ
     for ( int retryes=3; retryes; retryes-- )
     {
         ULONG TableSize=0;
 
-        // Запрашиваем ее размер
+        // Р—Р°РїСЂР°С€РёРІР°РµРј РµРµ СЂР°Р·РјРµСЂ
         if ( ::GetAdaptersAddresses(
             AF_INET,TableFlags,nullptr,
             nullptr,&TableSize)!=ERROR_BUFFER_OVERFLOW ) continue;
         if ( TableSize==0 ) continue;
         vTable.resize(TableSize);
 
-        // Запрашиваем таблицу
+        // Р—Р°РїСЂР°С€РёРІР°РµРј С‚Р°Р±Р»РёС†Сѓ
         if ( ::GetAdaptersAddresses(
             AF_INET,TableFlags,nullptr,
             (PIP_ADAPTER_ADDRESSES)vTable.data(),
             &TableSize)==ERROR_SUCCESS ) break;
         vTable.clear();
     }
-    // Выходим, если таблица пустая
+    // Р’С‹С…РѕРґРёРј, РµСЃР»Рё С‚Р°Р±Р»РёС†Р° РїСѓСЃС‚Р°СЏ
     if ( vTable.empty() ) return;
 
-    // Ищем подходящий адаптер
+    // РС‰РµРј РїРѕРґС…РѕРґСЏС‰РёР№ Р°РґР°РїС‚РµСЂ
     pAdapter=(PIP_ADAPTER_ADDRESSES)vTable.data();
     while(pAdapter)
     {
-        // Проверим указан ли хоть один DNS-сервер
+        // РџСЂРѕРІРµСЂРёРј СѓРєР°Р·Р°РЅ Р»Рё С…РѕС‚СЊ РѕРґРёРЅ DNS-СЃРµСЂРІРµСЂ
         if ( pAdapter->FirstDnsServerAddress!=nullptr ) break;
         pAdapter=pAdapter->Next;
     }
-    // Закончим, если не нашли адаптер
+    // Р—Р°РєРѕРЅС‡РёРј, РµСЃР»Рё РЅРµ РЅР°С€Р»Рё Р°РґР°РїС‚РµСЂ
     if ( pAdapter==nullptr ) return;
 
 	sockaddr_in *SockAddr=reinterpret_cast<sockaddr_in*>(
 		pAdapter->FirstDnsServerAddress->Address.lpSockaddr);
 
-    // Заполним запись для таблицы маршрутизации
+    // Р—Р°РїРѕР»РЅРёРј Р·Р°РїРёСЃСЊ РґР»СЏ С‚Р°Р±Р»РёС†С‹ РјР°СЂС€СЂСѓС‚РёР·Р°С†РёРё
     MIB_IPFORWARDROW Route;
     memset(&Route,0,sizeof(Route));
     Route.dwForwardDest=0;
@@ -289,13 +289,13 @@ void MSvcProcess::Route(bool Enable_)
     Route.dwForwardAge=0;
     Route.dwForwardNextHopAS=0;
 //    Route.dwForwardMetric1=pAdapter->Ipv4Metric;    // Vista+
-    Route.dwForwardMetric1=65535;                   /// костыль...
+    Route.dwForwardMetric1=65535;                   /// РєРѕСЃС‚С‹Р»СЊ...
     Route.dwForwardMetric2=-1;
     Route.dwForwardMetric3=-1;
     Route.dwForwardMetric4=-1;
     Route.dwForwardMetric5=-1;
 
-    // Добавляем/удаляем запись в таблицу
+    // Р”РѕР±Р°РІР»СЏРµРј/СѓРґР°Р»СЏРµРј Р·Р°РїРёСЃСЊ РІ С‚Р°Р±Р»РёС†Сѓ
     DWORD result;
     if ( Enable_ ) result=::CreateIpForwardEntry(&Route);
     else result=::DeleteIpForwardEntry(&Route);
@@ -313,14 +313,14 @@ void MSvcProcess::Route(bool Enable_)
 //---------------------------------------------------------------------------
 bool MSvcProcess::OnStart()
 {
-    // Сохраним имя файла службы
+    // РЎРѕС…СЂР°РЅРёРј РёРјСЏ С„Р°Р№Р»Р° СЃР»СѓР¶Р±С‹
 	if ( !::GetModuleFileName(nullptr, ExeName, MAX_PATH) )
     {
         ResMessageBox(nullptr,1,4,MB_SERVICE_NOTIFICATION,::GetLastError());
         return false;
     }
 
-    // Настраиваем пути
+    // РќР°СЃС‚СЂР°РёРІР°РµРј РїСѓС‚Рё
     {
         wchar_t gms_path[MAX_PATH+7+1], *delim;
 
@@ -337,7 +337,7 @@ bool MSvcProcess::OnStart()
 			HKEY_LOCAL_MACHINE, L"Software\\MMM Groups\\TLK\\3.0\\Client", L"Auth",ENC_Code);    //path//
     }
 
-    // Загружаем настройки, заменяя их "дефолтом" при необходимости
+    // Р—Р°РіСЂСѓР¶Р°РµРј РЅР°СЃС‚СЂРѕР№РєРё, Р·Р°РјРµРЅСЏСЏ РёС… "РґРµС„РѕР»С‚РѕРј" РїСЂРё РЅРµРѕР±С…РѕРґРёРјРѕСЃС‚Рё
     if ( !Auth.Load() ) Auth.Save();
     if ( !State.Load() ) State.Save();
 	if ( !State.GetOptions(Options) )
@@ -352,7 +352,7 @@ bool MSvcProcess::OnStart()
         State.NewOptions(Options);
     }
 
-    // Подготовка сети
+    // РџРѕРґРіРѕС‚РѕРІРєР° СЃРµС‚Рё
     if ( !(Sync.NetInit(ENC_Net,&Auth)&&
         Send.NetInit(&State,ENC_Net,&Auth)) )
     {
@@ -366,10 +366,10 @@ bool MSvcProcess::OnStart()
         return false;
     }
 
-    // Зададим начальный режим прозрачности
+    // Р—Р°РґР°РґРёРј РЅР°С‡Р°Р»СЊРЅС‹Р№ СЂРµР¶РёРј РїСЂРѕР·СЂР°С‡РЅРѕСЃС‚Рё
     Shared.SetTransp(Options.Flags&mcoTransp);
 
-    // Запуск таймера
+    // Р—Р°РїСѓСЃРє С‚Р°Р№РјРµСЂР°
     uTimer=::SetTimer(nullptr,0,1000,nullptr);
     if ( uTimer==0 )
     {
@@ -377,7 +377,7 @@ bool MSvcProcess::OnStart()
         return false;
     }
 
-    // Запуск сети
+    // Р—Р°РїСѓСЃРє СЃРµС‚Рё
     Sync.Associate(&State);
     if ( (!Sync.Start())||
          (!Send.Start()) )
@@ -403,7 +403,7 @@ void MSvcProcess::OnExecute()
 {
     OnTimer();
 
-    // Запустим TLK shell, если пользователь уже вошел в систему
+    // Р—Р°РїСѓСЃС‚РёРј TLK shell, РµСЃР»Рё РїРѕР»СЊР·РѕРІР°С‚РµР»СЊ СѓР¶Рµ РІРѕС€РµР» РІ СЃРёСЃС‚РµРјСѓ
     PWTS_SESSION_INFO pInfo;
     DWORD dwInfoCount;
     if ( !::WTSEnumerateSessions(WTS_CURRENT_SERVER_HANDLE,
@@ -442,38 +442,38 @@ void MSvcProcess::OnTimer()
     __int64 SystemTime;
 	MStatesInfo Info;
 
-    // Опытаемся занять shared-секцию
+    // РћРїС‹С‚Р°РµРјСЃСЏ Р·Р°РЅСЏС‚СЊ shared-СЃРµРєС†РёСЋ
     if ( !Shared.Lock() ) return;
 
     GetLocalTimeInt64(SystemTime);
     Shared.UpdateSysTime(SystemTime);
 
-    // Если время показа предупреждения об окончании времени истекло, уберем сообщение
+    // Р•СЃР»Рё РІСЂРµРјСЏ РїРѕРєР°Р·Р° РїСЂРµРґСѓРїСЂРµР¶РґРµРЅРёСЏ РѕР± РѕРєРѕРЅС‡Р°РЅРёРё РІСЂРµРјРµРЅРё РёСЃС‚РµРєР»Рѕ, СѓР±РµСЂРµРј СЃРѕРѕР±С‰РµРЅРёРµ
     if ( TimeMsgWarn&&((--TimeMsgWarn)==0) ) Shared.ShowWarnMsg(false);
-    // Если время показа сообщения об окончании времени истекло, сменим сообщение
+    // Р•СЃР»Рё РІСЂРµРјСЏ РїРѕРєР°Р·Р° СЃРѕРѕР±С‰РµРЅРёСЏ РѕР± РѕРєРѕРЅС‡Р°РЅРёРё РІСЂРµРјРµРЅРё РёСЃС‚РµРєР»Рѕ, СЃРјРµРЅРёРј СЃРѕРѕР±С‰РµРЅРёРµ
     if ( TimeMsgEndTime&&((--TimeMsgEndTime)==0) ) Shared.ShowImageMessage(mimLocked);
-    // Если таймер перезагрузки истек, помечаем что нужно перезагрузиться
+    // Р•СЃР»Рё С‚Р°Р№РјРµСЂ РїРµСЂРµР·Р°РіСЂСѓР·РєРё РёСЃС‚РµРє, РїРѕРјРµС‡Р°РµРј С‡С‚Рѕ РЅСѓР¶РЅРѕ РїРµСЂРµР·Р°РіСЂСѓР·РёС‚СЊСЃСЏ
     if ( TimeToReboot&&((--TimeToReboot)==0) ) State.CmdReboot();
-    // Обновляем состояние в соответствии со временем
+    // РћР±РЅРѕРІР»СЏРµРј СЃРѕСЃС‚РѕСЏРЅРёРµ РІ СЃРѕРѕС‚РІРµС‚СЃС‚РІРёРё СЃРѕ РІСЂРµРјРµРЅРµРј
     if ( State.Timer(SystemTime) ) State.Save();
     Info=State.GetInfo();
 
-    // Запрашиваем новые настройки
+    // Р—Р°РїСЂР°С€РёРІР°РµРј РЅРѕРІС‹Рµ РЅР°СЃС‚СЂРѕР№РєРё
     if ( Info.Changes&mdcOptions )
     {
         State.GetOptions(Options);
-        // Обновим режим прозрачности
+        // РћР±РЅРѕРІРёРј СЂРµР¶РёРј РїСЂРѕР·СЂР°С‡РЅРѕСЃС‚Рё
         Shared.SetTransp(Options.Flags&mcoTransp);
     }
-    // Обновляем номер компьютера
+    // РћР±РЅРѕРІР»СЏРµРј РЅРѕРјРµСЂ РєРѕРјРїСЊСЋС‚РµСЂР°
     if ( Info.Changes&mdcNumber ) Shared.UpdateCompNum(Info.Number);
-    // Режим работы
+    // Р РµР¶РёРј СЂР°Р±РѕС‚С‹
     if ( Info.Changes&mdcState )
     {
         Shared.SetConfigMode(false);
         if ( Info.State&mcsOpen )
         {
-            // Открыт для настройки
+            // РћС‚РєСЂС‹С‚ РґР»СЏ РЅР°СЃС‚СЂРѕР№РєРё
             Shared.SetConfigMode(true);
             TimeToReboot=0;
             TimeMsgEndTime=0;
@@ -487,13 +487,13 @@ void MSvcProcess::OnTimer()
             Shared.UpdateWorkTime(0);
             if ( Info.Changes&mdcWorkTime )
             {
-                // Время закончилось
+                // Р’СЂРµРјСЏ Р·Р°РєРѕРЅС‡РёР»РѕСЃСЊ
                 TimeToReboot=Options.RebootWait;
                 TimeMsgEndTime=Options.MsgEndTime;
                 Shared.ShowImageMessage(TimeMsgEndTime? mimEndTime: mimLocked);
             } else
             {
-                // Компьютер закрыт
+                // РљРѕРјРїСЊСЋС‚РµСЂ Р·Р°РєСЂС‹С‚
                 TimeToReboot=0;
                 TimeMsgEndTime=0;
                 Shared.ShowImageMessage(mimLocked);
@@ -502,39 +502,39 @@ void MSvcProcess::OnTimer()
         {
             if ( Info.Changes&mdcWorkTime )
             {
-                // Компьютер запущен
+                // РљРѕРјРїСЊСЋС‚РµСЂ Р·Р°РїСѓС‰РµРЅ
                 TimeToReboot=0;
                 TimeMsgEndTime=0;
                 Shared.ShowWarnMsg(false); MsgWarnShowed=false;
             }
-            // Дополнительные режимы
+            // Р”РѕРїРѕР»РЅРёС‚РµР»СЊРЅС‹Рµ СЂРµР¶РёРјС‹
             if ( Info.State&mcsPause )
             {
-                // Время приостановлено
+                // Р’СЂРµРјСЏ РїСЂРёРѕСЃС‚Р°РЅРѕРІР»РµРЅРѕ
                 Shared.ShowGames(mgpNone);
                 Shared.ShowImageMessage(mimTimePaused);
             } else if ( Info.State&mcsLock )
             {
-                // Прикрыт
+                // РџСЂРёРєСЂС‹С‚
                 Shared.ShowGames(mgpNone);
                 Shared.ShowImageMessage(mimPaused);
             } else if ( Info.State&mcsFine )
             {
-                // Штраф
+                // РЁС‚СЂР°С„
                 Shared.ShowGames(mgpNone);
                 Shared.ShowImageMessage(mimFine);
             } else
             {
-                // Работа
+                // Р Р°Р±РѕС‚Р°
                 Shared.ShowImageMessage(mimNone);
                 Shared.ShowGames(Info.Programs);
             }
         }
 
-        // Доступ в Интернет
+        // Р”РѕСЃС‚СѓРї РІ РРЅС‚РµСЂРЅРµС‚
         if ( Options.Flags&mcoAddRoute )
         {
-            // Определяем добавить или удалить маршрут по-умолчанию
+            // РћРїСЂРµРґРµР»СЏРµРј РґРѕР±Р°РІРёС‚СЊ РёР»Рё СѓРґР°Р»РёС‚СЊ РјР°СЂС€СЂСѓС‚ РїРѕ-СѓРјРѕР»С‡Р°РЅРёСЋ
             bool Enable=(Info.State&mcsOpen)||
                 ((Info.State&mcsWork)&&
                 (!(Info.State&(mcsFine|mcsPause)))&&
@@ -543,18 +543,18 @@ void MSvcProcess::OnTimer()
         }
     } else if ( Info.Changes&mdcPrograms )
     {
-        // Изменился список программ без изменения режима работы
+        // РР·РјРµРЅРёР»СЃСЏ СЃРїРёСЃРѕРє РїСЂРѕРіСЂР°РјРј Р±РµР· РёР·РјРµРЅРµРЅРёСЏ СЂРµР¶РёРјР° СЂР°Р±РѕС‚С‹
         if ( Info.State==mcsWork ) Shared.ShowGames(Info.Programs);
         else if ( Info.State&mcsOpen ) Shared.ShowGames(mgpAll);
     }
 
     //
     if ( Info.Changes&mdcWorkTime ) MsgWarnShowed=false;
-    // Выводим оставшееся время
+    // Р’С‹РІРѕРґРёРј РѕСЃС‚Р°РІС€РµРµСЃСЏ РІСЂРµРјСЏ
     if ( Info.State&mcsWork )
     {
         Shared.UpdateWorkTime(Info.ToEndWork);
-        // Если до окончания времени осталось менее двух минут, запускаем показ сообщения
+        // Р•СЃР»Рё РґРѕ РѕРєРѕРЅС‡Р°РЅРёСЏ РІСЂРµРјРµРЅРё РѕСЃС‚Р°Р»РѕСЃСЊ РјРµРЅРµРµ РґРІСѓС… РјРёРЅСѓС‚, Р·Р°РїСѓСЃРєР°РµРј РїРѕРєР°Р· СЃРѕРѕР±С‰РµРЅРёСЏ
         if ( (!MsgWarnShowed)&&Options.ToEndTime&&
             (Info.ToEndWork<=Options.ToEndTime) )
         {
@@ -571,7 +571,7 @@ void MSvcProcess::OnTimer()
         {
             State.Save();
 #ifndef _DEBUG
-            WinExit(EWX_POWEROFF|EWX_FORCE);  /// EWX_FORCEIFHUNG не подходит
+            WinExit(EWX_POWEROFF|EWX_FORCE);  /// EWX_FORCEIFHUNG РЅРµ РїРѕРґС…РѕРґРёС‚
 #endif
         } else if ( Info.Commands&mccReboot )
         {
@@ -584,7 +584,7 @@ void MSvcProcess::OnTimer()
 
     Shared.UnLock();
 
-    // Перезапустим TLK shell, на случай его "падения"
+    // РџРµСЂРµР·Р°РїСѓСЃС‚РёРј TLK shell, РЅР° СЃР»СѓС‡Р°Р№ РµРіРѕ "РїР°РґРµРЅРёСЏ"
     StartShell();
 }
 //---------------------------------------------------------------------------
@@ -592,7 +592,7 @@ void MSvcProcess::OnLogOn(DWORD dwSessionId_)
 {
     HANDLE hUser;
 
-    // Проверим под этим ли пользователем запускать TLK shell
+    // РџСЂРѕРІРµСЂРёРј РїРѕРґ СЌС‚РёРј Р»Рё РїРѕР»СЊР·РѕРІР°С‚РµР»РµРј Р·Р°РїСѓСЃРєР°С‚СЊ TLK shell
     if ( !::WTSQueryUserToken(dwSessionId_,&hUser) )
     {
 //        ResMessageBox(nullptr,1,10,MB_SERVICE_NOTIFICATION,::GetLastError());
@@ -600,11 +600,11 @@ void MSvcProcess::OnLogOn(DWORD dwSessionId_)
     }
 	if ( !CheckUser(hUser, Options.ShellUser.c_str()) ) return;
 
-    // Запомним handle "нашего" пользователя и запустим оболочку
+    // Р—Р°РїРѕРјРЅРёРј handle "РЅР°С€РµРіРѕ" РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ Рё Р·Р°РїСѓСЃС‚РёРј РѕР±РѕР»РѕС‡РєСѓ
     hUserToken=hUser;
     StartShell();
 
-    // Запустим программы из раздела автозапуска (лучше вынести из службы...)
+    // Р—Р°РїСѓСЃС‚РёРј РїСЂРѕРіСЂР°РјРјС‹ РёР· СЂР°Р·РґРµР»Р° Р°РІС‚РѕР·Р°РїСѓСЃРєР° (Р»СѓС‡С€Рµ РІС‹РЅРµСЃС‚Рё РёР· СЃР»СѓР¶Р±С‹...)
     if ( Options.Flags&mcoAutoRun )
     {
         RegExecList(
@@ -618,7 +618,7 @@ void MSvcProcess::OnLogOff(DWORD dwSessionId_)
 {
     if ( hUserToken==INVALID_HANDLE_VALUE ) return;
 
-    // Проверим "наш" ли пользователь вышел из системы
+    // РџСЂРѕРІРµСЂРёРј "РЅР°С€" Р»Рё РїРѕР»СЊР·РѕРІР°С‚РµР»СЊ РІС‹С€РµР» РёР· СЃРёСЃС‚РµРјС‹
     HANDLE hUser;
     if ( !::WTSQueryUserToken(dwSessionId_,&hUser) )
     {
@@ -627,7 +627,7 @@ void MSvcProcess::OnLogOff(DWORD dwSessionId_)
     }
     if ( hUser!=hUserToken ) return;
 
-    // Сбросим сведения о пользователе и запущенных дочерних процессах
+    // РЎР±СЂРѕСЃРёРј СЃРІРµРґРµРЅРёСЏ Рѕ РїРѕР»СЊР·РѕРІР°С‚РµР»Рµ Рё Р·Р°РїСѓС‰РµРЅРЅС‹С… РґРѕС‡РµСЂРЅРёС… РїСЂРѕС†РµСЃСЃР°С…
     hUserToken=INVALID_HANDLE_VALUE;
     hProcessShell=INVALID_HANDLE_VALUE;
 }

@@ -1,4 +1,4 @@
-//---------------------------------------------------------------------------
+п»ї//---------------------------------------------------------------------------
 #include <winsock2.h>
 #include <ip2string.h>
 #include <ntstatus.h>
@@ -23,7 +23,7 @@ MRandCounter
 
 			rnd_v[1]=std::chrono::system_clock::
 				now().time_since_epoch().count();
-			rnd_v[2]=CalcHwMacHash();		/// заменить на IP-адрес ?
+			rnd_v[2]=CalcHwMacHash();		/// Р·Р°РјРµРЅРёС‚СЊ РЅР° IP-Р°РґСЂРµСЃ ?
 			rnd_v[3]=0x5652532D444E4553;	// ASCII 'SEND-SRV'
 
 			return fasthash64(&rnd_v, sizeof(rnd_v), 0);
@@ -54,7 +54,7 @@ bool MSend::Create(bool Srv_)
     unsigned long b;
     sockaddr_in Address;
 
-    // Создаем сокет
+    // РЎРѕР·РґР°РµРј СЃРѕРєРµС‚
     if ( Srv_ )
     {
         if ( (rSocket=::socket(PF_INET,SOCK_STREAM,IPPROTO_IP))==INVALID_SOCKET ) goto error;
@@ -65,12 +65,12 @@ bool MSend::Create(bool Srv_)
         if ( (lSocket=::socket(PF_INET,SOCK_STREAM,IPPROTO_IP))==INVALID_SOCKET ) goto error;
         if ( ::setsockopt(lSocket,SOL_SOCKET,SO_REUSEADDR,(char*)&a,sizeof(a)) ) goto error;
         b=TRUE; if ( ::ioctlsocket(lSocket,FIONBIO,&b) ) goto error;
-        // Задаем адрес для ожидания соединений
+        // Р—Р°РґР°РµРј Р°РґСЂРµСЃ РґР»СЏ РѕР¶РёРґР°РЅРёСЏ СЃРѕРµРґРёРЅРµРЅРёР№
         memset(&Address,0,sizeof(Address));
         Address.sin_family=AF_INET;
         Address.sin_port=::htons(SEND_Port);
         Address.sin_addr.s_addr=INADDR_ANY;
-        // Присоединяем сокет
+        // РџСЂРёСЃРѕРµРґРёРЅСЏРµРј СЃРѕРєРµС‚
         if ( ::bind (lSocket,(sockaddr*)&Address,sizeof(Address))==SOCKET_ERROR ) goto error;
     }
 
@@ -86,9 +86,9 @@ bool MSend::Listen()
     timeval timeout;
     int result;
 
-    // Переводим сокет в режим приема соединений
+    // РџРµСЂРµРІРѕРґРёРј СЃРѕРєРµС‚ РІ СЂРµР¶РёРј РїСЂРёРµРјР° СЃРѕРµРґРёРЅРµРЅРёР№
     if ( ::listen(lSocket,1) ) goto exit;
-    // Ожидаем соединения
+    // РћР¶РёРґР°РµРј СЃРѕРµРґРёРЅРµРЅРёСЏ
     timeout.tv_sec=0; timeout.tv_usec=100*1000;
     do
     {
@@ -105,7 +105,7 @@ exit:
 //---------------------------------------------------------------------------
 bool MSend::Accept()
 {
-    // Принимаем соединение
+    // РџСЂРёРЅРёРјР°РµРј СЃРѕРµРґРёРЅРµРЅРёРµ
     rSocket=::accept(lSocket,nullptr,nullptr);
     return rSocket!=INVALID_SOCKET;
 }
@@ -119,7 +119,7 @@ bool MSend::Connect(const wchar_t *IP_, unsigned Time_)
     DWORD stime;
     int result;
 
-    // Задаем адрес компьютера
+    // Р—Р°РґР°РµРј Р°РґСЂРµСЃ РєРѕРјРїСЊСЋС‚РµСЂР°
     memset(&Address,0,sizeof(Address));
     Address.sin_family=AF_INET;
 	Address.sin_port=::htons(SEND_Port);
@@ -133,17 +133,17 @@ bool MSend::Connect(const wchar_t *IP_, unsigned Time_)
 		&Address.sin_addr
 		) != STATUS_SUCCESS ) goto exit;
 
-	// Запускаем установление соединения
+	// Р—Р°РїСѓСЃРєР°РµРј СѓСЃС‚Р°РЅРѕРІР»РµРЅРёРµ СЃРѕРµРґРёРЅРµРЅРёСЏ
 //    if ( ::connect(rSocket,(sockaddr*)&Address,sizeof(sockaddr_in))==SOCKET_ERROR ) goto exit;
 	::connect(rSocket,(sockaddr*)&Address,sizeof(sockaddr_in));
-	// Ожидаем установления соединения
+	// РћР¶РёРґР°РµРј СѓСЃС‚Р°РЅРѕРІР»РµРЅРёСЏ СЃРѕРµРґРёРЅРµРЅРёСЏ
     Time_*=1000; stime=::GetTickCount();
     timeout.tv_sec=0; timeout.tv_usec=100*1000;
     do
     {
 		if ( Break.load() ) goto exit;
 
-        // Ожидаем возможности передать еще данные
+        // РћР¶РёРґР°РµРј РІРѕР·РјРѕР¶РЅРѕСЃС‚Рё РїРµСЂРµРґР°С‚СЊ РµС‰Рµ РґР°РЅРЅС‹Рµ
 		FD_ZERO(&w_fds); FD_SET(rSocket,&w_fds);
 		FD_ZERO(&e_fds); FD_SET(rSocket,&e_fds);
 		if ( (result=::select(0,nullptr,&w_fds,&e_fds,&timeout))==0 ) continue;
@@ -169,12 +169,12 @@ bool MSend::Snd(char *Data_, std::size_t Size_, unsigned Time_)
 	{
 		if ( Break.load() ) goto exit;
 
-		// Ожидаем возможности передать еще данные
+		// РћР¶РёРґР°РµРј РІРѕР·РјРѕР¶РЅРѕСЃС‚Рё РїРµСЂРµРґР°С‚СЊ РµС‰Рµ РґР°РЅРЅС‹Рµ
         FD_ZERO(&w_fds); FD_SET(rSocket,&w_fds);
         FD_ZERO(&e_fds); FD_SET(rSocket,&e_fds);
         if ( (result=::select(0,nullptr,&w_fds,&e_fds,&timeout))==0 ) continue;
         if ( (result==SOCKET_ERROR)||FD_ISSET(rSocket,&e_fds) ) goto exit;
-        // Предаем очередную порцию данных
+        // РџСЂРµРґР°РµРј РѕС‡РµСЂРµРґРЅСѓСЋ РїРѕСЂС†РёСЋ РґР°РЅРЅС‹С…
         if ( (result=::send(rSocket,Data_,Size_,0))==SOCKET_ERROR ) goto exit;
         if ( (Size_-=result)==0 ) return true;
         Data_+=result;
@@ -198,12 +198,12 @@ bool MSend::Rcv(char *Data_, std::size_t Size_, unsigned Time_)
     {
 		if ( Break.load() ) goto exit;
 
-        // Ожидаем возможности принять еще данные
+        // РћР¶РёРґР°РµРј РІРѕР·РјРѕР¶РЅРѕСЃС‚Рё РїСЂРёРЅСЏС‚СЊ РµС‰Рµ РґР°РЅРЅС‹Рµ
         FD_ZERO(&r_fds); FD_SET(rSocket,&r_fds);
         FD_ZERO(&e_fds); FD_SET(rSocket,&e_fds);
         if ( (result=::select(0,&r_fds,nullptr,&e_fds,&timeout))==0 ) continue;
         if ( (result==SOCKET_ERROR)||FD_ISSET(rSocket,&e_fds) ) goto exit;
-        // Принимаем очередную порцию данных
+        // РџСЂРёРЅРёРјР°РµРј РѕС‡РµСЂРµРґРЅСѓСЋ РїРѕСЂС†РёСЋ РґР°РЅРЅС‹С…
         result=::recv(rSocket,Data_,Size_,0);
         if ( (result==SOCKET_ERROR)||(result==0) ) goto exit;
         if ( (Size_-=result)==0 ) return true;
@@ -223,7 +223,7 @@ bool MSend::Disconnect(unsigned Time_)
     int result;
     char buffer[1];
 
-    // Оповещаем партнера, что отправки данных больше не будет
+    // РћРїРѕРІРµС‰Р°РµРј РїР°СЂС‚РЅРµСЂР°, С‡С‚Рѕ РѕС‚РїСЂР°РІРєРё РґР°РЅРЅС‹С… Р±РѕР»СЊС€Рµ РЅРµ Р±СѓРґРµС‚
     if ( ::shutdown(rSocket,SD_SEND)==SOCKET_ERROR ) goto exit;
     //
     Time_*=1000; stime=::GetTickCount();
@@ -232,14 +232,14 @@ bool MSend::Disconnect(unsigned Time_)
     {
 		if ( Break.load() ) goto exit;
 
-        // Ожидаем возможности принять еще данные
+        // РћР¶РёРґР°РµРј РІРѕР·РјРѕР¶РЅРѕСЃС‚Рё РїСЂРёРЅСЏС‚СЊ РµС‰Рµ РґР°РЅРЅС‹Рµ
         FD_ZERO(&r_fds); FD_SET(rSocket,&r_fds);
         FD_ZERO(&e_fds); FD_SET(rSocket,&e_fds);
         if ( (result=::select(0,&r_fds,nullptr,&e_fds,&timeout))==0 ) continue;
         if ( (result==SOCKET_ERROR)||FD_ISSET(rSocket,&e_fds) ) goto exit;
-        // Проверяем пришел ли маркер конца файла
+        // РџСЂРѕРІРµСЂСЏРµРј РїСЂРёС€РµР» Р»Рё РјР°СЂРєРµСЂ РєРѕРЅС†Р° С„Р°Р№Р»Р°
         result=::recv(rSocket,buffer,sizeof(buffer),0);
-///        result=::recv(lSocket,buffer,sizeof(buffer),0);  // ошибка ?
+///        result=::recv(lSocket,buffer,sizeof(buffer),0);  // РѕС€РёР±РєР° ?
         if ( result==SOCKET_ERROR ) goto exit;
         if ( result==0 ) return true;
     } while((::GetTickCount()-stime)<Time_);
@@ -250,34 +250,34 @@ exit:
 //---------------------------------------------------------------------------
 void MSend::lClose()
 {
-    // Останавливаем прием/отправку данных
+    // РћСЃС‚Р°РЅР°РІР»РёРІР°РµРј РїСЂРёРµРј/РѕС‚РїСЂР°РІРєСѓ РґР°РЅРЅС‹С…
     ::shutdown(lSocket,SD_BOTH);
-    // Закрываем сокет
+    // Р—Р°РєСЂС‹РІР°РµРј СЃРѕРєРµС‚
     ::closesocket(lSocket);
     lSocket=INVALID_SOCKET;
 }
 //---------------------------------------------------------------------------
 void MSend::rClose()
 {
-    // Останавливаем прием/отправку данных
+    // РћСЃС‚Р°РЅР°РІР»РёРІР°РµРј РїСЂРёРµРј/РѕС‚РїСЂР°РІРєСѓ РґР°РЅРЅС‹С…
     ::shutdown(rSocket,SD_BOTH);
-    // Закрываем сокет
+    // Р—Р°РєСЂС‹РІР°РµРј СЃРѕРєРµС‚
     ::closesocket(rSocket);
     rSocket=INVALID_SOCKET;
 }
 //---------------------------------------------------------------------------
 bool MSend::SndHello(std::uint64_t SessId_)
 {
-	// Заполняем hello-блок со своим random
+	// Р—Р°РїРѕР»РЅСЏРµРј hello-Р±Р»РѕРє СЃРѕ СЃРІРѕРёРј random
 	Packet.Hello.Version=SEND_Version;
 	Packet.Hello.SessId=SessId_;
-	// Добавляем MAC и шифруем
+	// Р”РѕР±Р°РІР»СЏРµРј MAC Рё С€РёС„СЂСѓРµРј
 	NetMAC->Calc((char*)&Packet.Hello,
 		sizeof(Packet.Hello)-sizeof(Packet.Hello.MAC),
 		Packet.Hello.MAC,sizeof(Packet.Hello.MAC));
 	BasicEncode((char*)&Packet.Hello,sizeof(Packet.Hello),NetCode);
 
-	// Отправляем клиенту hello
+	// РћС‚РїСЂР°РІР»СЏРµРј РєР»РёРµРЅС‚Сѓ hello
 	return Snd((char*)&Packet.Hello,sizeof(Packet.Hello),3);
 }
 //---------------------------------------------------------------------------
@@ -285,12 +285,12 @@ bool MSend::RcvHello(std::uint64_t *SessId_)
 {
     if ( !Rcv((char*)&Packet.Hello,sizeof(Packet.Hello),3) ) goto error;
     BasicDecode((char*)&Packet.Hello,sizeof(Packet.Hello),NetCode);
-    // Сверяем версию интерфейса и MAC
+    // РЎРІРµСЂСЏРµРј РІРµСЂСЃРёСЋ РёРЅС‚РµСЂС„РµР№СЃР° Рё MAC
     if ( (Packet.Hello.Version!=SEND_Version)||
         (!NetMAC->Check((char*)&Packet.Hello,
         sizeof(Packet.Hello)-sizeof(Packet.Hello.MAC),
         Packet.Hello.MAC,sizeof(Packet.Hello.MAC))) ) goto error;
-    // Возвращаем результат
+    // Р’РѕР·РІСЂР°С‰Р°РµРј СЂРµР·СѓР»СЊС‚Р°С‚
     *SessId_=Packet.Hello.SessId;
 
     return true;
@@ -300,17 +300,17 @@ error:
 //---------------------------------------------------------------------------
 bool MSend::SndRequest(std::uint8_t Type_, std::uint64_t SessId_, std::size_t Size_)
 {
-    // Заполняем блок-информер
+    // Р—Р°РїРѕР»РЅСЏРµРј Р±Р»РѕРє-РёРЅС„РѕСЂРјРµСЂ
     Packet.Request.Type=Type_;
     Packet.Request.SessId=SessId_;
     Packet.Request.Size=Size_;
-    // Добавляем к блоку MAC и шифруем его
+    // Р”РѕР±Р°РІР»СЏРµРј Рє Р±Р»РѕРєСѓ MAC Рё С€РёС„СЂСѓРµРј РµРіРѕ
     NetMAC->Calc((char*)&Packet.Request,
         sizeof(Packet.Request)-sizeof(Packet.Request.MAC),
         Packet.Request.MAC,sizeof(Packet.Request.MAC));
     BasicEncode((char*)&Packet.Request,sizeof(Packet.Request),NetCode);
 
-    // Отправляем клиенту
+    // РћС‚РїСЂР°РІР»СЏРµРј РєР»РёРµРЅС‚Сѓ
     return Snd((char*)&Packet.Request,sizeof(Packet.Request),3);
 }
 //---------------------------------------------------------------------------
@@ -318,12 +318,12 @@ bool MSend::RcvRequest(std::uint8_t *Type_, std::uint64_t SessId_, std::size_t *
 {
     if ( !Rcv((char*)&Packet.Request,sizeof(Packet.Request),3) ) goto error;
     BasicDecode((char*)&Packet.Request,sizeof(Packet.Request),NetCode);
-    // Сверяем seed и MAC
+    // РЎРІРµСЂСЏРµРј seed Рё MAC
     if ( (Packet.Request.SessId!=SessId_)||
         (!NetMAC->Check((char*)&Packet.Request,
         sizeof(Packet.Request)-sizeof(Packet.Request.MAC),
         Packet.Request.MAC,sizeof(Packet.Request.MAC))) ) goto error;
-    // Возвращаем результат
+    // Р’РѕР·РІСЂР°С‰Р°РµРј СЂРµР·СѓР»СЊС‚Р°С‚
     *Type_=Packet.Request.Type;
     *Size_=Packet.Request.Size;
 
@@ -339,17 +339,17 @@ bool MSend::SndObject(obj_type *Obj_, std::uint8_t Type_, std::uint64_t SessId_)
 
 	try
 	{
-		// Определяем размер данных и выделяем память под буффер (+ seed,MAC)
+		// РћРїСЂРµРґРµР»СЏРµРј СЂР°Р·РјРµСЂ РґР°РЅРЅС‹С… Рё РІС‹РґРµР»СЏРµРј РїР°РјСЏС‚СЊ РїРѕРґ Р±СѓС„С„РµСЂ (+ seed,MAC)
 		std::size_t Size=Obj_->GetAllDataSize()+sizeof(decltype(SessId_))+MAC_Size;
 		Data.resize(Size);
-		// Заполняем его
+		// Р—Р°РїРѕР»РЅСЏРµРј РµРіРѕ
 		char *pt=static_cast<char*>(MemSet(&Data[0], SessId_));
 		pt=static_cast<char*>(Obj_->SetAllData(pt));
-		// Добавляем MAC и шифруем
+		// Р”РѕР±Р°РІР»СЏРµРј MAC Рё С€РёС„СЂСѓРµРј
 		NetMAC->Calc(&Data[0],pt-&Data[0],pt,&Data[0]+Size-pt);
 		BasicEncode(&Data[0],Size,NetCode);
 
-		// Отправляем клиенту информер и данные
+		// РћС‚РїСЂР°РІР»СЏРµРј РєР»РёРµРЅС‚Сѓ РёРЅС„РѕСЂРјРµСЂ Рё РґР°РЅРЅС‹Рµ
 		if ( (!SndRequest(Type_,SessId_,Size))||
 			(!Snd(&Data[0],Size,10)) ) goto error;
 	}
@@ -367,20 +367,20 @@ bool MSend::RcvObject(obj_type *Obj_, std::size_t Size_, std::uint64_t SessId_)
 
     try
     {
-        // Проверяем допустимость размера данных и выделяем память
+        // РџСЂРѕРІРµСЂСЏРµРј РґРѕРїСѓСЃС‚РёРјРѕСЃС‚СЊ СЂР°Р·РјРµСЂР° РґР°РЅРЅС‹С… Рё РІС‹РґРµР»СЏРµРј РїР°РјСЏС‚СЊ
         if ( (Size_<SEND_MinData)||
             (Size_>SEND_MaxData) ) goto error;
         Data.resize(Size_);
 
-        // Принимаем их и расшифровываем
+        // РџСЂРёРЅРёРјР°РµРј РёС… Рё СЂР°СЃС€РёС„СЂРѕРІС‹РІР°РµРј
         if ( !Rcv(&Data[0],Size_,10) ) goto error;
         BasicDecode(&Data[0],Size_,NetCode);
-        // Сверяем seed и MAC
+        // РЎРІРµСЂСЏРµРј seed Рё MAC
         if ( (*((decltype(SessId_)*)&Data[0])!=SessId_)||
             (!NetMAC->Check(&Data[0],Size_-MAC_Size,
             &Data[0]+(Size_-MAC_Size),MAC_Size)) ) goto error;
 
-        // Восстанавливаем объект из принятых данных (за вычетом seed и MAC)
+        // Р’РѕСЃСЃС‚Р°РЅР°РІР»РёРІР°РµРј РѕР±СЉРµРєС‚ РёР· РїСЂРёРЅСЏС‚С‹С… РґР°РЅРЅС‹С… (Р·Р° РІС‹С‡РµС‚РѕРј seed Рё MAC)
 		if ( !Obj_->GetAllData(&Data[0]+sizeof(decltype(SessId_)),
             &Data[0]+(Size_-MAC_Size)) ) goto error;
     }
@@ -388,7 +388,7 @@ bool MSend::RcvObject(obj_type *Obj_, std::size_t Size_, std::uint64_t SessId_)
 
     return true;
 error:
-    // Очистим возможно не полностью загруженный объект
+    // РћС‡РёСЃС‚РёРј РІРѕР·РјРѕР¶РЅРѕ РЅРµ РїРѕР»РЅРѕСЃС‚СЊСЋ Р·Р°РіСЂСѓР¶РµРЅРЅС‹Р№ РѕР±СЉРµРєС‚
     Obj_->Clear();
     return false;
 }
@@ -404,7 +404,7 @@ bool MSend::Start()
 	Break.store(false);
 	try
 	{
-		// Создаем поток для выполнения отправки и приема данных
+		// РЎРѕР·РґР°РµРј РїРѕС‚РѕРє РґР»СЏ РІС‹РїРѕР»РЅРµРЅРёСЏ РѕС‚РїСЂР°РІРєРё Рё РїСЂРёРµРјР° РґР°РЅРЅС‹С…
 		std::thread TmpThread(
 			[](MSend *Obj_)
 			{
@@ -430,15 +430,15 @@ void MSend::Stop()
 //---------------------------------------------------------------------------
 void MSendSrv::Event(MComputersItem *Computer_, int Event_)
 {
-//    ::Sleep(1000);  /// для визуальной отладки событий
+//    ::Sleep(1000);  /// РґР»СЏ РІРёР·СѓР°Р»СЊРЅРѕР№ РѕС‚Р»Р°РґРєРё СЃРѕР±С‹С‚РёР№
     if ( Window==nullptr ) return;
-	::PostMessage(Window, MinMsg+Event_, (WPARAM)Computer_, 0);			// асинхронно
-//    ::SendMessage(Window, MinMsg+Event_, (WPARAM)Computer_, nullptr);	// возможна блокировка потоков
+	::PostMessage(Window, MinMsg+Event_, (WPARAM)Computer_, 0);			// Р°СЃРёРЅС…СЂРѕРЅРЅРѕ
+//    ::SendMessage(Window, MinMsg+Event_, (WPARAM)Computer_, nullptr);	// РІРѕР·РјРѕР¶РЅР° Р±Р»РѕРєРёСЂРѕРІРєР° РїРѕС‚РѕРєРѕРІ
 }
 //---------------------------------------------------------------------------
 void MSendSrv::ThreadP()
 {
-    // Обработка тела потока
+    // РћР±СЂР°Р±РѕС‚РєР° С‚РµР»Р° РїРѕС‚РѕРєР°
     switch(Mode)
     {
         case mssSendGames:
@@ -466,28 +466,28 @@ void MSendSrv::ThreadSend()
 
 	for ( std::size_t i=0; i<Comps->size(); i++ )
 	{
-		// Создаем сокет для исходящего соединения
+		// РЎРѕР·РґР°РµРј СЃРѕРєРµС‚ РґР»СЏ РёСЃС…РѕРґСЏС‰РµРіРѕ СЃРѕРµРґРёРЅРµРЅРёСЏ
 		if ( !Create(true) ) goto next;
 		pComp=(*Comps)[i];
-		// Устанавливаем соединение
+		// РЈСЃС‚Р°РЅР°РІР»РёРІР°РµРј СЃРѕРµРґРёРЅРµРЅРёРµ
 		Event(pComp,mseConnecting);
 		if ( !Connect(pComp->Address.c_str(),2) ) { Event(pComp,mseNotConnect); goto next; }
 		Event(pComp,mseSending);
 
-		// Выполнем обмен hello и генерируем ID сеанса
+		// Р’С‹РїРѕР»РЅРµРј РѕР±РјРµРЅ hello Рё РіРµРЅРµСЂРёСЂСѓРµРј ID СЃРµР°РЅСЃР°
 		SessId=NextSessId();
 		if ( (!SndHello(SessId))||
 			(!RcvHello(&RmtSessId)) ) { Event(pComp,mseProtError); goto next; }
 
-		// Можем сгенерировать сеансовый ID из своего random и клиента
+		// РњРѕР¶РµРј СЃРіРµРЅРµСЂРёСЂРѕРІР°С‚СЊ СЃРµР°РЅСЃРѕРІС‹Р№ ID РёР· СЃРІРѕРµРіРѕ random Рё РєР»РёРµРЅС‚Р°
 		{
 			std::array <decltype(SessId),2> IdV;
 			IdV[0]=SessId;
 			IdV[1]=RmtSessId;
-			SessId=fasthash64(&IdV,sizeof(IdV),0);	/// Нужно использовать Hash-IV
+			SessId=fasthash64(&IdV,sizeof(IdV),0);	/// РќСѓР¶РЅРѕ РёСЃРїРѕР»СЊР·РѕРІР°С‚СЊ Hash-IV
 		}
 
-		// Отправляем блок-информер и данные
+		// РћС‚РїСЂР°РІР»СЏРµРј Р±Р»РѕРє-РёРЅС„РѕСЂРјРµСЂ Рё РґР°РЅРЅС‹Рµ
 		switch(Mode)
 		{
 			case mssSendGames:
@@ -502,11 +502,11 @@ void MSendSrv::ThreadSend()
 				goto next;
 		}
 
-		// Принимаем подтверждение
+		// РџСЂРёРЅРёРјР°РµРј РїРѕРґС‚РІРµСЂР¶РґРµРЅРёРµ
 		if ( !RcvRequest(&Type,SessId,&Size) ) { Event(pComp,mseProtError); goto next; }
 		if ( (Type!=mstAccept)||(Size!=0) ) { Event(pComp,mseProtError); goto next; }
 
-		// Завершаем соединение
+		// Р—Р°РІРµСЂС€Р°РµРј СЃРѕРµРґРёРЅРµРЅРёРµ
 		Event(pComp,mseDisconnecting);
 		if ( !Disconnect(10) ) { Event(pComp,mseProtError); goto next; }
 
@@ -524,25 +524,25 @@ void MSendSrv::ThreadGet()
 	std::uint8_t Type;
 
 	if ( !Create(true) ) goto error;
-	// Устанавливаем соединение
+	// РЈСЃС‚Р°РЅР°РІР»РёРІР°РµРј СЃРѕРµРґРёРЅРµРЅРёРµ
 	Event(Comp,mseConnecting);
 	if ( !Connect((Comp)->Address.c_str(),2) ) { Event(Comp,mseNotConnect); goto error; }
 	Event(Comp,mseReceiving);
 
-	// Выполнем обмен hello и генерируем ID сеанса
+	// Р’С‹РїРѕР»РЅРµРј РѕР±РјРµРЅ hello Рё РіРµРЅРµСЂРёСЂСѓРµРј ID СЃРµР°РЅСЃР°
 	SessId=NextSessId();
 	if ( (!SndHello(SessId))||
 		(!RcvHello(&RmtSessId)) ) { Event(Comp,mseProtError); goto error; }
 
-	// Можем сгенерировать сеансовый ID из своего random и клиента
+	// РњРѕР¶РµРј СЃРіРµРЅРµСЂРёСЂРѕРІР°С‚СЊ СЃРµР°РЅСЃРѕРІС‹Р№ ID РёР· СЃРІРѕРµРіРѕ random Рё РєР»РёРµРЅС‚Р°
 	{
 		std::array <decltype(SessId),2> IdV;
 		IdV[0]=SessId;
 		IdV[1]=RmtSessId;
-		SessId=fasthash64(&IdV,sizeof(IdV),0);	/// Нужно использовать Hash-IV
+		SessId=fasthash64(&IdV,sizeof(IdV),0);	/// РќСѓР¶РЅРѕ РёСЃРїРѕР»СЊР·РѕРІР°С‚СЊ Hash-IV
 	}
 
-	// Отправляем запрос на данные
+	// РћС‚РїСЂР°РІР»СЏРµРј Р·Р°РїСЂРѕСЃ РЅР° РґР°РЅРЅС‹Рµ
 	switch(Mode)
 	{
 		case mssGetGames:   Type=mstGetGames; break;
@@ -551,7 +551,7 @@ void MSendSrv::ThreadGet()
 	}
 	if ( !SndRequest(Type,SessId,0) ) { Event(Comp,mseProtError); goto error; }
 
-	// Принимаем ответ и данные
+	// РџСЂРёРЅРёРјР°РµРј РѕС‚РІРµС‚ Рё РґР°РЅРЅС‹Рµ
 	if ( (!RcvRequest(&Type,SessId,&Size))||
 		(Type!=mstAccept) ) { Event(Comp,mseProtError); goto error; }
 	switch(Mode)
@@ -568,7 +568,7 @@ void MSendSrv::ThreadGet()
 			break;
 	}
 
-	// Завершаем соединение
+	// Р—Р°РІРµСЂС€Р°РµРј СЃРѕРµРґРёРЅРµРЅРёРµ
 	Event(Comp,mseDisconnecting);
 	if ( !Disconnect(10) ) { Event(Comp,mseProtError); goto error; }
 
@@ -592,7 +592,7 @@ bool MSendSrv::NetFree()
 bool MSendSrv::Send(std::vector <MComputersItem*> *Computers_, MGames *Games_, MClOptions *Options_)
 {
     if ( Mode!=mssNone ) goto error;
-//    // Прерываем текущие сетевые операции
+//    // РџСЂРµСЂС‹РІР°РµРј С‚РµРєСѓС‰РёРµ СЃРµС‚РµРІС‹Рµ РѕРїРµСЂР°С†РёРё
 //    Stop();
 
     if ( Computers_==nullptr ) goto error; /// throw ?
@@ -609,7 +609,7 @@ bool MSendSrv::Send(std::vector <MComputersItem*> *Computers_, MGames *Games_, M
 		Mode=mssSendConfig;
 	} else goto error;                  /// throw ?
 
-	// Создаем поток, который разошлет данные компьютерам
+	// РЎРѕР·РґР°РµРј РїРѕС‚РѕРє, РєРѕС‚РѕСЂС‹Р№ СЂР°Р·РѕС€Р»РµС‚ РґР°РЅРЅС‹Рµ РєРѕРјРїСЊСЋС‚РµСЂР°Рј
 	return Start();
 error:
 	return false;
@@ -618,7 +618,7 @@ error:
 bool MSendSrv::Get(MComputersItem *Computer_, MGames *Games_, MClOptions *Options_)
 {
 	if ( Mode!=mssNone ) goto error;
-//    // Прерываем текущие сетевые операции
+//    // РџСЂРµСЂС‹РІР°РµРј С‚РµРєСѓС‰РёРµ СЃРµС‚РµРІС‹Рµ РѕРїРµСЂР°С†РёРё
 //    Stop();
 
 	if ( Computer_==nullptr ) goto error;  /// throw ?
@@ -635,7 +635,7 @@ bool MSendSrv::Get(MComputersItem *Computer_, MGames *Games_, MClOptions *Option
         Mode=mssGetConfig;
     } else goto error;                  /// throw ?
 
-    // Создаем поток, который займется приемом данных
+    // РЎРѕР·РґР°РµРј РїРѕС‚РѕРє, РєРѕС‚РѕСЂС‹Р№ Р·Р°Р№РјРµС‚СЃСЏ РїСЂРёРµРјРѕРј РґР°РЅРЅС‹С…
     return Start();
 error:
     return false;
@@ -652,29 +652,29 @@ void MSendCl::ThreadP()
 	std::size_t Size;
 	std::uint8_t Type;
 
-	// Создаем принимающий (слушающий) сокет
+	// РЎРѕР·РґР°РµРј РїСЂРёРЅРёРјР°СЋС‰РёР№ (СЃР»СѓС€Р°СЋС‰РёР№) СЃРѕРєРµС‚
 	if ( !Create(false) ) return;
-	// Обрабатываем поступающие соединения
+	// РћР±СЂР°Р±Р°С‚С‹РІР°РµРј РїРѕСЃС‚СѓРїР°СЋС‰РёРµ СЃРѕРµРґРёРЅРµРЅРёСЏ
 	while(Listen())
 	{
-		// Принимаем соединение
+		// РџСЂРёРЅРёРјР°РµРј СЃРѕРµРґРёРЅРµРЅРёРµ
 		if ( !Accept() ) continue;
 
-		// Принимаем hello и random сервера
+		// РџСЂРёРЅРёРјР°РµРј hello Рё random СЃРµСЂРІРµСЂР°
 		if ( !RcvHello(&RmtSessId) ) goto next;
-		// Отправляем свой
+		// РћС‚РїСЂР°РІР»СЏРµРј СЃРІРѕР№
 		SessId=NextSessId();
 		if ( !SndHello(SessId) ) goto next;
-		// Формируем сеансовый ID и принимаем запрос
+		// Р¤РѕСЂРјРёСЂСѓРµРј СЃРµР°РЅСЃРѕРІС‹Р№ ID Рё РїСЂРёРЅРёРјР°РµРј Р·Р°РїСЂРѕСЃ
 		{
 			std::array <decltype(SessId),2> IdV;
 			IdV[0]=RmtSessId;
 			IdV[1]=SessId;
-			SessId=fasthash64(&IdV,sizeof(IdV),0);	/// Нужно использовать Hash-IV
+			SessId=fasthash64(&IdV,sizeof(IdV),0);	/// РќСѓР¶РЅРѕ РёСЃРїРѕР»СЊР·РѕРІР°С‚СЊ Hash-IV
 		}
 		if ( !RcvRequest(&Type,SessId,&Size) ) goto next;
 
-        // Обрабатываем запрос
+        // РћР±СЂР°Р±Р°С‚С‹РІР°РµРј Р·Р°РїСЂРѕСЃ
         switch(Type)
         {
             case mstSendGames:
@@ -698,15 +698,15 @@ void MSendCl::ThreadP()
             default: goto next;
         }
 
-        // Завершаем соединение
+        // Р—Р°РІРµСЂС€Р°РµРј СЃРѕРµРґРёРЅРµРЅРёРµ
         Disconnect(10);
 next:
-        // Закрываем сокет
+        // Р—Р°РєСЂС‹РІР°РµРј СЃРѕРєРµС‚
         rClose();
-        // Подчищаем память до следующего соединения
+        // РџРѕРґС‡РёС‰Р°РµРј РїР°РјСЏС‚СЊ РґРѕ СЃР»РµРґСѓСЋС‰РµРіРѕ СЃРѕРµРґРёРЅРµРЅРёСЏ
         Games.Clear();
     }
-    // Закрываем принимающий сокет
+    // Р—Р°РєСЂС‹РІР°РµРј РїСЂРёРЅРёРјР°СЋС‰РёР№ СЃРѕРєРµС‚
     lClose();
 }
 //---------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-//---------------------------------------------------------------------------
+п»ї//---------------------------------------------------------------------------
 #include <vcl.h>
 #include <stdio.h>
 #include <cwchar>
@@ -31,7 +31,7 @@ void __fastcall TFormEvents::FormClose(TObject *Sender,
     ListViewEvents->Items->Clear();
     ListViewComputers->Items->Clear();
     Action=caFree;
-    FormMain->WindowClose(this);        /// нужно ли ??
+    FormMain->WindowClose(this);        /// РЅСѓР¶РЅРѕ Р»Рё ??
 }
 //---------------------------------------------------------------------------
 void __fastcall TFormEvents::ListViewComputersInsert(TObject *Sender,
@@ -87,11 +87,11 @@ void __fastcall TFormEvents::ListViewEventsSelectItem(TObject *Sender,
 	pos=0;
 	if ( hours>0 ) pos=swprintf(
 		line+pos, sizeof(line)/sizeof(line[0])-pos,
-		L"%.2i час. ",
+		L"%.2i С‡Р°СЃ. ",
 		hours);
 	swprintf(
 		line+pos, sizeof(line)/sizeof(line[0])-pos,
-		L"%.2i мин.",
+		L"%.2i РјРёРЅ.",
 		min);
     LabelSelTime->Caption=line;
     LabelSelMoney->Caption=FloatToStrF(Money,ffCurrency,8,2);
@@ -124,13 +124,13 @@ void __fastcall TFormEvents::ListViewEventsCompare(TObject *Sender,
 				LogItem2.SystemTime);
 			break;
 		case 2:
-			// Сравниваем номера компьютеров
+			// РЎСЂР°РІРЅРёРІР°РµРј РЅРѕРјРµСЂР° РєРѕРјРїСЊСЋС‚РµСЂРѕРІ
 			Compare=DComp(
 				GetCompNum(LogItem1),
 				GetCompNum(LogItem2));
 			break;
 		case 3:
-/*            // Сравнение на основе текстового описания
+/*            // РЎСЂР°РІРЅРµРЅРёРµ РЅР° РѕСЃРЅРѕРІРµ С‚РµРєСЃС‚РѕРІРѕРіРѕ РѕРїРёСЃР°РЅРёСЏ
 			Compare=strcmp(Item1->SubItems->Strings[2].c_str(),
 				Item2->SubItems->Strings[2].c_str()); */
 			if ( LogType1==LogType2 )
@@ -165,7 +165,7 @@ void __fastcall TFormEvents::ListViewEventsCompare(TObject *Sender,
 			{
 				Compare=DComp(LogType1, LogType2);
 			}
-/*            // Веделение в начало списка операций запуска, штрафования, начала смены
+/*            // Р’РµРґРµР»РµРЅРёРµ РІ РЅР°С‡Р°Р»Рѕ СЃРїРёСЃРєР° РѕРїРµСЂР°С†РёР№ Р·Р°РїСѓСЃРєР°, С€С‚СЂР°С„РѕРІР°РЅРёСЏ, РЅР°С‡Р°Р»Р° СЃРјРµРЅС‹
 				LogType1==mlrRun?-1:(
 				LogType2==mlrRun?1:(
 				LogType1==mlrFine?-1:(
@@ -174,7 +174,7 @@ void __fastcall TFormEvents::ListViewEventsCompare(TObject *Sender,
 				LogType2==mlrLogIn?1:DComp(LogType1,LogType2)))))); */
 			break;
 		case 4:
-/*            // Сравнение на основе текстового описания
+/*            // РЎСЂР°РІРЅРµРЅРёРµ РЅР° РѕСЃРЅРѕРІРµ С‚РµРєСЃС‚РѕРІРѕРіРѕ РѕРїРёСЃР°РЅРёСЏ
 			Compare=strcmp(Item1->SubItems->Count<=3?"":Item1->SubItems->Strings[3].c_str(),
 				Item2->SubItems->Count<=3?"":Item2->SubItems->Strings[3].c_str()); */
 			if ( LogType1==LogType2 )
@@ -340,7 +340,7 @@ void TFormEvents::SetListViewComputersLine(
 	wchar_t line[50];
 	int icon;
 
-	// Номер компьютера
+	// РќРѕРјРµСЂ РєРѕРјРїСЊСЋС‚РµСЂР°
 	if ( Info_.Changes&mdcNumber )
 	{
 		swprintf(
@@ -349,33 +349,33 @@ void TFormEvents::SetListViewComputersLine(
 			Info_.Number);
         SubItems->Strings[0]=line;
     }
-    // Режим работы
+    // Р РµР¶РёРј СЂР°Р±РѕС‚С‹
     if ( Info_.Changes&mdcState )
     {
         unsigned int State=Info_.State;
-		if ( State&mcsOpen ) { icon=5; wcscpy(line, L"настройка"); }
-		else if ( State&mcsPause ) { icon=4; wcscpy(line, L"приостановлен"); }
-		else if ( State&mcsLock ) { icon=3; wcscpy(line, L"Прикрыт !"); }
-		else if ( State&mcsFine ) { icon=2; wcscpy(line, L"Штраф !!!"); }
-		else if ( State&mcsWork ) { icon=1; wcscpy(line, L"Работа"); }
-		else if ( State&mcsFree ) { icon=0; wcscpy(line, L"СВОБОДЕН"); }
+		if ( State&mcsOpen ) { icon=5; wcscpy(line, L"РЅР°СЃС‚СЂРѕР№РєР°"); }
+		else if ( State&mcsPause ) { icon=4; wcscpy(line, L"РїСЂРёРѕСЃС‚Р°РЅРѕРІР»РµРЅ"); }
+		else if ( State&mcsLock ) { icon=3; wcscpy(line, L"РџСЂРёРєСЂС‹С‚ !"); }
+		else if ( State&mcsFine ) { icon=2; wcscpy(line, L"РЁС‚СЂР°С„ !!!"); }
+		else if ( State&mcsWork ) { icon=1; wcscpy(line, L"Р Р°Р±РѕС‚Р°"); }
+		else if ( State&mcsFree ) { icon=0; wcscpy(line, L"РЎР’РћР‘РћР”Р•Рќ"); }
 		else { icon=-1; wcscpy(line, L""); }
         Item_->SubItemImages[1]=icon;
         SubItems->Strings[1]=line;
     }
-    // Название тарифа
+    // РќР°Р·РІР°РЅРёРµ С‚Р°СЂРёС„Р°
     if ( Info_.Changes&mdcTariff )
     {
 		auto iTariff=Tariffs_.SrchUUID(Info_.TariffID);
 		if ( iTariff!=Tariffs_.end() ) SubItems->Strings[2]=iTariff->Name.c_str();
 		else SubItems->Strings[2]=L"";
 	}
-	// Время работы
+	// Р’СЂРµРјСЏ СЂР°Р±РѕС‚С‹
 	if ( Info_.Changes&mdcWorkTime )
 	{
 		if ( Info_.State&mcsWork )
 		{
-			swprintf(line, L"%i час. %.2i мин.",Info_.WorkTime/60,Info_.WorkTime%60);
+			swprintf(line, L"%i С‡Р°СЃ. %.2i РјРёРЅ.",Info_.WorkTime/60,Info_.WorkTime%60);
 			SubItems->Strings[3]=line;
         } else
         {
@@ -384,7 +384,7 @@ void TFormEvents::SetListViewComputersLine(
             SubItems->Strings[5]=L"";
         }
     }
-    // Сколько времени осталось работать и до скольки
+    // РЎРєРѕР»СЊРєРѕ РІСЂРµРјРµРЅРё РѕСЃС‚Р°Р»РѕСЃСЊ СЂР°Р±РѕС‚Р°С‚СЊ Рё РґРѕ СЃРєРѕР»СЊРєРё
     if ( Info_.State&mcsWork )
     {
 		swprintf(line, L"%.2i:%.2i",Info_.ToEndWork/60,Info_.ToEndWork%60);
@@ -392,12 +392,12 @@ void TFormEvents::SetListViewComputersLine(
         swprintf(line, L"%.2i:%.2i",Info_.EndWorkTime/60,Info_.EndWorkTime%60);
         SubItems->Strings[5]=line;
     }
-    // Время штрафа
+    // Р’СЂРµРјСЏ С€С‚СЂР°С„Р°
     if ( Info_.Changes&mdcFineTime )
     {
         if ( Info_.State&mcsFine )
         {
-            swprintf(line, L"%i мин.",Info_.FineTime);
+            swprintf(line, L"%i РјРёРЅ.",Info_.FineTime);
             SubItems->Strings[6]=line;
         } else
         {
@@ -405,7 +405,7 @@ void TFormEvents::SetListViewComputersLine(
             SubItems->Strings[7]=L"";
         }
     }
-    // Сколько времени штрафа осталось
+    // РЎРєРѕР»СЊРєРѕ РІСЂРµРјРµРЅРё С€С‚СЂР°С„Р° РѕСЃС‚Р°Р»РѕСЃСЊ
 	if ( Info_.State&mcsFine )
 	{
 		swprintf(line, L"%.2i:%.2i",Info_.ToEndFine/60,Info_.ToEndFine%60);
@@ -418,36 +418,36 @@ void TFormEvents::UpdateListViewComputers(
 	MStates &States_,
 	const MTariffs &Tariffs_)
 {
-	// Убираем записи, не сопоставленные с состоянием компьютера
+	// РЈР±РёСЂР°РµРј Р·Р°РїРёСЃРё, РЅРµ СЃРѕРїРѕСЃС‚Р°РІР»РµРЅРЅС‹Рµ СЃ СЃРѕСЃС‚РѕСЏРЅРёРµРј РєРѕРјРїСЊСЋС‚РµСЂР°
 	for ( int i=ListViewComputers->Items->Count-1; i>=0; i-- )
 	{
 		TListItem *Item=ListViewComputers->Items->Item[i];
 		if ( States_.Search((int)Item->Data)!=States_.end() ) Item->Delete();
 	}
 
-	// Убираем из списка компьютеры, не подходящие под фильтр, и добавляем новые
+	// РЈР±РёСЂР°РµРј РёР· СЃРїРёСЃРєР° РєРѕРјРїСЊСЋС‚РµСЂС‹, РЅРµ РїРѕРґС…РѕРґСЏС‰РёРµ РїРѕРґ С„РёР»СЊС‚СЂ, Рё РґРѕР±Р°РІР»СЏРµРј РЅРѕРІС‹Рµ
 	for ( auto &State: States_ )
 	{
 		//
 		MStatesInfo Info=State.GetInfo();
 		//
 		TListItem *Item=ListViewComputers->FindData(
-			0, reinterpret_cast<void*>(Info.Number),    /// "грязный" cast
+			0, reinterpret_cast<void*>(Info.Number),    /// "РіСЂСЏР·РЅС‹Р№" cast
 			true, false);
-		// Проверяем подходит ли компьютер под выставленный фильтр
+		// РџСЂРѕРІРµСЂСЏРµРј РїРѕРґС…РѕРґРёС‚ Р»Рё РєРѕРјРїСЊСЋС‚РµСЂ РїРѕРґ РІС‹СЃС‚Р°РІР»РµРЅРЅС‹Р№ С„РёР»СЊС‚СЂ
 		if ( !CheckFilter(Info,2) )
 		{
 			if ( Item ) Item->Delete();
 			continue;
 		}
-		// Если компьютер не занесен в список, то добавляем его
+		// Р•СЃР»Рё РєРѕРјРїСЊСЋС‚РµСЂ РЅРµ Р·Р°РЅРµСЃРµРЅ РІ СЃРїРёСЃРѕРє, С‚Рѕ РґРѕР±Р°РІР»СЏРµРј РµРіРѕ
 		if ( !Item )
 		{
 			Item=ListViewComputers->Items->Add();
 			Item->Data=reinterpret_cast<void*>(Info.Number);
 			Info.Changes=mdcAll;
 		}
-		// Обновляем информацию в таблице
+		// РћР±РЅРѕРІР»СЏРµРј РёРЅС„РѕСЂРјР°С†РёСЋ РІ С‚Р°Р±Р»РёС†Рµ
 		if ( Full_ ) Info.Changes=mdcAll;
 		SetListViewComputersLine(Item, Info, Tariffs_);
 	}
@@ -458,11 +458,11 @@ bool TFormEvents::Open(
 	MLogRecords::const_iterator Begin_,
 	MLogRecords::const_iterator End_)
 {
-	// Чистим интерфейс
+	// Р§РёСЃС‚РёРј РёРЅС‚РµСЂС„РµР№СЃ
 	ListViewEvents->Items->Clear();
 	ListViewComputers->Items->Clear();
 
-	Caption=UnicodeString(L"События  -  ")+File_.Name.c_str();
+	Caption=UnicodeString(L"РЎРѕР±С‹С‚РёСЏ  -  ")+File_.Name.c_str();
 
 	EventsLog=&File_.Records;
 	EventsBegin=Begin_;
@@ -475,7 +475,7 @@ bool TFormEvents::Open(
 	UpdateListViewEvents();
 
 	FormMain->WindowOpen(File_,this);
-	FormMain->WindowCaption(this, "События");	/// Unicode support ???
+	FormMain->WindowCaption(this, "РЎРѕР±С‹С‚РёСЏ");	/// Unicode support ???
 	return true;
 error:
     Close();
@@ -586,7 +586,7 @@ void TFormEvents::UpdateListViewEvents()
 	for ( MLogRecords::const_iterator Begin_=EventsBegin, End_=EventsEnd;
 		Begin_!=End_; ++Begin_ )
     {
-        // Обновим список тарифов/штрафов/пользователей
+        // РћР±РЅРѕРІРёРј СЃРїРёСЃРѕРє С‚Р°СЂРёС„РѕРІ/С€С‚СЂР°С„РѕРІ/РїРѕР»СЊР·РѕРІР°С‚РµР»РµР№
         switch(Begin_->gTypeID())
         {
 			case MLogRecords::DataTariffs::TypeID:
@@ -605,14 +605,14 @@ void TFormEvents::UpdateListViewEvents()
                 break;
         }
 
-        // Проверим подходит ли запись выбранному набору фильтров
+        // РџСЂРѕРІРµСЂРёРј РїРѕРґС…РѕРґРёС‚ Р»Рё Р·Р°РїРёСЃСЊ РІС‹Р±СЂР°РЅРЅРѕРјСѓ РЅР°Р±РѕСЂСѓ С„РёР»СЊС‚СЂРѕРІ
 		if ( !CheckEventFilter(Begin_->gTypeID()) ) continue;
 
-        // Общие данные
+        // РћР±С‰РёРµ РґР°РЅРЅС‹Рµ
         Item=ListViewEvents->Items->Add();
         Item->ImageIndex=-1;
         Item->Data=const_cast<MLogRecordsItem*>(&*Begin_);
-        // Время события
+        // Р’СЂРµРјСЏ СЃРѕР±С‹С‚РёСЏ
         if ( Int64ToSystemTime(Begin_->SystemTime, ss_time) )
 			swprintf(
 				line, sizeof(line)/sizeof(line[0]),
@@ -622,52 +622,52 @@ void TFormEvents::UpdateListViewEvents()
 		else *line=L'\0';
         Item->SubItems->Add(line);
 
-        // Описание
+        // РћРїРёСЃР°РЅРёРµ
         switch(Begin_->gTypeID())
         {
 			case MLogRecords::LogBegin::TypeID:
 				Item->SubItems->Add(L"");
-				Item->SubItems->Add(L"Файл лога начат");
+				Item->SubItems->Add(L"Р¤Р°Р№Р» Р»РѕРіР° РЅР°С‡Р°С‚");
 				break;
 			case MLogRecords::LogEnd::TypeID:
 				Item->SubItems->Add(L"");
-				Item->SubItems->Add(L"Файл лога закрыт");
+				Item->SubItems->Add(L"Р¤Р°Р№Р» Р»РѕРіР° Р·Р°РєСЂС‹С‚");
 				break;
 			case MLogRecords::AppStart::TypeID:
 				Item->SubItems->Add(L"");
-				Item->SubItems->Add(L"Модуль управления запущен");
+				Item->SubItems->Add(L"РњРѕРґСѓР»СЊ СѓРїСЂР°РІР»РµРЅРёСЏ Р·Р°РїСѓС‰РµРЅ");
 				break;
 			case MLogRecords::AppStop::TypeID:
 				Item->SubItems->Add(L"");
-				Item->SubItems->Add(L"Модуль управления остановлен");
+				Item->SubItems->Add(L"РњРѕРґСѓР»СЊ СѓРїСЂР°РІР»РµРЅРёСЏ РѕСЃС‚Р°РЅРѕРІР»РµРЅ");
 				break;
 
 			case MLogRecords::AppConfig::TypeID:
 				Item->SubItems->Add(L"");
 				if ( static_cast<const MLogRecords::AppConfig&>(*Begin_).Opened )
-					Item->SubItems->Add(L"Настройки открыты");
+					Item->SubItems->Add(L"РќР°СЃС‚СЂРѕР№РєРё РѕС‚РєСЂС‹С‚С‹");
 				else
-					Item->SubItems->Add(L"Настройки закрыты");
+					Item->SubItems->Add(L"РќР°СЃС‚СЂРѕР№РєРё Р·Р°РєСЂС‹С‚С‹");
 				break;
 			case MLogRecords::ChComputers::TypeID:
 				Item->SubItems->Add(L"");
-				Item->SubItems->Add(L"Изменен список компьютеров");
+				Item->SubItems->Add(L"РР·РјРµРЅРµРЅ СЃРїРёСЃРѕРє РєРѕРјРїСЊСЋС‚РµСЂРѕРІ");
 				break;
 			case MLogRecords::ChTariffs::TypeID:
 				Item->SubItems->Add(L"");
-				Item->SubItems->Add(L"Изменены тарифы");
+				Item->SubItems->Add(L"РР·РјРµРЅРµРЅС‹ С‚Р°СЂРёС„С‹");
 				break;
 			case MLogRecords::ChFines::TypeID:
 				Item->SubItems->Add(L"");
-				Item->SubItems->Add(L"Изменены штрафы");
+				Item->SubItems->Add(L"РР·РјРµРЅРµРЅС‹ С€С‚СЂР°С„С‹");
 				break;
 			case MLogRecords::ChUsers::TypeID:
 				Item->SubItems->Add(L"");
-				Item->SubItems->Add(L"Изменен список пользователей");
+				Item->SubItems->Add(L"РР·РјРµРЅРµРЅ СЃРїРёСЃРѕРє РїРѕР»СЊР·РѕРІР°С‚РµР»РµР№");
 				break;
 			case MLogRecords::ChOptions::TypeID:
 				Item->SubItems->Add(L"");
-				Item->SubItems->Add(L"Изменены общие настройки");
+				Item->SubItems->Add(L"РР·РјРµРЅРµРЅС‹ РѕР±С‰РёРµ РЅР°СЃС‚СЂРѕР№РєРё");
 				break;
 
 			case MLogRecords::AppLogIn::TypeID:
@@ -677,14 +677,14 @@ void TFormEvents::UpdateListViewEvents()
 					static_cast<const MLogRecords::AppLogIn&>(*Begin_).User);
 				swprintf(
 					line, sizeof(line)/sizeof(line[0]),
-					L"Смену начал(а) '%s'",
+					L"РЎРјРµРЅСѓ РЅР°С‡Р°Р»(Р°) '%s'",
 					iUsr!=Users.end()? iUsr->Name.c_str(): L"???");
 				Item->SubItems->Add(line);
 			}
 				break;
 			case MLogRecords::AppLogOut::TypeID:
 				Item->SubItems->Add(L"");
-				Item->SubItems->Add(L"Смена окончена");
+				Item->SubItems->Add(L"РЎРјРµРЅР° РѕРєРѕРЅС‡РµРЅР°");
 				break;
 
 			case MLogRecords::CompRun::TypeID:
@@ -697,18 +697,18 @@ void TFormEvents::UpdateListViewEvents()
 				switch(rcdr.Type)
 				{
 					case mttHours:
-						swprintf(line, L"%i час. %.2i мин.",
+						swprintf(line, L"%i С‡Р°СЃ. %.2i РјРёРЅ.",
 							rcdr.WorkTime/60,rcdr.WorkTime%60);
 						break;
 					case mttFlyPacket:
-						swprintf(line, L"На %i час. %.2i мин. (%i:%.2i)",
+						swprintf(line, L"РќР° %i С‡Р°СЃ. %.2i РјРёРЅ. (%i:%.2i)",
 							rcdr.SizeTime/60,rcdr.SizeTime%60,
 							rcdr.WorkTime/60,rcdr.WorkTime%60);
 						break;
 					case mttPacket:
 						int end;
 						end=rcdr.EndTime>=(24*60)? rcdr.EndTime-24*60: rcdr.EndTime;
-						swprintf(line, L"С %i:%.2i до %i:%.2i (%i:%.2i)",
+						swprintf(line, L"РЎ %i:%.2i РґРѕ %i:%.2i (%i:%.2i)",
 							rcdr.BeginTime/60,rcdr.BeginTime%60,end/60,end%60,
 							rcdr.WorkTime/60,rcdr.WorkTime%60);
 						break;
@@ -726,25 +726,25 @@ void TFormEvents::UpdateListViewEvents()
 				Item->SubItems->Add(IntToStr(rcdf.Number));
 				swprintf(
 					line, sizeof(line)/sizeof(line[0]),
-					L"Штраф '%s'",
+					L"РЁС‚СЂР°С„ '%s'",
 					iFn!=Fines.end()? iFn->Descr.c_str(): L"???");
 				Item->SubItems->Add(line);
 				if ( rcdf.Time==(24*60) )
 				{
 					swprintf(
 						line, sizeof(line)/sizeof(line[0]),
-						L"Все время");
+						L"Р’СЃРµ РІСЂРµРјСЏ");
 				} else if ( rcdf.Time<0 )
 				{
 					swprintf(
 						line, sizeof(line)/sizeof(line[0]),
-						L"Снято %i мин.",
+						L"РЎРЅСЏС‚Рѕ %i РјРёРЅ.",
 						-rcdf.Time);
 				} else
 				{
 					swprintf(
 						line, sizeof(line)/sizeof(line[0]),
-						L"Ожидание %i мин.",
+						L"РћР¶РёРґР°РЅРёРµ %i РјРёРЅ.",
 						rcdf.Time);
 				}
 				Item->SubItems->Add(line);
@@ -757,7 +757,7 @@ void TFormEvents::UpdateListViewEvents()
 				Item->SubItems->Add(IntToStr(rcde.From));
 				swprintf(
 					line, sizeof(line)/sizeof(line[0]),
-					L"Пересадка на №%i",
+					L"РџРµСЂРµСЃР°РґРєР° РЅР° в„–%i",
 					rcde.To);
 				Item->SubItems->Add(line);
 			}
@@ -767,7 +767,7 @@ void TFormEvents::UpdateListViewEvents()
 				auto &rcdl=static_cast<const MLogRecords::ModeLock&>(*Begin_);
 
 				Item->SubItems->Add(IntToStr(rcdl.Number));
-				Item->SubItems->Add(rcdl.Apply? L"Прикрыт": L"Открыт");
+				Item->SubItems->Add(rcdl.Apply? L"РџСЂРёРєСЂС‹С‚": L"РћС‚РєСЂС‹С‚");
 			}
 				break;
 			case MLogRecords::ModePause::TypeID:
@@ -775,7 +775,7 @@ void TFormEvents::UpdateListViewEvents()
 				auto &rcdp=static_cast<const MLogRecords::ModePause&>(*Begin_);
 
 				Item->SubItems->Add(IntToStr(rcdp.Number));
-				Item->SubItems->Add(rcdp.Apply? L"Время приостановлено": L"Время запущено");
+				Item->SubItems->Add(rcdp.Apply? L"Р’СЂРµРјСЏ РїСЂРёРѕСЃС‚Р°РЅРѕРІР»РµРЅРѕ": L"Р’СЂРµРјСЏ Р·Р°РїСѓС‰РµРЅРѕ");
 			}
 				break;
 			case MLogRecords::ModeOpen::TypeID:
@@ -783,7 +783,7 @@ void TFormEvents::UpdateListViewEvents()
 				auto &rcdo=static_cast<const MLogRecords::ModeOpen&>(*Begin_);
 
 				Item->SubItems->Add(IntToStr(rcdo.Number));
-				Item->SubItems->Add(rcdo.Apply? L"Открыт для настройки": L"Закрыт после настройки");
+				Item->SubItems->Add(rcdo.Apply? L"РћС‚РєСЂС‹С‚ РґР»СЏ РЅР°СЃС‚СЂРѕР№РєРё": L"Р—Р°РєСЂС‹С‚ РїРѕСЃР»Рµ РЅР°СЃС‚СЂРѕР№РєРё");
 			}
 				break;
 			case MLogRecords::CmdPowerOn::TypeID:
@@ -791,7 +791,7 @@ void TFormEvents::UpdateListViewEvents()
 				auto &rcdpwr=static_cast<const MLogRecords::CmdPowerOn&>(*Begin_);
 
 				Item->SubItems->Add(IntToStr(rcdpwr.Number));
-				Item->SubItems->Add(L"Команда на включение");
+				Item->SubItems->Add(L"РљРѕРјР°РЅРґР° РЅР° РІРєР»СЋС‡РµРЅРёРµ");
 			}
 				break;
 			case MLogRecords::CmdReboot::TypeID:
@@ -799,7 +799,7 @@ void TFormEvents::UpdateListViewEvents()
 				auto &rcdprb=static_cast<const MLogRecords::CmdReboot&>(*Begin_);
 
 				Item->SubItems->Add(IntToStr(rcdprb.Number));
-				Item->SubItems->Add(L"Команда на перезагрузку");
+				Item->SubItems->Add(L"РљРѕРјР°РЅРґР° РЅР° РїРµСЂРµР·Р°РіСЂСѓР·РєСѓ");
 			}
 				break;
 			case MLogRecords::CmdShutdown::TypeID:
@@ -807,29 +807,29 @@ void TFormEvents::UpdateListViewEvents()
 				auto &rcdpsd=static_cast<const MLogRecords::CmdShutdown&>(*Begin_);
 
 				Item->SubItems->Add(IntToStr(rcdpsd.Number));
-				Item->SubItems->Add(L"Команда на выключение");
+				Item->SubItems->Add(L"РљРѕРјР°РЅРґР° РЅР° РІС‹РєР»СЋС‡РµРЅРёРµ");
 			}
 				break;
 
 			case MLogRecords::DataShell::TypeID:
 				Item->SubItems->Add(L"");
-				Item->SubItems->Add(L"Данные по модулю управления");
+				Item->SubItems->Add(L"Р”Р°РЅРЅС‹Рµ РїРѕ РјРѕРґСѓР»СЋ СѓРїСЂР°РІР»РµРЅРёСЏ");
 				break;
 			case MLogRecords::DataStates::TypeID:
 				Item->SubItems->Add(L"");
-				Item->SubItems->Add(L"Данные по компьютерам");
+				Item->SubItems->Add(L"Р”Р°РЅРЅС‹Рµ РїРѕ РєРѕРјРїСЊСЋС‚РµСЂР°Рј");
 				break;
 			case MLogRecords::DataTariffs::TypeID:
 				Item->SubItems->Add(L"");
-				Item->SubItems->Add(L"Данные по тарифам");
+				Item->SubItems->Add(L"Р”Р°РЅРЅС‹Рµ РїРѕ С‚Р°СЂРёС„Р°Рј");
 				break;
 			case MLogRecords::DataFines::TypeID:
 				Item->SubItems->Add(L"");
-				Item->SubItems->Add(L"Данные по штрафам");
+				Item->SubItems->Add(L"Р”Р°РЅРЅС‹Рµ РїРѕ С€С‚СЂР°С„Р°Рј");
 				break;
 			case MLogRecords::DataUsers::TypeID:
 				Item->SubItems->Add(L"");
-				Item->SubItems->Add(L"Данные по пользователям");
+				Item->SubItems->Add(L"Р”Р°РЅРЅС‹Рµ РїРѕ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏРј");
 				break;
 
 			default: break;

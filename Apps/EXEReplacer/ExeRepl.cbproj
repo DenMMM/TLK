@@ -2,8 +2,8 @@
     <PropertyGroup>
         <ProjectGuid>{1C64040E-718C-4F32-85A5-81A87A1B1F34}</ProjectGuid>
         <ProjectType>CppGuiApplication</ProjectType>
-        <Config Condition="'$(Config)'==''">Debug</Config>
-        <ProjectVersion>18.8</ProjectVersion>
+        <Config Condition="'$(Config)'==''">Release</Config>
+        <ProjectVersion>19.2</ProjectVersion>
         <FrameworkType>None</FrameworkType>
         <Base>True</Base>
         <Platform Condition="'$(Platform)'==''">Win32</Platform>

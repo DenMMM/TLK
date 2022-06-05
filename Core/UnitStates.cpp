@@ -1,5 +1,5 @@
-//---------------------------------------------------------------------------
-#include <mem.h>
+п»ї//---------------------------------------------------------------------------
+//#include <mem.h>
 #include <stdexcept>
 #pragma hdrstop
 
@@ -73,7 +73,7 @@ bool MStatesItem::ControlWorkTime()
 	StopTimerTime=0;
 	Programs=0;
 	Changes|=mdcState|mdcTariff|mdcWorkTime|mdcFineTime;
-	// Помечаем данные для отправки по сети
+	// РџРѕРјРµС‡Р°РµРј РґР°РЅРЅС‹Рµ РґР»СЏ РѕС‚РїСЂР°РІРєРё РїРѕ СЃРµС‚Рё
 	NetState|=mnsSyncNeed|mnsSyncData; Changes|=mdcNetState;
 	return true;
 }
@@ -85,7 +85,7 @@ bool MStatesItem::ControlFineTime()
 	StartFineTime=0; SizeFineTime=0;
 	State&=~mcsFine;
 	Changes|=mdcState|mdcFineTime;
-	// Помечаем данные для отправки по сети
+	// РџРѕРјРµС‡Р°РµРј РґР°РЅРЅС‹Рµ РґР»СЏ РѕС‚РїСЂР°РІРєРё РїРѕ СЃРµС‚Рё
 	NetState|=mnsSyncNeed|mnsSyncData; Changes|=mdcNetState;
 	return true;
 }
@@ -102,23 +102,23 @@ bool MStatesItem::CmdRun(
 	//
 	if ( State==mcsFree )
 	{
-		// Запуск компьютера в работу
+		// Р—Р°РїСѓСЃРє РєРѕРјРїСЊСЋС‚РµСЂР° РІ СЂР°Р±РѕС‚Сѓ
 		State=mcsWork;
 		TariffID=Tariff_.gUUID();
 		StartWorkTime=SystemTime;
 		SizeWorkTime=Time_.WorkTime;
 		Programs=Tariff_.Programs;
 		Changes|=mdcState|mdcTariff|mdcWorkTime;
-		// Если компьютер после запуска нужно перезагрузить, то делаем нужные пометки
+		// Р•СЃР»Рё РєРѕРјРїСЊСЋС‚РµСЂ РїРѕСЃР»Рµ Р·Р°РїСѓСЃРєР° РЅСѓР¶РЅРѕ РїРµСЂРµР·Р°РіСЂСѓР·РёС‚СЊ, С‚Рѕ РґРµР»Р°РµРј РЅСѓР¶РЅС‹Рµ РїРѕРјРµС‚РєРё
 		if ( Tariff_.Reboot ) { Commands|=mccReboot; Changes|=mdcCommands; }
 	} else
 	{
-		// Добавление времени работающему компьютеру
+		// Р”РѕР±Р°РІР»РµРЅРёРµ РІСЂРµРјРµРЅРё СЂР°Р±РѕС‚Р°СЋС‰РµРјСѓ РєРѕРјРїСЊСЋС‚РµСЂСѓ
 		SizeWorkTime+=Time_.WorkTime;
 		if ( SizeWorkTime>(24*60) ) SizeWorkTime=24*60;
 		Changes|=mdcWorkTime;
 	}
-	// Помечаем данные для отправки по сети
+	// РџРѕРјРµС‡Р°РµРј РґР°РЅРЅС‹Рµ РґР»СЏ РѕС‚РїСЂР°РІРєРё РїРѕ СЃРµС‚Рё
 	NetState|=mnsSyncNeed|mnsSyncData; Changes|=mdcNetState;
 	return true;
 }
@@ -132,33 +132,33 @@ bool MStatesItem::CmdFine(short FineSize_, bool Check_)
 	//
 	if ( FineSize_>0 )
 	{
-		// Установка штрафа с ожиданием
+		// РЈСЃС‚Р°РЅРѕРІРєР° С€С‚СЂР°С„Р° СЃ РѕР¶РёРґР°РЅРёРµРј
 		if ( State&mcsFine )
 		{
-			// Увеличиваем время уже примененного штрафа
+			// РЈРІРµР»РёС‡РёРІР°РµРј РІСЂРµРјСЏ СѓР¶Рµ РїСЂРёРјРµРЅРµРЅРЅРѕРіРѕ С€С‚СЂР°С„Р°
 			SizeFineTime+=FineSize_;
 			Changes|=mdcFineTime;
 		} else
 		{
-			// Задаем новый штраф
+			// Р—Р°РґР°РµРј РЅРѕРІС‹Р№ С€С‚СЂР°С„
 			State|=mcsFine;
 			StartFineTime=SystemTime;
 			SizeFineTime=FineSize_;
 			Changes|=mdcState|mdcFineTime;
 		}
-		// Проверяем не перекрывает ли время штрафа оставшееся время работы
+		// РџСЂРѕРІРµСЂСЏРµРј РЅРµ РїРµСЂРµРєСЂС‹РІР°РµС‚ Р»Рё РІСЂРµРјСЏ С€С‚СЂР°С„Р° РѕСЃС‚Р°РІС€РµРµСЃСЏ РІСЂРµРјСЏ СЂР°Р±РѕС‚С‹
 		if ( ((SizeWorkTime-SizeFineTime)*(60*10000000i64)+
 			StartWorkTime-StartFineTime+
 			SystemTime-(State&(mcsPause|mcsOpen)?StopTimerTime:SystemTime))<0 ) goto full;
 	} else if ( FineSize_<0 )
 	{
-		// Уменьшение времени работы по штрафу без ожидания
+		// РЈРјРµРЅСЊС€РµРЅРёРµ РІСЂРµРјРµРЅРё СЂР°Р±РѕС‚С‹ РїРѕ С€С‚СЂР°С„Сѓ Р±РµР· РѕР¶РёРґР°РЅРёСЏ
 		SizeWorkTime+=FineSize_;
 		Changes|=mdcWorkTime;
 		if ( SizeWorkTime<0 )
         {
 full:
-            // Полное снятие времени работы
+            // РџРѕР»РЅРѕРµ СЃРЅСЏС‚РёРµ РІСЂРµРјРµРЅРё СЂР°Р±РѕС‚С‹
             State=mcsFree|(State&mcsOpen);
             TariffID=0;
             StartWorkTime=0; SizeWorkTime=0;
@@ -166,15 +166,15 @@ full:
             StopTimerTime=0;
             Programs=0;
             Changes|=mdcState|mdcTariff|mdcWorkTime|mdcFineTime;
-            // Перезагружаем компьютер при закрытии
+            // РџРµСЂРµР·Р°РіСЂСѓР¶Р°РµРј РєРѕРјРїСЊСЋС‚РµСЂ РїСЂРё Р·Р°РєСЂС‹С‚РёРё
 ///            if ( !(State&mcsOpen) ) { Commands|=mccReboot; Changes|=mdcCommands; }
         }
     } else
     {
-        // Предупреждение
+        // РџСЂРµРґСѓРїСЂРµР¶РґРµРЅРёРµ
 
     }
-    // Помечаем данные для отправки по сети
+    // РџРѕРјРµС‡Р°РµРј РґР°РЅРЅС‹Рµ РґР»СЏ РѕС‚РїСЂР°РІРєРё РїРѕ СЃРµС‚Рё
     NetState|=mnsSyncNeed|mnsSyncData; Changes|=mdcNetState;
     return true;
 }
@@ -187,7 +187,7 @@ bool MStatesItem::CmdExchange(MStatesItem &State_, bool Check_)
 
     if ( !((State&mcsWork)&&(State_.State==mcsFree)) ) return false;
     if ( Check_ ) return true;
-    // Задаем новые режимы работы
+    // Р—Р°РґР°РµРј РЅРѕРІС‹Рµ СЂРµР¶РёРјС‹ СЂР°Р±РѕС‚С‹
     State_.State=State&(mcsWork|mcsFine|mcsLock|mcsPause);
     State_.TariffID=TariffID;
     State_.StartWorkTime=StartWorkTime;
@@ -202,9 +202,9 @@ bool MStatesItem::CmdExchange(MStatesItem &State_, bool Check_)
         State_.StopTimerTime=0;
     }
     State_.Changes|=mdcState|mdcTariff|mdcWorkTime|mdcFineTime;
-    // Помечаем данные для отправки по сети
+    // РџРѕРјРµС‡Р°РµРј РґР°РЅРЅС‹Рµ РґР»СЏ РѕС‚РїСЂР°РІРєРё РїРѕ СЃРµС‚Рё
 	State_.NetState|=mnsSyncNeed|mnsSyncData; State_.Changes|=mdcNetState;
-	// Задаем новые режимы работы
+	// Р—Р°РґР°РµРј РЅРѕРІС‹Рµ СЂРµР¶РёРјС‹ СЂР°Р±РѕС‚С‹
 	State=mcsFree|(State&mcsOpen);
 	TariffID=0;
 	StartWorkTime=0; SizeWorkTime=0;
@@ -212,9 +212,9 @@ bool MStatesItem::CmdExchange(MStatesItem &State_, bool Check_)
     StopTimerTime=0;
     Programs=0;
     Changes|=mdcState|mdcTariff|mdcWorkTime|mdcFineTime;
-    // Помечаем данные для отправки по сети
+    // РџРѕРјРµС‡Р°РµРј РґР°РЅРЅС‹Рµ РґР»СЏ РѕС‚РїСЂР°РІРєРё РїРѕ СЃРµС‚Рё
     NetState|=mnsSyncNeed|mnsSyncData; Changes|=mdcNetState;
-    // Перезагружаем компьютер при закрытии
+    // РџРµСЂРµР·Р°РіСЂСѓР¶Р°РµРј РєРѕРјРїСЊСЋС‚РµСЂ РїСЂРё Р·Р°РєСЂС‹С‚РёРё
 ///    if ( !(State&mcsOpen) ) { Commands|=mccReboot; Changes|=mdcCommands; }
 
     return true;
@@ -226,21 +226,21 @@ bool MStatesItem::CmdLock(bool Apply_, bool Check_)
 
 	if ( Apply_ )
 	{
-		// Проверяем запущен ли компьютер и не прикрыт ли он уже
+		// РџСЂРѕРІРµСЂСЏРµРј Р·Р°РїСѓС‰РµРЅ Р»Рё РєРѕРјРїСЊСЋС‚РµСЂ Рё РЅРµ РїСЂРёРєСЂС‹С‚ Р»Рё РѕРЅ СѓР¶Рµ
 		if ( (State&(mcsWork|mcsLock))!=mcsWork ) return false;
 		if ( Check_ ) return true;
-		// Помечаем, что компьютер прикрыт
+		// РџРѕРјРµС‡Р°РµРј, С‡С‚Рѕ РєРѕРјРїСЊСЋС‚РµСЂ РїСЂРёРєСЂС‹С‚
 		State|=mcsLock;
 	} else
 	{
-		// Проверяем прикрыт ли компьютер
+		// РџСЂРѕРІРµСЂСЏРµРј РїСЂРёРєСЂС‹С‚ Р»Рё РєРѕРјРїСЊСЋС‚РµСЂ
 		if ( !(State&mcsLock) ) return false;
 		if ( Check_ ) return true;
-		// Снимаем пометку, что компьютер прикрыт
+		// РЎРЅРёРјР°РµРј РїРѕРјРµС‚РєСѓ, С‡С‚Рѕ РєРѕРјРїСЊСЋС‚РµСЂ РїСЂРёРєСЂС‹С‚
 		State&=~mcsLock;
 	}
 	Changes|=mdcState;
-	// Помечаем данные для отправки по сети
+	// РџРѕРјРµС‡Р°РµРј РґР°РЅРЅС‹Рµ РґР»СЏ РѕС‚РїСЂР°РІРєРё РїРѕ СЃРµС‚Рё
 	NetState|=mnsSyncNeed|mnsSyncData; Changes|=mdcNetState;
 	return true;
 }
@@ -251,29 +251,29 @@ bool MStatesItem::CmdPause(bool Apply_, bool Check_)
 
 	if ( Apply_ )
 	{
-		// Проверяем запущен ли компьютер и не приостановлен ли он уже
+		// РџСЂРѕРІРµСЂСЏРµРј Р·Р°РїСѓС‰РµРЅ Р»Рё РєРѕРјРїСЊСЋС‚РµСЂ Рё РЅРµ РїСЂРёРѕСЃС‚Р°РЅРѕРІР»РµРЅ Р»Рё РѕРЅ СѓР¶Рµ
 		if ( (State&(mcsWork|mcsPause))!=mcsWork ) return false;
 		if ( Check_ ) return true;
 		if ( !(State&mcsOpen) ) StopTimerTime=SystemTime;
-		// Помечаем, что компьютер приостановлен
+		// РџРѕРјРµС‡Р°РµРј, С‡С‚Рѕ РєРѕРјРїСЊСЋС‚РµСЂ РїСЂРёРѕСЃС‚Р°РЅРѕРІР»РµРЅ
 		State|=mcsPause;
 	} else
 	{
-		// Проверяем приостановлен ли компьютер
+		// РџСЂРѕРІРµСЂСЏРµРј РїСЂРёРѕСЃС‚Р°РЅРѕРІР»РµРЅ Р»Рё РєРѕРјРїСЊСЋС‚РµСЂ
 		if ( !(State&mcsPause) ) return false;
 		if ( Check_ ) return true;
-		// Если компьютер не открыт для обслуживания, корретируем время его работы
+		// Р•СЃР»Рё РєРѕРјРїСЊСЋС‚РµСЂ РЅРµ РѕС‚РєСЂС‹С‚ РґР»СЏ РѕР±СЃР»СѓР¶РёРІР°РЅРёСЏ, РєРѕСЂСЂРµС‚РёСЂСѓРµРј РІСЂРµРјСЏ РµРіРѕ СЂР°Р±РѕС‚С‹
 		if ( !(State&mcsOpen) )
 		{
 			StartWorkTime+=SystemTime-StopTimerTime;
-///            StartFineTime+=SystemTime-StopTimerTime;  // Приостановка штрафа
+///            StartFineTime+=SystemTime-StopTimerTime;  // РџСЂРёРѕСЃС‚Р°РЅРѕРІРєР° С€С‚СЂР°С„Р°
 			StopTimerTime=0;
 		}
-		// Снимаем пометку, что компьютер приостановлен
+		// РЎРЅРёРјР°РµРј РїРѕРјРµС‚РєСѓ, С‡С‚Рѕ РєРѕРјРїСЊСЋС‚РµСЂ РїСЂРёРѕСЃС‚Р°РЅРѕРІР»РµРЅ
 		State&=~mcsPause;
 	}
 	Changes|=mdcState;
-	// Помечаем данные для отправки по сети
+	// РџРѕРјРµС‡Р°РµРј РґР°РЅРЅС‹Рµ РґР»СЏ РѕС‚РїСЂР°РІРєРё РїРѕ СЃРµС‚Рё
 	NetState|=mnsSyncNeed|mnsSyncData; Changes|=mdcNetState;
 	return true;
 }
@@ -284,30 +284,30 @@ bool MStatesItem::CmdOpen(bool Apply_, bool Check_)
 
 	if ( Apply_ )
 	{
-		// Проверяем свободен или запущен компьютер и не открыт ли он уже
+		// РџСЂРѕРІРµСЂСЏРµРј СЃРІРѕР±РѕРґРµРЅ РёР»Рё Р·Р°РїСѓС‰РµРЅ РєРѕРјРїСЊСЋС‚РµСЂ Рё РЅРµ РѕС‚РєСЂС‹С‚ Р»Рё РѕРЅ СѓР¶Рµ
 		if ( (!(State&(mcsFree|mcsWork)))||(State&mcsOpen) ) return false;
 		if ( Check_ ) return true;
-		// Если компьютер запущен и не приостановлен, сохраняем время его открытия
+		// Р•СЃР»Рё РєРѕРјРїСЊСЋС‚РµСЂ Р·Р°РїСѓС‰РµРЅ Рё РЅРµ РїСЂРёРѕСЃС‚Р°РЅРѕРІР»РµРЅ, СЃРѕС…СЂР°РЅСЏРµРј РІСЂРµРјСЏ РµРіРѕ РѕС‚РєСЂС‹С‚РёСЏ
 		if ( (State&(mcsWork|mcsPause))==mcsWork ) StopTimerTime=SystemTime;
-		// Помечаем, что компьютер открыт
+		// РџРѕРјРµС‡Р°РµРј, С‡С‚Рѕ РєРѕРјРїСЊСЋС‚РµСЂ РѕС‚РєСЂС‹С‚
 		State|=mcsOpen;
 	} else
 	{
-		// Проверяем открыт ли компьютер
+		// РџСЂРѕРІРµСЂСЏРµРј РѕС‚РєСЂС‹С‚ Р»Рё РєРѕРјРїСЊСЋС‚РµСЂ
 		if ( !(State&mcsOpen) ) return false;
 		if ( Check_ ) return true;
-		// Если компьютер запущен и не приостановлен, корретируем время его работы
+		// Р•СЃР»Рё РєРѕРјРїСЊСЋС‚РµСЂ Р·Р°РїСѓС‰РµРЅ Рё РЅРµ РїСЂРёРѕСЃС‚Р°РЅРѕРІР»РµРЅ, РєРѕСЂСЂРµС‚РёСЂСѓРµРј РІСЂРµРјСЏ РµРіРѕ СЂР°Р±РѕС‚С‹
 		if ( (State&(mcsWork|mcsPause))==mcsWork )
 		{
 			StartWorkTime+=SystemTime-StopTimerTime;
-///            StartFineTime+=SystemTime-StopTimerTime; // Приостановка штрафа
+///            StartFineTime+=SystemTime-StopTimerTime; // РџСЂРёРѕСЃС‚Р°РЅРѕРІРєР° С€С‚СЂР°С„Р°
 			StopTimerTime=0;
 		}
-		// Снимаем пометку, что компьютер открыт
+		// РЎРЅРёРјР°РµРј РїРѕРјРµС‚РєСѓ, С‡С‚Рѕ РєРѕРјРїСЊСЋС‚РµСЂ РѕС‚РєСЂС‹С‚
 		State&=~mcsOpen;
 	}
 	Changes|=mdcState;
-	// Помечаем данные для отправки по сети
+	// РџРѕРјРµС‡Р°РµРј РґР°РЅРЅС‹Рµ РґР»СЏ РѕС‚РїСЂР°РІРєРё РїРѕ СЃРµС‚Рё
 	NetState|=mnsSyncNeed|mnsSyncData; Changes|=mdcNetState;
 	return true;
 }
@@ -328,7 +328,7 @@ bool MStatesItem::CmdReboot(bool Check_)
 
 	if ( Check_ ) return true;
 	Commands|=mccReboot; Changes|=mdcCommands;
-	// Помечаем данные для отправки по сети
+	// РџРѕРјРµС‡Р°РµРј РґР°РЅРЅС‹Рµ РґР»СЏ РѕС‚РїСЂР°РІРєРё РїРѕ СЃРµС‚Рё
 	NetState|=mnsSyncNeed|mnsSyncData; Changes|=mdcNetState;
 
 	return true;
@@ -340,7 +340,7 @@ bool MStatesItem::CmdShutdown(bool Check_)
 
 	if ( Check_ ) return true;
 	Commands|=mccShutdown; Changes|=mdcCommands;
-	// Помечаем данные для отправки по сети
+	// РџРѕРјРµС‡Р°РµРј РґР°РЅРЅС‹Рµ РґР»СЏ РѕС‚РїСЂР°РІРєРё РїРѕ СЃРµС‚Рё
 	NetState|=mnsSyncNeed|mnsSyncData; Changes|=mdcNetState;
 
 	return true;
@@ -381,7 +381,7 @@ MStatesInfo MStatesItem::GetInfo()
 
 	//
 	MStatesInfo Info;
-	memset(&Info,0,sizeof(Info));       /// нужно ?
+	memset(&Info,0,sizeof(Info));       /// РЅСѓР¶РЅРѕ ?
 
 	Info.Number=Number;
 	Info.State=State;
@@ -438,13 +438,13 @@ bool MStatesItem::NetBegin()
 {
 	std::lock_guard <std::mutex> lckObj(mtxMain);
 
-	// Проверяем не блокирован ли доступ к сетевым операциям
+	// РџСЂРѕРІРµСЂСЏРµРј РЅРµ Р±Р»РѕРєРёСЂРѕРІР°РЅ Р»Рё РґРѕСЃС‚СѓРї Рє СЃРµС‚РµРІС‹Рј РѕРїРµСЂР°С†РёСЏРј
 	if ( NetState&mnsLock ) return false;
-	// Блокируем доступ к сетевым операциям
+	// Р‘Р»РѕРєРёСЂСѓРµРј РґРѕСЃС‚СѓРї Рє СЃРµС‚РµРІС‹Рј РѕРїРµСЂР°С†РёСЏРј
 	NetState|=mnsLock;
-	// Сбрасываем флаг необходимости сохранения состояния на диск
+	// РЎР±СЂР°СЃС‹РІР°РµРј С„Р»Р°Рі РЅРµРѕР±С…РѕРґРёРјРѕСЃС‚Рё СЃРѕС…СЂР°РЅРµРЅРёСЏ СЃРѕСЃС‚РѕСЏРЅРёСЏ РЅР° РґРёСЃРє
 	NetState&=~mnsNeedSave;
-	// Задаем постоянную выдачу данных для несинхронизированного состояния
+	// Р—Р°РґР°РµРј РїРѕСЃС‚РѕСЏРЅРЅСѓСЋ РІС‹РґР°С‡Сѓ РґР°РЅРЅС‹С… РґР»СЏ РЅРµСЃРёРЅС…СЂРѕРЅРёР·РёСЂРѕРІР°РЅРЅРѕРіРѕ СЃРѕСЃС‚РѕСЏРЅРёСЏ
 ///    if ( NetState&mnsSyncNeed ) NetState|=mnsSyncData;
 	return true;
 }
@@ -454,7 +454,7 @@ bool MStatesItem::NetEnd()
 	std::lock_guard <std::mutex> lckObj(mtxMain);
 
 	CmdsToReset&=~(mccReboot|mccShutdown);
-	// Снимаем блокировку доступа к сетевым операциям
+	// РЎРЅРёРјР°РµРј Р±Р»РѕРєРёСЂРѕРІРєСѓ РґРѕСЃС‚СѓРїР° Рє СЃРµС‚РµРІС‹Рј РѕРїРµСЂР°С†РёСЏРј
 	NetState&=~mnsLock;
 	return NetState&mnsNeedSave;
 }
@@ -471,9 +471,9 @@ MSyncData MStatesItem::NetSyncData()
 	std::lock_guard <std::mutex> lckObj(mtxMain);
 
 	MSyncData ResData;
-	// Сбрасываем флаг наличия новых данных
+	// РЎР±СЂР°СЃС‹РІР°РµРј С„Р»Р°Рі РЅР°Р»РёС‡РёСЏ РЅРѕРІС‹С… РґР°РЅРЅС‹С…
 	NetState&=~mnsSyncData;
-	// Заносим новые данные о режиме работы
+	// Р—Р°РЅРѕСЃРёРј РЅРѕРІС‹Рµ РґР°РЅРЅС‹Рµ Рѕ СЂРµР¶РёРјРµ СЂР°Р±РѕС‚С‹
 	ResData.SystemTime=SystemTime;
 	ResData.Number=Number;
 	ResData.State=State;
@@ -495,26 +495,26 @@ void MStatesItem::NetSyncExecuted(bool Executed_)
 
 	if ( Executed_ )
 	{
-		// Если за время отправки последних запрошенных данных новых не поступило,
-		// сбрасываем флаг необходимости синхронизации
+		// Р•СЃР»Рё Р·Р° РІСЂРµРјСЏ РѕС‚РїСЂР°РІРєРё РїРѕСЃР»РµРґРЅРёС… Р·Р°РїСЂРѕС€РµРЅРЅС‹С… РґР°РЅРЅС‹С… РЅРѕРІС‹С… РЅРµ РїРѕСЃС‚СѓРїРёР»Рѕ,
+		// СЃР±СЂР°СЃС‹РІР°РµРј С„Р»Р°Рі РЅРµРѕР±С…РѕРґРёРјРѕСЃС‚Рё СЃРёРЅС…СЂРѕРЅРёР·Р°С†РёРё
 		if ( (NetState&(mnsSyncNeed|mnsSyncData))==mnsSyncNeed )
 		{
 			NetState&=~mnsSyncNeed;
 			NetState|=mnsNeedSave;
 		}
-		// Помечаем, что компьютер доступен по сети
+		// РџРѕРјРµС‡Р°РµРј, С‡С‚Рѕ РєРѕРјРїСЊСЋС‚РµСЂ РґРѕСЃС‚СѓРїРµРЅ РїРѕ СЃРµС‚Рё
 		NetState|=mnsPresent;
-		// Сбрасываем команды, отправленные для исполнения клиентом
+		// РЎР±СЂР°СЃС‹РІР°РµРј РєРѕРјР°РЅРґС‹, РѕС‚РїСЂР°РІР»РµРЅРЅС‹Рµ РґР»СЏ РёСЃРїРѕР»РЅРµРЅРёСЏ РєР»РёРµРЅС‚РѕРј
 		Commands&=~CmdsToReset;
 		CmdsToReset=0;
-		// Помечаем изменения для оболочки
+		// РџРѕРјРµС‡Р°РµРј РёР·РјРµРЅРµРЅРёСЏ РґР»СЏ РѕР±РѕР»РѕС‡РєРё
 		Changes|=mdcCommands;
 	} else
 	{
-		// Сбрасываем флаг доступности компьютера по сети
+		// РЎР±СЂР°СЃС‹РІР°РµРј С„Р»Р°Рі РґРѕСЃС‚СѓРїРЅРѕСЃС‚Рё РєРѕРјРїСЊСЋС‚РµСЂР° РїРѕ СЃРµС‚Рё
 		NetState&=~mnsPresent;
 	}
-	// Помечаем изменения для оболочки
+	// РџРѕРјРµС‡Р°РµРј РёР·РјРµРЅРµРЅРёСЏ РґР»СЏ РѕР±РѕР»РѕС‡РєРё
 	Changes|=mdcNetState;
 }
 //---------------------------------------------------------------------------
@@ -529,9 +529,9 @@ void MStatesItem::NetPwrOnExecuted()
 {
 	std::lock_guard <std::mutex> lckObj(mtxMain);
 
-	// Сбрасываем команду для компьютера, т.к. она выполнена
+	// РЎР±СЂР°СЃС‹РІР°РµРј РєРѕРјР°РЅРґСѓ РґР»СЏ РєРѕРјРїСЊСЋС‚РµСЂР°, С‚.Рє. РѕРЅР° РІС‹РїРѕР»РЅРµРЅР°
 	Commands&=~mccPowerOn;
-	// Помечаем изменения для оболочки
+	// РџРѕРјРµС‡Р°РµРј РёР·РјРµРЅРµРЅРёСЏ РґР»СЏ РѕР±РѕР»РѕС‡РєРё
 	Changes|=mdcCommands;
 }
 //---------------------------------------------------------------------------
@@ -539,7 +539,7 @@ bool MStates::Save()
 {
 	std::lock_guard <std::mutex> lckObj(mtxFile);
 
-	// Сохраняем в файл с безопасной перезаписью и без кэширования
+	// РЎРѕС…СЂР°РЅСЏРµРј РІ С„Р°Р№Р» СЃ Р±РµР·РѕРїР°СЃРЅРѕР№ РїРµСЂРµР·Р°РїРёСЃСЊСЋ Рё Р±РµР· РєСЌС€РёСЂРѕРІР°РЅРёСЏ
 	return MSLList::Save(true,true);
 }
 //---------------------------------------------------------------------------
@@ -561,8 +561,8 @@ bool MStates::Update(const MComputers &Computers_)
 {
 	bool result=false;
 
-	// Убираем состояния, ассоциированные с несуществующими
-	// или неиспользуемыми компьютерами
+	// РЈР±РёСЂР°РµРј СЃРѕСЃС‚РѕСЏРЅРёСЏ, Р°СЃСЃРѕС†РёРёСЂРѕРІР°РЅРЅС‹Рµ СЃ РЅРµСЃСѓС‰РµСЃС‚РІСѓСЋС‰РёРјРё
+	// РёР»Рё РЅРµРёСЃРїРѕР»СЊР·СѓРµРјС‹РјРё РєРѕРјРїСЊСЋС‚РµСЂР°РјРё
 	for ( auto iState=cbegin(), iEnd=cend(); iState!=iEnd; )
 	{
 		auto iComputer=Computers_.Search(iState->Associated());
@@ -578,7 +578,7 @@ bool MStates::Update(const MComputers &Computers_)
 			++iState;
 		}
 	}
-	// Добавляем состояния для новых компьютеров
+	// Р”РѕР±Р°РІР»СЏРµРј СЃРѕСЃС‚РѕСЏРЅРёСЏ РґР»СЏ РЅРѕРІС‹С… РєРѕРјРїСЊСЋС‚РµСЂРѕРІ
 	for ( const auto &Computer: Computers_ )
 	{
 		if ( Computer.NotUsed ) continue;
@@ -587,7 +587,7 @@ bool MStates::Update(const MComputers &Computers_)
 		result=true;
 		Add().Associate(Computer.Number);
 	}
-	// Убираем лишние записи, ассоциированные с одним и тем же компьютером
+	// РЈР±РёСЂР°РµРј Р»РёС€РЅРёРµ Р·Р°РїРёСЃРё, Р°СЃСЃРѕС†РёРёСЂРѕРІР°РЅРЅС‹Рµ СЃ РѕРґРЅРёРј Рё С‚РµРј Р¶Рµ РєРѕРјРїСЊСЋС‚РµСЂРѕРј
 	for ( auto iState=cbegin(), iEnd=cend(); iState!=iEnd; )
 	{
 		if ( Search(iState->Associated())!=iState )
@@ -686,15 +686,15 @@ bool MStateCl::ControlSyncTime()
 {
 	if ( (AutoLockTime==0)||(::GetTickCount()<
 		(LastSyncTime+AutoLockTime*60*1000)) ) return false;
-	// Проверяем запущен ли компьютер и не прикрыт ли он уже
+	// РџСЂРѕРІРµСЂСЏРµРј Р·Р°РїСѓС‰РµРЅ Р»Рё РєРѕРјРїСЊСЋС‚РµСЂ Рё РЅРµ РїСЂРёРєСЂС‹С‚ Р»Рё РѕРЅ СѓР¶Рµ
 	if ( (State&(mcsWork|mcsLock))!=mcsWork ) return false;
-	// Помечаем, что компьютер прикрыт
+	// РџРѕРјРµС‡Р°РµРј, С‡С‚Рѕ РєРѕРјРїСЊСЋС‚РµСЂ РїСЂРёРєСЂС‹С‚
 	State|=mcsLock;
 /*
-	// Проверяем запущен ли компьютер и не приостановлен ли он уже
+	// РџСЂРѕРІРµСЂСЏРµРј Р·Р°РїСѓС‰РµРЅ Р»Рё РєРѕРјРїСЊСЋС‚РµСЂ Рё РЅРµ РїСЂРёРѕСЃС‚Р°РЅРѕРІР»РµРЅ Р»Рё РѕРЅ СѓР¶Рµ
 	if ( (State&(mcsWork|mcsPause))!=mcsWork ) return false;
 	if ( !(State&mcsOpen) ) StopTimerTime=SystemTime;
-	// Помечаем, что компьютер приостановлен
+	// РџРѕРјРµС‡Р°РµРј, С‡С‚Рѕ РєРѕРјРїСЊСЋС‚РµСЂ РїСЂРёРѕСЃС‚Р°РЅРѕРІР»РµРЅ
 	State|=mcsPause;
 */
 	Changes|=mdcState|mdcPrograms;
@@ -706,7 +706,7 @@ MStatesInfo MStateCl::GetInfo()
 	std::lock_guard <std::mutex> lckObj(mtxMain);
 
 	MStatesInfo ResInfo;
-	memset(&ResInfo,0,sizeof(ResInfo));     /// нужно ?
+	memset(&ResInfo,0,sizeof(ResInfo));     /// РЅСѓР¶РЅРѕ ?
 	//
     ResInfo.Number=Number;
     ResInfo.State=State;
@@ -786,13 +786,13 @@ bool MStateCl::NewSyncData(MSyncData &Data_)
 	bool NeedSave=false;
 	std::int64_t CurrentTime;
 
-	// Проверяем отклонение системного времени и при необходимости корректируем его
+	// РџСЂРѕРІРµСЂСЏРµРј РѕС‚РєР»РѕРЅРµРЅРёРµ СЃРёСЃС‚РµРјРЅРѕРіРѕ РІСЂРµРјРµРЅРё Рё РїСЂРё РЅРµРѕР±С…РѕРґРёРјРѕСЃС‚Рё РєРѕСЂСЂРµРєС‚РёСЂСѓРµРј РµРіРѕ
 	GetLocalTimeInt64(CurrentTime);
 	CurrentTime=(CurrentTime-=Data_.SystemTime)<0?-CurrentTime:CurrentTime;
 	if ( CurrentTime>=MAX_TimeShift*10000000i64 ) SetLocalTimeInt64(Data_.SystemTime);
 
 	std::lock_guard <std::mutex> lckObj(mtxMain);
-	// Заносим новые данные о режиме работы и помечаем события для оболочки
+	// Р—Р°РЅРѕСЃРёРј РЅРѕРІС‹Рµ РґР°РЅРЅС‹Рµ Рѕ СЂРµР¶РёРјРµ СЂР°Р±РѕС‚С‹ Рё РїРѕРјРµС‡Р°РµРј СЃРѕР±С‹С‚РёСЏ РґР»СЏ РѕР±РѕР»РѕС‡РєРё
 	if ( Data_.Number!=Number ) { Number=Data_.Number; Changes|=mdcNumber; NeedSave=true; }
 	if ( Data_.State!=State ) { State=Data_.State; Changes|=mdcState; NeedSave=true; }
 	if ( Data_.StartWorkTime!=StartWorkTime ) { StartWorkTime=Data_.StartWorkTime; Changes|=mdcWorkTime; NeedSave=true; }

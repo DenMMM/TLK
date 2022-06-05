@@ -1,20 +1,20 @@
-//---------------------------------------------------------------------------
+п»ї//---------------------------------------------------------------------------
 #ifndef UnitOptionsH
 #define UnitOptionsH
 //---------------------------------------------------------------------------
-#include "UnitCommon.h"
-#include "UnitSLList.h"
+#include "..\..\Core\UnitCommon.h"
+#include "..\..\Core\UnitSLList.h"
+#include "..\..\Core\UnitPassword.h"
 #include "UnitLog.h"
-#include "UnitPassword.h"
 //---------------------------------------------------------------------------
 class MOptions;
 //---------------------------------------------------------------------------
-#define MAX_OptPassLen          16          // Длина пароля на настройки
+#define MAX_OptPassLen          16          // Р”Р»РёРЅР° РїР°СЂРѕР»СЏ РЅР° РЅР°СЃС‚СЂРѕР№РєРё
 #define MAX_DialogTime          30          // Options.CostDialogTime
 #define MAX_FilterFreeTime      60          // Options.FilterFreeTime
 //---------------------------------------------------------------------------
 // Main Users Rights
-#define murPause                1           // Разрешить админам приостанавливать компьютеры
+#define murPause                1           // Р Р°Р·СЂРµС€РёС‚СЊ Р°РґРјРёРЅР°Рј РїСЂРёРѕСЃС‚Р°РЅР°РІР»РёРІР°С‚СЊ РєРѕРјРїСЊСЋС‚РµСЂС‹
 //---------------------------------------------------------------------------
 class MOptionsStub:
 	public MSLListItem <MOptions, MOptionsStub> {};
@@ -23,14 +23,14 @@ class MOptions:
 	public MSLList <MOptions, MOptionsStub>       /// private ?
 {
 public:
-	std::uint8_t LogPeriod;			// Период ведения файла лога
-	std::int16_t FilterFreeTime;	// Время до окончания работы компьютера, когда он подпадает под фильтр свободных (в минутах)
-	std::int16_t CostDialogTime;	// Время использования диалогов с расчетом цен (в минутах)
-	double CostPrecision;			// Точность расчета цен
-	std::uint32_t UsersRights;		// Права пользователей (администраторов)
-	MPassword Pass;					// Пароль на изменение настроек
+	std::uint8_t LogPeriod;			// РџРµСЂРёРѕРґ РІРµРґРµРЅРёСЏ С„Р°Р№Р»Р° Р»РѕРіР°
+	std::int16_t FilterFreeTime;	// Р’СЂРµРјСЏ РґРѕ РѕРєРѕРЅС‡Р°РЅРёСЏ СЂР°Р±РѕС‚С‹ РєРѕРјРїСЊСЋС‚РµСЂР°, РєРѕРіРґР° РѕРЅ РїРѕРґРїР°РґР°РµС‚ РїРѕРґ С„РёР»СЊС‚СЂ СЃРІРѕР±РѕРґРЅС‹С… (РІ РјРёРЅСѓС‚Р°С…)
+	std::int16_t CostDialogTime;	// Р’СЂРµРјСЏ РёСЃРїРѕР»СЊР·РѕРІР°РЅРёСЏ РґРёР°Р»РѕРіРѕРІ СЃ СЂР°СЃС‡РµС‚РѕРј С†РµРЅ (РІ РјРёРЅСѓС‚Р°С…)
+	double CostPrecision;			// РўРѕС‡РЅРѕСЃС‚СЊ СЂР°СЃС‡РµС‚Р° С†РµРЅ
+	std::uint32_t UsersRights;		// РџСЂР°РІР° РїРѕР»СЊР·РѕРІР°С‚РµР»РµР№ (Р°РґРјРёРЅРёСЃС‚СЂР°С‚РѕСЂРѕРІ)
+	MPassword Pass;					// РџР°СЂРѕР»СЊ РЅР° РёР·РјРµРЅРµРЅРёРµ РЅР°СЃС‚СЂРѕРµРє
 
-	// Функции механизма сохранения/загрузки данных
+	// Р¤СѓРЅРєС†РёРё РјРµС…Р°РЅРёР·РјР° СЃРѕС…СЂР°РЅРµРЅРёСЏ/Р·Р°РіСЂСѓР·РєРё РґР°РЅРЅС‹С…
 	virtual std::size_t GetDataSize() const override;
 	virtual void *SetData(void *Data_) const override;
 	virtual const void *GetData(const void *Data_, const void *Limit_) override;

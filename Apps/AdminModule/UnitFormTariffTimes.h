@@ -1,4 +1,4 @@
-//---------------------------------------------------------------------------
+п»ї//---------------------------------------------------------------------------
 #ifndef UnitFormTariffTimesH
 #define UnitFormTariffTimesH
 //---------------------------------------------------------------------------
@@ -51,7 +51,7 @@ __published:	// IDE-managed Components
     void __fastcall ListViewTimesCompare(TObject *Sender, TListItem *Item1,
           TListItem *Item2, int Data, int &Compare);
 private:	// User declarations
-    MTariffTimes TmpTimes;              // Буфер для списка пакетов тарифа
+    MTariffTimes TmpTimes;              // Р‘СѓС„РµСЂ РґР»СЏ СЃРїРёСЃРєР° РїР°РєРµС‚РѕРІ С‚Р°СЂРёС„Р°
     void SetEdit(bool Edit_);
     void SetListViewTimesLine(TListItem *Item_);
 public:		// User declarations

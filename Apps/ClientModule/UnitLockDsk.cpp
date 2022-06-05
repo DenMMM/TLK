@@ -1,4 +1,4 @@
-//---------------------------------------------------------------------------
+п»ї//---------------------------------------------------------------------------
 #include <stdio.h>
 #pragma hdrstop
 
@@ -10,11 +10,11 @@ DWORD WINAPI MLockDsk::ThreadF(LPVOID Data_)
 {
     DWORD ExitCode;
 
-    // Создаем очередь сообщений для потока
+    // РЎРѕР·РґР°РµРј РѕС‡РµСЂРµРґСЊ СЃРѕРѕР±С‰РµРЅРёР№ РґР»СЏ РїРѕС‚РѕРєР°
     ::PeekMessage(nullptr,(HWND)-1,0,0,PM_NOREMOVE);
-    // Обработка тела
+    // РћР±СЂР°Р±РѕС‚РєР° С‚РµР»Р°
     ExitCode=reinterpret_cast<MLockDsk*>(Data_)->ThreadP();
-    // Завершаем работу
+    // Р—Р°РІРµСЂС€Р°РµРј СЂР°Р±РѕС‚Сѓ
     ::ExitThread(ExitCode);
 
     return 0;
@@ -24,21 +24,21 @@ DWORD MLockDsk::ThreadP()
 {
     DWORD LastError;
 
-    // Запомним текущие параметры экрана
+    // Р—Р°РїРѕРјРЅРёРј С‚РµРєСѓС‰РёРµ РїР°СЂР°РјРµС‚СЂС‹ СЌРєСЂР°РЅР°
     dmPrev.dmSize=sizeof(dmPrev);
     dmPrev.dmDriverExtra=0;
     ::EnumDisplaySettings(nullptr,ENUM_CURRENT_SETTINGS,&dmPrev);
-    // Запомним текущий рабочий стол и создадим новый
+    // Р—Р°РїРѕРјРЅРёРј С‚РµРєСѓС‰РёР№ СЂР°Р±РѕС‡РёР№ СЃС‚РѕР» Рё СЃРѕР·РґР°РґРёРј РЅРѕРІС‹Р№
     hPrevDsk=::GetThreadDesktop(::GetCurrentThreadId());
     if ( hPrevDsk==nullptr ) goto api_error;
     hMainDsk=::CreateDesktop(LOCKDSK_Name,nullptr,nullptr,0,GENERIC_ALL,nullptr);
     if ( hMainDsk==nullptr ) goto api_error;
 #ifndef _DEBUG
-    // Выберем его для потока и переключимся
+    // Р’С‹Р±РµСЂРµРј РµРіРѕ РґР»СЏ РїРѕС‚РѕРєР° Рё РїРµСЂРµРєР»СЋС‡РёРјСЃСЏ
     if ( !::SetThreadDesktop(hMainDsk) ) goto api_error;
     ::SwitchDesktop(hMainDsk);
 //    if ( !::SwitchDesktop(hMainDsk) ) goto api_error;
-    // Зададим режим экрана по-умолчанию (как при входе пользователя)
+    // Р—Р°РґР°РґРёРј СЂРµР¶РёРј СЌРєСЂР°РЅР° РїРѕ-СѓРјРѕР»С‡Р°РЅРёСЋ (РєР°Рє РїСЂРё РІС…РѕРґРµ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ)
     ::ChangeDisplaySettings(nullptr,0);
 #endif
 
@@ -82,7 +82,7 @@ DWORD MLockDsk::ThreadP()
         FIXED_PITCH,
         L"BankGothic Md BT");
 
-    // Зарегистрируем класс основного окна
+    // Р—Р°СЂРµРіРёСЃС‚СЂРёСЂСѓРµРј РєР»Р°СЃСЃ РѕСЃРЅРѕРІРЅРѕРіРѕ РѕРєРЅР°
     wincl.hInstance = hInst;
     wincl.lpszClassName = szClassName;
     wincl.lpfnWndProc = &WndProc;
@@ -98,13 +98,13 @@ DWORD MLockDsk::ThreadP()
     ::RegisterClassEx(&wincl);
 //    if ( ::RegisterClassEx(&wincl)==0 ) goto error;
 
-    // Узнаем размеры экрана
+    // РЈР·РЅР°РµРј СЂР°Р·РјРµСЂС‹ СЌРєСЂР°РЅР°
     HDC hDCScreen = ::GetDC(nullptr);
     int ScrWidth = ::GetDeviceCaps(hDCScreen, HORZRES);
     int ScrHeight = ::GetDeviceCaps(hDCScreen, VERTRES);
     ::ReleaseDC(nullptr, hDCScreen);
 
-    // Создадим основное окно
+    // РЎРѕР·РґР°РґРёРј РѕСЃРЅРѕРІРЅРѕРµ РѕРєРЅРѕ
 	hwMain=::CreateWindowEx(
 		0x02000000,  // WS_EX_COMPOSITED
 		szClassName, nullptr,
@@ -112,34 +112,34 @@ DWORD MLockDsk::ThreadP()
 		0, 0, ScrWidth,	ScrHeight,
 		nullptr, nullptr, wincl.hInstance, nullptr);
 
-    // Создадим элемент с для картинки-сообщения
+    // РЎРѕР·РґР°РґРёРј СЌР»РµРјРµРЅС‚ СЃ РґР»СЏ РєР°СЂС‚РёРЅРєРё-СЃРѕРѕР±С‰РµРЅРёСЏ
 	hwMsgImg=::CreateWindowEx(
 			0, L"STATIC", nullptr,
 			SS_BITMAP|SS_CENTERIMAGE|WS_CHILD|WS_VISIBLE,
 			0, 0, ScrWidth, ScrHeight,
 			hwMain, (HMENU)IDC_MSGIMG, hInst, nullptr);
 
-    // Создадим элемент для картинки-подложки меню
+    // РЎРѕР·РґР°РґРёРј СЌР»РµРјРµРЅС‚ РґР»СЏ РєР°СЂС‚РёРЅРєРё-РїРѕРґР»РѕР¶РєРё РјРµРЅСЋ
 	hwMenuImg=::CreateWindowEx(
 			0, L"STATIC", L"LOCKDESKMENU",
 			SS_BITMAP|WS_CHILD|WS_VISIBLE,
 			0, 0, 0, 0,
 			hwMain,(HMENU)IDC_MENUIMG,hInst,nullptr);
 
-	// Создадим элемент-номер компьютера и его тень
+	// РЎРѕР·РґР°РґРёРј СЌР»РµРјРµРЅС‚-РЅРѕРјРµСЂ РєРѕРјРїСЊСЋС‚РµСЂР° Рё РµРіРѕ С‚РµРЅСЊ
 	hwCompNumSh=CreateText(L"99", 0, 0, 0, 0, hwMain, IDC_COMPNUMSH);
 	hwCompNum=CreateText(L"99",0,0,0,0,hwMain,IDC_COMPNUM);
     ::SendMessage(hwCompNumSh,WM_SETFONT,(WPARAM)hfCompNum,0);
     ::SendMessage(hwCompNum,WM_SETFONT,(WPARAM)hfCompNum,0);
 
-    // Создадим элемент "Текущее время 00:00"
-    hwSysTimeTxt=CreateText(L"Текущее время",0,0,0,0,hwMain,IDC_SYSTIMETXT);
+    // РЎРѕР·РґР°РґРёРј СЌР»РµРјРµРЅС‚ "РўРµРєСѓС‰РµРµ РІСЂРµРјСЏ 00:00"
+    hwSysTimeTxt=CreateText(L"РўРµРєСѓС‰РµРµ РІСЂРµРјСЏ",0,0,0,0,hwMain,IDC_SYSTIMETXT);
     ::SendMessage(hwSysTimeTxt,WM_SETFONT,(WPARAM)hfSysTime,0);
     hwSysTime=CreateText(L"00:00",0,0,0,0,hwMain,IDC_SYSTIME);
     ::SendMessage(hwSysTime,WM_SETFONT,(WPARAM)hfSysTime,0);
 
-    // Создадим элемент "Осталось 00:00"
-	hwWorkTimeTxt=CreateText(L"Осталось",0,0,0,0,hwMain,IDC_WORKTIMETXT);
+    // РЎРѕР·РґР°РґРёРј СЌР»РµРјРµРЅС‚ "РћСЃС‚Р°Р»РѕСЃСЊ 00:00"
+	hwWorkTimeTxt=CreateText(L"РћСЃС‚Р°Р»РѕСЃСЊ",0,0,0,0,hwMain,IDC_WORKTIMETXT);
 	::SendMessage(hwWorkTimeTxt,WM_SETFONT,(WPARAM)hfSysTime,0);
     hwWorkTime=CreateText(L"00:00",0,0,0,0,hwMain,IDC_WORKTIME);
     ::SendMessage(hwWorkTime,WM_SETFONT,(WPARAM)hfSysTime,0);
@@ -151,14 +151,14 @@ DWORD MLockDsk::ThreadP()
     ::SendMessage(hwFineTime,WM_SETFONT,(WPARAM)hfFineTime,0);
 */
 
-    // Зададим первоначальные настройки и заполним данные
+    // Р—Р°РґР°РґРёРј РїРµСЂРІРѕРЅР°С‡Р°Р»СЊРЅС‹Рµ РЅР°СЃС‚СЂРѕР№РєРё Рё Р·Р°РїРѕР»РЅРёРј РґР°РЅРЅС‹Рµ
     UpdTransp();
     LoadImg();
     UpdCompNum();
     UpdSysTime();
     UpdWorkTime();
 
-    // Расставим элементы окна
+    // Р Р°СЃСЃС‚Р°РІРёРј СЌР»РµРјРµРЅС‚С‹ РѕРєРЅР°
     int Left=ScrWidth-320;
     ::MoveWindow(hwMsgImg,0,83,ScrWidth,ScrHeight-83,FALSE);
     ::MoveWindow(hwMenuImg,Left+0,0,320,83,FALSE);
@@ -169,7 +169,7 @@ DWORD MLockDsk::ThreadP()
     ::MoveWindow(hwWorkTimeTxt,Left+102,31,64,13,FALSE);
     ::MoveWindow(hwWorkTime,Left+184,31,40,13,FALSE);
 
-    // Покажем его
+    // РџРѕРєР°Р¶РµРј РµРіРѕ
     ::ShowWindow(hwMain,SW_SHOW);
     ::UpdateWindow(hwMain);
 }
@@ -179,24 +179,24 @@ DWORD MLockDsk::ThreadP()
     MSG Msg;
     while(::GetMessage(&Msg,nullptr,0,0))
     {
-        // Обработаем сообщения GUI
+        // РћР±СЂР°Р±РѕС‚Р°РµРј СЃРѕРѕР±С‰РµРЅРёСЏ GUI
         if ( Msg.hwnd!=nullptr )
         {
             ::DispatchMessage(&Msg);
             continue;
         }
 
-        // Обработаем сообщения потоку
+        // РћР±СЂР°Р±РѕС‚Р°РµРј СЃРѕРѕР±С‰РµРЅРёСЏ РїРѕС‚РѕРєСѓ
         if ( Msg.message==MSG_Exit ) break;
         else if ( Msg.message==MSG_UnLock )
         {
 #ifndef _DEBUG
-            // Вернем прежние настройки экрана
+            // Р’РµСЂРЅРµРј РїСЂРµР¶РЅРёРµ РЅР°СЃС‚СЂРѕР№РєРё СЌРєСЂР°РЅР°
             ::ChangeDisplaySettings(&dmPrev,CDS_RESET);
-            // Переключимся на прежний рабочий стол
+            // РџРµСЂРµРєР»СЋС‡РёРјСЃСЏ РЅР° РїСЂРµР¶РЅРёР№ СЂР°Р±РѕС‡РёР№ СЃС‚РѕР»
             ::SwitchDesktop(hPrevDsk);
 #endif
-            // Завершим работу
+            // Р—Р°РІРµСЂС€РёРј СЂР°Р±РѕС‚Сѓ
             break;
         }
 
@@ -216,10 +216,10 @@ DWORD MLockDsk::ThreadP()
 
     ::KillTimer(nullptr,uTimer);
 
-    // Уничтожим основное окно и все что в нем создано
+    // РЈРЅРёС‡С‚РѕР¶РёРј РѕСЃРЅРѕРІРЅРѕРµ РѕРєРЅРѕ Рё РІСЃРµ С‡С‚Рѕ РІ РЅРµРј СЃРѕР·РґР°РЅРѕ
     ::DestroyWindow(hwMain);
 #ifndef _DEBUG
-    // Уничтожим свой рабочий стол
+    // РЈРЅРёС‡С‚РѕР¶РёРј СЃРІРѕР№ СЂР°Р±РѕС‡РёР№ СЃС‚РѕР»
     ::SetThreadDesktop(hPrevDsk);
 #endif
     ::CloseDesktop(hMainDsk);
@@ -239,18 +239,18 @@ void MLockDsk::UpdBkg(HWND hBkg_, HWND hText_)
     RECT rect;
     POINT point={0,0};
 
-    // Определим область экрана где STATIC
+    // РћРїСЂРµРґРµР»РёРј РѕР±Р»Р°СЃС‚СЊ СЌРєСЂР°РЅР° РіРґРµ STATIC
     ::GetWindowRect(hText_,&rect);
-    // Определим координаты меню на экране
+    // РћРїСЂРµРґРµР»РёРј РєРѕРѕСЂРґРёРЅР°С‚С‹ РјРµРЅСЋ РЅР° СЌРєСЂР°РЅРµ
     ::ClientToScreen(hBkg_,&point);
-    // Вычислим относительные коодринаты STATIC'а
+    // Р’С‹С‡РёСЃР»РёРј РѕС‚РЅРѕСЃРёС‚РµР»СЊРЅС‹Рµ РєРѕРѕРґСЂРёРЅР°С‚С‹ STATIC'Р°
     rect.left-=point.x;
     rect.top-=point.y;
     rect.right-=point.x;
     rect.bottom-=point.y;
-    // Обновим картинку под STATIC'ом
+    // РћР±РЅРѕРІРёРј РєР°СЂС‚РёРЅРєСѓ РїРѕРґ STATIC'РѕРј
 //    ::RedrawWindow(hBkg_,&rect,nullptr,
-//        RDW_INVALIDATE|RDW_NOCHILDREN|RDW_UPDATENOW);   /// что лучше ?
+//        RDW_INVALIDATE|RDW_NOCHILDREN|RDW_UPDATENOW);   /// С‡С‚Рѕ Р»СѓС‡С€Рµ ?
 	::InvalidateRect(hBkg_,&rect,FALSE);
 	::UpdateWindow(hBkg_);
 }
@@ -259,14 +259,14 @@ void MLockDsk::UpdTransp() const
 {
 	std::lock_guard <std::mutex> lckObj(mtxParam);
 
-	// Выставим режим прозрачности окна и параметры цвета
+	// Р’С‹СЃС‚Р°РІРёРј СЂРµР¶РёРј РїСЂРѕР·СЂР°С‡РЅРѕСЃС‚Рё РѕРєРЅР° Рё РїР°СЂР°РјРµС‚СЂС‹ С†РІРµС‚Р°
 	if ( Transp )
 	{
 		::SetWindowLong(hwMain,GWL_EXSTYLE,WS_EX_LAYERED);
 		::SetLayeredWindowAttributes(hwMain,TCOLOR_TRANSPARENT,255,LWA_COLORKEY);
 	} else
 		::SetWindowLong(hwMain,GWL_EXSTYLE,0);
-	// Обновим содержимое
+	// РћР±РЅРѕРІРёРј СЃРѕРґРµСЂР¶РёРјРѕРµ
 	::InvalidateRect(hwMain,nullptr,TRUE);
 	::UpdateWindow(hwMain);
 }
@@ -287,7 +287,7 @@ void MLockDsk::UpdCompNum() const
 {
 	std::lock_guard <std::mutex> lckObj(mtxParam);
 
-	// Номер компьютера
+	// РќРѕРјРµСЂ РєРѕРјРїСЊСЋС‚РµСЂР°
 	wchar_t line[]=L"99";
 	swprintf(
 		line, sizeof(line)/sizeof(line[0]),
@@ -302,7 +302,7 @@ void MLockDsk::UpdSysTime() const
 {
 	std::lock_guard <std::mutex> lckObj(mtxParam);
 
-	// Текущее время
+	// РўРµРєСѓС‰РµРµ РІСЂРµРјСЏ
 	SYSTEMTIME st;
 	if ( Int64ToSystemTime(SysTime,st) )
 	{
@@ -320,7 +320,7 @@ void MLockDsk::UpdWorkTime() const
 {
 	std::lock_guard <std::mutex> lckObj(mtxParam);
 
-	// Сколько осталось работать
+	// РЎРєРѕР»СЊРєРѕ РѕСЃС‚Р°Р»РѕСЃСЊ СЂР°Р±РѕС‚Р°С‚СЊ
 	wchar_t line[]=L"--:--";
 	if ( WorkTime==0 ) swprintf(
 		line,  sizeof(line)/sizeof(line[0]),
@@ -337,7 +337,7 @@ bool MLockDsk::ThreadMsg(UINT Msg_) const
 {
     DWORD ExitCode;
 
-    // Убедимся что поток создан и работает перед отправкой ему сообщения
+    // РЈР±РµРґРёРјСЃСЏ С‡С‚Рѕ РїРѕС‚РѕРє СЃРѕР·РґР°РЅ Рё СЂР°Р±РѕС‚Р°РµС‚ РїРµСЂРµРґ РѕС‚РїСЂР°РІРєРѕР№ РµРјСѓ СЃРѕРѕР±С‰РµРЅРёСЏ
     if ( (hThread!=nullptr)&&
         ::GetExitCodeThread(hThread,&ExitCode)&&
         (ExitCode==STILL_ACTIVE) ) return ::PostThreadMessage(ThreadID,Msg_,0,0);
@@ -347,7 +347,7 @@ bool MLockDsk::ThreadMsg(UINT Msg_) const
 //---------------------------------------------------------------------------
 bool MLockDsk::SetTransp(bool Transp_)
 {
-    return true;            /// с прозрачностью баг - отключена
+    return true;            /// СЃ РїСЂРѕР·СЂР°С‡РЅРѕСЃС‚СЊСЋ Р±Р°Рі - РѕС‚РєР»СЋС‡РµРЅР°
 /*
     CS_Param.Enter();
     Transp=Transp_;
@@ -359,16 +359,16 @@ bool MLockDsk::SetTransp(bool Transp_)
 //---------------------------------------------------------------------------
 bool MLockDsk::Show(const wchar_t *File_)
 {
-	// Скопируем параметры в буфер потока
+	// РЎРєРѕРїРёСЂСѓРµРј РїР°СЂР°РјРµС‚СЂС‹ РІ Р±СѓС„РµСЂ РїРѕС‚РѕРєР°
 	{
 		std::lock_guard <std::mutex> lckObj(mtxParam);
 		if ( wcslen(File_)>MAX_PATH ) MsgFile.clear();
-		else MsgFile=File_;     /// проверить bad_alloc или выделить память заранее
+		else MsgFile=File_;     /// РїСЂРѕРІРµСЂРёС‚СЊ bad_alloc РёР»Рё РІС‹РґРµР»РёС‚СЊ РїР°РјСЏС‚СЊ Р·Р°СЂР°РЅРµРµ
 	}
 
-    // Отправим сообщение работающему потоку
+    // РћС‚РїСЂР°РІРёРј СЃРѕРѕР±С‰РµРЅРёРµ СЂР°Р±РѕС‚Р°СЋС‰РµРјСѓ РїРѕС‚РѕРєСѓ
     if ( hThread!=nullptr ) return ThreadMsg(MSG_UpdMsg);
-    // Или создадим его и рабочий стол блокировки
+    // РР»Рё СЃРѕР·РґР°РґРёРј РµРіРѕ Рё СЂР°Р±РѕС‡РёР№ СЃС‚РѕР» Р±Р»РѕРєРёСЂРѕРІРєРё
     hThread=::CreateThread(nullptr,0,
         &MLockDsk::ThreadF,
         (LPVOID)this,0,&ThreadID);
@@ -410,19 +410,19 @@ void MLockDsk::Hide(bool UnLock_)
 {
    DWORD ExitCode;
 
-    // Проверяем работает ли поток
+    // РџСЂРѕРІРµСЂСЏРµРј СЂР°Р±РѕС‚Р°РµС‚ Р»Рё РїРѕС‚РѕРє
     if ( hThread==nullptr ) return;
 
     if ( ::GetExitCodeThread(hThread,&ExitCode)&&(ExitCode==STILL_ACTIVE) )
     {
-        // Посылаем потоку сообщение и ждем завершения его работы
+        // РџРѕСЃС‹Р»Р°РµРј РїРѕС‚РѕРєСѓ СЃРѕРѕР±С‰РµРЅРёРµ Рё Р¶РґРµРј Р·Р°РІРµСЂС€РµРЅРёСЏ РµРіРѕ СЂР°Р±РѕС‚С‹
         ::PostThreadMessage(
             ThreadID,
             UnLock_? MSG_UnLock: MSG_Exit,
             0,0);
         ::WaitForSingleObject(hThread,INFINITE);
     }
-    // Удаляем объект потока
+    // РЈРґР°Р»СЏРµРј РѕР±СЉРµРєС‚ РїРѕС‚РѕРєР°
     ::CloseHandle(hThread);
 
     hThread=nullptr;
@@ -486,7 +486,7 @@ LRESULT CALLBACK MLockDsk::WndProc(HWND hWnd_,
 
                 default: break;
             }
-            // Все static-элементы c "прозрачной" заливкой
+            // Р’СЃРµ static-СЌР»РµРјРµРЅС‚С‹ c "РїСЂРѕР·СЂР°С‡РЅРѕР№" Р·Р°Р»РёРІРєРѕР№
             ::SetBkMode((HDC)wParam_,TRANSPARENT);
             return (LRESULT)::GetStockObject(NULL_BRUSH);
 
@@ -507,9 +507,9 @@ LRESULT CALLBACK MLockDsk::WndProc(HWND hWnd_,
 
 /*
         case WM_DISPLAYCHANGE:
-wParam 	Новое число битов на пиксель
-LOWORD(lParam) 	Новая ширина пикселя
-HIWORD(lParam) 	Новая высота пикселя
+wParam 	РќРѕРІРѕРµ С‡РёСЃР»Рѕ Р±РёС‚РѕРІ РЅР° РїРёРєСЃРµР»СЊ
+LOWORD(lParam) 	РќРѕРІР°СЏ С€РёСЂРёРЅР° РїРёРєСЃРµР»СЏ
+HIWORD(lParam) 	РќРѕРІР°СЏ РІС‹СЃРѕС‚Р° РїРёРєСЃРµР»СЏ
             break;
 */
 

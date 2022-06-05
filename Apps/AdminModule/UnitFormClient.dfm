@@ -59,10 +59,6 @@ object FormClient: TFormClient
     OnChange = PageControlChange
     object TabSheetGames: TTabSheet
       Caption = #1055#1088#1086#1075#1088#1072#1084#1084#1099
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       DesignSize = (
         557
         341)
@@ -195,10 +191,6 @@ object FormClient: TFormClient
     object TabSheetOptions: TTabSheet
       Caption = #1055#1086#1074#1077#1076#1077#1085#1080#1077' '#1082#1083#1080#1077#1085#1090#1072
       ImageIndex = 1
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       DesignSize = (
         557
         341)

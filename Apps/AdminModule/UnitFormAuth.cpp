@@ -1,4 +1,4 @@
-//---------------------------------------------------------------------------
+ï»¿//---------------------------------------------------------------------------
 #include <vcl.h>
 #pragma hdrstop
 
@@ -17,20 +17,20 @@ __fastcall TFormAuth::TFormAuth(TComponent* Owner)
 void __fastcall TFormAuth::FormShow(TObject *Sender)
 {
     Auth->GetKey(TmpKey,sizeof(TmpKey));
-    // Ïåðåâîäèì BYTE â HEX-ñòðîêó
+    // ÐŸÐµÑ€ÐµÐ²Ð¾Ð´Ð¸Ð¼ BYTE Ð² HEX-ÑÑ‚Ñ€Ð¾ÐºÑƒ
 	ByteToHEX(
 		TmpKey, sizeof(TmpKey),
 		HexBuffer, sizeof(HexBuffer)/sizeof(HexBuffer[0]),
 		L' ');
-	// Ïîäàåì íà ðåäàêòèðîâàíèå
+	// ÐŸÐ¾Ð´Ð°ÐµÐ¼ Ð½Ð° Ñ€ÐµÐ´Ð°ÐºÑ‚Ð¸Ñ€Ð¾Ð²Ð°Ð½Ð¸Ðµ
     MemoHEX->Lines->SetText(HexBuffer);
 
     SaveDialog->Filter=
-		L"Ôàéëû ðååñòðà Windows(*.reg)|*.reg|"
-		L"Âñå ôàéëû (*.*)|*.*";
+		L"Ð¤Ð°Ð¹Ð»Ñ‹ Ñ€ÐµÐµÑÑ‚Ñ€Ð° Windows(*.reg)|*.reg|"
+		L"Ð’ÑÐµ Ñ„Ð°Ð¹Ð»Ñ‹ (*.*)|*.*";
 	SaveDialog->DefaultExt=L"REG";
 
-	// Äîáàâèì ýíòðîïèè
+	// Ð”Ð¾Ð±Ð°Ð²Ð¸Ð¼ ÑÐ½Ñ‚Ñ€Ð¾Ð¿Ð¸Ð¸
 	BasicRand.event();
 }
 //---------------------------------------------------------------------------
@@ -86,17 +86,17 @@ void __fastcall TFormAuth::MemoHEXExit(TObject *Sender)
     {
         throw std::runtime_error (
 			"TFormAuth::MemoHEXExit()"
-			"Äëèíà êëþ÷à â áàéòàõ ïîëó÷èëàñü ìåíüøå îæèäàåìîãî.");
+			"Ð”Ð»Ð¸Ð½Ð° ÐºÐ»ÑŽÑ‡Ð° Ð² Ð±Ð°Ð¹Ñ‚Ð°Ñ… Ð¿Ð¾Ð»ÑƒÑ‡Ð¸Ð»Ð°ÑÑŒ Ð¼ÐµÐ½ÑŒÑˆÐµ Ð¾Ð¶Ð¸Ð´Ð°ÐµÐ¼Ð¾Ð³Ð¾.");
     }
 }
 //---------------------------------------------------------------------------
 void __fastcall TFormAuth::ButtonOKClick(TObject *Sender)
 {
-    // Çàìåùàåì òåêóùèé êëþ÷ áåçîïàñíîñòè íîâûì
+    // Ð—Ð°Ð¼ÐµÑ‰Ð°ÐµÐ¼ Ñ‚ÐµÐºÑƒÑ‰Ð¸Ð¹ ÐºÐ»ÑŽÑ‡ Ð±ÐµÐ·Ð¾Ð¿Ð°ÑÐ½Ð¾ÑÑ‚Ð¸ Ð½Ð¾Ð²Ñ‹Ð¼
     Sync->Stop();
     Auth->SetKey(TmpKey,sizeof(TmpKey));
     Sync->Start();
-    // Ñîõðàíÿåì åãî â ôàéë
+    // Ð¡Ð¾Ñ…Ñ€Ð°Ð½ÑÐµÐ¼ ÐµÐ³Ð¾ Ð² Ñ„Ð°Ð¹Ð»
     if ( !Auth->Save() )
     {
         ShellState->State|=mssErrorConfig; FormMain->SetShell();
@@ -106,14 +106,14 @@ void __fastcall TFormAuth::ButtonOKClick(TObject *Sender)
 //---------------------------------------------------------------------------
 void __fastcall TFormAuth::ButtonNewClick(TObject *Sender)
 {
-    // Ãåíåðèðóåì êëþ÷
+    // Ð“ÐµÐ½ÐµÑ€Ð¸Ñ€ÑƒÐµÐ¼ ÐºÐ»ÑŽÑ‡
 	if ( !CngRand(TmpKey,sizeof(TmpKey)) ) TimeRand(TmpKey,sizeof(TmpKey));
-    // Ïåðåâîäèì BYTE â HEX-ñòðîêó
+    // ÐŸÐµÑ€ÐµÐ²Ð¾Ð´Ð¸Ð¼ BYTE Ð² HEX-ÑÑ‚Ñ€Ð¾ÐºÑƒ
 	ByteToHEX(
 		TmpKey,sizeof(TmpKey),
 		HexBuffer,sizeof(HexBuffer)/sizeof(HexBuffer[0]),
 		L' ');
-    // Ïîäàåì íà ðåäàêòèðîâàíèå
+    // ÐŸÐ¾Ð´Ð°ÐµÐ¼ Ð½Ð° Ñ€ÐµÐ´Ð°ÐºÑ‚Ð¸Ñ€Ð¾Ð²Ð°Ð½Ð¸Ðµ
     MemoHEX->Lines->SetText(HexBuffer);
 }
 //---------------------------------------------------------------------------

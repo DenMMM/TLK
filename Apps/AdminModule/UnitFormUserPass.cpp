@@ -1,4 +1,4 @@
-//---------------------------------------------------------------------------
+п»ї//---------------------------------------------------------------------------
 #include <vcl.h>
 #include <memory>
 #pragma hdrstop
@@ -79,7 +79,7 @@ void __fastcall TFormUserPass::FormShow(TObject *Sender)
     EditConfirm->MaxLength=MAX_UserPassLen;
 	EditConfirm->PasswordChar=PASS_Char;
 
-	// Добавим энтропии
+	// Р”РѕР±Р°РІРёРј СЌРЅС‚СЂРѕРїРёРё
 	BasicRand.event();
 }
 //---------------------------------------------------------------------------
@@ -88,7 +88,7 @@ void __fastcall TFormUserPass::FormCloseQuery(TObject *Sender,
 {
 	if ( ModalResult!=mrOk ) return;
 
-	// Определяем какой пользователь был выбран
+	// РћРїСЂРµРґРµР»СЏРµРј РєР°РєРѕР№ РїРѕР»СЊР·РѕРІР°С‚РµР»СЊ Р±С‹Р» РІС‹Р±СЂР°РЅ
 	int Index=ComboBoxLogin->ItemIndex;
 	if ( Index<0 )
 	{
@@ -100,14 +100,14 @@ void __fastcall TFormUserPass::FormCloseQuery(TObject *Sender,
 	auto &User=*reinterpret_cast<MUsersItem*>(
 		ComboBoxLogin->Items->Objects[Index]);
 
-	// Проверяем текущий пароль
+	// РџСЂРѕРІРµСЂСЏРµРј С‚РµРєСѓС‰РёР№ РїР°СЂРѕР»СЊ
 	if ( Users && (!User.Pass.Check(EditPassword->Text.c_str())) )
 	{
 		ActiveControl=EditPassword;
 		CanClose=false;
 		return;
 	}
-	// Проверяем новый пароль
+	// РџСЂРѕРІРµСЂСЏРµРј РЅРѕРІС‹Р№ РїР°СЂРѕР»СЊ
 	if ( EditNew->Text!=EditConfirm->Text )
 	{
 		ActiveControl=EditNew;
@@ -155,7 +155,7 @@ void __fastcall TFormUserPass::ComboBoxLoginClick(TObject *Sender)
 //---------------------------------------------------------------------------
 void __fastcall TFormUserPass::EditPasswordKeyPress(TObject *Sender, System::WideChar &Key)
 {
-	// Добавим энтропии
+	// Р”РѕР±Р°РІРёРј СЌРЅС‚СЂРѕРїРёРё
 	BasicRand.event();
 }
 //---------------------------------------------------------------------------

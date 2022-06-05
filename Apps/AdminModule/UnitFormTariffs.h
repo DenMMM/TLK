@@ -1,4 +1,4 @@
-//---------------------------------------------------------------------------
+п»ї//---------------------------------------------------------------------------
 #ifndef UnitFormTariffsH
 #define UnitFormTariffsH
 //---------------------------------------------------------------------------
@@ -66,8 +66,8 @@ __published:	// IDE-managed Components
     void __fastcall ButtonSaveClick(TObject *Sender);
     void __fastcall CheckBoxDesktopExit(TObject *Sender);
 private:	// User declarations
-	MTariffs TmpTariffs;					// Буфер для списка тарифов
-	std::vector <std::int8_t> TmpComps;		// Буфер для списка компьютеров редактируемого тарифа
+	MTariffs TmpTariffs;					// Р‘СѓС„РµСЂ РґР»СЏ СЃРїРёСЃРєР° С‚Р°СЂРёС„РѕРІ
+	std::vector <std::int8_t> TmpComps;		// Р‘СѓС„РµСЂ РґР»СЏ СЃРїРёСЃРєР° РєРѕРјРїСЊСЋС‚РµСЂРѕРІ СЂРµРґР°РєС‚РёСЂСѓРµРјРѕРіРѕ С‚Р°СЂРёС„Р°
 	void SetEdit(bool Edit_);
     void SetListViewNamesLine(TListItem *Item_);
 public:		// User declarations

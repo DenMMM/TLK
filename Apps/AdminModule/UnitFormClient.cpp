@@ -1,4 +1,4 @@
-//---------------------------------------------------------------------------
+п»ї//---------------------------------------------------------------------------
 #include <vcl.h>
 #include <stdio.h>
 #include <stdexcept>
@@ -27,14 +27,14 @@ void __fastcall TFormClient::FormShow(TObject *Sender)
     PageControl->ActivePage=TabSheetGames;
     PageControlChange(nullptr);
 
-	// Заполняем список компьютеров
+	// Р—Р°РїРѕР»РЅСЏРµРј СЃРїРёСЃРѕРє РєРѕРјРїСЊСЋС‚РµСЂРѕРІ
 	for ( auto &Computer: *Computers )
 	{
 		TListItem *Item;
 
 		Item=ListViewComputers->Items->Add();
 		Item->Data=&Computer;
-		// Цвет группы и номер компьютера
+		// Р¦РІРµС‚ РіСЂСѓРїРїС‹ Рё РЅРѕРјРµСЂ РєРѕРјРїСЊСЋС‚РµСЂР°
 		Item->SubItems->Add(IntToStr(Computer.Number));
 		Item->SubItems->Add(L"");
 		Item->SubItemImages[0]=FormMain->GetCompColorIcon(&Computer);
@@ -50,10 +50,10 @@ void __fastcall TFormClient::FormShow(TObject *Sender)
     CreateGamesTree(TmpGames);
 
     EditShellUser->MaxLength=MAX_ClUNameLen;
-	ComboBoxToEndTime->Items->Add(L"Не показывать");
-	ComboBoxMsgEndTime->Items->Add(L"Не показывать");
-	ComboBoxRebootWait->Items->Add(L"Не перезагружать");
-	ComboBoxAutoLockTime->Items->Add(L"Не блокировать");
+	ComboBoxToEndTime->Items->Add(L"РќРµ РїРѕРєР°Р·С‹РІР°С‚СЊ");
+	ComboBoxMsgEndTime->Items->Add(L"РќРµ РїРѕРєР°Р·С‹РІР°С‚СЊ");
+	ComboBoxRebootWait->Items->Add(L"РќРµ РїРµСЂРµР·Р°РіСЂСѓР¶Р°С‚СЊ");
+	ComboBoxAutoLockTime->Items->Add(L"РќРµ Р±Р»РѕРєРёСЂРѕРІР°С‚СЊ");
 	for ( int i=1; i<=30; i++ )
 	{
 		UnicodeString line=IntToStr(i);
@@ -74,10 +74,10 @@ void __fastcall TFormClient::FormShow(TObject *Sender)
 void __fastcall TFormClient::FormClose(TObject *Sender,
       TCloseAction &Action)
 {
-    // Отменяем сетевые операции и освобождаем ресурсы WinSock
+    // РћС‚РјРµРЅСЏРµРј СЃРµС‚РµРІС‹Рµ РѕРїРµСЂР°С†РёРё Рё РѕСЃРІРѕР±РѕР¶РґР°РµРј СЂРµСЃСѓСЂСЃС‹ WinSock
     ButtonCancelClick(nullptr);
     Send.NetFree();
-    // Очищаем память
+    // РћС‡РёС‰Р°РµРј РїР°РјСЏС‚СЊ
     SendComps.clear();
     TmpGames.Clear();
     //
@@ -99,14 +99,14 @@ void __fastcall TFormClient::PageControlChange(TObject *Sender)
     if ( PageControl->ActivePage==TabSheetGames )
     {
 		OpenDialog->Filter=
-			L"Список игр TLK (*.gms)|*.gms|"
-			L"Все файлы (*.*)|*.*";
+			L"РЎРїРёСЃРѕРє РёРіСЂ TLK (*.gms)|*.gms|"
+			L"Р’СЃРµ С„Р°Р№Р»С‹ (*.*)|*.*";
 		OpenDialog->DefaultExt=L"GMS";
 	} else if ( PageControl->ActivePage==TabSheetOptions )
 	{
 		OpenDialog->Filter=
-			L"Настройки для клиента (*.cfg)|*.cfg|"
-			L"Все файлы (*.*)|*.*";
+			L"РќР°СЃС‚СЂРѕР№РєРё РґР»СЏ РєР»РёРµРЅС‚Р° (*.cfg)|*.cfg|"
+			L"Р’СЃРµ С„Р°Р№Р»С‹ (*.*)|*.*";
 		OpenDialog->DefaultExt=L"CFG";
 	}
 	SaveDialog->Filter=OpenDialog->Filter;
@@ -166,9 +166,9 @@ void __fastcall TFormClient::NSendClick(TObject *Sender)
     if ( ListViewComputers->SelCount<1 ) return;
 
     {
-        // Создадим массив указателей на компьютеры, куда будем рассылать
+        // РЎРѕР·РґР°РґРёРј РјР°СЃСЃРёРІ СѓРєР°Р·Р°С‚РµР»РµР№ РЅР° РєРѕРјРїСЊСЋС‚РµСЂС‹, РєСѓРґР° Р±СѓРґРµРј СЂР°СЃСЃС‹Р»Р°С‚СЊ
         SendComps.resize(ListViewComputers->SelCount);
-        // Заполним его
+        // Р—Р°РїРѕР»РЅРёРј РµРіРѕ
         TItemStates is=TItemStates()<<isSelected;
         TListItem *item=ListViewComputers->Selected;
         for ( unsigned i=0; item; i++ )
@@ -181,23 +181,23 @@ void __fastcall TFormClient::NSendClick(TObject *Sender)
 
     if ( PageControl->ActivePage==TabSheetGames )
     {
-        // Заполняем объект для отправки
+        // Р—Р°РїРѕР»РЅСЏРµРј РѕР±СЉРµРєС‚ РґР»СЏ РѕС‚РїСЂР°РІРєРё
         CreateGamesFromTree(TmpGames);
-        // Запускаем отправку данных
+        // Р—Р°РїСѓСЃРєР°РµРј РѕС‚РїСЂР°РІРєСѓ РґР°РЅРЅС‹С…
         SetNet(true,true);
         if ( !Send.Send(&SendComps,&TmpGames,nullptr) ) goto error;
     } else if ( PageControl->ActivePage==TabSheetOptions )
     {
-        // Заполняем объект для отправки
+        // Р—Р°РїРѕР»РЅСЏРµРј РѕР±СЉРµРєС‚ РґР»СЏ РѕС‚РїСЂР°РІРєРё
         ShellToOptions(TmpOptions);
-        // Запускаем отправку данных
+        // Р—Р°РїСѓСЃРєР°РµРј РѕС‚РїСЂР°РІРєСѓ РґР°РЅРЅС‹С…
         SetNet(true,true);
         if ( !Send.Send(&SendComps,nullptr,&TmpOptions) ) goto error;
     } else goto error;
 
     return;
 error:
-    // Удаляем мусор
+    // РЈРґР°Р»СЏРµРј РјСѓСЃРѕСЂ
     TmpGames.Clear();
     SendComps.clear();
 }
@@ -212,12 +212,12 @@ void __fastcall TFormClient::NLoadClick(TObject *Sender)
 
     if ( PageControl->ActivePage==TabSheetGames )
     {
-        // Запускаем поток загрузки списка игр в Games
+        // Р—Р°РїСѓСЃРєР°РµРј РїРѕС‚РѕРє Р·Р°РіСЂСѓР·РєРё СЃРїРёСЃРєР° РёРіСЂ РІ Games
         SetNet(true,false);
         Send.Get(Computer,&TmpGames,nullptr);
     } else if ( PageControl->ActivePage==TabSheetOptions )
     {
-        // Запускаем поток загрузки настроек
+        // Р—Р°РїСѓСЃРєР°РµРј РїРѕС‚РѕРє Р·Р°РіСЂСѓР·РєРё РЅР°СЃС‚СЂРѕРµРє
         SetNet(true,false);
         Send.Get(Computer,nullptr,&TmpOptions);
     }
@@ -239,8 +239,8 @@ void __fastcall TFormClient::TreeViewGamesChange(TObject *Sender,
     EditName->Text=Game->Name.c_str();
     EditCmd->Text=Game->Command.c_str();
     EditIcon->Text=Game->Icon.c_str();
-    // Если элемент верхнего уровня (группы программ) или слишком вложенный,
-    // корень ветви - запрещаем делать его новым корнем
+    // Р•СЃР»Рё СЌР»РµРјРµРЅС‚ РІРµСЂС…РЅРµРіРѕ СѓСЂРѕРІРЅСЏ (РіСЂСѓРїРїС‹ РїСЂРѕРіСЂР°РјРј) РёР»Рё СЃР»РёС€РєРѕРј РІР»РѕР¶РµРЅРЅС‹Р№,
+    // РєРѕСЂРµРЅСЊ РІРµС‚РІРё - Р·Р°РїСЂРµС‰Р°РµРј РґРµР»Р°С‚СЊ РµРіРѕ РЅРѕРІС‹Рј РєРѕСЂРЅРµРј
     ButtonAddChild->Enabled=!(
         (Select->Level==0)||
         (Select->Level>=MAX_PrgLevel)||
@@ -298,13 +298,13 @@ void __fastcall TFormClient::ButtonDelClick(TObject *Sender)
     if ( Select->HasChildren&&
         ResMessageBox(Handle,27,28,
             MB_APPLMODAL|MB_YESNO|MB_ICONQUESTION)!=IDYES ) return;
-    // Запоминаем родительский и предыдущий элементы
+    // Р—Р°РїРѕРјРёРЅР°РµРј СЂРѕРґРёС‚РµР»СЊСЃРєРёР№ Рё РїСЂРµРґС‹РґСѓС‰РёР№ СЌР»РµРјРµРЅС‚С‹
     Parent=Select->Parent;
     Prev=Parent->GetLastChild()==Select? Select->GetPrev(): nullptr;
     Select->Delete();
-    // Корректриуем вид строки, если элемент больше не корень дерева
+    // РљРѕСЂСЂРµРєС‚СЂРёСѓРµРј РІРёРґ СЃС‚СЂРѕРєРё, РµСЃР»Рё СЌР»РµРјРµРЅС‚ Р±РѕР»СЊС€Рµ РЅРµ РєРѕСЂРµРЅСЊ РґРµСЂРµРІР°
     if ( Parent&&(!Parent->HasChildren) ) SetTreeViewGamesLine(Parent);
-    // Назначем активной строку, предшествовавшую удаленной, если она была нижней в ветви
+    // РќР°Р·РЅР°С‡РµРј Р°РєС‚РёРІРЅРѕР№ СЃС‚СЂРѕРєСѓ, РїСЂРµРґС€РµСЃС‚РІРѕРІР°РІС€СѓСЋ СѓРґР°Р»РµРЅРЅРѕР№, РµСЃР»Рё РѕРЅР° Р±С‹Р»Р° РЅРёР¶РЅРµР№ РІ РІРµС‚РІРё
     if ( Prev ) TreeViewGames->Selected=Prev;
 }
 //---------------------------------------------------------------------------
@@ -363,7 +363,7 @@ void __fastcall TFormClient::BitBtnDownClick(TObject *Sender)
 //---------------------------------------------------------------------------
 void __fastcall TFormClient::ButtonCancelClick(TObject *Sender)
 {
-    // Останавливаем сетевые операции
+    // РћСЃС‚Р°РЅР°РІР»РёРІР°РµРј СЃРµС‚РµРІС‹Рµ РѕРїРµСЂР°С†РёРё
     Send.Stop();
 }
 //---------------------------------------------------------------------------
@@ -391,14 +391,14 @@ void TFormClient::AddGamesToTree(TTreeNode *Node_, const MGames &Games_)
 {
 	for ( const auto &sGame: Games_ )
 	{
-		// Добавляем строку в дерево
+		// Р”РѕР±Р°РІР»СЏРµРј СЃС‚СЂРѕРєСѓ РІ РґРµСЂРµРІРѕ
 		TTreeNode *Node=TreeViewGames->Items->AddChild(Node_, L"");
 		MGamesItem *dGame=new MGamesItem;
 		Node->Data=dGame;
 
-		// Зададим имя программы/узла
+		// Р—Р°РґР°РґРёРј РёРјСЏ РїСЂРѕРіСЂР°РјРјС‹/СѓР·Р»Р°
 		dGame->Name=sGame.Name;
-		// Зададим остальные параметры или добавим элементы нижних уровней
+		// Р—Р°РґР°РґРёРј РѕСЃС‚Р°Р»СЊРЅС‹Рµ РїР°СЂР°РјРµС‚СЂС‹ РёР»Рё РґРѕР±Р°РІРёРј СЌР»РµРјРµРЅС‚С‹ РЅРёР¶РЅРёС… СѓСЂРѕРІРЅРµР№
 		if ( !sGame.upSubGames )
 		{
 			dGame->Command=sGame.Command;
@@ -424,11 +424,11 @@ void TFormClient::CreateGamesTree(const MGames &Games_)
 			const MGamesItem& sGame=Games_.GetItem(i);
 
 			dGame->Name=sGame.Name;
-			// Добавим элементы нижних уровней
+			// Р”РѕР±Р°РІРёРј СЌР»РµРјРµРЅС‚С‹ РЅРёР¶РЅРёС… СѓСЂРѕРІРЅРµР№
 			if ( sGame.upSubGames ) AddGamesToTree(Node,*sGame.upSubGames);
 		} catch (std::out_of_range &e)
 		{
-			// Если узла верхнего уровня нет, зададим имя по-умолчанию
+			// Р•СЃР»Рё СѓР·Р»Р° РІРµСЂС…РЅРµРіРѕ СѓСЂРѕРІРЅСЏ РЅРµС‚, Р·Р°РґР°РґРёРј РёРјСЏ РїРѕ-СѓРјРѕР»С‡Р°РЅРёСЋ
 			wchar_t str[5+1];
 			swprintf(
 				str, sizeof(str)/sizeof(str[0]),
@@ -450,16 +450,16 @@ void TFormClient::AddGamesFromTree(MGames &Games_, TTreeNode *Node_)
 		MGamesItem& dGame=Games_.Add();
 		auto *sGame=reinterpret_cast<MGamesItem*>(Node->Data);
 
-		// Задаем имя программы/узла
+		// Р—Р°РґР°РµРј РёРјСЏ РїСЂРѕРіСЂР°РјРјС‹/СѓР·Р»Р°
 		dGame.Name=sGame->Name;
-		// Если это узловой элемент, добавляем дочерние
+		// Р•СЃР»Рё СЌС‚Рѕ СѓР·Р»РѕРІРѕР№ СЌР»РµРјРµРЅС‚, РґРѕР±Р°РІР»СЏРµРј РґРѕС‡РµСЂРЅРёРµ
 		if ( Node->HasChildren )
 		{
 			dGame.upSubGames.reset(new MGames);
 			AddGamesFromTree(*dGame.upSubGames,Node);
         } else
         {
-            // Иначе можно задать команду и путь к иконке
+            // РРЅР°С‡Рµ РјРѕР¶РЅРѕ Р·Р°РґР°С‚СЊ РєРѕРјР°РЅРґСѓ Рё РїСѓС‚СЊ Рє РёРєРѕРЅРєРµ
 			dGame.Command=sGame->Command;
 			dGame.Icon=sGame->Icon;
 		}
@@ -482,7 +482,7 @@ void TFormClient::CreateGamesFromTree(MGames &Games_)
 
 		//
 		dGame.Name=sGame->Name;
-		// Добавляем вложенные элементы
+		// Р”РѕР±Р°РІР»СЏРµРј РІР»РѕР¶РµРЅРЅС‹Рµ СЌР»РµРјРµРЅС‚С‹
 		if ( node->HasChildren )
 		{
 			dGame.upSubGames.reset(new MGames);
@@ -540,11 +540,11 @@ void TFormClient::SetNet(bool Begin_, bool Sending_)
     Sending=Sending_;
     if ( Begin_ )
     {
-        // Сбросим иконки у всех компьютеров
+        // РЎР±СЂРѕСЃРёРј РёРєРѕРЅРєРё Сѓ РІСЃРµС… РєРѕРјРїСЊСЋС‚РµСЂРѕРІ
         for ( int i=0, j=ListViewComputers->Items->Count; i<j; i++ )
             ListViewComputers->Items->Item[i]->SubItemImages[1]=-1;
-        // Выставим начальные у компьютеров, с которыми будем обмениваться данными.
-        // Обновляться будут в TFormClient::Dispatch().
+        // Р’С‹СЃС‚Р°РІРёРј РЅР°С‡Р°Р»СЊРЅС‹Рµ Сѓ РєРѕРјРїСЊСЋС‚РµСЂРѕРІ, СЃ РєРѕС‚РѕСЂС‹РјРё Р±СѓРґРµРј РѕР±РјРµРЅРёРІР°С‚СЊСЃСЏ РґР°РЅРЅС‹РјРё.
+        // РћР±РЅРѕРІР»СЏС‚СЊСЃСЏ Р±СѓРґСѓС‚ РІ TFormClient::Dispatch().
         if ( Sending_ )
         {
             for ( unsigned int i=0; i<SendComps.size(); i++ )
@@ -575,37 +575,37 @@ void __fastcall TFormClient::Dispatch(void *Message)
         case WM_USER+mseConnecting:
 /*
 			wchar_t line[12+MAX_ComputerAddressLength+1];
-			line[0]=0; wcscpy(line, L"Соединение: ");
-			// Проверяем что Message содержит правильный указатель на MComputer
+			line[0]=0; wcscpy(line, L"РЎРѕРµРґРёРЅРµРЅРёРµ: ");
+			// РџСЂРѕРІРµСЂСЏРµРј С‡С‚Рѕ Message СЃРѕРґРµСЂР¶РёС‚ РїСЂР°РІРёР»СЊРЅС‹Р№ СѓРєР°Р·Р°С‚РµР»СЊ РЅР° MComputer
 			Item=ListViewComputers->FindData(0,
 				(void*)(((TMessage*)Message)->WParam),true,false);
-			// И добавляем из него IP-адрес компьютера
+			// Р РґРѕР±Р°РІР»СЏРµРј РёР· РЅРµРіРѕ IP-Р°РґСЂРµСЃ РєРѕРјРїСЊСЋС‚РµСЂР°
 			if ( Item ) wcscat(line,((MComputersItem*)(Item->Data))->Address);
 			PanelProcess->Caption=line;
 */
-			PanelProcess->Caption=L"Соединение";
+			PanelProcess->Caption=L"РЎРѕРµРґРёРЅРµРЅРёРµ";
 			break;
 
 		case WM_USER+mseSending:
-            PanelProcess->Caption=L"Отправка";
+            PanelProcess->Caption=L"РћС‚РїСЂР°РІРєР°";
             break;
 
         case WM_USER+mseReceiving:
-			PanelProcess->Caption=L"Загрузка";
+			PanelProcess->Caption=L"Р—Р°РіСЂСѓР·РєР°";
 			break;
 
 		case WM_USER+mseDisconnecting:
-            PanelProcess->Caption=L"Разъединение";
+            PanelProcess->Caption=L"Р Р°Р·СЉРµРґРёРЅРµРЅРёРµ";
             break;
 
         case WM_USER+mseExecute:
-            // Сбрасываем иконку, отображающую сетевой процесс
+            // РЎР±СЂР°СЃС‹РІР°РµРј РёРєРѕРЅРєСѓ, РѕС‚РѕР±СЂР°Р¶Р°СЋС‰СѓСЋ СЃРµС‚РµРІРѕР№ РїСЂРѕС†РµСЃСЃ
             Item=ListViewComputers->FindData(0,
 				reinterpret_cast<void*>(
 					reinterpret_cast<TMessage*>(Message)->WParam
 				),true,false);
 			if ( Item ) Item->SubItemImages[1]=-1;
-			// Если данные загружали, обновляем интерфейс
+			// Р•СЃР»Рё РґР°РЅРЅС‹Рµ Р·Р°РіСЂСѓР¶Р°Р»Рё, РѕР±РЅРѕРІР»СЏРµРј РёРЅС‚РµСЂС„РµР№СЃ
 			if ( Sending ) break;
 			if ( PageControl->ActivePage==TabSheetGames )
 				CreateGamesTree(TmpGames);
@@ -620,13 +620,13 @@ void __fastcall TFormClient::Dispatch(void *Message)
 					reinterpret_cast<TMessage*>(Message)->WParam
 				),true,false);
             if ( Item ) Item->SubItemImages[1]=14;
-            PanelProcess->Caption=L"Ошибка";
+            PanelProcess->Caption=L"РћС€РёР±РєР°";
             break;
 
 		case WM_USER+mseFreeParam:
 			//
             Send.Stop();
-            // Удаляем мусор
+            // РЈРґР°Р»СЏРµРј РјСѓСЃРѕСЂ
             SendComps.clear();
             TmpGames.Clear();
             //

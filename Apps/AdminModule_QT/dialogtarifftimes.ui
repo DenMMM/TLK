@@ -2,9 +2,6 @@
 <ui version="4.0">
  <class>dialogTariffTimes</class>
  <widget class="QDialog" name="dialogTariffTimes">
-  <property name="windowModality">
-   <enum>Qt::ApplicationModal</enum>
-  </property>
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -12,6 +9,18 @@
     <width>585</width>
     <height>345</height>
    </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>0</width>
+    <height>0</height>
+   </size>
   </property>
   <property name="windowTitle">
    <string>Dialog</string>
@@ -47,7 +56,7 @@
    <property name="frameShadow">
     <enum>QFrame::Raised</enum>
    </property>
-   <widget class="QLabel" name="label">
+   <widget class="QLabel" name="labelTimeTypeText">
     <property name="geometry">
      <rect>
       <x>7</x>
@@ -68,12 +77,12 @@
      <rect>
       <x>44</x>
       <y>214</y>
-      <width>149</width>
+      <width>191</width>
       <height>21</height>
      </rect>
     </property>
    </widget>
-   <widget class="QLabel" name="label_2">
+   <widget class="QLabel" name="labelBeginText">
     <property name="geometry">
      <rect>
       <x>7</x>
@@ -109,7 +118,7 @@
      </rect>
     </property>
    </widget>
-   <widget class="QLabel" name="label_3">
+   <widget class="QLabel" name="labelEndText">
     <property name="geometry">
      <rect>
       <x>138</x>
@@ -155,7 +164,7 @@
      </rect>
     </property>
    </widget>
-   <widget class="QLabel" name="label_4">
+   <widget class="QLabel" name="labelSizeText">
     <property name="geometry">
      <rect>
       <x>258</x>
@@ -181,7 +190,7 @@
      </rect>
     </property>
    </widget>
-   <widget class="QLabel" name="label_5">
+   <widget class="QLabel" name="labelCostText">
     <property name="geometry">
      <rect>
       <x>371</x>
@@ -230,10 +239,10 @@
      </rect>
     </property>
     <property name="text">
-     <string>Добавить</string>
+     <string>Удалить</string>
     </property>
    </widget>
-   <widget class="QListWidget" name="listWidgetTimes">
+   <widget class="QTableWidget" name="tableWidgetTimes">
     <property name="geometry">
      <rect>
       <x>4</x>
@@ -242,6 +251,33 @@
       <height>205</height>
      </rect>
     </property>
+    <property name="editTriggers">
+     <set>QAbstractItemView::NoEditTriggers</set>
+    </property>
+    <property name="tabKeyNavigation">
+     <bool>false</bool>
+    </property>
+    <property name="selectionMode">
+     <enum>QAbstractItemView::ExtendedSelection</enum>
+    </property>
+    <property name="selectionBehavior">
+     <enum>QAbstractItemView::SelectRows</enum>
+    </property>
+    <property name="showGrid">
+     <bool>false</bool>
+    </property>
+    <property name="wordWrap">
+     <bool>false</bool>
+    </property>
+    <attribute name="verticalHeaderVisible">
+     <bool>false</bool>
+    </attribute>
+    <attribute name="verticalHeaderMinimumSectionSize">
+     <number>23</number>
+    </attribute>
+    <attribute name="verticalHeaderDefaultSectionSize">
+     <number>23</number>
+    </attribute>
    </widget>
   </widget>
  </widget>

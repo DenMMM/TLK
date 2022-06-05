@@ -95,7 +95,7 @@
      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
     </property>
    </widget>
-   <widget class="QLabel" name="label_3">
+   <widget class="QLabel" name="labelPassword">
     <property name="geometry">
      <rect>
       <x>39</x>
@@ -129,6 +129,9 @@
       <width>185</width>
       <height>21</height>
      </rect>
+    </property>
+    <property name="echoMode">
+     <enum>QLineEdit::Password</enum>
     </property>
    </widget>
   </widget>

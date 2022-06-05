@@ -1,4 +1,4 @@
-//---------------------------------------------------------------------------
+п»ї//---------------------------------------------------------------------------
 #include <vcl.h>
 #include <string.h>
 #include <memory>
@@ -21,10 +21,10 @@ __fastcall TFormTariffs::TFormTariffs(TComponent* Owner)
 //---------------------------------------------------------------------------
 void __fastcall TFormTariffs::FormShow(TObject *Sender)
 {
-    // Копируем список тарифов в буфер
+    // РљРѕРїРёСЂСѓРµРј СЃРїРёСЃРѕРє С‚Р°СЂРёС„РѕРІ РІ Р±СѓС„РµСЂ
 	TmpTariffs=*Tariffs;
 
-    // Формируем их список
+    // Р¤РѕСЂРјРёСЂСѓРµРј РёС… СЃРїРёСЃРѕРє
 	for ( auto &tariff: TmpTariffs )
 	{
 		TListItem *item;
@@ -33,9 +33,9 @@ void __fastcall TFormTariffs::FormShow(TObject *Sender)
         SetListViewNamesLine(item);
     }
 
-    // Заполняем список групп программ
+    // Р—Р°РїРѕР»РЅСЏРµРј СЃРїРёСЃРѕРє РіСЂСѓРїРї РїСЂРѕРіСЂР°РјРј
     for ( int i=1; i<=8; i++ ) CheckListBoxApps->Items->Add(IntToStr(i));
-	// Формируем список компьютеров
+	// Р¤РѕСЂРјРёСЂСѓРµРј СЃРїРёСЃРѕРє РєРѕРјРїСЊСЋС‚РµСЂРѕРІ
 	for ( auto &comp: *Computers )
 	{
 		TListItem *item;
@@ -49,20 +49,20 @@ void __fastcall TFormTariffs::FormShow(TObject *Sender)
     SetEdit(false);
 	ActiveControl=ListViewNames;
 
-	// Добавим энтропии
+	// Р”РѕР±Р°РІРёРј СЌРЅС‚СЂРѕРїРёРё
 	BasicRand.event();
 }
 //---------------------------------------------------------------------------
 void __fastcall TFormTariffs::FormClose(TObject *Sender,
       TCloseAction &Action)
 {
-    // Чистим интерфейсные элементы
+    // Р§РёСЃС‚РёРј РёРЅС‚РµСЂС„РµР№СЃРЅС‹Рµ СЌР»РµРјРµРЅС‚С‹
     ListViewNames->Items->Clear();
     EditName->Text=L"";
     CheckBoxReboot->Checked=false;
     CheckListBoxApps->Items->Clear();
     ListViewComputers->Items->Clear();
-    // Чистим буфер
+    // Р§РёСЃС‚РёРј Р±СѓС„РµСЂ
     TmpTariffs.Clear();
 }
 //---------------------------------------------------------------------------
@@ -85,7 +85,7 @@ void __fastcall TFormTariffs::ListViewNamesSelectItem(TObject *Sender,
 	auto &tariff=*reinterpret_cast<const MTariffsItem*>(
 		ListViewNames->Selected->Data);
 	EditName->Text=tariff.Name.c_str();
-	// Проставляем группы программ
+	// РџСЂРѕСЃС‚Р°РІР»СЏРµРј РіСЂСѓРїРїС‹ РїСЂРѕРіСЂР°РјРј
 	unsigned Programs=tariff.Programs;
 	CheckListBoxApps->Checked[0]=Programs&mgp1;
 	CheckListBoxApps->Checked[1]=Programs&mgp2;
@@ -99,7 +99,7 @@ void __fastcall TFormTariffs::ListViewNamesSelectItem(TObject *Sender,
 	CheckBoxReboot->Checked=tariff.Reboot;
 	CheckBoxRoute->Checked=tariff.Programs&mgpRoute;
 	CheckBoxDesktop->Checked=tariff.Programs&mgpDesktop;
-	// Проставляем для каких компьютеров используется тариф
+	// РџСЂРѕСЃС‚Р°РІР»СЏРµРј РґР»СЏ РєР°РєРёС… РєРѕРјРїСЊСЋС‚РµСЂРѕРІ РёСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ С‚Р°СЂРёС„
 	int i=0;
 	for ( const auto &comp: *Computers )
 	{
@@ -117,14 +117,14 @@ void __fastcall TFormTariffs::ButtonAddClick(TObject *Sender)
         return;
     }
 
-    // Добавляем новый тариф в буфер
+    // Р”РѕР±Р°РІР»СЏРµРј РЅРѕРІС‹Р№ С‚Р°СЂРёС„ РІ Р±СѓС„РµСЂ
 	auto &tariff=TmpTariffs.Add();
-    tariff.Name=L"Новый тариф";
-    // Добавляем строку в список и связываем ее с тарифом
+    tariff.Name=L"РќРѕРІС‹Р№ С‚Р°СЂРёС„";
+    // Р”РѕР±Р°РІР»СЏРµРј СЃС‚СЂРѕРєСѓ РІ СЃРїРёСЃРѕРє Рё СЃРІСЏР·С‹РІР°РµРј РµРµ СЃ С‚Р°СЂРёС„РѕРј
     TListItem *item=ListViewNames->Items->Add();
     item->Data=&tariff;
     SetListViewNamesLine(item);
-    // Обновляем интерфейс
+    // РћР±РЅРѕРІР»СЏРµРј РёРЅС‚РµСЂС„РµР№СЃ
     ListViewNames->ItemFocused=item;
     ListViewNames->Selected=nullptr;
     ListViewNames->Selected=item;
@@ -133,17 +133,17 @@ void __fastcall TFormTariffs::ButtonAddClick(TObject *Sender)
 //---------------------------------------------------------------------------
 void __fastcall TFormTariffs::ButtonDelClick(TObject *Sender)
 {
-    // Удаляем тарифы из списка
+    // РЈРґР°Р»СЏРµРј С‚Р°СЂРёС„С‹ РёР· СЃРїРёСЃРєР°
     TItemStates is=TItemStates()<<isSelected;
     TListItem *item=ListViewNames->Selected, *next;
     while(item)
     {
-        // Удаляем тариф из буфера
+        // РЈРґР°Р»СЏРµРј С‚Р°СЂРёС„ РёР· Р±СѓС„РµСЂР°
 		TmpTariffs.Del(
 			MTariffs::const_iterator(
 			reinterpret_cast<MTariffsItem*>(item->Data)
 			));
-        // Удаляем строку из списка
+        // РЈРґР°Р»СЏРµРј СЃС‚СЂРѕРєСѓ РёР· СЃРїРёСЃРєР°
         next=ListViewNames->GetNextItem(item,sdAll,is);
         item->Delete();
         item=next;
@@ -231,7 +231,7 @@ void __fastcall TFormTariffs::ListViewComputersKeyPress(TObject *Sender,
 void __fastcall TFormTariffs::ListViewComputersExit(TObject *Sender)
 {
     if ( ListViewNames->Selected==nullptr ) return;
-    // Заполняем массив номеров компьютеров
+    // Р—Р°РїРѕР»РЅСЏРµРј РјР°СЃСЃРёРІ РЅРѕРјРµСЂРѕРІ РєРѕРјРїСЊСЋС‚РµСЂРѕРІ
     TmpComps.clear();
     TListItems *items=ListViewComputers->Items;
 	for ( int i=0; i<items->Count; ++i )
@@ -242,7 +242,7 @@ void __fastcall TFormTariffs::ListViewComputersExit(TObject *Sender)
 			reinterpret_cast<MComputersItem*>(
 			item->Data)->Number);
 	}
-    // Сохраняем копию этого массива в тарифе
+    // РЎРѕС…СЂР°РЅСЏРµРј РєРѕРїРёСЋ СЌС‚РѕРіРѕ РјР°СЃСЃРёРІР° РІ С‚Р°СЂРёС„Рµ
 	auto &tariff=*reinterpret_cast<MTariffsItem*>(
 		ListViewNames->Selected->Data);
 	tariff.Comps=TmpComps;
@@ -286,7 +286,7 @@ void __fastcall TFormTariffs::ButtonTimesClick(TObject *Sender)
     {
 		auto &tariff=*reinterpret_cast<MTariffsItem*>(
 			ListViewNames->Selected->Data);
-		// Открываем диалог редактирования
+		// РћС‚РєСЂС‹РІР°РµРј РґРёР°Р»РѕРі СЂРµРґР°РєС‚РёСЂРѕРІР°РЅРёСЏ
 		form.reset(new TFormTariffTimes(0));
 		form->Execute(tariff.Times, tariff.Name.c_str(), Left+30, Top+30);
 	}
@@ -298,25 +298,25 @@ void __fastcall TFormTariffs::ButtonTimesClick(TObject *Sender)
 //---------------------------------------------------------------------------
 void __fastcall TFormTariffs::ButtonSaveClick(TObject *Sender)
 {
-    // Замещаем тарифы записями из буфера
+    // Р—Р°РјРµС‰Р°РµРј С‚Р°СЂРёС„С‹ Р·Р°РїРёСЃСЏРјРё РёР· Р±СѓС„РµСЂР°
 	*Tariffs=std::move(TmpTariffs);
-	// Задаем ID-номера для новых тарифов
+	// Р—Р°РґР°РµРј ID-РЅРѕРјРµСЂР° РґР»СЏ РЅРѕРІС‹С… С‚Р°СЂРёС„РѕРІ
     Tariffs->SetUUIDs();
-    // Сохраняем в файле
+    // РЎРѕС…СЂР°РЅСЏРµРј РІ С„Р°Р№Р»Рµ
     if ( !Tariffs->Save() )
     {
         ShellState->State|=mssErrorConfig; FormMain->SetShell();
         ResMessageBox(Handle,1,3,MB_APPLMODAL|MB_OK|MB_ICONERROR,Tariffs->gLastErr());
         return;
     }
-    // Запись в логах
+    // Р—Р°РїРёСЃСЊ РІ Р»РѕРіР°С…
     if ( !Log->AddTariffs(*Tariffs) )
     {
-        // Настройки сохранили, но без отображения их в логе работать не дадим
+        // РќР°СЃС‚СЂРѕР№РєРё СЃРѕС…СЂР°РЅРёР»Рё, РЅРѕ Р±РµР· РѕС‚РѕР±СЂР°Р¶РµРЅРёСЏ РёС… РІ Р»РѕРіРµ СЂР°Р±РѕС‚Р°С‚СЊ РЅРµ РґР°РґРёРј
         ShellState->State|=mssErrorLog|mssErrorConfig; FormMain->SetShell();
         ResMessageBox(Handle,1,5,MB_APPLMODAL|MB_OK|MB_ICONERROR,Log->gLastErr());
     }
-    // Обновляем список компьютеров в главном окне
+    // РћР±РЅРѕРІР»СЏРµРј СЃРїРёСЃРѕРє РєРѕРјРїСЊСЋС‚РµСЂРѕРІ РІ РіР»Р°РІРЅРѕРј РѕРєРЅРµ
     FormMain->UpdateListViewComputers(true);
 }
 //---------------------------------------------------------------------------

@@ -1,21 +1,22 @@
-//---------------------------------------------------------------------------
+п»ї//---------------------------------------------------------------------------
 #ifndef UnitSLListH
 #define UnitSLListH
 //---------------------------------------------------------------------------
+#include <winsock2.h>
+//#include <windows.h>
+
 #include <string>
 #include <vector>
 #include <stdexcept>
 #include <cwchar>
 #include <cstdint>
 #include <stdio.h>
-#include <winsock2.h>
-//#include <windows.h>
 
 #include "UnitList.h"
 #include "UnitCommon.h"
 //---------------------------------------------------------------------------
-#define MAX_SLFileSize  0x02000000  // Ограничение на размер файлов - 32Мбайт
-#define MAX_SLRegSize   0x00000800  // Ограничение на размер ключей реестра - 2Кбайт
+#define MAX_SLFileSize  0x02000000  // РћРіСЂР°РЅРёС‡РµРЅРёРµ РЅР° СЂР°Р·РјРµСЂ С„Р°Р№Р»РѕРІ - 32РњР±Р°Р№С‚
+#define MAX_SLRegSize   0x00000800  // РћРіСЂР°РЅРёС‡РµРЅРёРµ РЅР° СЂР°Р·РјРµСЂ РєР»СЋС‡РµР№ СЂРµРµСЃС‚СЂР° - 2РљР±Р°Р№С‚
 //---------------------------------------------------------------------------
 //---------------------------------------------------------------------------
 template <typename list_type, typename base_type>
@@ -37,16 +38,16 @@ using MSLListSimple = MListSimple <parent_list, item_type>;
 //---------------------------------------------------------------------------
 //---------------------------------------------------------------------------
 template <
-	typename list_type,			// Имя будущего класса-списка
-	typename base_type>			// Базовый (родительский) тип его элементов
+	typename list_type,			// РРјСЏ Р±СѓРґСѓС‰РµРіРѕ РєР»Р°СЃСЃР°-СЃРїРёСЃРєР°
+	typename base_type>			// Р‘Р°Р·РѕРІС‹Р№ (СЂРѕРґРёС‚РµР»СЊСЃРєРёР№) С‚РёРї РµРіРѕ СЌР»РµРјРµРЅС‚РѕРІ
 class MSLListItem:
 	public MListItem <list_type, base_type>
 {
 //	friend MSLList <list_type, base_type>;
 
 public:
-	// Функции определения размера данных производного от MSLListItem класса,
-	// сохранения и восстановления их в/из памяти.
+	// Р¤СѓРЅРєС†РёРё РѕРїСЂРµРґРµР»РµРЅРёСЏ СЂР°Р·РјРµСЂР° РґР°РЅРЅС‹С… РїСЂРѕРёР·РІРѕРґРЅРѕРіРѕ РѕС‚ MSLListItem РєР»Р°СЃСЃР°,
+	// СЃРѕС…СЂР°РЅРµРЅРёСЏ Рё РІРѕСЃСЃС‚Р°РЅРѕРІР»РµРЅРёСЏ РёС… РІ/РёР· РїР°РјСЏС‚Рё.
 	virtual std::size_t GetDataSize() const = 0;
 	virtual void *SetData(void *Data_) const = 0;
 	virtual const void *GetData(const void *Data_, const void *Limit_) = 0;
@@ -54,36 +55,36 @@ public:
 //---------------------------------------------------------------------------
 //---------------------------------------------------------------------------
 template <
-	typename list_type,			// Создаваемый класс списка (имя)
-	typename base_type>			// Базовый тип элемента списка
+	typename list_type,			// РЎРѕР·РґР°РІР°РµРјС‹Р№ РєР»Р°СЃСЃ СЃРїРёСЃРєР° (РёРјСЏ)
+	typename base_type>			// Р‘Р°Р·РѕРІС‹Р№ С‚РёРї СЌР»РµРјРµРЅС‚Р° СЃРїРёСЃРєР°
 class MSLList:
 	public MList <list_type, base_type>
 {
 public:
-	// "Вытащим" объявления из родительского шаблона
+	// "Р’С‹С‚Р°С‰РёРј" РѕР±СЉСЏРІР»РµРЅРёСЏ РёР· СЂРѕРґРёС‚РµР»СЊСЃРєРѕРіРѕ С€Р°Р±Р»РѕРЅР°
 	using MList <list_type, base_type> ::isTyped;
 //	using MList <list_type, base_type> ::gFirst;
 	using MList <list_type, base_type> ::Clear;
 	using MList <list_type, base_type> ::Add;
 
-public:      /// ??? проверить MLog
+public:      /// ??? РїСЂРѕРІРµСЂРёС‚СЊ MLog
 	HKEY DefaultKey;			// HKCR/HKCU/HKLM/HKU
-	std::wstring DefaultFile;	// путь к файлу на диске / раздел реестра
-	std::wstring DefaultValue;	// имя параметра в реестре
-	std::uint32_t DefaultCode;	// двоичный ключ шифрования данных
-	mutable DWORD LastError;	// код ошибки последней операции с файлом/реестром
+	std::wstring DefaultFile;	// РїСѓС‚СЊ Рє С„Р°Р№Р»Сѓ РЅР° РґРёСЃРєРµ / СЂР°Р·РґРµР» СЂРµРµСЃС‚СЂР°
+	std::wstring DefaultValue;	// РёРјСЏ РїР°СЂР°РјРµС‚СЂР° РІ СЂРµРµСЃС‚СЂРµ
+	std::uint32_t DefaultCode;	// РґРІРѕРёС‡РЅС‹Р№ РєР»СЋС‡ С€РёС„СЂРѕРІР°РЅРёСЏ РґР°РЅРЅС‹С…
+	mutable DWORD LastError;	// РєРѕРґ РѕС€РёР±РєРё РїРѕСЃР»РµРґРЅРµР№ РѕРїРµСЂР°С†РёРё СЃ С„Р°Р№Р»РѕРј/СЂРµРµСЃС‚СЂРѕРј
 
 public:
-	// Функции определения размера данных производного от MSLList класса,
-	// сохранения и восстановления их в/из памяти.
-	// Заглушки. MList не предполагает дополнения атрибутами, а MSLList-да.
+	// Р¤СѓРЅРєС†РёРё РѕРїСЂРµРґРµР»РµРЅРёСЏ СЂР°Р·РјРµСЂР° РґР°РЅРЅС‹С… РїСЂРѕРёР·РІРѕРґРЅРѕРіРѕ РѕС‚ MSLList РєР»Р°СЃСЃР°,
+	// СЃРѕС…СЂР°РЅРµРЅРёСЏ Рё РІРѕСЃСЃС‚Р°РЅРѕРІР»РµРЅРёСЏ РёС… РІ/РёР· РїР°РјСЏС‚Рё.
+	// Р—Р°РіР»СѓС€РєРё. MList РЅРµ РїСЂРµРґРїРѕР»Р°РіР°РµС‚ РґРѕРїРѕР»РЅРµРЅРёСЏ Р°С‚СЂРёР±СѓС‚Р°РјРё, Р° MSLList-РґР°.
 	virtual std::size_t GetDataSize() const { return 0; }
 	virtual void *SetData(void *Data_) const { return Data_; }
 	virtual const void *GetData(const void *Data_, const void *Limit_) { return Data_; }
 
 public:
-	// Функции определения размера данных всех элементов списка,
-	// сохранения и восстановления их в/из памяти.
+	// Р¤СѓРЅРєС†РёРё РѕРїСЂРµРґРµР»РµРЅРёСЏ СЂР°Р·РјРµСЂР° РґР°РЅРЅС‹С… РІСЃРµС… СЌР»РµРјРµРЅС‚РѕРІ СЃРїРёСЃРєР°,
+	// СЃРѕС…СЂР°РЅРµРЅРёСЏ Рё РІРѕСЃСЃС‚Р°РЅРѕРІР»РµРЅРёСЏ РёС… РІ/РёР· РїР°РјСЏС‚Рё.
 	std::size_t GetAllDataSize(bool Header_=true) const;
 	void *SetAllData(void *Data_, bool Header_=true) const;
 	const void *GetAllData(const void *Data_, const void *Limit_);
@@ -114,46 +115,46 @@ std::size_t MSLList<list_type,base_type>::GetAllDataSize(bool Header_) const
 {
 	std::size_t DataSize=0;
 
-	// Берем размер заголовка
+	// Р‘РµСЂРµРј СЂР°Р·РјРµСЂ Р·Р°РіРѕР»РѕРІРєР°
 	std::size_t Size=GetDataSize();
 	if ( Size > std::numeric_limits<std::uint32_t>::max() )
 	{
 		throw std::out_of_range(
 			"MSLList::GetAllDataSize()\n"
-			"Размер заголовка превышает max(uint32_t).");
+			"Р Р°Р·РјРµСЂ Р·Р°РіРѕР»РѕРІРєР° РїСЂРµРІС‹С€Р°РµС‚ max(uint32_t).");
 	}
-	// Не забываем добавить поле для размера данных заголовка
+	// РќРµ Р·Р°Р±С‹РІР°РµРј РґРѕР±Р°РІРёС‚СЊ РїРѕР»Рµ РґР»СЏ СЂР°Р·РјРµСЂР° РґР°РЅРЅС‹С… Р·Р°РіРѕР»РѕРІРєР°
 	if ( Header_&&(Size!=0) ) DataSize+=sizeof(std::uint32_t)+Size;
 
-	// Берем размер элементов списка (игнорируя элементы с нулевым размером данных)
+	// Р‘РµСЂРµРј СЂР°Р·РјРµСЂ СЌР»РµРјРµРЅС‚РѕРІ СЃРїРёСЃРєР° (РёРіРЅРѕСЂРёСЂСѓСЏ СЌР»РµРјРµРЅС‚С‹ СЃ РЅСѓР»РµРІС‹Рј СЂР°Р·РјРµСЂРѕРј РґР°РЅРЅС‹С…)
 	bool typed=isTyped();
 	for ( const auto &Item: *this )
 	{
 		std::size_t Size=Item.GetDataSize();
 		if ( Size==0 ) continue;
 
-		// Если список типизированный, добавляем размер поля типа
+		// Р•СЃР»Рё СЃРїРёСЃРѕРє С‚РёРїРёР·РёСЂРѕРІР°РЅРЅС‹Р№, РґРѕР±Р°РІР»СЏРµРј СЂР°Р·РјРµСЂ РїРѕР»СЏ С‚РёРїР°
 		if ( typed ) Size+=sizeof(std::uint8_t);
 
 		if ( Size > std::numeric_limits<std::uint32_t>::max() )
 		{
 			throw std::out_of_range(
 				"MSLList::GetAllDataSize()\n"
-				"Размер элемента превышает max(uint32_t).");
+				"Р Р°Р·РјРµСЂ СЌР»РµРјРµРЅС‚Р° РїСЂРµРІС‹С€Р°РµС‚ max(uint32_t).");
 		}
 
-		// Не забываем добавить поле для размера данных элемента
+		// РќРµ Р·Р°Р±С‹РІР°РµРј РґРѕР±Р°РІРёС‚СЊ РїРѕР»Рµ РґР»СЏ СЂР°Р·РјРµСЂР° РґР°РЅРЅС‹С… СЌР»РµРјРµРЅС‚Р°
 		DataSize+=sizeof(std::uint32_t)+Size;
 	}
-	// Маркер конца списка
+	// РњР°СЂРєРµСЂ РєРѕРЅС†Р° СЃРїРёСЃРєР°
 	DataSize+=sizeof(std::uint32_t);
 
-	// Будем считать (для совместимости), что размер данных укладывается в uint32_t
+	// Р‘СѓРґРµРј СЃС‡РёС‚Р°С‚СЊ (РґР»СЏ СЃРѕРІРјРµСЃС‚РёРјРѕСЃС‚Рё), С‡С‚Рѕ СЂР°Р·РјРµСЂ РґР°РЅРЅС‹С… СѓРєР»Р°РґС‹РІР°РµС‚СЃСЏ РІ uint32_t
 	if ( DataSize > std::numeric_limits<std::uint32_t>::max() )
 	{
 		throw std::out_of_range(
 			"MSLList::GetAllDataSize()\n"
-			"Размер списка превышает max(uint32_t).");
+			"Р Р°Р·РјРµСЂ СЃРїРёСЃРєР° РїСЂРµРІС‹С€Р°РµС‚ max(uint32_t).");
 	}
 
 	return DataSize;
@@ -169,47 +170,47 @@ void *MSLList<list_type,base_type>::SetAllData(void *Data__, bool Header_) const
 
 	if ( Header_ )
 	{
-		// Оставляем поле для размера данных заголовка
+		// РћСЃС‚Р°РІР»СЏРµРј РїРѕР»Рµ РґР»СЏ СЂР°Р·РјРµСЂР° РґР°РЅРЅС‹С… Р·Р°РіРѕР»РѕРІРєР°
 		Data_+=sizeof(std::uint32_t);
-		// Сохраняем данные заголовка и вычисляем его реальный размер
+		// РЎРѕС…СЂР°РЅСЏРµРј РґР°РЅРЅС‹Рµ Р·Р°РіРѕР»РѕРІРєР° Рё РІС‹С‡РёСЃР»СЏРµРј РµРіРѕ СЂРµР°Р»СЊРЅС‹Р№ СЂР°Р·РјРµСЂ
 		NextData=static_cast<char*>(SetData(Data_));
 		BlockSize=NextData-Data_;
-		// Проверяем нужно ли было сохранять заголовок (были ли записаны данные)
+		// РџСЂРѕРІРµСЂСЏРµРј РЅСѓР¶РЅРѕ Р»Рё Р±С‹Р»Рѕ СЃРѕС…СЂР°РЅСЏС‚СЊ Р·Р°РіРѕР»РѕРІРѕРє (Р±С‹Р»Рё Р»Рё Р·Р°РїРёСЃР°РЅС‹ РґР°РЅРЅС‹Рµ)
 		if ( BlockSize==0 ) Data_-=sizeof(std::uint32_t);
 		else
 		{
-			// Сохраняем размер заголовка
+			// РЎРѕС…СЂР°РЅСЏРµРј СЂР°Р·РјРµСЂ Р·Р°РіРѕР»РѕРІРєР°
 			MemSet(
 				Data_-sizeof(std::uint32_t),
 				static_cast<std::uint32_t>(BlockSize));
-			// Переходим далее
+			// РџРµСЂРµС…РѕРґРёРј РґР°Р»РµРµ
 			Data_=NextData;
 		}
 	}
 
 	for ( const auto &Item: *this )
 	{
-		// Оставляем поле для размера данных блока
+		// РћСЃС‚Р°РІР»СЏРµРј РїРѕР»Рµ РґР»СЏ СЂР°Р·РјРµСЂР° РґР°РЅРЅС‹С… Р±Р»РѕРєР°
 		Data_+=sizeof(std::uint32_t);
-		// Если список типизированный, то оставляем поле для типа элемента
+		// Р•СЃР»Рё СЃРїРёСЃРѕРє С‚РёРїРёР·РёСЂРѕРІР°РЅРЅС‹Р№, С‚Рѕ РѕСЃС‚Р°РІР»СЏРµРј РїРѕР»Рµ РґР»СЏ С‚РёРїР° СЌР»РµРјРµРЅС‚Р°
 		NextData=typed? Data_+sizeof(std::uint8_t): Data_;
-		// Сохраняем данные блока и вычисляем его реальный размер (включая поле типа)
+		// РЎРѕС…СЂР°РЅСЏРµРј РґР°РЅРЅС‹Рµ Р±Р»РѕРєР° Рё РІС‹С‡РёСЃР»СЏРµРј РµРіРѕ СЂРµР°Р»СЊРЅС‹Р№ СЂР°Р·РјРµСЂ (РІРєР»СЋС‡Р°СЏ РїРѕР»Рµ С‚РёРїР°)
 		NextData=static_cast<char*>(Item.SetData(NextData));
 		BlockSize=NextData-Data_;
-		// Проверяем нужно ли было сохранять блок (были ли записаны данные)
+		// РџСЂРѕРІРµСЂСЏРµРј РЅСѓР¶РЅРѕ Р»Рё Р±С‹Р»Рѕ СЃРѕС…СЂР°РЅСЏС‚СЊ Р±Р»РѕРє (Р±С‹Р»Рё Р»Рё Р·Р°РїРёСЃР°РЅС‹ РґР°РЅРЅС‹Рµ)
 		if ( BlockSize!=0 )
 		{
-			// Сохраняем размер данных блока
+			// РЎРѕС…СЂР°РЅСЏРµРј СЂР°Р·РјРµСЂ РґР°РЅРЅС‹С… Р±Р»РѕРєР°
 			Data_=static_cast<char*>(MemSet(
 				Data_-sizeof(std::uint32_t),
 				static_cast<std::uint32_t>(BlockSize)));
-			// Если список типизированный, сохраняем тип элемента
+			// Р•СЃР»Рё СЃРїРёСЃРѕРє С‚РёРїРёР·РёСЂРѕРІР°РЅРЅС‹Р№, СЃРѕС…СЂР°РЅСЏРµРј С‚РёРї СЌР»РµРјРµРЅС‚Р°
 			if ( typed ) MemSet(Data_,Item.gTypeID());
-			// Переходим далее
+			// РџРµСЂРµС…РѕРґРёРј РґР°Р»РµРµ
 			Data_=NextData;
 		} else Data_-=sizeof(std::uint32_t);
 	}
-	// Маркер конца списка
+	// РњР°СЂРєРµСЂ РєРѕРЅС†Р° СЃРїРёСЃРєР°
 	Data_=static_cast<char*>(MemSet(Data_,(std::uint32_t)0));
 
 	return Data_;
@@ -224,20 +225,20 @@ const void *MSLList<list_type,base_type>::GetAllData(const void *Data__, const v
 	std::uint32_t DataSize;
 	std::uint8_t TypeID;
 
-	// Очищаем список для профилактики
+	// РћС‡РёС‰Р°РµРј СЃРїРёСЃРѕРє РґР»СЏ РїСЂРѕС„РёР»Р°РєС‚РёРєРё
 	Clear();
-									/// возможно, стоит проверять bad_alloc
-	// Берем размер вроде бы заголовка списка
+									/// РІРѕР·РјРѕР¶РЅРѕ, СЃС‚РѕРёС‚ РїСЂРѕРІРµСЂСЏС‚СЊ bad_alloc
+	// Р‘РµСЂРµРј СЂР°Р·РјРµСЂ РІСЂРѕРґРµ Р±С‹ Р·Р°РіРѕР»РѕРІРєР° СЃРїРёСЃРєР°
 	Data_=static_cast<const char*>(MemGet(Data_,&DataSize,Limit_));
 	if ( Data_==nullptr ) goto error;
-	// Вычисляем лимит для операций с памятью внутри этого блока
+	// Р’С‹С‡РёСЃР»СЏРµРј Р»РёРјРёС‚ РґР»СЏ РѕРїРµСЂР°С†РёР№ СЃ РїР°РјСЏС‚СЊСЋ РІРЅСѓС‚СЂРё СЌС‚РѕРіРѕ Р±Р»РѕРєР°
 	Limit=Data_+DataSize;
-	// Проверим выход на установленную границу и на переполнение указателя
+	// РџСЂРѕРІРµСЂРёРј РІС‹С…РѕРґ РЅР° СѓСЃС‚Р°РЅРѕРІР»РµРЅРЅСѓСЋ РіСЂР°РЅРёС†Сѓ Рё РЅР° РїРµСЂРµРїРѕР»РЅРµРЅРёРµ СѓРєР°Р·Р°С‚РµР»СЏ
 	if ( (Limit>Limit_)||(Limit<Data_) ) goto error;
-	// Берем данные
+	// Р‘РµСЂРµРј РґР°РЅРЅС‹Рµ
 	{
 		const char *result=static_cast<const char*>(GetData(Data_,Limit));
-		// Если ничего не считали, значит у списка нет заголовка
+		// Р•СЃР»Рё РЅРёС‡РµРіРѕ РЅРµ СЃС‡РёС‚Р°Р»Рё, Р·РЅР°С‡РёС‚ Сѓ СЃРїРёСЃРєР° РЅРµС‚ Р·Р°РіРѕР»РѕРІРєР°
 		if ( Data_==result ) Data_-=sizeof(std::uint32_t);
 		else if ( result!=Limit ) goto error;
 		else Data_=result;
@@ -245,27 +246,27 @@ const void *MSLList<list_type,base_type>::GetAllData(const void *Data__, const v
 
 	while(true)
 	{
-		// Берем размер блока
+		// Р‘РµСЂРµРј СЂР°Р·РјРµСЂ Р±Р»РѕРєР°
 		Data_=static_cast<const char*>(MemGet(Data_,&DataSize,Limit_));
 		if ( Data_==nullptr ) goto error;
-		// Если размер блока равен нулю (маркер конца списка),
-		// то прекращаем заполнение списка
+		// Р•СЃР»Рё СЂР°Р·РјРµСЂ Р±Р»РѕРєР° СЂР°РІРµРЅ РЅСѓР»СЋ (РјР°СЂРєРµСЂ РєРѕРЅС†Р° СЃРїРёСЃРєР°),
+		// С‚Рѕ РїСЂРµРєСЂР°С‰Р°РµРј Р·Р°РїРѕР»РЅРµРЅРёРµ СЃРїРёСЃРєР°
 		if ( DataSize==0 ) break;
-		// Вычисляем лимит для операций с памятью внутри этого блока
+		// Р’С‹С‡РёСЃР»СЏРµРј Р»РёРјРёС‚ РґР»СЏ РѕРїРµСЂР°С†РёР№ СЃ РїР°РјСЏС‚СЊСЋ РІРЅСѓС‚СЂРё СЌС‚РѕРіРѕ Р±Р»РѕРєР°
 		Limit=Data_+DataSize;
-		// Проверим выход на установленную границу и на переполнение указателя
+		// РџСЂРѕРІРµСЂРёРј РІС‹С…РѕРґ РЅР° СѓСЃС‚Р°РЅРѕРІР»РµРЅРЅСѓСЋ РіСЂР°РЅРёС†Сѓ Рё РЅР° РїРµСЂРµРїРѕР»РЅРµРЅРёРµ СѓРєР°Р·Р°С‚РµР»СЏ
 		if ( (Limit>Limit_)||(Limit<Data_) ) goto error;
-		// Если список типизированный, берем тип элемента
+		// Р•СЃР»Рё СЃРїРёСЃРѕРє С‚РёРїРёР·РёСЂРѕРІР°РЅРЅС‹Р№, Р±РµСЂРµРј С‚РёРї СЌР»РµРјРµРЅС‚Р°
 		if ( typed )
 		{
 			Data_=static_cast<const char*>(MemGet(Data_, &TypeID, Limit_));
 			if ( Data_==nullptr ) goto error;
 		} else TypeID=0;
-		// Добавляем новый элемент в список
+		// Р”РѕР±Р°РІР»СЏРµРј РЅРѕРІС‹Р№ СЌР»РµРјРµРЅС‚ РІ СЃРїРёСЃРѕРє
 		try
 		{
 			base_type& Item=Add(TypeID);
-			// Берем данные
+			// Р‘РµСЂРµРј РґР°РЅРЅС‹Рµ
 			Data_=static_cast<const char*>(Item.GetData(Data_,Limit));
 			if ( Data_!=Limit ) goto error;
 		}
@@ -277,7 +278,7 @@ const void *MSLList<list_type,base_type>::GetAllData(const void *Data__, const v
 
 	return Data_;
 error:
-	// Очищаем частично заполненный список
+	// РћС‡РёС‰Р°РµРј С‡Р°СЃС‚РёС‡РЅРѕ Р·Р°РїРѕР»РЅРµРЅРЅС‹Р№ СЃРїРёСЃРѕРє
 	Clear();
     return nullptr;
 }
@@ -290,28 +291,28 @@ bool MSLList<list_type,base_type>::SaveTo(const std::wstring &File_, std::uint32
 	std::vector <char> all_data;
 
 	LastError=0;
-	// Определяем размер данных и проверяем на допустимость
+	// РћРїСЂРµРґРµР»СЏРµРј СЂР°Р·РјРµСЂ РґР°РЅРЅС‹С… Рё РїСЂРѕРІРµСЂСЏРµРј РЅР° РґРѕРїСѓСЃС‚РёРјРѕСЃС‚СЊ
 	data_size=GetAllDataSize();         /// value limited to int32_t
 	if ( data_size>MAX_SLFileSize )
     {
-		throw std::runtime_error (      /// заменить на return false ?
+		throw std::runtime_error (      /// Р·Р°РјРµРЅРёС‚СЊ РЅР° return false ?
 			"MSLList::SaveTo()\n"
-			"Размер данных превышает ограничение MAX_SLFileSize.");
+			"Р Р°Р·РјРµСЂ РґР°РЅРЅС‹С… РїСЂРµРІС‹С€Р°РµС‚ РѕРіСЂР°РЅРёС‡РµРЅРёРµ MAX_SLFileSize.");
     }
-    // Выделяем память под данные.
-    // bad_alloc не ловим, т.к. ничего еще не начали делать
+    // Р’С‹РґРµР»СЏРµРј РїР°РјСЏС‚СЊ РїРѕРґ РґР°РЅРЅС‹Рµ.
+    // bad_alloc РЅРµ Р»РѕРІРёРј, С‚.Рє. РЅРёС‡РµРіРѕ РµС‰Рµ РЅРµ РЅР°С‡Р°Р»Рё РґРµР»Р°С‚СЊ
 	all_data.resize(data_size);
-	// Сохраняем весь список в памяти и сверяем реальный размер данных
-	if ( SetAllData(all_data.data()) != &all_data[all_data.size()] )
+	// РЎРѕС…СЂР°РЅСЏРµРј РІРµСЃСЊ СЃРїРёСЃРѕРє РІ РїР°РјСЏС‚Рё Рё СЃРІРµСЂСЏРµРј СЂРµР°Р»СЊРЅС‹Р№ СЂР°Р·РјРµСЂ РґР°РЅРЅС‹С…
+    if ( SetAllData(all_data.data()) != (all_data.data()+all_data.size()) )
 	{
 		throw std::runtime_error (
 			"MSLList::SaveTo()\n"
-			"Размер данных MSLList::SetAllData() не соответствует MSLList::GetAllDataSize().");
+			"Р Р°Р·РјРµСЂ РґР°РЅРЅС‹С… MSLList::SetAllData() РЅРµ СЃРѕРѕС‚РІРµС‚СЃС‚РІСѓРµС‚ MSLList::GetAllDataSize().");
 	}
-	// Шифруем данные
+	// РЁРёС„СЂСѓРµРј РґР°РЅРЅС‹Рµ
 	BasicEncode(all_data.data(),all_data.size(),Code_);
 
-	// Создаем файл
+	// РЎРѕР·РґР°РµРј С„Р°Р№Р»
 	if ( (file=::CreateFile(File_.c_str(),GENERIC_WRITE,0,nullptr,
         Always_? (Safe_?OPEN_ALWAYS:CREATE_ALWAYS) :CREATE_NEW,
         Safe_?FILE_ATTRIBUTE_NORMAL|FILE_FLAG_WRITE_THROUGH:FILE_ATTRIBUTE_NORMAL,
@@ -319,13 +320,13 @@ bool MSLList<list_type,base_type>::SaveTo(const std::wstring &File_, std::uint32
 
     if ( Always_&&Safe_ )
     {
-        // Задаем новый размер файла
+        // Р—Р°РґР°РµРј РЅРѕРІС‹Р№ СЂР°Р·РјРµСЂ С„Р°Р№Р»Р°
         if ( ::SetFilePointer(file,(LONG)data_size,nullptr,FILE_BEGIN)==0xFFFFFFFF ) goto api_error;
         if ( !SetEndOfFile(file) ) goto api_error;
-        // Возвращаем позицию к началу
+        // Р’РѕР·РІСЂР°С‰Р°РµРј РїРѕР·РёС†РёСЋ Рє РЅР°С‡Р°Р»Сѓ
         if ( ::SetFilePointer(file,(LONG)0,nullptr,FILE_BEGIN)==0xFFFFFFFF ) goto api_error;
     }
-    // Записываем данные
+    // Р—Р°РїРёСЃС‹РІР°РµРј РґР°РЅРЅС‹Рµ
 	if ( (!::WriteFile(file,all_data.data(),data_size,&rw_size,nullptr))||
         (rw_size!=data_size) ) goto api_error;
 
@@ -346,77 +347,77 @@ bool MSLList<list_type,base_type>::AttachTo(const std::wstring &File_, std::uint
 	std::vector <char> all_data;
 
 	LastError=0;
-    // Открываем файл
+    // РћС‚РєСЂС‹РІР°РµРј С„Р°Р№Р»
 	if ( (file=::CreateFile(File_.c_str(),GENERIC_READ|GENERIC_WRITE,0,nullptr,
 		OPEN_EXISTING,
         Safe_?FILE_ATTRIBUTE_NORMAL|FILE_FLAG_WRITE_THROUGH:FILE_ATTRIBUTE_NORMAL,
         nullptr))==INVALID_HANDLE_VALUE ) goto api_error;
-	// Определяем размер файла и проверяем на допустимость
+	// РћРїСЂРµРґРµР»СЏРµРј СЂР°Р·РјРµСЂ С„Р°Р№Р»Р° Рё РїСЂРѕРІРµСЂСЏРµРј РЅР° РґРѕРїСѓСЃС‚РёРјРѕСЃС‚СЊ
     if ( (file_sizel=::GetFileSize(file,&file_sizeh))==0xFFFFFFFF ) goto api_error;
     if ( (file_sizeh!=0)||
-         (file_sizel<sizeof(std::uint32_t))||    // короче маркера конца списка быть не может
+         (file_sizel<sizeof(std::uint32_t))||    // РєРѕСЂРѕС‡Рµ РјР°СЂРєРµСЂР° РєРѕРЅС†Р° СЃРїРёСЃРєР° Р±С‹С‚СЊ РЅРµ РјРѕР¶РµС‚
          (file_sizel>=MAX_SLFileSize) ) goto error;
-    // Определяем размер данных для добавления к файлу, его допустимость
-    // и не превысит ли ограничение увеличившийся файл (иначе потом не откроем его)
+    // РћРїСЂРµРґРµР»СЏРµРј СЂР°Р·РјРµСЂ РґР°РЅРЅС‹С… РґР»СЏ РґРѕР±Р°РІР»РµРЅРёСЏ Рє С„Р°Р№Р»Сѓ, РµРіРѕ РґРѕРїСѓСЃС‚РёРјРѕСЃС‚СЊ
+    // Рё РЅРµ РїСЂРµРІС‹СЃРёС‚ Р»Рё РѕРіСЂР°РЅРёС‡РµРЅРёРµ СѓРІРµР»РёС‡РёРІС€РёР№СЃСЏ С„Р°Р№Р» (РёРЅР°С‡Рµ РїРѕС‚РѕРј РЅРµ РѕС‚РєСЂРѕРµРј РµРіРѕ)
     data_size=GetAllDataSize(false);
     if ( data_size>MAX_SLFileSize )
     {
-        throw std::runtime_error (      /// заменить на return false ?
+        throw std::runtime_error (      /// Р·Р°РјРµРЅРёС‚СЊ РЅР° return false ?
 			"MSLList::AttachTo()\n"
-			"Размер данных превышает ограничение MAX_SLFileSize.");
+			"Р Р°Р·РјРµСЂ РґР°РЅРЅС‹С… РїСЂРµРІС‹С€Р°РµС‚ РѕРіСЂР°РЅРёС‡РµРЅРёРµ MAX_SLFileSize.");
     }
     if ( (data_size+file_sizel)>MAX_SLFileSize ) goto error;
 
     read_size=file_sizel;
-    // Ограничиваем область чтения двойным размером
-    // блока шифрования (особенность алгоритма)
+    // РћРіСЂР°РЅРёС‡РёРІР°РµРј РѕР±Р»Р°СЃС‚СЊ С‡С‚РµРЅРёСЏ РґРІРѕР№РЅС‹Рј СЂР°Р·РјРµСЂРѕРј
+    // Р±Р»РѕРєР° С€РёС„СЂРѕРІР°РЅРёСЏ (РѕСЃРѕР±РµРЅРЅРѕСЃС‚СЊ Р°Р»РіРѕСЂРёС‚РјР°)
     if ( read_size>(sizeof(std::uint32_t)*2) ) read_size=sizeof(std::uint32_t)*2;
-    // Определяем общий размер данных для записи
+    // РћРїСЂРµРґРµР»СЏРµРј РѕР±С‰РёР№ СЂР°Р·РјРµСЂ РґР°РЅРЅС‹С… РґР»СЏ Р·Р°РїРёСЃРё
     data_size+=read_size-sizeof(std::uint32_t);
-    // Выделяем память под новые данные и часть старых из файла
+    // Р’С‹РґРµР»СЏРµРј РїР°РјСЏС‚СЊ РїРѕРґ РЅРѕРІС‹Рµ РґР°РЅРЅС‹Рµ Рё С‡Р°СЃС‚СЊ СЃС‚Р°СЂС‹С… РёР· С„Р°Р№Р»Р°
     try { all_data.resize(data_size); }
 	catch ( std::bad_alloc &e )
     {
-        // Закрываем файл и передаем исключение выше
+        // Р—Р°РєСЂС‹РІР°РµРј С„Р°Р№Р» Рё РїРµСЂРµРґР°РµРј РёСЃРєР»СЋС‡РµРЅРёРµ РІС‹С€Рµ
         ::CloseHandle(file);
         throw e;
     }
 
-    // Читаем часть старых данных из файла
+    // Р§РёС‚Р°РµРј С‡Р°СЃС‚СЊ СЃС‚Р°СЂС‹С… РґР°РЅРЅС‹С… РёР· С„Р°Р№Р»Р°
     if ( (::SetFilePointer(file,-(LONG)read_size,nullptr,FILE_END)==0xFFFFFFFF)||
         (!::ReadFile(file,all_data.data(),read_size,&rw_size,nullptr))||
-        (rw_size!=read_size) ) goto api_error;  /// ошибка обработки rw_size ?
-    // Расшифровываем их и проверяем наличие маркера конца списка (0x00000000)
+        (rw_size!=read_size) ) goto api_error;  /// РѕС€РёР±РєР° РѕР±СЂР°Р±РѕС‚РєРё rw_size ?
+    // Р Р°СЃС€РёС„СЂРѕРІС‹РІР°РµРј РёС… Рё РїСЂРѕРІРµСЂСЏРµРј РЅР°Р»РёС‡РёРµ РјР°СЂРєРµСЂР° РєРѕРЅС†Р° СЃРїРёСЃРєР° (0x00000000)
     BasicDecode(all_data.data(),read_size,Code_);
     if ( ((std::uint32_t*)&all_data[read_size])[-1]!=0 ) goto error;
 
-    // Сохраняем список без заголовка в памяти и сверяем реальный размер данных
+    // РЎРѕС…СЂР°РЅСЏРµРј СЃРїРёСЃРѕРє Р±РµР· Р·Р°РіРѕР»РѕРІРєР° РІ РїР°РјСЏС‚Рё Рё СЃРІРµСЂСЏРµРј СЂРµР°Р»СЊРЅС‹Р№ СЂР°Р·РјРµСЂ РґР°РЅРЅС‹С…
 	if ( SetAllData(&all_data[read_size-sizeof(std::uint32_t)],false) !=
-		&all_data[all_data.size()] )
+        (all_data.data()+all_data.size()) )
 	{
         throw std::runtime_error (
 			"MSLList::AttachTo()\n"
-			"Размер данных MSLList::SetAllData() не соответствует MSLList::GetAllDataSize().");
+			"Р Р°Р·РјРµСЂ РґР°РЅРЅС‹С… MSLList::SetAllData() РЅРµ СЃРѕРѕС‚РІРµС‚СЃС‚РІСѓРµС‚ MSLList::GetAllDataSize().");
 	}
 
-    // Шифруем
+    // РЁРёС„СЂСѓРµРј
     BasicEncode(all_data.data(),all_data.size(),Code_);
 
     if ( Safe_ )
     {
-		// Резервируем место в файле
+		// Р РµР·РµСЂРІРёСЂСѓРµРј РјРµСЃС‚Рѕ РІ С„Р°Р№Р»Рµ
         if ( (::SetFilePointer(file,(LONG)(data_size-read_size),nullptr,FILE_END)==0xFFFFFFFF)||
             (!SetEndOfFile(file)) ) goto api_error;
-        // Отступаем от конца файла так, чтобы перезаписать часть старых данных
+        // РћС‚СЃС‚СѓРїР°РµРј РѕС‚ РєРѕРЅС†Р° С„Р°Р№Р»Р° С‚Р°Рє, С‡С‚РѕР±С‹ РїРµСЂРµР·Р°РїРёСЃР°С‚СЊ С‡Р°СЃС‚СЊ СЃС‚Р°СЂС‹С… РґР°РЅРЅС‹С…
         if ( ::SetFilePointer(file,-(LONG)data_size,nullptr,FILE_END)==0xFFFFFFFF ) goto api_error;
     } else
     {
-        // Отступаем от конца файла так, чтобы перезаписать часть старых данных
+        // РћС‚СЃС‚СѓРїР°РµРј РѕС‚ РєРѕРЅС†Р° С„Р°Р№Р»Р° С‚Р°Рє, С‡С‚РѕР±С‹ РїРµСЂРµР·Р°РїРёСЃР°С‚СЊ С‡Р°СЃС‚СЊ СЃС‚Р°СЂС‹С… РґР°РЅРЅС‹С…
         if ( ::SetFilePointer(file,-(LONG)read_size,nullptr,FILE_END)==0xFFFFFFFF ) goto api_error;
     }
-    // Сохраняем данные в файле
+    // РЎРѕС…СЂР°РЅСЏРµРј РґР°РЅРЅС‹Рµ РІ С„Р°Р№Р»Рµ
     if ( (!::WriteFile(file,all_data.data(),data_size,&rw_size,nullptr))||
-        (rw_size!=data_size) ) goto api_error;    /// ошибка обработки rw_size ?
+        (rw_size!=data_size) ) goto api_error;    /// РѕС€РёР±РєР° РѕР±СЂР°Р±РѕС‚РєРё rw_size ?
 
     ::CloseHandle(file);
     return true;
@@ -435,32 +436,32 @@ bool MSLList<list_type,base_type>::LoadFrom(const std::wstring &File_, std::uint
 	std::vector <char> all_data;
 
 	LastError=0;
-	// Открываем файл
+	// РћС‚РєСЂС‹РІР°РµРј С„Р°Р№Р»
 	if ( (file=::CreateFile(File_.c_str(),GENERIC_READ,0,nullptr,OPEN_EXISTING,
 		FILE_ATTRIBUTE_NORMAL,nullptr))==INVALID_HANDLE_VALUE ) goto api_error;
-	// Определяем его размер и проверяем на допустимость
+	// РћРїСЂРµРґРµР»СЏРµРј РµРіРѕ СЂР°Р·РјРµСЂ Рё РїСЂРѕРІРµСЂСЏРµРј РЅР° РґРѕРїСѓСЃС‚РёРјРѕСЃС‚СЊ
 	if ( (file_sizel=::GetFileSize(file,&file_sizeh))==0xFFFFFFFF ) goto api_error;
 	if ( (file_sizeh!=0)||
 		 (file_sizel>MAX_SLFileSize) ) goto error;
-	// Выделяем память под данные
+	// Р’С‹РґРµР»СЏРµРј РїР°РјСЏС‚СЊ РїРѕРґ РґР°РЅРЅС‹Рµ
 	try { all_data.resize(file_sizel); }
 	catch ( std::bad_alloc &e )
 	{
-		// Закрываем файл и передаем исключение выше
+		// Р—Р°РєСЂС‹РІР°РµРј С„Р°Р№Р» Рё РїРµСЂРµРґР°РµРј РёСЃРєР»СЋС‡РµРЅРёРµ РІС‹С€Рµ
 		::CloseHandle(file);
 		throw e;
 	}
-	// Считываем данные из файла
+	// РЎС‡РёС‚С‹РІР°РµРј РґР°РЅРЅС‹Рµ РёР· С„Р°Р№Р»Р°
 	if ( (!::ReadFile(file,all_data.data(),file_sizel,&rw_size,nullptr))||
 		(rw_size!=file_sizel) ) goto api_error;
-	// Закрываем его
+	// Р—Р°РєСЂС‹РІР°РµРј РµРіРѕ
 	::CloseHandle(file); file=INVALID_HANDLE_VALUE;
 
-	// Расшифровываем
+	// Р Р°СЃС€РёС„СЂРѕРІС‹РІР°РµРј
 	BasicDecode(all_data.data(),file_sizel,Code_);
-	// Заносим в список (bad_alloc не ловим, т.к. уже безопасно)
-	if ( GetAllData(all_data.data(),&all_data[file_sizel]) !=
-		&all_data[file_sizel] ) goto error;
+	// Р—Р°РЅРѕСЃРёРј РІ СЃРїРёСЃРѕРє (bad_alloc РЅРµ Р»РѕРІРёРј, С‚.Рє. СѓР¶Рµ Р±РµР·РѕРїР°СЃРЅРѕ)
+    if ( GetAllData(all_data.data(), all_data.data()+file_sizel) !=
+        (all_data.data()+file_sizel) ) goto error;
 
 	return true;
 api_error:
@@ -479,31 +480,31 @@ bool MSLList<list_type,base_type>::StoreTo(HKEY Key_, const std::wstring &SubKey
 	std::size_t size;
 
 	LastError=0;
-	// Определяем размер данных и проверяем на допустимость
+	// РћРїСЂРµРґРµР»СЏРµРј СЂР°Р·РјРµСЂ РґР°РЅРЅС‹С… Рё РїСЂРѕРІРµСЂСЏРµРј РЅР° РґРѕРїСѓСЃС‚РёРјРѕСЃС‚СЊ
 	size=GetAllDataSize();
 	if ( size>MAX_SLRegSize )
 	{
-		throw std::runtime_error (      /// заменить на return false ?
+		throw std::runtime_error (      /// Р·Р°РјРµРЅРёС‚СЊ РЅР° return false ?
 			"MSLList::StoreTo()\n"
-			"Размер данных превышает ограничение MAX_SLRegSize.");
+			"Р Р°Р·РјРµСЂ РґР°РЅРЅС‹С… РїСЂРµРІС‹С€Р°РµС‚ РѕРіСЂР°РЅРёС‡РµРЅРёРµ MAX_SLRegSize.");
 	}
-    // Выделяем память (bad_alloc не ловим, т.к. еще ничего не начали делать)
+    // Р’С‹РґРµР»СЏРµРј РїР°РјСЏС‚СЊ (bad_alloc РЅРµ Р»РѕРІРёРј, С‚.Рє. РµС‰Рµ РЅРёС‡РµРіРѕ РЅРµ РЅР°С‡Р°Р»Рё РґРµР»Р°С‚СЊ)
     data.resize(size);
-    // Сохраняем весь список в памяти и сверяем реальный размер данных
+    // РЎРѕС…СЂР°РЅСЏРµРј РІРµСЃСЊ СЃРїРёСЃРѕРє РІ РїР°РјСЏС‚Рё Рё СЃРІРµСЂСЏРµРј СЂРµР°Р»СЊРЅС‹Р№ СЂР°Р·РјРµСЂ РґР°РЅРЅС‹С…
 	if ( SetAllData(data.data()) != &data[data.size()] )
 	{
         throw std::runtime_error (
 			"MSLList::StoreTo()\n"
-			"Размер данных MSLList::SetAllData() не соответствует MSLList::GetAllDataSize().");
+			"Р Р°Р·РјРµСЂ РґР°РЅРЅС‹С… MSLList::SetAllData() РЅРµ СЃРѕРѕС‚РІРµС‚СЃС‚РІСѓРµС‚ MSLList::GetAllDataSize().");
     }
-    // Шифруем
+    // РЁРёС„СЂСѓРµРј
 	BasicEncode(data.data(),data.size(),Code_);
 
-    // Создаем ключ реестра
+    // РЎРѕР·РґР°РµРј РєР»СЋС‡ СЂРµРµСЃС‚СЂР°
 	if ( ::RegCreateKeyEx(Key_,SubKey_.c_str(),0,nullptr,
 		REG_OPTION_NON_VOLATILE,KEY_ALL_ACCESS,nullptr,
 		&key,nullptr)!=ERROR_SUCCESS ) goto api_error;
-	// Сохраняем параметр
+	// РЎРѕС…СЂР°РЅСЏРµРј РїР°СЂР°РјРµС‚СЂ
 	if ( ::RegSetValueEx(key,Value_.c_str(),0,REG_BINARY,
 		(LPBYTE)data.data(),size)!=ERROR_SUCCESS ) goto api_error;
 
@@ -524,28 +525,28 @@ bool MSLList<list_type,base_type>::QueryFrom(HKEY Key_, const std::wstring &SubK
 	std::vector <char> data;
 
 	LastError=0;
-	// Открываем ключ реестра
+	// РћС‚РєСЂС‹РІР°РµРј РєР»СЋС‡ СЂРµРµСЃС‚СЂР°
 	if ( ::RegOpenKeyExW(Key_,SubKey_.c_str(),
 		0,KEY_QUERY_VALUE,&key)!=ERROR_SUCCESS ) goto api_error;
 
-	// Сразу выделяем память под данные (для реестра буфер маленький)
+	// РЎСЂР°Р·Сѓ РІС‹РґРµР»СЏРµРј РїР°РјСЏС‚СЊ РїРѕРґ РґР°РЅРЅС‹Рµ (РґР»СЏ СЂРµРµСЃС‚СЂР° Р±СѓС„РµСЂ РјР°Р»РµРЅСЊРєРёР№)
 	try { data.resize(MAX_SLRegSize); }
 	catch ( std::bad_alloc &e )
 	{
-		// Закрываем ключ реестра и передаем исключение выше
+		// Р—Р°РєСЂС‹РІР°РµРј РєР»СЋС‡ СЂРµРµСЃС‚СЂР° Рё РїРµСЂРµРґР°РµРј РёСЃРєР»СЋС‡РµРЅРёРµ РІС‹С€Рµ
 		::RegCloseKey(key); key=nullptr;
 		throw e;
 	}
-	// Считываем сколько есть по-факту данных
+	// РЎС‡РёС‚С‹РІР°РµРј СЃРєРѕР»СЊРєРѕ РµСЃС‚СЊ РїРѕ-С„Р°РєС‚Сѓ РґР°РЅРЅС‹С…
 	size=MAX_SLRegSize;
 	if ( ::RegQueryValueEx(key,Value_.c_str(),
 		nullptr,nullptr,(LPBYTE)data.data(),&size)!=ERROR_SUCCESS ) goto api_error;
-	// Закрываем ключ реестра
+	// Р—Р°РєСЂС‹РІР°РµРј РєР»СЋС‡ СЂРµРµСЃС‚СЂР°
 	::RegCloseKey(key); key=nullptr;
 
-	// Расшифровываем данные
+	// Р Р°СЃС€РёС„СЂРѕРІС‹РІР°РµРј РґР°РЅРЅС‹Рµ
 	BasicDecode(data.data(),size,Code_);
-	// Заносим данные в список (bad_alloc не ловим, т.к. уже безопасно)
+	// Р—Р°РЅРѕСЃРёРј РґР°РЅРЅС‹Рµ РІ СЃРїРёСЃРѕРє (bad_alloc РЅРµ Р»РѕРІРёРј, С‚.Рє. СѓР¶Рµ Р±РµР·РѕРїР°СЃРЅРѕ)
 	if ( GetAllData(&data[0], &data[size])==nullptr ) goto error;
 
 	return true;
@@ -565,27 +566,28 @@ bool MSLList<list_type,base_type>::SaveAsReg(
 	std::uint32_t Code_) const
 {
 	LastError=0;
-	// Определяем размер данных и проверяем на допустимость
+
+	// РћРїСЂРµРґРµР»СЏРµРј СЂР°Р·РјРµСЂ РґР°РЅРЅС‹С… Рё РїСЂРѕРІРµСЂСЏРµРј РЅР° РґРѕРїСѓСЃС‚РёРјРѕСЃС‚СЊ
 	DWORD size=GetAllDataSize();
 	if ( size>MAX_SLRegSize )
 	{
-		throw std::runtime_error (      /// заменить на return false ?
+		throw std::runtime_error (      /// Р·Р°РјРµРЅРёС‚СЊ РЅР° return false ?
 			"MSLList::SaveAsReg()\n"
-			"Размер данных превышает ограничение MAX_SLRegSize.");
+			"Р Р°Р·РјРµСЂ РґР°РЅРЅС‹С… РїСЂРµРІС‹С€Р°РµС‚ РѕРіСЂР°РЅРёС‡РµРЅРёРµ MAX_SLRegSize.");
 	}
-	// Выделяем память (bad_alloc не ловим, т.к. еще ничего не начали делать)
+	// Р’С‹РґРµР»СЏРµРј РїР°РјСЏС‚СЊ (bad_alloc РЅРµ Р»РѕРІРёРј, С‚.Рє. РµС‰Рµ РЅРёС‡РµРіРѕ РЅРµ РЅР°С‡Р°Р»Рё РґРµР»Р°С‚СЊ)
 	std::vector <char> data;
 	data.resize(size);
-	// Сохраняем весь список в памяти и сверяем реальный размер данных
+	// РЎРѕС…СЂР°РЅСЏРµРј РІРµСЃСЊ СЃРїРёСЃРѕРє РІ РїР°РјСЏС‚Рё Рё СЃРІРµСЂСЏРµРј СЂРµР°Р»СЊРЅС‹Р№ СЂР°Р·РјРµСЂ РґР°РЅРЅС‹С…
 	if ( SetAllData(data.data()) != (data.data()+data.size()) )
 	{
 		throw std::runtime_error (
 			"MSLList::SaveAsReg()\n"
-			"Размер данных MSLList::SetAllData() не соответствует MSLList::GetAllDataSize().");
+			"Р Р°Р·РјРµСЂ РґР°РЅРЅС‹С… MSLList::SetAllData() РЅРµ СЃРѕРѕС‚РІРµС‚СЃС‚РІСѓРµС‚ MSLList::GetAllDataSize().");
 	}
-	// Шифруем
+	// РЁРёС„СЂСѓРµРј
 	BasicEncode(data.data(),data.size(),Code_);
-	// Конвертируем в HEX
+	// РљРѕРЅРІРµСЂС‚РёСЂСѓРµРј РІ HEX
 	std::vector <wchar_t> hex_data;
 	hex_data.resize(data.size()*3+1);
 	ByteToHEX(
@@ -593,15 +595,22 @@ bool MSLList<list_type,base_type>::SaveAsReg(
 		hex_data.data(), hex_data.size(),
 		L',');
 
-	// Формируем текстовую часть reg-файла
+	// Р¤РѕСЂРјРёСЂСѓРµРј С‚РµРєСЃС‚РѕРІСѓСЋ С‡Р°СЃС‚СЊ reg-С„Р°Р№Р»Р°
 	static const wchar_t hdr[]=L"REGEDIT4";
 	static const wchar_t hk1[]=L"HKEY_LOCAL_MACHINE";
 	static const wchar_t hk2[]=L"HKEY_CURRENT_USER";
 	static const wchar_t hk3[]=L"HKEY_USERS";
 	static const wchar_t hk4[]=L"HKEY_CLASSES_ROOT";
-	const wchar_t *hk=nullptr;	if ( Key_==HKEY_LOCAL_MACHINE ) hk=hk1;
-	else if ( Key_==HKEY_CURRENT_USER ) hk=hk2;	else if ( Key_==HKEY_USERS ) hk=hk3;	else if ( Key_==HKEY_CLASSES_ROOT ) hk=hk4;	else		throw std::runtime_error (			"MSLList::SaveAsReg()\n"
-			"Задан не верный тип HKEY.");
+
+	const wchar_t *hk=nullptr;
+	if ( Key_==HKEY_LOCAL_MACHINE ) hk=hk1;
+	else if ( Key_==HKEY_CURRENT_USER ) hk=hk2;
+	else if ( Key_==HKEY_USERS ) hk=hk3;
+	else if ( Key_==HKEY_CLASSES_ROOT ) hk=hk4;
+	else
+		throw std::runtime_error (
+			"MSLList::SaveAsReg()\n"
+			"Р—Р°РґР°РЅ РЅРµ РІРµСЂРЅС‹Р№ С‚РёРї HKEY.");
 
 	const std::wstring reg_str=
 		L"\xFEFF"           			// UTF-16BE
@@ -613,7 +622,7 @@ bool MSLList<list_type,base_type>::SaveAsReg(
 	const wchar_t *reg_data=reg_str.c_str();    /// Windows only !!!
 	const DWORD reg_size=reg_str.length()*sizeof(*reg_data);
 
-	// Создаем файл и записываем данные
+	// РЎРѕР·РґР°РµРј С„Р°Р№Р» Рё Р·Р°РїРёСЃС‹РІР°РµРј РґР°РЅРЅС‹Рµ
 	HANDLE file;
 	DWORD rw_size;
 	if ( (file=::CreateFile(File_.c_str(),GENERIC_WRITE,0,nullptr,CREATE_ALWAYS,

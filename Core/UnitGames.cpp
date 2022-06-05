@@ -1,4 +1,4 @@
-//---------------------------------------------------------------------------
+ï»¿//---------------------------------------------------------------------------
 #pragma hdrstop
 
 #include "UnitGames.h"
@@ -8,7 +8,7 @@
 //---------------------------------------------------------------------------
 std::size_t MGamesItem::GetDataSize() const
 {
-    const MGames vGames;            // Çàãëóøêà äëÿ SubGames=nullptr
+    const MGames vGames;            // Ð—Ð°Ð³Ð»ÑƒÑˆÐºÐ° Ð´Ð»Ñ SubGames=nullptr
 
     return
 		sizeofLine(Name)+
@@ -23,7 +23,7 @@ std::size_t MGamesItem::GetDataSize() const
 
 void *MGamesItem::SetData(void *Data_) const
 {
-    const MGames vGames;            // Çàãëóøêà äëÿ SubGames=nullptr
+    const MGames vGames;            // Ð—Ð°Ð³Ð»ÑƒÑˆÐºÐ° Ð´Ð»Ñ SubGames=nullptr
 
 	Data_=MemSetLine(Data_,Name);
 	Data_=MemSetLine(Data_,Command);
@@ -44,13 +44,13 @@ const void *MGamesItem::GetData(const void *Data_, const void *Limit_)
 		(Data_=MemGetLine(Data_,Icon,MAX_PrgIconLength,Limit_))
 		) ) return nullptr;
 
-	// Ñîçäàåì SubGames è ïðîáóåì åãî çàïîëíèòü
+	// Ð¡Ð¾Ð·Ð´Ð°ÐµÐ¼ SubGames Ð¸ Ð¿Ñ€Ð¾Ð±ÑƒÐµÐ¼ ÐµÐ³Ð¾ Ð·Ð°Ð¿Ð¾Ð»Ð½Ð¸Ñ‚ÑŒ
 	upSubGames.reset(new MGames);
 	if ( !(
 		(Data_=upSubGames->GetAllData(Data_,Limit_))
 		) ) return nullptr;
 
-	// Åñëè SubGames îêàçàëñÿ ïóñòûì, óäàëèì åãî
+	// Ð•ÑÐ»Ð¸ SubGames Ð¾ÐºÐ°Ð·Ð°Ð»ÑÑ Ð¿ÑƒÑÑ‚Ñ‹Ð¼, ÑƒÐ´Ð°Ð»Ð¸Ð¼ ÐµÐ³Ð¾
 	if ( upSubGames->gCount()==0 ) upSubGames.reset(nullptr);
 
 	return Data_;

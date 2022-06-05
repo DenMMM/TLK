@@ -1,4 +1,4 @@
-//---------------------------------------------------------------------------
+п»ї//---------------------------------------------------------------------------
 #include <stdio.h>
 #pragma hdrstop
 
@@ -16,7 +16,7 @@ MLog::MLog()
 //---------------------------------------------------------------------------
 void MLog::AddSimpleEvent(MLogRecords::ItemType Type_)
 {
-	// Добавляем запись в буфер и заполняем атрибуты
+	// Р”РѕР±Р°РІР»СЏРµРј Р·Р°РїРёСЃСЊ РІ Р±СѓС„РµСЂ Рё Р·Р°РїРѕР»РЅСЏРµРј Р°С‚СЂРёР±СѓС‚С‹
 	auto &record=dynamic_cast<MLogRecords::Event&>(
 		Records.Add(Type_));
 
@@ -25,12 +25,12 @@ void MLog::AddSimpleEvent(MLogRecords::ItemType Type_)
 //---------------------------------------------------------------------------
 void MLog::AddStatesData(const MStates &States_)
 {
-	// Добавляем запись в буфер и заполняем атрибуты
+	// Р”РѕР±Р°РІР»СЏРµРј Р·Р°РїРёСЃСЊ РІ Р±СѓС„РµСЂ Рё Р·Р°РїРѕР»РЅСЏРµРј Р°С‚СЂРёР±СѓС‚С‹
 	auto &record=dynamic_cast<MLogRecords::DataStates&>(
 		Records.Add(MLogRecords::mlrDataStates));
 
 	record.SystemTime=SystemTime;
-	// Создаем массив состояний компьютеров и заполняем его
+	// РЎРѕР·РґР°РµРј РјР°СЃСЃРёРІ СЃРѕСЃС‚РѕСЏРЅРёР№ РєРѕРјРїСЊСЋС‚РµСЂРѕРІ Рё Р·Р°РїРѕР»РЅСЏРµРј РµРіРѕ
 	record.Items.clear();
 	record.Items.reserve(States_.gCount());
 	for ( const auto &State: States_ )
@@ -41,12 +41,12 @@ void MLog::AddStatesData(const MStates &States_)
 //---------------------------------------------------------------------------
 void MLog::AddTariffsData(const MTariffs &Tariffs_)
 {
-	// Добавляем запись в буфер и заполняем атрибуты
+	// Р”РѕР±Р°РІР»СЏРµРј Р·Р°РїРёСЃСЊ РІ Р±СѓС„РµСЂ Рё Р·Р°РїРѕР»РЅСЏРµРј Р°С‚СЂРёР±СѓС‚С‹
 	auto &record=dynamic_cast<MLogRecords::DataTariffs&>(
 		Records.Add(MLogRecords::mlrDataTariffs));
 
 	record.SystemTime=SystemTime;
-	// Создаем массив тарифов и заполняем его
+	// РЎРѕР·РґР°РµРј РјР°СЃСЃРёРІ С‚Р°СЂРёС„РѕРІ Рё Р·Р°РїРѕР»РЅСЏРµРј РµРіРѕ
 	record.Items.clear();
 	record.Items.reserve(Tariffs_.gCount());
 	for ( const auto &Tariff: Tariffs_ )
@@ -57,12 +57,12 @@ void MLog::AddTariffsData(const MTariffs &Tariffs_)
 //---------------------------------------------------------------------------
 void MLog::AddFinesData(const MFines &Fines_)
 {
-	// Добавляем запись в буфер и заполняем атрибуты
+	// Р”РѕР±Р°РІР»СЏРµРј Р·Р°РїРёСЃСЊ РІ Р±СѓС„РµСЂ Рё Р·Р°РїРѕР»РЅСЏРµРј Р°С‚СЂРёР±СѓС‚С‹
 	auto &record=dynamic_cast<MLogRecords::DataFines&>(
 		Records.Add(MLogRecords::mlrDataFines));
 
 	record.SystemTime=SystemTime;
-	// Создаем массив штрафов и заполняем его
+	// РЎРѕР·РґР°РµРј РјР°СЃСЃРёРІ С€С‚СЂР°С„РѕРІ Рё Р·Р°РїРѕР»РЅСЏРµРј РµРіРѕ
 	record.Items.clear();
 	record.Items.reserve(Fines_.gCount());
 	for ( const auto &Fine: Fines_ )
@@ -73,12 +73,12 @@ void MLog::AddFinesData(const MFines &Fines_)
 //---------------------------------------------------------------------------
 void MLog::AddUsersData(const MUsers &Users_)
 {
-	// Добавляем запись в буфер и заполняем атрибуты
+	// Р”РѕР±Р°РІР»СЏРµРј Р·Р°РїРёСЃСЊ РІ Р±СѓС„РµСЂ Рё Р·Р°РїРѕР»РЅСЏРµРј Р°С‚СЂРёР±СѓС‚С‹
 	auto &record=dynamic_cast<MLogRecords::DataUsers&>(
 		Records.Add(MLogRecords::mlrDataUsers));
 
 	record.SystemTime=SystemTime;
-	// Создаем массив пользователей и заполняем его
+	// РЎРѕР·РґР°РµРј РјР°СЃСЃРёРІ РїРѕР»СЊР·РѕРІР°С‚РµР»РµР№ Рё Р·Р°РїРѕР»РЅСЏРµРј РµРіРѕ
 	record.Items.clear();
 	record.Items.reserve(Users_.ActiveCount());
 	for ( const auto &User: Users_ )
@@ -95,10 +95,10 @@ bool MLog::AddEvent(MLogRecords::ItemType Type_)
 	if ( !Opened ) return false;
 
 	Records.Clear();
-	// Добавляем запись в буфер и дописываем к файлу лога безопасно
+	// Р”РѕР±Р°РІР»СЏРµРј Р·Р°РїРёСЃСЊ РІ Р±СѓС„РµСЂ Рё РґРѕРїРёСЃС‹РІР°РµРј Рє С„Р°Р№Р»Сѓ Р»РѕРіР° Р±РµР·РѕРїР°СЃРЅРѕ
     AddSimpleEvent(Type_);
     result=Records.Attach(true);
-    // Очищаем буфер
+    // РћС‡РёС‰Р°РµРј Р±СѓС„РµСЂ
     Records.Clear();
 
     return result;
@@ -111,14 +111,14 @@ bool MLog::AddMode(MLogRecords::ItemType Type_, char Number_, bool Apply_)
 	if ( !Opened ) return false;
 
 	Records.Clear();
-	// Добавляем запись в буфер и заполняем атрибуты
+	// Р”РѕР±Р°РІР»СЏРµРј Р·Р°РїРёСЃСЊ РІ Р±СѓС„РµСЂ Рё Р·Р°РїРѕР»РЅСЏРµРј Р°С‚СЂРёР±СѓС‚С‹
 	auto &record=dynamic_cast<MLogRecords::Mode&>(Records.Add(Type_));
     record.SystemTime=SystemTime;
     record.Number=Number_;
 	record.Apply=Apply_;
-    // Добавляем к файлу безопасно
+    // Р”РѕР±Р°РІР»СЏРµРј Рє С„Р°Р№Р»Сѓ Р±РµР·РѕРїР°СЃРЅРѕ
     result=Records.Attach(true);
-    // Очищаем буфер
+    // РћС‡РёС‰Р°РµРј Р±СѓС„РµСЂ
     Records.Clear();
 
     return result;
@@ -131,13 +131,13 @@ bool MLog::AddCmd(MLogRecords::ItemType Type_, char Number_)
 	if ( !Opened ) return false;
 
 	Records.Clear();
-	// Добавляем запись в буфер и заполняем атрибуты
+	// Р”РѕР±Р°РІР»СЏРµРј Р·Р°РїРёСЃСЊ РІ Р±СѓС„РµСЂ Рё Р·Р°РїРѕР»РЅСЏРµРј Р°С‚СЂРёР±СѓС‚С‹
 	auto &record=dynamic_cast<MLogRecords::Cmd&>(Records.Add(Type_));
 	record.SystemTime=SystemTime;
 	record.Number=Number_;
-	// Добавляем к файлу безопасно
+	// Р”РѕР±Р°РІР»СЏРµРј Рє С„Р°Р№Р»Сѓ Р±РµР·РѕРїР°СЃРЅРѕ
 	result=Records.Attach(true);
-	// Очищаем буфер
+	// РћС‡РёС‰Р°РµРј Р±СѓС„РµСЂ
     Records.Clear();
 
     return result;
@@ -149,28 +149,28 @@ bool MLog::Rename() const
     wchar_t file_name[MAX_PATH];
     int name_length;
 
-    // Конвертируем время начала и окончания (текущее) лога
+    // РљРѕРЅРІРµСЂС‚РёСЂСѓРµРј РІСЂРµРјСЏ РЅР°С‡Р°Р»Р° Рё РѕРєРѕРЅС‡Р°РЅРёСЏ (С‚РµРєСѓС‰РµРµ) Р»РѕРіР°
 	if ( !(Int64ToSystemTime(BeginTime,begin_time)&&
         Int64ToSystemTime(SystemTime,end_time)) ) goto error;
 
-    // Путь к файлу
+    // РџСѓС‚СЊ Рє С„Р°Р№Р»Сѓ
 	name_length=swprintf(
 		file_name, sizeof(file_name)/sizeof(file_name[0]),
 		L"%s\\", Directory.c_str());
-	// Полная дата создания файла
+	// РџРѕР»РЅР°СЏ РґР°С‚Р° СЃРѕР·РґР°РЅРёСЏ С„Р°Р№Р»Р°
 	name_length+=swprintf(
 		file_name+name_length, sizeof(file_name)/sizeof(file_name[0])-name_length,
 		L"%4d.%02d.%02d - ", begin_time.wYear, begin_time.wMonth, begin_time.wDay);
-    // Если года отличаются, то добавляем год закрытия файла
+    // Р•СЃР»Рё РіРѕРґР° РѕС‚Р»РёС‡Р°СЋС‚СЃСЏ, С‚Рѕ РґРѕР±Р°РІР»СЏРµРј РіРѕРґ Р·Р°РєСЂС‹С‚РёСЏ С„Р°Р№Р»Р°
     if ( begin_time.wYear!=end_time.wYear )
 		name_length+=swprintf(
 			file_name+name_length, sizeof(file_name)/sizeof(file_name[0])-name_length,
 			L"%4d.", end_time.wYear);
-    // Месяц и число закрытия файла
+    // РњРµСЃСЏС† Рё С‡РёСЃР»Рѕ Р·Р°РєСЂС‹С‚РёСЏ С„Р°Р№Р»Р°
 	name_length+=swprintf(
 		file_name+name_length, sizeof(file_name)/sizeof(file_name[0])-name_length,
 		L"%02d.%02d", end_time.wMonth, end_time.wDay);
-    // Если файл открыт и закрыт в один день, добавляем метку уникальности
+    // Р•СЃР»Рё С„Р°Р№Р» РѕС‚РєСЂС‹С‚ Рё Р·Р°РєСЂС‹С‚ РІ РѕРґРёРЅ РґРµРЅСЊ, РґРѕР±Р°РІР»СЏРµРј РјРµС‚РєСѓ СѓРЅРёРєР°Р»СЊРЅРѕСЃС‚Рё
     if ( (begin_time.wYear==end_time.wYear)&&
         (begin_time.wMonth==end_time.wMonth)&&
         (begin_time.wDay==end_time.wDay) )
@@ -179,11 +179,11 @@ bool MLog::Rename() const
 			file_name+name_length, sizeof(file_name)/sizeof(file_name[0])-name_length,
 			L" (%03x)", end_time.wMilliseconds);
     }
-    // Окончание имени файла
+    // РћРєРѕРЅС‡Р°РЅРёРµ РёРјРµРЅРё С„Р°Р№Р»Р°
 	swprintf(
 		file_name+name_length, sizeof(file_name)/sizeof(file_name[0])-name_length,
 		L".TLG");
-    // Переименовываем файл
+    // РџРµСЂРµРёРјРµРЅРѕРІС‹РІР°РµРј С„Р°Р№Р»
 	if ( !::MoveFile(Records.DefaultFile.c_str(), file_name) ) goto error;
 
     return true;
@@ -201,18 +201,18 @@ bool MLog::Begin(
     Opened=false;
 
     Records.Clear();
-    // Запоминаем время начала лога и переименуем файл, если он все еще существует
+    // Р—Р°РїРѕРјРёРЅР°РµРј РІСЂРµРјСЏ РЅР°С‡Р°Р»Р° Р»РѕРіР° Рё РїРµСЂРµРёРјРµРЅСѓРµРј С„Р°Р№Р», РµСЃР»Рё РѕРЅ РІСЃРµ РµС‰Рµ СЃСѓС‰РµСЃС‚РІСѓРµС‚
     BeginTime=SystemTime;
     Rename();
-    // Сохраняем обязательные данные _без перезаписи_ файла
+    // РЎРѕС…СЂР°РЅСЏРµРј РѕР±СЏР·Р°С‚РµР»СЊРЅС‹Рµ РґР°РЅРЅС‹Рµ _Р±РµР· РїРµСЂРµР·Р°РїРёСЃРё_ С„Р°Р№Р»Р°
 	AddSimpleEvent(
-		MLogRecords::mlrBegin);			// Время начала нового лога
-	AddStatesData(States_);             // Состояния компьютеров
-    AddTariffsData(Tariffs_);           // Описания тарифов
-    AddFinesData(Fines_);               // Описания штрафов
-    AddUsersData(Users_);               // Данные о пользователях
-    Opened=Records.Save(false,true);    // Без перезаписи файла и без кеша
-    // Очищаем буфер
+		MLogRecords::mlrBegin);			// Р’СЂРµРјСЏ РЅР°С‡Р°Р»Р° РЅРѕРІРѕРіРѕ Р»РѕРіР°
+	AddStatesData(States_);             // РЎРѕСЃС‚РѕСЏРЅРёСЏ РєРѕРјРїСЊСЋС‚РµСЂРѕРІ
+    AddTariffsData(Tariffs_);           // РћРїРёСЃР°РЅРёСЏ С‚Р°СЂРёС„РѕРІ
+    AddFinesData(Fines_);               // РћРїРёСЃР°РЅРёСЏ С€С‚СЂР°С„РѕРІ
+    AddUsersData(Users_);               // Р”Р°РЅРЅС‹Рµ Рѕ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏС…
+    Opened=Records.Save(false,true);    // Р‘РµР· РїРµСЂРµР·Р°РїРёСЃРё С„Р°Р№Р»Р° Рё Р±РµР· РєРµС€Р°
+    // РћС‡РёС‰Р°РµРј Р±СѓС„РµСЂ
     Records.Clear();
 
     return Opened;
@@ -223,16 +223,16 @@ bool MLog::Open()
 	Opened=false;
 	Records.Clear();
 
-	// Загружаем все записи
+	// Р—Р°РіСЂСѓР¶Р°РµРј РІСЃРµ Р·Р°РїРёСЃРё
 	if ( !Records.Load() ) return false;	// goto error;
 
-	// Производим простейшую проверку
+	// РџСЂРѕРёР·РІРѕРґРёРј РїСЂРѕСЃС‚РµР№С€СѓСЋ РїСЂРѕРІРµСЂРєСѓ
 	auto iRecord=Records.cbegin();
 	auto iEnd=Records.cend();
 
 	if ( (iRecord==iEnd)||
 		(iRecord->gTypeID() != MLogRecords::LogBegin::TypeID) ) goto error;
-	// Запоминаем время, когда лог был начат
+	// Р—Р°РїРѕРјРёРЅР°РµРј РІСЂРµРјСЏ, РєРѕРіРґР° Р»РѕРі Р±С‹Р» РЅР°С‡Р°С‚
 	BeginTime=dynamic_cast<const MLogRecords::LogBegin&>(*iRecord).SystemTime;
 	//
 	++iRecord;
@@ -256,12 +256,12 @@ bool MLog::Open()
 //	if ( Records.gLa_st()->gTypeID() == MLogRecords::LogEnd::TypeID ) goto error;
 	Opened=true;
 
-    // Определяем какой пользователь последним открыл смену
+    // РћРїСЂРµРґРµР»СЏРµРј РєР°РєРѕР№ РїРѕР»СЊР·РѕРІР°С‚РµР»СЊ РїРѕСЃР»РµРґРЅРёРј РѕС‚РєСЂС‹Р» СЃРјРµРЅСѓ
 	User=0;
 	for ( auto iBegin=Records.cbegin(), iRecord=Records.cend();
 		iRecord!=iBegin; )
 	{
-		--iRecord;		// безопасно, т.к. список явно не пустой
+		--iRecord;		// Р±РµР·РѕРїР°СЃРЅРѕ, С‚.Рє. СЃРїРёСЃРѕРє СЏРІРЅРѕ РЅРµ РїСѓСЃС‚РѕР№
 
 		std::uint8_t type=iRecord->gTypeID();
 		if ( type == MLogRecords::AppLogOut::TypeID ) break;
@@ -272,7 +272,7 @@ bool MLog::Open()
 		}
 	}
 
-	// Очищаем буфер
+	// РћС‡РёС‰Р°РµРј Р±СѓС„РµСЂ
 	Records.Clear();
 
 error:
@@ -283,9 +283,9 @@ bool MLog::End()
 {
     if ( !Opened ) return false;
     
-    // Добавляем запись о закрытии файла лога
+    // Р”РѕР±Р°РІР»СЏРµРј Р·Р°РїРёСЃСЊ Рѕ Р·Р°РєСЂС‹С‚РёРё С„Р°Р№Р»Р° Р»РѕРіР°
 	Opened=!AddEvent(MLogRecords::mlrEnd);
-    // Если добавилась, пытаемся переименовать файл лога
+    // Р•СЃР»Рё РґРѕР±Р°РІРёР»Р°СЃСЊ, РїС‹С‚Р°РµРјСЃСЏ РїРµСЂРµРёРјРµРЅРѕРІР°С‚СЊ С„Р°Р№Р» Р»РѕРіР°
     return (!Opened)&&Rename();
 }
 //---------------------------------------------------------------------------
@@ -337,15 +337,15 @@ bool MLog::AddStart(
     if ( !Opened ) return false;
 
     Records.Clear();
-    // Добавляем записи в список и дописываем данные к файлу лога
+    // Р”РѕР±Р°РІР»СЏРµРј Р·Р°РїРёСЃРё РІ СЃРїРёСЃРѕРє Рё РґРѕРїРёСЃС‹РІР°РµРј РґР°РЅРЅС‹Рµ Рє С„Р°Р№Р»Сѓ Р»РѕРіР°
 	AddSimpleEvent(
-		MLogRecords::mlrStart);				// Запуск админского модуля
-	AddStatesData(States_);         		// Состояния компьютеров
-	AddTariffsData(Tariffs_);       		// Описания тарифов
-	AddFinesData(Fines_);           		// Описания штрафов
-	AddUsersData(Users_);           		// Данные о пользователях
-	result=Records.Attach(true);    		// Сохраняем новые записи в файле
-    // Очищаем буфер
+		MLogRecords::mlrStart);				// Р—Р°РїСѓСЃРє Р°РґРјРёРЅСЃРєРѕРіРѕ РјРѕРґСѓР»СЏ
+	AddStatesData(States_);         		// РЎРѕСЃС‚РѕСЏРЅРёСЏ РєРѕРјРїСЊСЋС‚РµСЂРѕРІ
+	AddTariffsData(Tariffs_);       		// РћРїРёСЃР°РЅРёСЏ С‚Р°СЂРёС„РѕРІ
+	AddFinesData(Fines_);           		// РћРїРёСЃР°РЅРёСЏ С€С‚СЂР°С„РѕРІ
+	AddUsersData(Users_);           		// Р”Р°РЅРЅС‹Рµ Рѕ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏС…
+	result=Records.Attach(true);    		// РЎРѕС…СЂР°РЅСЏРµРј РЅРѕРІС‹Рµ Р·Р°РїРёСЃРё РІ С„Р°Р№Р»Рµ
+    // РћС‡РёС‰Р°РµРј Р±СѓС„РµСЂ
     Records.Clear();
     
     return result;
@@ -363,15 +363,15 @@ bool MLog::AddConfig(bool Open_)
 	if ( !Opened ) return false;
 
 	Records.Clear();
-	// Добавляем запись в буфер
+	// Р”РѕР±Р°РІР»СЏРµРј Р·Р°РїРёСЃСЊ РІ Р±СѓС„РµСЂ
 	auto &record=dynamic_cast<MLogRecords::AppConfig&>(
 		Records.Add(MLogRecords::mlrConfig));
-    // Заполняем атрибуты
+    // Р—Р°РїРѕР»РЅСЏРµРј Р°С‚СЂРёР±СѓС‚С‹
 	record.SystemTime=SystemTime;
     record.Opened=Open_;
-    // Добавляем к файлу безопасно
+    // Р”РѕР±Р°РІР»СЏРµРј Рє С„Р°Р№Р»Сѓ Р±РµР·РѕРїР°СЃРЅРѕ
     result=Records.Attach(true);
-    // Очищаем буфер
+    // РћС‡РёС‰Р°РµРј Р±СѓС„РµСЂ
     Records.Clear();
 
 error:
@@ -385,12 +385,12 @@ bool MLog::AddComputers(const MStates &States_)
     if ( !Opened ) return false;
 
     Records.Clear();
-    // Добавляем записи в список и дописываем данные к файлу лога
+    // Р”РѕР±Р°РІР»СЏРµРј Р·Р°РїРёСЃРё РІ СЃРїРёСЃРѕРє Рё РґРѕРїРёСЃС‹РІР°РµРј РґР°РЅРЅС‹Рµ Рє С„Р°Р№Р»Сѓ Р»РѕРіР°
 	AddSimpleEvent(
-		MLogRecords::mlrComputers);		// Изменен список компьютеров
-    AddStatesData(States_);             // Данные состояний компьютеров
-    result=Records.Attach(true);        // Сохраняем новые записи в файле
-    // Очищаем буфер
+		MLogRecords::mlrComputers);		// РР·РјРµРЅРµРЅ СЃРїРёСЃРѕРє РєРѕРјРїСЊСЋС‚РµСЂРѕРІ
+    AddStatesData(States_);             // Р”Р°РЅРЅС‹Рµ СЃРѕСЃС‚РѕСЏРЅРёР№ РєРѕРјРїСЊСЋС‚РµСЂРѕРІ
+    result=Records.Attach(true);        // РЎРѕС…СЂР°РЅСЏРµРј РЅРѕРІС‹Рµ Р·Р°РїРёСЃРё РІ С„Р°Р№Р»Рµ
+    // РћС‡РёС‰Р°РµРј Р±СѓС„РµСЂ
     Records.Clear();
 
     return result;
@@ -403,12 +403,12 @@ bool MLog::AddTariffs(const MTariffs &Tariffs_)
     if ( !Opened ) return false;
 
     Records.Clear();
-    // Добавляем записи в список и дописываем данные к файлу лога
+    // Р”РѕР±Р°РІР»СЏРµРј Р·Р°РїРёСЃРё РІ СЃРїРёСЃРѕРє Рё РґРѕРїРёСЃС‹РІР°РµРј РґР°РЅРЅС‹Рµ Рє С„Р°Р№Р»Сѓ Р»РѕРіР°
 	AddSimpleEvent(
-		MLogRecords::mlrTariffs);		// Изменен список тарифов
-    AddTariffsData(Tariffs_);           // Данные тарифов
-    result=Records.Attach(true);        // Сохраняем новые записи в файле
-    // Очищаем буфер
+		MLogRecords::mlrTariffs);		// РР·РјРµРЅРµРЅ СЃРїРёСЃРѕРє С‚Р°СЂРёС„РѕРІ
+    AddTariffsData(Tariffs_);           // Р”Р°РЅРЅС‹Рµ С‚Р°СЂРёС„РѕРІ
+    result=Records.Attach(true);        // РЎРѕС…СЂР°РЅСЏРµРј РЅРѕРІС‹Рµ Р·Р°РїРёСЃРё РІ С„Р°Р№Р»Рµ
+    // РћС‡РёС‰Р°РµРј Р±СѓС„РµСЂ
     Records.Clear();
 
     return result;
@@ -421,12 +421,12 @@ bool MLog::AddFines(const MFines &Fines_)
     if ( !Opened ) return false;
 
     Records.Clear();
-    // Добавляем записи в список и дописываем данные к файлу лога
+    // Р”РѕР±Р°РІР»СЏРµРј Р·Р°РїРёСЃРё РІ СЃРїРёСЃРѕРє Рё РґРѕРїРёСЃС‹РІР°РµРј РґР°РЅРЅС‹Рµ Рє С„Р°Р№Р»Сѓ Р»РѕРіР°
 	AddSimpleEvent(
-		MLogRecords::mlrFines);			// Изменен список штрафов
-    AddFinesData(Fines_);               // Данные штрафов
-    result=Records.Attach(true);        // Сохраняем новые записи в файле
-    // Очищаем буфер
+		MLogRecords::mlrFines);			// РР·РјРµРЅРµРЅ СЃРїРёСЃРѕРє С€С‚СЂР°С„РѕРІ
+    AddFinesData(Fines_);               // Р”Р°РЅРЅС‹Рµ С€С‚СЂР°С„РѕРІ
+    result=Records.Attach(true);        // РЎРѕС…СЂР°РЅСЏРµРј РЅРѕРІС‹Рµ Р·Р°РїРёСЃРё РІ С„Р°Р№Р»Рµ
+    // РћС‡РёС‰Р°РµРј Р±СѓС„РµСЂ
     Records.Clear();
 
     return result;
@@ -439,12 +439,12 @@ bool MLog::AddUsers(const MUsers &Users_)
 	if ( !Opened ) return false;
 
 	Records.Clear();
-	// Добавляем записи в список и дописываем данные к файлу лога
+	// Р”РѕР±Р°РІР»СЏРµРј Р·Р°РїРёСЃРё РІ СЃРїРёСЃРѕРє Рё РґРѕРїРёСЃС‹РІР°РµРј РґР°РЅРЅС‹Рµ Рє С„Р°Р№Р»Сѓ Р»РѕРіР°
 	AddSimpleEvent(
-		MLogRecords::mlrUsers);			// Изменен список пользователей
-    AddUsersData(Users_);               // Данные пользователей
-    result=Records.Attach(true);        // Сохраняем новые записи в файле
-    // Очищаем буфер
+		MLogRecords::mlrUsers);			// РР·РјРµРЅРµРЅ СЃРїРёСЃРѕРє РїРѕР»СЊР·РѕРІР°С‚РµР»РµР№
+    AddUsersData(Users_);               // Р”Р°РЅРЅС‹Рµ РїРѕР»СЊР·РѕРІР°С‚РµР»РµР№
+    result=Records.Attach(true);        // РЎРѕС…СЂР°РЅСЏРµРј РЅРѕРІС‹Рµ Р·Р°РїРёСЃРё РІ С„Р°Р№Р»Рµ
+    // РћС‡РёС‰Р°РµРј Р±СѓС„РµСЂ
     Records.Clear();
 
     return result;
@@ -462,14 +462,14 @@ bool MLog::AddLogIn(std::uint32_t UserID_)
 	if ( !Opened ) return false;
 
 	Records.Clear();
-	// Добавляем запись в буфер и заполняем атрибуты
+	// Р”РѕР±Р°РІР»СЏРµРј Р·Р°РїРёСЃСЊ РІ Р±СѓС„РµСЂ Рё Р·Р°РїРѕР»РЅСЏРµРј Р°С‚СЂРёР±СѓС‚С‹
 	auto &record=dynamic_cast<MLogRecords::AppLogIn&>(
 		Records.Add(MLogRecords::mlrLogIn));
 	record.SystemTime=SystemTime;
 	record.User=UserID_;
-    // Добавляем к файлу безопасно
+    // Р”РѕР±Р°РІР»СЏРµРј Рє С„Р°Р№Р»Сѓ Р±РµР·РѕРїР°СЃРЅРѕ
     result=Records.Attach(true);
-    // Очищаем буфер
+    // РћС‡РёС‰Р°РµРј Р±СѓС„РµСЂ
     Records.Clear();
 
     if ( result ) User=UserID_;
@@ -492,10 +492,10 @@ bool MLog::AddRun(const MTariffRunTimesItem &Time_)
 	if ( !Opened ) return false;
 
 	Records.Clear();
-	// Добавляем запись в буфер
+	// Р”РѕР±Р°РІР»СЏРµРј Р·Р°РїРёСЃСЊ РІ Р±СѓС„РµСЂ
 	auto &record=dynamic_cast<MLogRecords::CompRun&>(
 		Records.Add(MLogRecords::mlrRun));
-    // Заполняем атрибуты
+    // Р—Р°РїРѕР»РЅСЏРµРј Р°С‚СЂРёР±СѓС‚С‹
     record.SystemTime=SystemTime;
     record.Number=Time_.Number;
     record.Tariff=Time_.TariffID;
@@ -506,9 +506,9 @@ bool MLog::AddRun(const MTariffRunTimesItem &Time_)
     record.SizeTime=Time_.SizeTime;
     record.WorkTime=Time_.WorkTime;
     record.Cost=Time_.Cost;
-    // Добавляем к файлу безопасно
+    // Р”РѕР±Р°РІР»СЏРµРј Рє С„Р°Р№Р»Сѓ Р±РµР·РѕРїР°СЃРЅРѕ
     result=Records.Attach(true);
-    // Очищаем буфер
+    // РћС‡РёС‰Р°РµРј Р±СѓС„РµСЂ
     Records.Clear();
 
 error:
@@ -522,17 +522,17 @@ bool MLog::AddFine(std::int8_t Number_, std::uint32_t FineID_, std::int16_t Time
 	if ( !Opened ) return false;
 
 	Records.Clear();
-	// Добавляем запись
+	// Р”РѕР±Р°РІР»СЏРµРј Р·Р°РїРёСЃСЊ
 	auto &record=dynamic_cast<MLogRecords::CompFine&>(
 		Records.Add(MLogRecords::mlrFine));
-    // Заполняем атрибуты
+    // Р—Р°РїРѕР»РЅСЏРµРј Р°С‚СЂРёР±СѓС‚С‹
     record.SystemTime=SystemTime;
     record.Number=Number_;
 	record.Fine=FineID_;
 	record.Time=Time_;
-    // Добавляем к файлу безопасно
+    // Р”РѕР±Р°РІР»СЏРµРј Рє С„Р°Р№Р»Сѓ Р±РµР·РѕРїР°СЃРЅРѕ
     result=Records.Attach(true);
-    // Очищаем буфер
+    // РћС‡РёС‰Р°РµРј Р±СѓС„РµСЂ
     Records.Clear();
 
 error:
@@ -546,16 +546,16 @@ bool MLog::AddExchange(std::int8_t From_, std::int8_t To_)
 	if ( !Opened ) return false;
 
 	Records.Clear();
-	// Добавляем запись
+	// Р”РѕР±Р°РІР»СЏРµРј Р·Р°РїРёСЃСЊ
 	auto &record=dynamic_cast<MLogRecords::CompExchange&>(
 		Records.Add(MLogRecords::mlrExchange));
-    // Заполняем атрибуты
+    // Р—Р°РїРѕР»РЅСЏРµРј Р°С‚СЂРёР±СѓС‚С‹
     record.SystemTime=SystemTime;
     record.From=From_;
 	record.To=To_;
-    // Добавляем к файлу безопасно
+    // Р”РѕР±Р°РІР»СЏРµРј Рє С„Р°Р№Р»Сѓ Р±РµР·РѕРїР°СЃРЅРѕ
     result=Records.Attach(true);
-    // Очищаем буфер
+    // РћС‡РёС‰Р°РµРј Р±СѓС„РµСЂ
     Records.Clear();
 
 error:
@@ -580,7 +580,7 @@ bool MLog::AddOpen(std::int8_t Number_, bool Apply_)
 bool MLog::AddPowerOn(std::int8_t Number_)
 {
 	return true;
-//    return AddCmd(MLogRecords::mlrPowerOn, Number_);   /// отключил, чтобы не засорять лог
+//    return AddCmd(MLogRecords::mlrPowerOn, Number_);   /// РѕС‚РєР»СЋС‡РёР», С‡С‚РѕР±С‹ РЅРµ Р·Р°СЃРѕСЂСЏС‚СЊ Р»РѕРі
 }
 //---------------------------------------------------------------------------
 bool MLog::AddReboot(std::int8_t Number_)

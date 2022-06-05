@@ -1,4 +1,4 @@
-//---------------------------------------------------------------------------
+п»ї//---------------------------------------------------------------------------
 #include <vcl.h>
 //#include <stdio.h>
 #include <cwchar>
@@ -18,10 +18,10 @@ __fastcall TFormComputers::TFormComputers(TComponent* Owner)
 //---------------------------------------------------------------------------
 void __fastcall TFormComputers::FormShow(TObject *Sender)
 {
-    // Копируем список компьютеров в буфер
+    // РљРѕРїРёСЂСѓРµРј СЃРїРёСЃРѕРє РєРѕРјРїСЊСЋС‚РµСЂРѕРІ РІ Р±СѓС„РµСЂ
     TmpComputers=*Computers;
 
-    // Формируем их список
+    // Р¤РѕСЂРјРёСЂСѓРµРј РёС… СЃРїРёСЃРѕРє
 	for ( auto &comp: TmpComputers )
 	{
 		TListItem *item;
@@ -29,7 +29,7 @@ void __fastcall TFormComputers::FormShow(TObject *Sender)
 		item->Data=&comp;
         SetListViewComputersLine(item);
     }
-    // Сортируем
+    // РЎРѕСЂС‚РёСЂСѓРµРј
     ListViewComputers->AlphaSort();
 
     EditNumber->MaxLength=3;
@@ -38,18 +38,18 @@ void __fastcall TFormComputers::FormShow(TObject *Sender)
     SetEdit(false);
 	ActiveControl=ListViewComputers;
 
-	// Добавим энтропии
+	// Р”РѕР±Р°РІРёРј СЌРЅС‚СЂРѕРїРёРё
 	BasicRand.event();
 }
 //---------------------------------------------------------------------------
 void __fastcall TFormComputers::FormClose(TObject *Sender,
       TCloseAction &Action)
 {
-    // Чистим интерфейсные элементы
+    // Р§РёСЃС‚РёРј РёРЅС‚РµСЂС„РµР№СЃРЅС‹Рµ СЌР»РµРјРµРЅС‚С‹
     ListViewComputers->Items->Clear();
 	EditNumber->Text=L"";
     EditAddress->Text=L"";
-    // Чистим буфер
+    // Р§РёСЃС‚РёРј Р±СѓС„РµСЂ
     TmpComputers.Clear();
 }
 //---------------------------------------------------------------------------
@@ -93,11 +93,11 @@ void __fastcall TFormComputers::EditNumberExit(TObject *Sender)
 	auto *comp=reinterpret_cast<MComputersItem*>(
 		ListViewComputers->Selected->Data);
 
-    // Пытаемся сконвертировать текстовый номер в число
+    // РџС‹С‚Р°РµРјСЃСЏ СЃРєРѕРЅРІРµСЂС‚РёСЂРѕРІР°С‚СЊ С‚РµРєСЃС‚РѕРІС‹Р№ РЅРѕРјРµСЂ РІ С‡РёСЃР»Рѕ
     int Number;
     try { Number=StrToInt(EditNumber->Text); }
     catch ( EConvertError *Error ) { goto error; }
-    // Проверяем допустимый диапазон
+    // РџСЂРѕРІРµСЂСЏРµРј РґРѕРїСѓСЃС‚РёРјС‹Р№ РґРёР°РїР°Р·РѕРЅ
     if ( (Number<=0)||(Number>MAX_Comps) ) goto error;
     comp->Number=Number;
 
@@ -157,7 +157,7 @@ void __fastcall TFormComputers::ButtonAddClick(TObject *Sender)
         return;
     }
 
-    // Добавляем в буфер компьютер с номером на '1' больше, чем у выбранного
+    // Р”РѕР±Р°РІР»СЏРµРј РІ Р±СѓС„РµСЂ РєРѕРјРїСЊСЋС‚РµСЂ СЃ РЅРѕРјРµСЂРѕРј РЅР° '1' Р±РѕР»СЊС€Рµ, С‡РµРј Сѓ РІС‹Р±СЂР°РЅРЅРѕРіРѕ
 	MComputersItem& comp=TmpComputers.Add();
 	MComputersItem *selcomp=
 		ListViewComputers->Selected==nullptr?
@@ -171,10 +171,10 @@ void __fastcall TFormComputers::ButtonAddClick(TObject *Sender)
 		L"192.168.1.%i", comp.Number);
 	comp.Address=Address;
 
-    // Добавили строку в список и связали с компьютером
+    // Р”РѕР±Р°РІРёР»Рё СЃС‚СЂРѕРєСѓ РІ СЃРїРёСЃРѕРє Рё СЃРІСЏР·Р°Р»Рё СЃ РєРѕРјРїСЊСЋС‚РµСЂРѕРј
     TListItem *item=ListViewComputers->Items->Add();
     item->Data=&comp;
-    // Обновили интерфейс
+    // РћР±РЅРѕРІРёР»Рё РёРЅС‚РµСЂС„РµР№СЃ
     SetListViewComputersLine(item);
     ListViewComputers->AlphaSort();
     ListViewComputers->ItemFocused=item;
@@ -185,17 +185,17 @@ void __fastcall TFormComputers::ButtonAddClick(TObject *Sender)
 //---------------------------------------------------------------------------
 void __fastcall TFormComputers::ButtonDelClick(TObject *Sender)
 {
-    // Удаляем компьютеры из списка
+    // РЈРґР°Р»СЏРµРј РєРѕРјРїСЊСЋС‚РµСЂС‹ РёР· СЃРїРёСЃРєР°
     TItemStates is=TItemStates()<<isSelected;
     TListItem *item=ListViewComputers->Selected, *next;
     while(item)
     {
-        // Удаляем компьютер из буфера
+        // РЈРґР°Р»СЏРµРј РєРѕРјРїСЊСЋС‚РµСЂ РёР· Р±СѓС„РµСЂР°
 		TmpComputers.Del(
 			MComputers::const_iterator(
 			reinterpret_cast<MComputersItem*>(item->Data)
 			));
-        // Удаляем строку из списка
+        // РЈРґР°Р»СЏРµРј СЃС‚СЂРѕРєСѓ РёР· СЃРїРёСЃРєР°
         next=ListViewComputers->GetNextItem(item,sdAll,is);
         item->Delete();
         item=next;
@@ -206,27 +206,27 @@ void __fastcall TFormComputers::ButtonDelClick(TObject *Sender)
 //---------------------------------------------------------------------------
 void __fastcall TFormComputers::ButtonSaveClick(TObject *Sender)
 {
-    // Замещаем список компьютеров записями из буфера
+    // Р—Р°РјРµС‰Р°РµРј СЃРїРёСЃРѕРє РєРѕРјРїСЊСЋС‚РµСЂРѕРІ Р·Р°РїРёСЃСЏРјРё РёР· Р±СѓС„РµСЂР°
 	*Computers=std::move(TmpComputers);
-    // Сохраняем в файле
+    // РЎРѕС…СЂР°РЅСЏРµРј РІ С„Р°Р№Р»Рµ
     if ( !Computers->Save() )
     {
         ShellState->State|=mssErrorConfig; FormMain->SetShell();
         ResMessageBox(Handle,1,3,MB_APPLMODAL|MB_OK|MB_ICONERROR,Computers->gLastErr());
         return;
     }
-    // Останавливаем сетевые операции
+    // РћСЃС‚Р°РЅР°РІР»РёРІР°РµРј СЃРµС‚РµРІС‹Рµ РѕРїРµСЂР°С†РёРё
     Sync->Stop();
 	if ( States->Update(*Computers) )
     {
-        // Запись в логах
+        // Р—Р°РїРёСЃСЊ РІ Р»РѕРіР°С…
         if ( !Log->AddComputers(*States) )
         {
-            // Настройки сохранили, но без отображения их в логе работать не дадим
+            // РќР°СЃС‚СЂРѕР№РєРё СЃРѕС…СЂР°РЅРёР»Рё, РЅРѕ Р±РµР· РѕС‚РѕР±СЂР°Р¶РµРЅРёСЏ РёС… РІ Р»РѕРіРµ СЂР°Р±РѕС‚Р°С‚СЊ РЅРµ РґР°РґРёРј
             ShellState->State|=mssErrorLog|mssErrorConfig; FormMain->SetShell();
             ResMessageBox(Handle,1,5,MB_APPLMODAL|MB_OK|MB_ICONERROR,Log->gLastErr());
         }
-        // Сохраняем новые состояния в файле
+        // РЎРѕС…СЂР°РЅСЏРµРј РЅРѕРІС‹Рµ СЃРѕСЃС‚РѕСЏРЅРёСЏ РІ С„Р°Р№Р»Рµ
         if ( !States->Save() )
         {
             ShellState->State|=mssErrorState; FormMain->SetShell();
@@ -235,10 +235,10 @@ void __fastcall TFormComputers::ButtonSaveClick(TObject *Sender)
     }
     //
     Sync->Associate(States.get(), Computers.get());
-    // Обновляем индикатор сетевой активности и список компьютеров в главном окне
+    // РћР±РЅРѕРІР»СЏРµРј РёРЅРґРёРєР°С‚РѕСЂ СЃРµС‚РµРІРѕР№ Р°РєС‚РёРІРЅРѕСЃС‚Рё Рё СЃРїРёСЃРѕРє РєРѕРјРїСЊСЋС‚РµСЂРѕРІ РІ РіР»Р°РІРЅРѕРј РѕРєРЅРµ
     FormMain->ProgressBarNetProcess->Max=Sync->gPCountMax();
     FormMain->UpdateListViewComputers(true);
-    // Запускаем сетевые операции
+    // Р—Р°РїСѓСЃРєР°РµРј СЃРµС‚РµРІС‹Рµ РѕРїРµСЂР°С†РёРё
     Sync->Start();
 }
 //---------------------------------------------------------------------------

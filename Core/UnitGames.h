@@ -1,4 +1,4 @@
-//---------------------------------------------------------------------------
+п»ї//---------------------------------------------------------------------------
 #ifndef UnitGamesH
 #define UnitGamesH
 //---------------------------------------------------------------------------
@@ -10,10 +10,10 @@
 class MGamesItem;
 class MGames;
 //---------------------------------------------------------------------------
-#define MAX_PrgNameLength   32      // Длина названия игры
-#define MAX_PrgCmdLength    128     // Длина пути к файлу игры
-#define MAX_PrgIconLength   128     // Длина пути к файлу иконки
-#define MAX_PrgLevel        2       // Количество уровней в списке
+#define MAX_PrgNameLength   32      // Р”Р»РёРЅР° РЅР°Р·РІР°РЅРёСЏ РёРіСЂС‹
+#define MAX_PrgCmdLength    128     // Р”Р»РёРЅР° РїСѓС‚Рё Рє С„Р°Р№Р»Сѓ РёРіСЂС‹
+#define MAX_PrgIconLength   128     // Р”Р»РёРЅР° РїСѓС‚Рё Рє С„Р°Р№Р»Сѓ РёРєРѕРЅРєРё
+#define MAX_PrgLevel        2       // РљРѕР»РёС‡РµСЃС‚РІРѕ СѓСЂРѕРІРЅРµР№ РІ СЃРїРёСЃРєРµ
 //---------------------------------------------------------------------------
 class MGamesItem:
 	public MSLListItemSimple <
@@ -21,7 +21,7 @@ class MGamesItem:
 		MGamesItem>
 {
 public:
-	// Функции механизма сохранения/загрузки данных
+	// Р¤СѓРЅРєС†РёРё РјРµС…Р°РЅРёР·РјР° СЃРѕС…СЂР°РЅРµРЅРёСЏ/Р·Р°РіСЂСѓР·РєРё РґР°РЅРЅС‹С…
 	virtual std::size_t GetDataSize() const override;
 	virtual void *SetData(void *Data_) const override;
 	virtual const void *GetData(const void *Data_, const void *Limit_) override;

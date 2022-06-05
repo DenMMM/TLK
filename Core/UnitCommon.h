@@ -1,20 +1,21 @@
-//---------------------------------------------------------------------------
+п»ї//---------------------------------------------------------------------------
 #ifndef UnitCommonH
 #define UnitCommonH
 //---------------------------------------------------------------------------
-#include <string>
 #include <winsock2.h>
 //#include <windows.h>
 #include <userenv.h>
-#include <mem.h>
+
+#include <string>
 #include <stdexcept>
+//#include <mem.h>
 
 #include "UnitTimeRand.h"
 //---------------------------------------------------------------------------
-#define ENC_Code        0x5BC935CF  // Код шифрования файлов
-#define ENC_Net         0x9ABD5BAE  // Код шифрования сетевых данных
+#define ENC_Code        0x5BC935CF  // РљРѕРґ С€РёС„СЂРѕРІР°РЅРёСЏ С„Р°Р№Р»РѕРІ
+#define ENC_Net         0x9ABD5BAE  // РљРѕРґ С€РёС„СЂРѕРІР°РЅРёСЏ СЃРµС‚РµРІС‹С… РґР°РЅРЅС‹С…
 //---------------------------------------------------------------------------
-// Сравнение двух чисел: "0" - равны, "-1" - первое меньше второго, "+1" - наоборот
+// РЎСЂР°РІРЅРµРЅРёРµ РґРІСѓС… С‡РёСЃРµР»: "0" - СЂР°РІРЅС‹, "-1" - РїРµСЂРІРѕРµ РјРµРЅСЊС€Рµ РІС‚РѕСЂРѕРіРѕ, "+1" - РЅР°РѕР±РѕСЂРѕС‚
 template <typename type>
 //inline int DComp(type &D1_, type &D2_)
 inline int DComp(type D1_, type D2_)
@@ -32,7 +33,7 @@ inline size_t sizeofLine(const std::string &Line_)
 	return (Line_.length()+1)*sizeof(char);
 }
 
-// Сохранение переменной в области памяти со сдвигом указателя
+// РЎРѕС…СЂР°РЅРµРЅРёРµ РїРµСЂРµРјРµРЅРЅРѕР№ РІ РѕР±Р»Р°СЃС‚Рё РїР°РјСЏС‚Рё СЃРѕ СЃРґРІРёРіРѕРј СѓРєР°Р·Р°С‚РµР»СЏ
 template <typename type>
 inline void *MemSet(void *Mem_, const type Data_)
 {
@@ -40,8 +41,8 @@ inline void *MemSet(void *Mem_, const type Data_)
 	return static_cast<char*>(Mem_)+sizeof(type);
 }
 
-// Чтение переменной из области памяти со сдвигом указателя
-// и контролем выхода за границу области
+// Р§С‚РµРЅРёРµ РїРµСЂРµРјРµРЅРЅРѕР№ РёР· РѕР±Р»Р°СЃС‚Рё РїР°РјСЏС‚Рё СЃРѕ СЃРґРІРёРіРѕРј СѓРєР°Р·Р°С‚РµР»СЏ
+// Рё РєРѕРЅС‚СЂРѕР»РµРј РІС‹С…РѕРґР° Р·Р° РіСЂР°РЅРёС†Сѓ РѕР±Р»Р°СЃС‚Рё
 template <typename type>
 inline const void *MemGet(const void *Mem_, type *Data_, const void *Limit_)
 {
@@ -54,7 +55,7 @@ inline const void *MemGet(const void *Mem_, type *Data_, const void *Limit_)
 	return new_limit;
 }
 
-// Поиск значения в области памяти с контролем выхода за границу
+// РџРѕРёСЃРє Р·РЅР°С‡РµРЅРёСЏ РІ РѕР±Р»Р°СЃС‚Рё РїР°РјСЏС‚Рё СЃ РєРѕРЅС‚СЂРѕР»РµРј РІС‹С…РѕРґР° Р·Р° РіСЂР°РЅРёС†Сѓ
 template <typename type>
 type *MemSrch(type *Mem_, const type *Limit_, type Data_)
 {
@@ -63,7 +64,7 @@ type *MemSrch(type *Mem_, const type *Limit_, type Data_)
     return Mem_;
 }
 
-// Копирование строк со сдвигом указателя, контролем длины и выхода за границу
+// РљРѕРїРёСЂРѕРІР°РЅРёРµ СЃС‚СЂРѕРє СЃРѕ СЃРґРІРёРіРѕРј СѓРєР°Р·Р°С‚РµР»СЏ, РєРѕРЅС‚СЂРѕР»РµРј РґР»РёРЅС‹ Рё РІС‹С…РѕРґР° Р·Р° РіСЂР°РЅРёС†Сѓ
 void *MemSetLine(void *Mem_, const std::string &Line__);
 void *MemSetLine(void *Mem__, const std::wstring &Line__);
 const void *MemGetLine(const void *Mem__, std::string &Line_,
@@ -162,13 +163,13 @@ size_t HEXToByte(const wchar_t *Line_, void *Buff__, std::size_t BuffSize_);
 //---------------------------------------------------------------------------
 int ResMessageBox(HWND Owner_, UINT uCaption, UINT uMessage, UINT Type_, DWORD LastErr_=0);
 //---------------------------------------------------------------------------
-// Выход из системы
+// Р’С‹С…РѕРґ РёР· СЃРёСЃС‚РµРјС‹
 bool WinExit(UINT uFlags);
 //---------------------------------------------------------------------------
-// Запуск программ по списку из реестра
+// Р—Р°РїСѓСЃРє РїСЂРѕРіСЂР°РјРј РїРѕ СЃРїРёСЃРєСѓ РёР· СЂРµРµСЃС‚СЂР°
 void RegExecList(HKEY hKey_, LPCWSTR SubKey_, HANDLE hToken_=INVALID_HANDLE_VALUE);
 //---------------------------------------------------------------------------
-// Вычисляет хэш MAC-адресов всех физических сетевых адаптеров
+// Р’С‹С‡РёСЃР»СЏРµС‚ С…СЌС€ MAC-Р°РґСЂРµСЃРѕРІ РІСЃРµС… С„РёР·РёС‡РµСЃРєРёС… СЃРµС‚РµРІС‹С… Р°РґР°РїС‚РµСЂРѕРІ
 std::uint64_t CalcHwMacHash();
 //---------------------------------------------------------------------------
 #endif

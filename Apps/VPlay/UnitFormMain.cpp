@@ -1,4 +1,4 @@
-//---------------------------------------------------------------------------
+п»ї//---------------------------------------------------------------------------
 #include <vcl.h>
 #include <mem.h>
 #include <stdio.h>
@@ -20,22 +20,22 @@ __fastcall TFormMain::TFormMain(TComponent* Owner)
 //---------------------------------------------------------------------------
 void __fastcall TFormMain::FormShow(TObject *Sender)
 {
-    // Извлекаем из командной строки имя файла для воспроизведения
+    // РР·РІР»РµРєР°РµРј РёР· РєРѕРјР°РЅРґРЅРѕР№ СЃС‚СЂРѕРєРё РёРјСЏ С„Р°Р№Р»Р° РґР»СЏ РІРѕСЃРїСЂРѕРёР·РІРµРґРµРЅРёСЏ
     FileName=::GetCommandLine();
     FileName.Trim();
     FileName.Delete(1,Application->ExeName.Length()+2);
     FileName=FileName.Trim();
 
-    // Меняем заголовок окна программы
+    // РњРµРЅСЏРµРј Р·Р°РіРѕР»РѕРІРѕРє РѕРєРЅР° РїСЂРѕРіСЂР°РјРјС‹
     Caption=L"VPlay - "+ExtractFileName(FileName);
 
-    // Отправляем сообщение для открытия устройства
+    // РћС‚РїСЂР°РІР»СЏРµРј СЃРѕРѕР±С‰РµРЅРёРµ РґР»СЏ РѕС‚РєСЂС‹С‚РёСЏ СѓСЃС‚СЂРѕР№СЃС‚РІР°
     ::PostMessage(Handle,MOPEN,0,0);
 }
 //---------------------------------------------------------------------------
 void __fastcall TFormMain::FormClose(TObject *Sender, TCloseAction &Action)
 {
-    // Закрываем MCI-устройство
+    // Р—Р°РєСЂС‹РІР°РµРј MCI-СѓСЃС‚СЂРѕР№СЃС‚РІРѕ
     mcierror=::mciSendCommand(DeviceID, MCI_CLOSE,
         0, (DWORD)(LPMCI_GENERIC_PARMS)nullptr);
 }
@@ -44,23 +44,24 @@ void __fastcall TFormMain::FormResize(TObject *Sender)
 {
     if ( !DeviceID ) return;
 
-    // Определяем изначальный размер картинки
+    // РћРїСЂРµРґРµР»СЏРµРј РёР·РЅР°С‡Р°Р»СЊРЅС‹Р№ СЂР°Р·РјРµСЂ РєР°СЂС‚РёРЅРєРё
     MCI_DGV_RECT_PARMS dgv_rect_parms;
     setmem(&dgv_rect_parms,sizeof(dgv_rect_parms),0);
     mcierror=::mciSendCommand(DeviceID, MCI_WHERE,
-        MCI_DGV_WHERE_SOURCE, (DWORD)(LPMCI_GENERIC_PARMS)&dgv_rect_parms);
+        MCI_DGV_WHERE_SOURCE, (DWORD)(LPMCI_GENERIC_PARMS)&dgv_rect_parms);
+
     int MainWidth=ClientWidth,
         MainHeight=ClientHeight-PanelControl->Height;
-    // Рассчитываем новый масштаб для вывода на экран
+    // Р Р°СЃСЃС‡РёС‚С‹РІР°РµРј РЅРѕРІС‹Р№ РјР°СЃС€С‚Р°Р± РґР»СЏ РІС‹РІРѕРґР° РЅР° СЌРєСЂР°РЅ
     float Scale, XScale, YScale;
     XScale=(float)MainWidth/dgv_rect_parms.rc.right;
     YScale=(float)MainHeight/dgv_rect_parms.rc.bottom;
     Scale= XScale<YScale? XScale: YScale;
-    // Рассчитываем новые размеры для выводимой картинки
+    // Р Р°СЃСЃС‡РёС‚С‹РІР°РµРј РЅРѕРІС‹Рµ СЂР°Р·РјРµСЂС‹ РґР»СЏ РІС‹РІРѕРґРёРјРѕР№ РєР°СЂС‚РёРЅРєРё
     int NewWidth=dgv_rect_parms.rc.right*Scale,
         NewHeight=dgv_rect_parms.rc.bottom*Scale;
 
-    // Задаем новый размер и положение для кадра в окне
+    // Р—Р°РґР°РµРј РЅРѕРІС‹Р№ СЂР°Р·РјРµСЂ Рё РїРѕР»РѕР¶РµРЅРёРµ РґР»СЏ РєР°РґСЂР° РІ РѕРєРЅРµ
     MCI_DGV_PUT_PARMS dgv_put_parms;
     setmem(&dgv_put_parms,sizeof(dgv_put_parms),0);
     dgv_put_parms.rc.left=(MainWidth-NewWidth)/2;
@@ -75,19 +76,25 @@ void __fastcall TFormMain::TimerTimer(TObject *Sender)
 {
     if ( !DeviceID ) return;
 
-    // Запрашиваем текущее состояние устройства
+    // Р—Р°РїСЂР°С€РёРІР°РµРј С‚РµРєСѓС‰РµРµ СЃРѕСЃС‚РѕСЏРЅРёРµ СѓСЃС‚СЂРѕР№СЃС‚РІР°
     MCI_STATUS_PARMS status_parms;
     setmem(&status_parms,sizeof(status_parms),0);
     status_parms.dwItem=MCI_STATUS_MODE;
     ::mciSendCommand(DeviceID, MCI_STATUS,
-        MCI_STATUS_ITEM, (DWORD)(LPMCI_STATUS_PARMS)&status_parms);
+        MCI_STATUS_ITEM, (DWORD)(LPMCI_STATUS_PARMS)&status_parms);
+
     switch(status_parms.dwReturn)
     {
-		case MCI_MODE_NOT_READY: LabelState->Caption=L"Устройство не готово"; break;
-		case MCI_MODE_PAUSE: LabelState->Caption=L"Пауза"; break;		case MCI_MODE_PLAY: LabelState->Caption=L"Воспроизведение"; break;		case MCI_MODE_STOP: LabelState->Caption=L"Остановлено"; break;		case MCI_MODE_OPEN: LabelState->Caption=L"Открыто"; break;        case MCI_MODE_SEEK: LabelState->Caption=L"Перемотка"; break;        default: break;
+		case MCI_MODE_NOT_READY: LabelState->Caption=L"РЈСЃС‚СЂРѕР№СЃС‚РІРѕ РЅРµ РіРѕС‚РѕРІРѕ"; break;
+		case MCI_MODE_PAUSE: LabelState->Caption=L"РџР°СѓР·Р°"; break;
+		case MCI_MODE_PLAY: LabelState->Caption=L"Р’РѕСЃРїСЂРѕРёР·РІРµРґРµРЅРёРµ"; break;
+		case MCI_MODE_STOP: LabelState->Caption=L"РћСЃС‚Р°РЅРѕРІР»РµРЅРѕ"; break;
+		case MCI_MODE_OPEN: LabelState->Caption=L"РћС‚РєСЂС‹С‚Рѕ"; break;
+        case MCI_MODE_SEEK: LabelState->Caption=L"РџРµСЂРµРјРѕС‚РєР°"; break;
+        default: break;
     }
 
-    // Запрашиваем текущую позицию
+    // Р—Р°РїСЂР°С€РёРІР°РµРј С‚РµРєСѓС‰СѓСЋ РїРѕР·РёС†РёСЋ
     setmem(&status_parms,sizeof(status_parms),0);
     status_parms.dwItem=MCI_STATUS_POSITION;
     ::mciSendCommand(DeviceID, MCI_STATUS,
@@ -98,7 +105,7 @@ void __fastcall TFormMain::TimerTimer(TObject *Sender)
     GetTimeString(status_parms.dwReturn,time);
     LabelTime->Caption=time;
 
-    // Если возможно, выставляем новое положение индикатора перемотки
+    // Р•СЃР»Рё РІРѕР·РјРѕР¶РЅРѕ, РІС‹СЃС‚Р°РІР»СЏРµРј РЅРѕРІРѕРµ РїРѕР»РѕР¶РµРЅРёРµ РёРЅРґРёРєР°С‚РѕСЂР° РїРµСЂРµРјРѕС‚РєРё
     if ( (!PosChanging)&&(PanelPos->Tag!=0) )
     {
         int MinX=BevelPos->Left-(PanelPos->Height-BevelPos->Height)/2;
@@ -181,13 +188,14 @@ void TFormMain::GetTimeString(int Time_, char *Line_)
     setmem(&systemtime,sizeof(systemtime),0);
     ::FileTimeToSystemTime(&filetime,&systemtime);
     sprintf(Line_,"%.2i:%.2i:%.2i",systemtime.wHour,systemtime.wMinute,systemtime.wSecond);
-}//---------------------------------------------------------------------------
+}
+//---------------------------------------------------------------------------
 void __fastcall TFormMain::MOpen(TMessage &Msg)
 {
-    // Помечаем текущую операцию
-    LabelState->Caption=L"Загрузка данных..."; Application->ProcessMessages();
+    // РџРѕРјРµС‡Р°РµРј С‚РµРєСѓС‰СѓСЋ РѕРїРµСЂР°С†РёСЋ
+    LabelState->Caption=L"Р—Р°РіСЂСѓР·РєР° РґР°РЅРЅС‹С…..."; Application->ProcessMessages();
 
-    // Открываем MCI-устройство
+    // РћС‚РєСЂС‹РІР°РµРј MCI-СѓСЃС‚СЂРѕР№СЃС‚РІРѕ
     MCI_OPEN_PARMS open_params;
     setmem(&open_params,sizeof(open_params),0);
     open_params.dwCallback=(DWORD)Handle;
@@ -196,10 +204,10 @@ void __fastcall TFormMain::MOpen(TMessage &Msg)
     mcierror=::mciSendCommand(0, MCI_OPEN,
         MCI_OPEN_ELEMENT|MCI_OPEN_TYPE|MCI_DGV_OPEN_32BIT,
         (DWORD)(LPMCI_OPEN_PARMS)&open_params);
-    if ( mcierror ) { LabelState->Caption=L"Не удалось открыть файл !"; return; }
+    if ( mcierror ) { LabelState->Caption=L"РќРµ СѓРґР°Р»РѕСЃСЊ РѕС‚РєСЂС‹С‚СЊ С„Р°Р№Р» !"; return; }
     DeviceID=open_params.wDeviceID;
 
-    // Определяем изначальный размер картинки
+    // РћРїСЂРµРґРµР»СЏРµРј РёР·РЅР°С‡Р°Р»СЊРЅС‹Р№ СЂР°Р·РјРµСЂ РєР°СЂС‚РёРЅРєРё
     MCI_DGV_RECT_PARMS dgv_rect_parms;
     setmem(&dgv_rect_parms,sizeof(dgv_rect_parms),0);
     mcierror=::mciSendCommand(DeviceID, MCI_WHERE,
@@ -207,12 +215,12 @@ void __fastcall TFormMain::MOpen(TMessage &Msg)
 
     if ( !mcierror )
     {
-        // Задаем размеры окна
+        // Р—Р°РґР°РµРј СЂР°Р·РјРµСЂС‹ РѕРєРЅР°
         ClientWidth=dgv_rect_parms.rc.right;
         ClientHeight=dgv_rect_parms.rc.bottom+PanelControl->Height;
     }
 
-    // Задаем в какое окно выводить изображение
+    // Р—Р°РґР°РµРј РІ РєР°РєРѕРµ РѕРєРЅРѕ РІС‹РІРѕРґРёС‚СЊ РёР·РѕР±СЂР°Р¶РµРЅРёРµ
     MCI_DGV_WINDOW_PARMS dgv_window_parms;
     setmem(&dgv_window_parms,sizeof(dgv_window_parms),0);
     dgv_window_parms.hWnd=Handle;
@@ -221,30 +229,45 @@ void __fastcall TFormMain::MOpen(TMessage &Msg)
 
     Application->ProcessMessages();
 
-    // Включаем звук
+    // Р’РєР»СЋС‡Р°РµРј Р·РІСѓРє
     mcierror=::mciSendCommand(DeviceID, MCI_SETAUDIO,
         MCI_SET_ON, (DWORD)(LPMCI_GENERIC_PARMS)nullptr);
     if ( mcierror ) return;
 
-    // Устанавливаем громкость
+    // РЈСЃС‚Р°РЅР°РІР»РёРІР°РµРј РіСЂРѕРјРєРѕСЃС‚СЊ
     TrackBarVolume->Min=0; TrackBarVolume->Max=100;
     TrackBarVolume->PageSize=20; TrackBarVolume->Position=40;
 
-    // Устанавливаем формат времени в миллисекундах
+    // РЈСЃС‚Р°РЅР°РІР»РёРІР°РµРј С„РѕСЂРјР°С‚ РІСЂРµРјРµРЅРё РІ РјРёР»Р»РёСЃРµРєСѓРЅРґР°С…
     MCI_SET_PARMS set_parms;
     setmem(&set_parms,sizeof(set_parms),0);
     set_parms.dwTimeFormat=MCI_FORMAT_MILLISECONDS;
     ::mciSendCommand(DeviceID, MCI_SET,
-        MCI_SET_TIME_FORMAT, (DWORD)(LPMCI_SET_PARMS)&set_parms);    // Определяем длительность файла для перемотки    MCI_STATUS_PARMS status_parms;    setmem(&status_parms,sizeof(status_parms),0);    status_parms.dwItem=MCI_STATUS_LENGTH;
+        MCI_SET_TIME_FORMAT, (DWORD)(LPMCI_SET_PARMS)&set_parms);
+
+    // РћРїСЂРµРґРµР»СЏРµРј РґР»РёС‚РµР»СЊРЅРѕСЃС‚СЊ С„Р°Р№Р»Р° РґР»СЏ РїРµСЂРµРјРѕС‚РєРё
+    MCI_STATUS_PARMS status_parms;
+    setmem(&status_parms,sizeof(status_parms),0);
+    status_parms.dwItem=MCI_STATUS_LENGTH;
     ::mciSendCommand(DeviceID, MCI_STATUS,
-        MCI_STATUS_ITEM, (DWORD)(LPMCI_STATUS_PARMS)&status_parms);    //    PanelPos->Tag=status_parms.dwReturn;    char length[8+1];    GetTimeString(status_parms.dwReturn,length);    LabelLength->Caption=length;    // Отправляем сообщение для запуска воспроизведения
+        MCI_STATUS_ITEM, (DWORD)(LPMCI_STATUS_PARMS)&status_parms);
+
+    //
+    PanelPos->Tag=status_parms.dwReturn;
+
+    char length[8+1];
+    GetTimeString(status_parms.dwReturn,length);
+    LabelLength->Caption=length;
+
+    // РћС‚РїСЂР°РІР»СЏРµРј СЃРѕРѕР±С‰РµРЅРёРµ РґР»СЏ Р·Р°РїСѓСЃРєР° РІРѕСЃРїСЂРѕРёР·РІРµРґРµРЅРёСЏ
     ::PostMessage(Handle,MPLAY,0,0);
-}//---------------------------------------------------------------------------
+}
+//---------------------------------------------------------------------------
 void __fastcall TFormMain::MPlay(TMessage &Msg)
 {
     if ( !DeviceID ) return;
 
-    // Запускаем воспроизведение
+    // Р—Р°РїСѓСЃРєР°РµРј РІРѕСЃРїСЂРѕРёР·РІРµРґРµРЅРёРµ
     MCI_PLAY_PARMS play_params;
     setmem(&play_params,sizeof(play_params),0);
     play_params.dwCallback=(DWORD)Handle;
@@ -264,7 +287,8 @@ void __fastcall TFormMain::MPause(TMessage &Msg)
     generic_parms.dwCallback=(DWORD)Handle;
 
     mcierror=::mciSendCommand(DeviceID, MCI_PAUSE,
-        0, (DWORD)(LPMCI_GENERIC_PARMS)&generic_parms);}
+        0, (DWORD)(LPMCI_GENERIC_PARMS)&generic_parms);
+}
 //---------------------------------------------------------------------------
 void __fastcall TFormMain::MStop(TMessage &Msg)
 {
@@ -275,28 +299,35 @@ void __fastcall TFormMain::MStop(TMessage &Msg)
     generic_parms.dwCallback=(DWORD)Handle;
 
     ::mciSendCommand(DeviceID, MCI_STOP,
-        MCI_NOTIFY, (DWORD)(LPMCI_GENERIC_PARMS)&generic_parms);    if ( mcierror ) return;
+        MCI_NOTIFY, (DWORD)(LPMCI_GENERIC_PARMS)&generic_parms);
+    if ( mcierror ) return;
 
     mcierror=::mciSendCommand(DeviceID, MCI_SEEK,
-        MCI_SEEK_TO_START, (DWORD)(LPMCI_SEEK_PARMS)nullptr);}//---------------------------------------------------------------------------
+        MCI_SEEK_TO_START, (DWORD)(LPMCI_SEEK_PARMS)nullptr);
+}
+//---------------------------------------------------------------------------
 void __fastcall TFormMain::MSeek(TMessage &Msg)
 {
     if ( !DeviceID ) return;
 
-    LabelState->Caption=L"Перемотка..."; Application->ProcessMessages();
+    LabelState->Caption=L"РџРµСЂРµРјРѕС‚РєР°..."; Application->ProcessMessages();
 
     MCI_SEEK_PARMS seek_parms;
     setmem(&seek_parms,sizeof(seek_parms),0);
     seek_parms.dwCallback=(DWORD)Handle;
     seek_parms.dwTo=Msg.WParam;
     mcierror=::mciSendCommand(DeviceID, MCI_SEEK,
-        MCI_TO, (DWORD)(LPMCI_SEEK_PARMS)&seek_parms);    // Если до перемотки было включено воспроизведение, то возобновляем его    if ( SpeedButtonPlay->Down ) ::PostMessage(Handle,MPLAY,0,0);
-}//---------------------------------------------------------------------------
+        MCI_TO, (DWORD)(LPMCI_SEEK_PARMS)&seek_parms);
+
+    // Р•СЃР»Рё РґРѕ РїРµСЂРµРјРѕС‚РєРё Р±С‹Р»Рѕ РІРєР»СЋС‡РµРЅРѕ РІРѕСЃРїСЂРѕРёР·РІРµРґРµРЅРёРµ, С‚Рѕ РІРѕР·РѕР±РЅРѕРІР»СЏРµРј РµРіРѕ
+    if ( SpeedButtonPlay->Down ) ::PostMessage(Handle,MPLAY,0,0);
+}
+//---------------------------------------------------------------------------
 void __fastcall TFormMain::MVolume(TMessage &Msg)
 {
     if ( !DeviceID ) return;
 
-    // Устанавливаем громкость звука
+    // РЈСЃС‚Р°РЅР°РІР»РёРІР°РµРј РіСЂРѕРјРєРѕСЃС‚СЊ Р·РІСѓРєР°
     MCI_DGV_SETAUDIO_PARMS dgv_setaudio_parms;
     setmem(&dgv_setaudio_parms,sizeof(dgv_setaudio_parms),0);
     dgv_setaudio_parms.dwItem=MCI_DGV_SETAUDIO_VOLUME;

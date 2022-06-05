@@ -1,4 +1,4 @@
-//---------------------------------------------------------------------------
+ï»¿//---------------------------------------------------------------------------
 #include <vcl.h>
 #include <stdio.h>
 #pragma hdrstop
@@ -34,7 +34,7 @@ void __fastcall TFormMain::FormCreate(TObject *Sender)
     Tag=false;
     PanelMenu->DoubleBuffered=true;
 
-    // Íàñòðàèâàåì ïóòè äëÿ ôàéëîâ
+    // ÐÐ°ÑÑ‚Ñ€Ð°Ð¸Ð²Ð°ÐµÐ¼ Ð¿ÑƒÑ‚Ð¸ Ð´Ð»Ñ Ñ„Ð°Ð¹Ð»Ð¾Ð²
     ExePath=ExtractFilePath(Application->ExeName);
     UnicodeString MsgFile=ExePath+L"\\MSGTIMEWARN.BMP";
     WarnMessage.File=MsgFile.c_str();
@@ -42,7 +42,7 @@ void __fastcall TFormMain::FormCreate(TObject *Sender)
 //---------------------------------------------------------------------------
 void __fastcall TFormMain::FormShow(TObject *Sender)
 {
-    // Ñêðîåìñÿ èç ïàíåëè çàäà÷
+    // Ð¡ÐºÑ€Ð¾ÐµÐ¼ÑÑ Ð¸Ð· Ð¿Ð°Ð½ÐµÐ»Ð¸ Ð·Ð°Ð´Ð°Ñ‡
     ::ShowWindow(Application->Handle,SW_HIDE);
 
     Timer->Interval=250;
@@ -76,7 +76,7 @@ void __fastcall TFormMain::FormResize(TObject *Sender)
 //---------------------------------------------------------------------------
 void __fastcall TFormMain::TimerTimer(TObject *Sender)
 {
-    // Çàâåðøèì ðàáîòó, åñëè óïðàâëÿþùàÿ ñëóæáà "óïàëà"
+    // Ð—Ð°Ð²ÐµÑ€ÑˆÐ¸Ð¼ Ñ€Ð°Ð±Ð¾Ñ‚Ñƒ, ÐµÑÐ»Ð¸ ÑƒÐ¿Ñ€Ð°Ð²Ð»ÑÑŽÑ‰Ð°Ñ ÑÐ»ÑƒÐ¶Ð±Ð° "ÑƒÐ¿Ð°Ð»Ð°"
     if ( !Shared.IsLive() )
     {
         FormMain->Tag=true;
@@ -85,24 +85,24 @@ void __fastcall TFormMain::TimerTimer(TObject *Sender)
         return;
     }
 
-    // Ïîïûòàåìñÿ çàíÿòü shared-ñåêöèþ
+    // ÐŸÐ¾Ð¿Ñ‹Ñ‚Ð°ÐµÐ¼ÑÑ Ð·Ð°Ð½ÑÑ‚ÑŒ shared-ÑÐµÐºÑ†Ð¸ÑŽ
     if ( Shared.Lock() )
     {
         try
         {
-            // Îòðàáîòàåì êîìàíäû ñëóæáû
+            // ÐžÑ‚Ñ€Ð°Ð±Ð¾Ñ‚Ð°ÐµÐ¼ ÐºÐ¾Ð¼Ð°Ð½Ð´Ñ‹ ÑÐ»ÑƒÐ¶Ð±Ñ‹
             SharedProcess();
             Shared.UnLock();
         }
         catch(Exception &exception)
         {
-            // Çàùèòèìñÿ îò áëîêèðîâêè shared-ñåêöèè íà ñëó÷àé èñêëþ÷åíèÿ
+            // Ð—Ð°Ñ‰Ð¸Ñ‚Ð¸Ð¼ÑÑ Ð¾Ñ‚ Ð±Ð»Ð¾ÐºÐ¸Ñ€Ð¾Ð²ÐºÐ¸ shared-ÑÐµÐºÑ†Ð¸Ð¸ Ð½Ð° ÑÐ»ÑƒÑ‡Ð°Ð¹ Ð¸ÑÐºÐ»ÑŽÑ‡ÐµÐ½Ð¸Ñ
             Shared.UnLock();
             Application->ShowException(&exception);
         }
     }
 
-    // Ïîçèöèîíèðóåì îêíî ïðîãðàììû
+    // ÐŸÐ¾Ð·Ð¸Ñ†Ð¸Ð¾Ð½Ð¸Ñ€ÑƒÐµÐ¼ Ð¾ÐºÐ½Ð¾ Ð¿Ñ€Ð¾Ð³Ñ€Ð°Ð¼Ð¼Ñ‹
     if ( Transp )
     {
         if ( Left!=(Screen->Width-Width) ) Left=Screen->Width-Width;
@@ -138,7 +138,7 @@ void __fastcall TFormMain::SpeedButtonOptionsClick(TObject *Sender)
 //---------------------------------------------------------------------------
 void __fastcall TFormMain::NLogOffClick(TObject *Sender)
 {
-    // Äîï. ïðîâåðêà äëÿ áîëüøåé áåçîïàñíîñòè
+    // Ð”Ð¾Ð¿. Ð¿Ñ€Ð¾Ð²ÐµÑ€ÐºÐ° Ð´Ð»Ñ Ð±Ð¾Ð»ÑŒÑˆÐµÐ¹ Ð±ÐµÐ·Ð¾Ð¿Ð°ÑÐ½Ð¾ÑÑ‚Ð¸
     if ( !ConfigMode ) return;
 
 #ifdef _DEBUG
@@ -152,7 +152,7 @@ void __fastcall TFormMain::NLogOffClick(TObject *Sender)
 //---------------------------------------------------------------------------
 void __fastcall TFormMain::NShutdownClick(TObject *Sender)
 {
-    // Äîï. ïðîâåðêà äëÿ áîëüøåé áåçîïàñíîñòè
+    // Ð”Ð¾Ð¿. Ð¿Ñ€Ð¾Ð²ÐµÑ€ÐºÐ° Ð´Ð»Ñ Ð±Ð¾Ð»ÑŒÑˆÐµÐ¹ Ð±ÐµÐ·Ð¾Ð¿Ð°ÑÐ½Ð¾ÑÑ‚Ð¸
     if ( !ConfigMode ) return;
 
 #ifdef _DEBUG
@@ -170,7 +170,7 @@ void TFormMain::SetTransp(bool Transp_)
     FormMain->Color=clBlack;
     FormMain->PanelMenu->Color=clBlack;
     FormMain->AutoSize=Transp_;
-    if ( Transp_ )      /// ïðîçðà÷íîñòü ãëþ÷èò
+    if ( Transp_ )      /// Ð¿Ñ€Ð¾Ð·Ñ€Ð°Ñ‡Ð½Ð¾ÑÑ‚ÑŒ Ð³Ð»ÑŽÑ‡Ð¸Ñ‚
     {
 		FormGames->Parent=nullptr;
 //        FormGames->TransparentColor=true;
@@ -191,7 +191,7 @@ void TFormMain::SetTransp(bool Transp_)
 //---------------------------------------------------------------------------
 void TFormMain::SharedProcess()
 {
-    // Îáíîâëÿåì íîìåð êîìïüþòåðà
+    // ÐžÐ±Ð½Ð¾Ð²Ð»ÑÐµÐ¼ Ð½Ð¾Ð¼ÐµÑ€ ÐºÐ¾Ð¼Ð¿ÑŒÑŽÑ‚ÐµÑ€Ð°
     int CompNum;
     if ( Shared.CheckCompNum(CompNum,CompNumVer) )
     {
@@ -199,7 +199,7 @@ void TFormMain::SharedProcess()
         LabelCompNumShad->Caption=LabelCompNum->Caption;
         LockDsk.UpdateCompNum(CompNum);
     }
-    // Îáíîâëÿåì òåêóùåå âðåìÿ
+    // ÐžÐ±Ð½Ð¾Ð²Ð»ÑÐµÐ¼ Ñ‚ÐµÐºÑƒÑ‰ÐµÐµ Ð²Ñ€ÐµÐ¼Ñ
     __int64 SysTime;
     if ( Shared.CheckSysTime(SysTime,SysTimeVer) )
     {
@@ -216,7 +216,7 @@ void TFormMain::SharedProcess()
         }
         LockDsk.UpdateSysTime(SysTime);
     }
-    // Îáíîâëÿåì îñòàâøååñÿ âðåìÿ ðàáîòû
+    // ÐžÐ±Ð½Ð¾Ð²Ð»ÑÐµÐ¼ Ð¾ÑÑ‚Ð°Ð²ÑˆÐµÐµÑÑ Ð²Ñ€ÐµÐ¼Ñ Ñ€Ð°Ð±Ð¾Ñ‚Ñ‹
     int WorkTime;
     if ( Shared.CheckWorkTime(WorkTime,WorkTimeVer) )
     {
@@ -229,14 +229,14 @@ void TFormMain::SharedProcess()
 		LabelWorkTime->Caption=line;
 		LockDsk.UpdateWorkTime(WorkTime);
 	}
-	// Çàïóñêàåì ïîêàç ïðåäóïðåæäåíèÿ îá îêîí÷àíèè âðåìåíè
+	// Ð—Ð°Ð¿ÑƒÑÐºÐ°ÐµÐ¼ Ð¿Ð¾ÐºÐ°Ð· Ð¿Ñ€ÐµÐ´ÑƒÐ¿Ñ€ÐµÐ¶Ð´ÐµÐ½Ð¸Ñ Ð¾Ð± Ð¾ÐºÐ¾Ð½Ñ‡Ð°Ð½Ð¸Ð¸ Ð²Ñ€ÐµÐ¼ÐµÐ½Ð¸
 	bool WarnMsg;
 	if ( Shared.CheckWarnMsg(WarnMsg,WarnMsgVer) )
 	{
         if ( WarnMsg ) WarnMessage.Show();
         else WarnMessage.Stop();
     }
-    // Îáíîâëÿåì ýêðàí áëîêèðîâêè
+    // ÐžÐ±Ð½Ð¾Ð²Ð»ÑÐµÐ¼ ÑÐºÑ€Ð°Ð½ Ð±Ð»Ð¾ÐºÐ¸Ñ€Ð¾Ð²ÐºÐ¸
     int ImageMsg;
     if ( Shared.CheckImageMessage(ImageMsg,ImageMsgVer) )
     {
@@ -256,17 +256,17 @@ void TFormMain::SharedProcess()
             if ( FileName!=L"" ) LockDsk.Show(FileName.c_str());
         }
     }
-    // Îáíîâëÿåì ñïèñîê ïðîãðàìì
+    // ÐžÐ±Ð½Ð¾Ð²Ð»ÑÐµÐ¼ ÑÐ¿Ð¸ÑÐ¾Ðº Ð¿Ñ€Ð¾Ð³Ñ€Ð°Ð¼Ð¼
     unsigned Games;
     if ( Shared.CheckGames(Games,GamesVer) ) FormGames->ShowGames(Games);
-    // Îáíîâëÿåì ðåæèì ïðîçðà÷íîñòè
+    // ÐžÐ±Ð½Ð¾Ð²Ð»ÑÐµÐ¼ Ñ€ÐµÐ¶Ð¸Ð¼ Ð¿Ñ€Ð¾Ð·Ñ€Ð°Ñ‡Ð½Ð¾ÑÑ‚Ð¸
     bool Transp;
     if ( Shared.CheckTransp(Transp,TranspVer) )
     {
         SetTransp(Transp);
         LockDsk.SetTransp(Transp);
     }
-    // Îáíîâëÿåì ðåæèì íàñòðîéêè
+    // ÐžÐ±Ð½Ð¾Ð²Ð»ÑÐµÐ¼ Ñ€ÐµÐ¶Ð¸Ð¼ Ð½Ð°ÑÑ‚Ñ€Ð¾Ð¹ÐºÐ¸
     if ( Shared.CheckConfigMode(ConfigMode,ConfigModeVer) )
         SpeedButtonOptions->Enabled=ConfigMode;
 }

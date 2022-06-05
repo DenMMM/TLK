@@ -1,6 +1,6 @@
-//---------------------------------------------------------------------------
+п»ї//---------------------------------------------------------------------------
 #include <string.h>
-#include <mem.h>
+//#include <mem.h>
 #pragma hdrstop
 
 #include "UnitFines.h"
@@ -11,9 +11,9 @@
 std::size_t MFinesItem::GetDataSize() const
 {
 	return
-		MIDListItem::GetDataSize()+				// ID-номер штрафа
-		sizeofLine(Descr)+						// Описание штрафа
-		sizeof(Time);                   		// Время штрафа
+		MIDListItem::GetDataSize()+				// ID-РЅРѕРјРµСЂ С€С‚СЂР°С„Р°
+		sizeofLine(Descr)+						// РћРїРёСЃР°РЅРёРµ С€С‚СЂР°С„Р°
+		sizeof(Time);                   		// Р’СЂРµРјСЏ С€С‚СЂР°С„Р°
 }
 
 void *MFinesItem::SetData(void *Data_) const

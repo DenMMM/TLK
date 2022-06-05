@@ -1,4 +1,4 @@
-//---------------------------------------------------------------------------
+п»ї//---------------------------------------------------------------------------
 #ifndef UnitUsersH
 #define UnitUsersH
 //---------------------------------------------------------------------------
@@ -23,7 +23,7 @@ class MUsersItem:
 		MUsersItem>
 {
 public:
-	// Функции механизма сохранения/загрузки данных
+	// Р¤СѓРЅРєС†РёРё РјРµС…Р°РЅРёР·РјР° СЃРѕС…СЂР°РЅРµРЅРёСЏ/Р·Р°РіСЂСѓР·РєРё РґР°РЅРЅС‹С…
 	virtual std::size_t GetDataSize() const override;
 	virtual void *SetData(void *Data_) const override;
 	virtual const void *GetData(const void *Data_, const void *Limit_) override;
@@ -34,7 +34,7 @@ public:
 	bool Active;
 	MPassword Pass;
 
-	// Поддержка логов
+	// РџРѕРґРґРµСЂР¶РєР° Р»РѕРіРѕРІ
 	struct LogData
 	{
 		std::uint32_t UUID;

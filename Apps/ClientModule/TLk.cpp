@@ -1,4 +1,4 @@
-//---------------------------------------------------------------------------
+п»ї//---------------------------------------------------------------------------
 #include <vcl.h>
 //#include <string.h>
 #include <cwchar>
@@ -36,7 +36,7 @@ int WINAPI _tWinMain(HINSTANCE, HINSTANCE, LPTSTR lpCmdLine, int)
         cmd_HEX=&lpCmdLine[wcslen(cmd_shell)];
     } else
     {
-        // Выведем подсказку по использованию tlk.exe
+        // Р’С‹РІРµРґРµРј РїРѕРґСЃРєР°Р·РєСѓ РїРѕ РёСЃРїРѕР»СЊР·РѕРІР°РЅРёСЋ tlk.exe
         ResMessageBox(nullptr,0,5,MB_APPLMODAL|MB_OK|MB_ICONINFORMATION);
         return 0;
     }
@@ -44,15 +44,15 @@ int WINAPI _tWinMain(HINSTANCE, HINSTANCE, LPTSTR lpCmdLine, int)
     if ( !Shared.Open(cmd_HEX) )
     {
         Shared.Close();
-        // Добавим задержку
-        ::Sleep(500);           /// смысл есть ?
+        // Р”РѕР±Р°РІРёРј Р·Р°РґРµСЂР¶РєСѓ
+        ::Sleep(500);           /// СЃРјС‹СЃР» РµСЃС‚СЊ ?
         return 1;
     }
 
-    // Зададим завершать процесс последним
+    // Р—Р°РґР°РґРёРј Р·Р°РІРµСЂС€Р°С‚СЊ РїСЂРѕС†РµСЃСЃ РїРѕСЃР»РµРґРЅРёРј
     ::SetProcessShutdownParameters(1,0);
     {
-        // Обновим фон рабочего стола (часть функций shell'а)
+        // РћР±РЅРѕРІРёРј С„РѕРЅ СЂР°Р±РѕС‡РµРіРѕ СЃС‚РѕР»Р° (С‡Р°СЃС‚СЊ С„СѓРЅРєС†РёР№ shell'Р°)
         wchar_t wlp[MAX_PATH+1];
         ::SystemParametersInfo(SPI_GETDESKWALLPAPER,MAX_PATH,wlp,0);
         ::SystemParametersInfo(SPI_SETDESKWALLPAPER,0,wlp,0);   /// ,SPIF_SENDCHANGE);
@@ -61,7 +61,7 @@ int WINAPI _tWinMain(HINSTANCE, HINSTANCE, LPTSTR lpCmdLine, int)
 	try
 	{
 		Application->Initialize();
-		Application->Title = L"TLK - Клиент";
+		Application->Title = L"TLK - РљР»РёРµРЅС‚";
 		Application->CreateForm(__classid(TFormMain), &FormMain);
 		Application->CreateForm(__classid(TFormGames), &FormGames);
 		Application->Run();
@@ -83,16 +83,16 @@ void ServiceInstall()
 	const wchar_t cmd_run[]=L" /run";
 	wchar_t file_name[MAX_PATH+1];
 
-    // Берем имя файла с путем к нему
+    // Р‘РµСЂРµРј РёРјСЏ С„Р°Р№Р»Р° СЃ РїСѓС‚РµРј Рє РЅРµРјСѓ
 	if ( ::GetModuleFileName(nullptr, file_name,
 		MAX_PATH-wcslen(cmd_run))==0 ) goto error;
-	// Добавляем к названию файла службы ключ " /run"
+	// Р”РѕР±Р°РІР»СЏРµРј Рє РЅР°Р·РІР°РЅРёСЋ С„Р°Р№Р»Р° СЃР»СѓР¶Р±С‹ РєР»СЋС‡ " /run"
 	wcscat(file_name, cmd_run);
 
-    // Открываем менеджер служб
+    // РћС‚РєСЂС‹РІР°РµРј РјРµРЅРµРґР¶РµСЂ СЃР»СѓР¶Р±
     sc_manager_handle=::OpenSCManager(nullptr,nullptr,SC_MANAGER_CREATE_SERVICE);
     if ( sc_manager_handle==nullptr ) goto error;
-    // Регистрируем службу
+    // Р РµРіРёСЃС‚СЂРёСЂСѓРµРј СЃР»СѓР¶Р±Сѓ
     service_handle=::CreateService(
         sc_manager_handle,
         SVC_Name,
@@ -110,18 +110,18 @@ void ServiceInstall()
     SERVICE_FAILURE_ACTIONS sfa;
     SC_ACTION sca[3];
 
-    sca[0].Type=SC_ACTION_RESTART;      // перезапустить службу
-    sca[0].Delay=60*1000;               // через 1 минуту
+    sca[0].Type=SC_ACTION_RESTART;      // РїРµСЂРµР·Р°РїСѓСЃС‚РёС‚СЊ СЃР»СѓР¶Р±Сѓ
+    sca[0].Delay=60*1000;               // С‡РµСЂРµР· 1 РјРёРЅСѓС‚Сѓ
     sca[1]=sca[0];
     sca[2]=sca[0];
 
-    sfa.dwResetPeriod=24*60*60;         // сброс счетчика ошибок через сутки
+    sfa.dwResetPeriod=24*60*60;         // СЃР±СЂРѕСЃ СЃС‡РµС‚С‡РёРєР° РѕС€РёР±РѕРє С‡РµСЂРµР· СЃСѓС‚РєРё
 	sfa.lpRebootMsg=L"";
     sfa.lpCommand=L"";
     sfa.cActions=3;
     sfa.lpsaActions=sca;
 
-    // Задаем параметры восстановления после сбоев
+    // Р—Р°РґР°РµРј РїР°СЂР°РјРµС‚СЂС‹ РІРѕСЃСЃС‚Р°РЅРѕРІР»РµРЅРёСЏ РїРѕСЃР»Рµ СЃР±РѕРµРІ
     if ( !::ChangeServiceConfig2(
         service_handle,
         SERVICE_CONFIG_FAILURE_ACTIONS,
@@ -148,10 +148,10 @@ void ServiceUninstall()
     SC_HANDLE sc_manager_handle=nullptr;
     SC_HANDLE service_handle=nullptr;
 
-    // Открываем менеджер служб
+    // РћС‚РєСЂС‹РІР°РµРј РјРµРЅРµРґР¶РµСЂ СЃР»СѓР¶Р±
     sc_manager_handle=::OpenSCManager(nullptr,nullptr,SC_MANAGER_CREATE_SERVICE);
     if ( sc_manager_handle==nullptr ) goto error;
-    // Удаляем службу
+    // РЈРґР°Р»СЏРµРј СЃР»СѓР¶Р±Сѓ
     service_handle=::OpenService(sc_manager_handle,SVC_Name,DELETE);
     if ( service_handle==nullptr ) goto error;
     if ( !::DeleteService(service_handle) ) goto error;

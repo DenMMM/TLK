@@ -1,4 +1,4 @@
-//---------------------------------------------------------------------------
+п»ї//---------------------------------------------------------------------------
 #include <vcl.h>
 #include <stdio.h>
 #pragma hdrstop
@@ -18,7 +18,7 @@ __fastcall TFormFine::TFormFine(TComponent* Owner)
 //---------------------------------------------------------------------------
 void __fastcall TFormFine::FormShow(TObject *Sender)
 {
-    // Выделим буфер сразу под все выбранные компьютеры
+    // Р’С‹РґРµР»РёРј Р±СѓС„РµСЂ СЃСЂР°Р·Сѓ РїРѕРґ РІСЃРµ РІС‹Р±СЂР°РЅРЅС‹Рµ РєРѕРјРїСЊСЋС‚РµСЂС‹
     ApplyFines.resize(FormMain->ListViewComputers->SelCount);
 
     unsigned i=0;
@@ -26,37 +26,37 @@ void __fastcall TFormFine::FormShow(TObject *Sender)
     for ( TListItem *item=FormMain->ListViewComputers->Selected; item;
         item=FormMain->ListViewComputers->GetNextItem(item,sdAll,is) )
     {
-        // Проверим применим ли к компьютеру штраф
+        // РџСЂРѕРІРµСЂРёРј РїСЂРёРјРµРЅРёРј Р»Рё Рє РєРѕРјРїСЊСЋС‚РµСЂСѓ С€С‚СЂР°С„
 		auto *state=reinterpret_cast<MStatesItem*>(item->Data);
         if ( !state->CmdFine(0,true) ) continue;
-        // Заполним доп. атрибуты
+        // Р—Р°РїРѕР»РЅРёРј РґРѕРї. Р°С‚СЂРёР±СѓС‚С‹
         ApplyFines[i].State=state;
         ApplyFines[i].Number=state->Associated();
         ApplyFines[i].Fine=nullptr;
         ApplyFines[i].Wait=false;
         ApplyFines[i].Warn=false;
-        // Добавим строку в список компьютеров и свяжем с атрибутами
+        // Р”РѕР±Р°РІРёРј СЃС‚СЂРѕРєСѓ РІ СЃРїРёСЃРѕРє РєРѕРјРїСЊСЋС‚РµСЂРѕРІ Рё СЃРІСЏР¶РµРј СЃ Р°С‚СЂРёР±СѓС‚Р°РјРё
         TListItem *newitem=ListViewFines->Items->Add();
         newitem->Data=&ApplyFines[i];
-        // Выберем ее для удобства
+        // Р’С‹Р±РµСЂРµРј РµРµ РґР»СЏ СѓРґРѕР±СЃС‚РІР°
         newitem->Selected=true;
         SetListViewFinesLine(newitem);
         i++;
     }
 
-    // Заполняем список времен штрафов
+    // Р—Р°РїРѕР»РЅСЏРµРј СЃРїРёСЃРѕРє РІСЂРµРјРµРЅ С€С‚СЂР°С„РѕРІ
 	for ( const auto &fine: *Fines )
 	{
 		UnicodeString line=fine.Descr.c_str();
 		line+=L"  (";
 
-		if ( fine.Time==(24*60) ) line+=L"все время)";
+		if ( fine.Time==(24*60) ) line+=L"РІСЃРµ РІСЂРµРјСЏ)";
 		else
 		{
 			wchar_t time[8+1];
 			swprintf(
 				time, sizeof(time)/sizeof(time[0]),
-				L"%.2i мин.)", fine.Time);
+				L"%.2i РјРёРЅ.)", fine.Time);
 			line+=time;
 		}
 
@@ -67,23 +67,23 @@ void __fastcall TFormFine::FormShow(TObject *Sender)
 	CheckBoxWarn->Enabled=false; CheckBoxWarn->Checked=false;
 	ActiveControl=ComboBoxTime;
 
-	// Добавим энтропии
+	// Р”РѕР±Р°РІРёРј СЌРЅС‚СЂРѕРїРёРё
 	BasicRand.event();
 }
 //---------------------------------------------------------------------------
 void __fastcall TFormFine::FormClose(TObject *Sender, TCloseAction &Action)
 {
-	// Чистим интерфейсные элементы
+	// Р§РёСЃС‚РёРј РёРЅС‚РµСЂС„РµР№СЃРЅС‹Рµ СЌР»РµРјРµРЅС‚С‹
 	ListViewFines->Items->Clear();
 	ComboBoxTime->Items->Clear();
-	// Чистим буфер
+	// Р§РёСЃС‚РёРј Р±СѓС„РµСЂ
 	ApplyFines.clear();
 }
 //---------------------------------------------------------------------------
 void __fastcall TFormFine::ListViewFinesInsert(TObject *Sender,
       TListItem *Item)
 {
-    Item->ImageIndex=-1;  // Устранение ошибки VCL
+    Item->ImageIndex=-1;  // РЈСЃС‚СЂР°РЅРµРЅРёРµ РѕС€РёР±РєРё VCL
 	Item->SubItems->Add(L"");
 	Item->SubItems->Add(L"");
 	Item->SubItems->Add(L"");
@@ -110,7 +110,7 @@ void __fastcall TFormFine::ComboBoxTimeClick(TObject *Sender)
 		Wait=CheckBoxWait->Checked;
 	}
 
-	// Заносим новые значения штрафа для выбранных компьютеров
+	// Р—Р°РЅРѕСЃРёРј РЅРѕРІС‹Рµ Р·РЅР°С‡РµРЅРёСЏ С€С‚СЂР°С„Р° РґР»СЏ РІС‹Р±СЂР°РЅРЅС‹С… РєРѕРјРїСЊСЋС‚РµСЂРѕРІ
 	TItemStates is=TItemStates()<<isSelected;
 	for ( TListItem *Item=ListViewFines->Selected; Item;
 		Item=ListViewFines->GetNextItem(Item,sdAll,is) )
@@ -126,7 +126,7 @@ void __fastcall TFormFine::ComboBoxTimeClick(TObject *Sender)
 //---------------------------------------------------------------------------
 void __fastcall TFormFine::BitBtnFineClick(TObject *Sender)
 {
-	// Удаляем оштрафованые компьютеры из списка
+	// РЈРґР°Р»СЏРµРј РѕС€С‚СЂР°С„РѕРІР°РЅС‹Рµ РєРѕРјРїСЊСЋС‚РµСЂС‹ РёР· СЃРїРёСЃРєР°
 	TItemStates is=TItemStates()<<isSelected;
 	TListItem *item=ListViewFines->Selected, *next;
 	while(item)
@@ -136,7 +136,7 @@ void __fastcall TFormFine::BitBtnFineClick(TObject *Sender)
         if ( appfine->Fine!=nullptr )
         {
             MStatesItem *state=appfine->State;
-            // Проверяем возможно ли применить команду
+            // РџСЂРѕРІРµСЂСЏРµРј РІРѕР·РјРѕР¶РЅРѕ Р»Рё РїСЂРёРјРµРЅРёС‚СЊ РєРѕРјР°РЅРґСѓ
             if ( state->CmdFine(0,true) )
             {
                 int time=
@@ -144,28 +144,28 @@ void __fastcall TFormFine::BitBtnFineClick(TObject *Sender)
                        (appfine->Fine->Time==(24*60))?
                         appfine->Fine->Time:
                        -appfine->Fine->Time;
-                // Добавляем запись в лог
+                // Р”РѕР±Р°РІР»СЏРµРј Р·Р°РїРёСЃСЊ РІ Р»РѕРі
                 if ( !Log->AddFine(appfine->Number,appfine->Fine->gUUID(),time) )
                 {
                     ShellState->State|=mssErrorLog; FormMain->SetShell();
                     ResMessageBox(Handle,1,5,MB_APPLMODAL|MB_OK|MB_ICONERROR,Log->gLastErr());
                     break;
                 }
-                // Применяем команду
+                // РџСЂРёРјРµРЅСЏРµРј РєРѕРјР°РЅРґСѓ
                 state->CmdFine(time,false);
-                // Удаляем строку из списка
+                // РЈРґР°Р»СЏРµРј СЃС‚СЂРѕРєСѓ РёР· СЃРїРёСЃРєР°
                 item->Delete();
             }
         }
         item=next;
     }
-    // Сохраняем новые состояния
+    // РЎРѕС…СЂР°РЅСЏРµРј РЅРѕРІС‹Рµ СЃРѕСЃС‚РѕСЏРЅРёСЏ
     if ( !States->Save() )
     {
         ShellState->State|=mssErrorState; FormMain->SetShell();
         ResMessageBox(Handle,1,8,MB_APPLMODAL|MB_OK|MB_ICONERROR,States->gLastErr());
     }
-    // Обновляем список компьютеров
+    // РћР±РЅРѕРІР»СЏРµРј СЃРїРёСЃРѕРє РєРѕРјРїСЊСЋС‚РµСЂРѕРІ
     FormMain->UpdateListViewComputers(false);
 }
 //---------------------------------------------------------------------------
@@ -174,26 +174,26 @@ void __fastcall TFormFine::SetListViewFinesLine(TListItem *Item_)
     auto *selfine=reinterpret_cast<MApplyFine*>(Item_->Data);
     auto iComp=Computers->Search(selfine->Number);
 
-    // Номер компьютера и цвет его группы
+    // РќРѕРјРµСЂ РєРѕРјРїСЊСЋС‚РµСЂР° Рё С†РІРµС‚ РµРіРѕ РіСЂСѓРїРїС‹
 	Item_->SubItemImages[0]=FormMain->GetCompColorIcon(&*iComp);
 	Item_->SubItems->Strings[0]=IntToStr(selfine->Number);
 
     if ( selfine->Fine==nullptr ) return;
 
-    // Описание штрафа
+    // РћРїРёСЃР°РЅРёРµ С€С‚СЂР°С„Р°
     Item_->SubItems->Strings[1]=selfine->Fine->Descr.c_str();
-    // Время штрафа
+    // Р’СЂРµРјСЏ С€С‚СЂР°С„Р°
 	if ( selfine->Warn ) Item_->SubItems->Strings[2]=L"";
 	else
 	{
 		int Time=selfine->Fine->Time;
-		if ( Time==(24*60) ) Item_->SubItems->Strings[2]=L"Все время";
+		if ( Time==(24*60) ) Item_->SubItems->Strings[2]=L"Р’СЃРµ РІСЂРµРјСЏ";
 		else Item_->SubItems->Strings[2]=IntToStr(Time);
 	}
-	// Ожидание
+	// РћР¶РёРґР°РЅРёРµ
 	if ( (selfine->Fine->Time==(24*60))||selfine->Warn||
         (!selfine->Wait) ) Item_->SubItems->Strings[3]=L"";
-	else Item_->SubItems->Strings[3]=L"Да";
+	else Item_->SubItems->Strings[3]=L"Р”Р°";
 }
 //---------------------------------------------------------------------------
 

@@ -1,4 +1,4 @@
-//---------------------------------------------------------------------------
+п»ї//---------------------------------------------------------------------------
 #include <stdio.h>
 #pragma hdrstop
 
@@ -13,17 +13,17 @@ bool ProcessComputersState(
 {
 	States_.Clear();
 	Tariffs_.Clear();
-	// Ищем назад по логу ближайшие данные по состоянию компьютеров
+	// РС‰РµРј РЅР°Р·Р°Рґ РїРѕ Р»РѕРіСѓ Р±Р»РёР¶Р°Р№С€РёРµ РґР°РЅРЅС‹Рµ РїРѕ СЃРѕСЃС‚РѕСЏРЅРёСЋ РєРѕРјРїСЊСЋС‚РµСЂРѕРІ
 	MLogRecords::const_iterator
 		iPos=iPoint_,
 		iBegin=Log_.begin();
 	while(
-		(iPos!=iBegin) &&    	/// Не совсем чисто, т.к. итератор "прямой"
+		(iPos!=iBegin) &&    	/// РќРµ СЃРѕРІСЃРµРј С‡РёСЃС‚Рѕ, С‚.Рє. РёС‚РµСЂР°С‚РѕСЂ "РїСЂСЏРјРѕР№"
 		(iPos->gTypeID()!=MLogRecords::DataStates::TypeID)
 		) --iPos;
 	if ( iPos==iBegin ) goto error;
 
-	// Заполняем таблицу состояний начальными данными
+	// Р—Р°РїРѕР»РЅСЏРµРј С‚Р°Р±Р»РёС†Сѓ СЃРѕСЃС‚РѕСЏРЅРёР№ РЅР°С‡Р°Р»СЊРЅС‹РјРё РґР°РЅРЅС‹РјРё
 	{
 		auto &rcdds=static_cast<const MLogRecords::DataStates&>(*iPos);
 		for ( const auto &Ld: rcdds.Items )
@@ -31,7 +31,7 @@ bool ProcessComputersState(
 			States_.Add().sFromLog(Ld);
 		}
 	}
-	// Начинаем сбор данных за прошедшее время
+	// РќР°С‡РёРЅР°РµРј СЃР±РѕСЂ РґР°РЅРЅС‹С… Р·Р° РїСЂРѕС€РµРґС€РµРµ РІСЂРµРјСЏ
 	while(iPos!=iPoint_)
 	{
 		++iPos;
@@ -139,7 +139,7 @@ bool ProcessComputersState(
 			default: break;
 		}
 	}
-	// Обновляем состояния
+	// РћР±РЅРѕРІР»СЏРµРј СЃРѕСЃС‚РѕСЏРЅРёСЏ
 	States_.Timer(iPos->SystemTime);
 
 	return true;
@@ -192,7 +192,7 @@ bool ProcessUsersUpTime(
 			{
 				auto &rcddusr=static_cast<const MLogRecords::DataUsers&>(*iPosBegin_);
 
-				// Добавляем новых пользователей в список
+				// Р”РѕР±Р°РІР»СЏРµРј РЅРѕРІС‹С… РїРѕР»СЊР·РѕРІР°С‚РµР»РµР№ РІ СЃРїРёСЃРѕРє
 				for ( const auto &Ld: rcddusr.Items )
 				{
 					auto iUsr=Users_.SrchUUID(Ld.UUID);

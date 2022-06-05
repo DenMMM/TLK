@@ -1,4 +1,4 @@
-//---------------------------------------------------------------------------
+ï»¿//---------------------------------------------------------------------------
 #include <vcl.h>
 #pragma hdrstop
 
@@ -15,7 +15,7 @@ __fastcall TFormOptions::TFormOptions(TComponent* Owner)
 //---------------------------------------------------------------------------
 void __fastcall TFormOptions::FormShow(TObject *Sender)
 {
-    // Êîïèðóåì íàñòðîéêè â áóôåð
+    // ÐšÐ¾Ð¿Ð¸Ñ€ÑƒÐµÐ¼ Ð½Ð°ÑÑ‚Ñ€Ð¾Ð¹ÐºÐ¸ Ð² Ð±ÑƒÑ„ÐµÑ€
 	TmpOptions=*Options;
 
     {
@@ -39,7 +39,7 @@ void __fastcall TFormOptions::FormShow(TObject *Sender)
     EditFilterFreeTime->MaxLength=5;
 	ActiveControl=ComboBoxLogPeriod;
 
-	// Äîáàâèì ýíòðîïèè
+	// Ð”Ð¾Ð±Ð°Ð²Ð¸Ð¼ ÑÐ½Ñ‚Ñ€Ð¾Ð¿Ð¸Ð¸
 	BasicRand.event();
 }
 //---------------------------------------------------------------------------
@@ -106,19 +106,19 @@ void __fastcall TFormOptions::CheckBoxRightPauseExit(TObject *Sender)
 //---------------------------------------------------------------------------
 void __fastcall TFormOptions::ButtonSaveClick(TObject *Sender)
 {
-    // Êîïèðóåì èç áóôåðà íàçàä
+    // ÐšÐ¾Ð¿Ð¸Ñ€ÑƒÐµÐ¼ Ð¸Ð· Ð±ÑƒÑ„ÐµÑ€Ð° Ð½Ð°Ð·Ð°Ð´
 	*Options=TmpOptions;
-    // Ñîõðàíÿåì â ôàéëå
+    // Ð¡Ð¾Ñ…Ñ€Ð°Ð½ÑÐµÐ¼ Ð² Ñ„Ð°Ð¹Ð»Ðµ
     if ( !Options->Save() )
     {
         ShellState->State|=mssErrorConfig; FormMain->SetShell();
         ResMessageBox(Handle,1,31,MB_APPLMODAL|MB_OK|MB_ICONERROR,Options->gLastErr());
         return;
     }
-    // Çàïèñü â ëîãàõ
+    // Ð—Ð°Ð¿Ð¸ÑÑŒ Ð² Ð»Ð¾Ð³Ð°Ñ…
     if ( !Log->AddOptions() )
     {
-        // Íàñòðîéêè ñîõðàíèëè, íî áåç îòìåòêè îá èõ èçìåíåíèè (íàäî ëè ?) ðàáîòàòü íå äàäèì
+        // ÐÐ°ÑÑ‚Ñ€Ð¾Ð¹ÐºÐ¸ ÑÐ¾Ñ…Ñ€Ð°Ð½Ð¸Ð»Ð¸, Ð½Ð¾ Ð±ÐµÐ· Ð¾Ñ‚Ð¼ÐµÑ‚ÐºÐ¸ Ð¾Ð± Ð¸Ñ… Ð¸Ð·Ð¼ÐµÐ½ÐµÐ½Ð¸Ð¸ (Ð½Ð°Ð´Ð¾ Ð»Ð¸ ?) Ñ€Ð°Ð±Ð¾Ñ‚Ð°Ñ‚ÑŒ Ð½Ðµ Ð´Ð°Ð´Ð¸Ð¼
         ShellState->State|=mssErrorLog|mssErrorConfig; FormMain->SetShell();
         ResMessageBox(Handle,1,5,MB_APPLMODAL|MB_OK|MB_ICONERROR,Log->gLastErr());
     }

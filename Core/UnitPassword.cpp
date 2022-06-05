@@ -1,8 +1,9 @@
-//---------------------------------------------------------------------------
-#include <array>
-#include <random>
+п»ї//---------------------------------------------------------------------------
 //#include <windows.h>
 #include <winsock2.h>
+
+#include <array>
+#include <random>
 #pragma hdrstop
 
 #include "UnitPassword.h"
@@ -34,10 +35,10 @@ const void *MPassword::GetData(const void *Data_, const void *Limit_)
 
 void MPassword::Set(const std::wstring &Pass_)
 {
-	// Сгенерируем "соль"
+	// РЎРіРµРЅРµСЂРёСЂСѓРµРј "СЃРѕР»СЊ"
 	if ( !CngRand(Salt,sizeof(Salt)) ) TimeRand(Salt,sizeof(Salt));
 
-	// Вычисляем хэш введенного пароля и соли
+	// Р’С‹С‡РёСЃР»СЏРµРј С…СЌС€ РІРІРµРґРµРЅРЅРѕРіРѕ РїР°СЂРѕР»СЏ Рё СЃРѕР»Рё
 	hmac_sha(
 		PASS_Alg,
 		(const unsigned char*)Pass_.c_str(),
@@ -50,14 +51,14 @@ bool MPassword::Check(const std::wstring &Pass_) const
 {
 	unsigned char tmp[sizeof(Hash)];
 
-	// Вычисляем хэш введенного пароля и соли
+	// Р’С‹С‡РёСЃР»СЏРµРј С…СЌС€ РІРІРµРґРµРЅРЅРѕРіРѕ РїР°СЂРѕР»СЏ Рё СЃРѕР»Рё
 	hmac_sha(
 		PASS_Alg,
 		(const unsigned char*)Pass_.c_str(),
 		Pass_.length()*sizeof(wchar_t),
 		Salt, sizeof(Salt),
 		tmp, sizeof(tmp));
-	// Сравниваем его с сохраненным ранее хэшем
+	// РЎСЂР°РІРЅРёРІР°РµРј РµРіРѕ СЃ СЃРѕС…СЂР°РЅРµРЅРЅС‹Рј СЂР°РЅРµРµ С…СЌС€РµРј
 	return MemSlowCmp(tmp, Hash, sizeof(Hash));
 //    return memcmp(tmp, Hash, sizeof(Hash)) == 0;
 }
@@ -68,7 +69,7 @@ std::wstring MPassword::New(std::size_t Len_, bool Cap_, bool Low_, bool Num_)
 	const std::wstring low(L"abcdefghijklmnopqrstuvwxyz");
 	const std::wstring dig(L"0123456789");
 
-	// Заполняем словарь
+	// Р—Р°РїРѕР»РЅСЏРµРј СЃР»РѕРІР°СЂСЊ
 	std::wstring dict;
 	dict.reserve(cap.length()+low.length()+dig.length());
 	if ( Cap_ ) dict+=cap;
@@ -76,21 +77,21 @@ std::wstring MPassword::New(std::size_t Len_, bool Cap_, bool Low_, bool Num_)
 	if ( Num_ ) dict+=dig;
 	if ( dict.empty() ) return L"";
 
-	// Подготовим распределитель значений по словарю
+	// РџРѕРґРіРѕС‚РѕРІРёРј СЂР°СЃРїСЂРµРґРµР»РёС‚РµР»СЊ Р·РЅР°С‡РµРЅРёР№ РїРѕ СЃР»РѕРІР°СЂСЋ
 	std::uniform_int_distribution <std::size_t> rnd_distr(0, dict.length()-1);
 
-	// Заполним последовательность инициализации
-	/// 96 бит достаточно для 16-символьных паролей из 52 знаков ?
+	// Р—Р°РїРѕР»РЅРёРј РїРѕСЃР»РµРґРѕРІР°С‚РµР»СЊРЅРѕСЃС‚СЊ РёРЅРёС†РёР°Р»РёР·Р°С†РёРё
+	/// 96 Р±РёС‚ РґРѕСЃС‚Р°С‚РѕС‡РЅРѕ РґР»СЏ 16-СЃРёРјРІРѕР»СЊРЅС‹С… РїР°СЂРѕР»РµР№ РёР· 52 Р·РЅР°РєРѕРІ ?
 	std::array <uint_fast32_t, 3> seeds;
 	try
 	{
-		// Попытаемся использовать аппаратный ГСЧ...
+		// РџРѕРїС‹С‚Р°РµРјСЃСЏ РёСЃРїРѕР»СЊР·РѕРІР°С‚СЊ Р°РїРїР°СЂР°С‚РЅС‹Р№ Р“РЎР§...
 		std::random_device rnd_dev;
 
 		if ( rnd_dev.entropy()==0 )
 			throw std::runtime_error(
 				"MPassword::New()\n"
-				"Аппаратный ГСЧ не поддерживается.");
+				"РђРїРїР°СЂР°С‚РЅС‹Р№ Р“РЎР§ РЅРµ РїРѕРґРґРµСЂР¶РёРІР°РµС‚СЃСЏ.");
 
 		seeds[0]=rnd_dev();
 		seeds[1]=rnd_dev();
@@ -98,17 +99,17 @@ std::wstring MPassword::New(std::size_t Len_, bool Cap_, bool Low_, bool Num_)
 	}
 	catch(std::runtime_error &e)
 	{
-		// ... или воспользуемся таймерами
+		// ... РёР»Рё РІРѕСЃРїРѕР»СЊР·СѓРµРјСЃСЏ С‚Р°Р№РјРµСЂР°РјРё
 		seeds[0]=BasicRand();
 		seeds[1]=BasicRand();
 		seeds[2]=BasicRand();
 	}
 
-	// Инициализируем ГПСЧ
+	// РРЅРёС†РёР°Р»РёР·РёСЂСѓРµРј Р“РџРЎР§
 	std::seed_seq rnd_seed(seeds.begin(),seeds.end());
 	std::mt19937 rnd_gen(rnd_seed);
 
-	// Сгенерируем пароль
+	// РЎРіРµРЅРµСЂРёСЂСѓРµРј РїР°СЂРѕР»СЊ
 	std::wstring pass;
 	pass.reserve(Len_);
 

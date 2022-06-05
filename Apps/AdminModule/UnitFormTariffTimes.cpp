@@ -1,4 +1,4 @@
-//---------------------------------------------------------------------------
+п»ї//---------------------------------------------------------------------------
 #include <vcl.h>
 #pragma hdrstop
 
@@ -17,13 +17,13 @@ bool TFormTariffTimes::Execute(MTariffTimes &Times_,
 {
     Left=Left_;
 	Top=Top_;
-	Caption=L"Время для тарифа \'"+Name_+L"\'";
+	Caption=L"Р’СЂРµРјСЏ РґР»СЏ С‚Р°СЂРёС„Р° \'"+Name_+L"\'";
 
-    // Копируем пакеты в буфер
+    // РљРѕРїРёСЂСѓРµРј РїР°РєРµС‚С‹ РІ Р±СѓС„РµСЂ
 	TmpTimes=Times_;
-    // Открываем окно
+    // РћС‚РєСЂС‹РІР°РµРј РѕРєРЅРѕ
     if ( ShowModal()!=mrOk ) return false;
-    // Замещаем пакетами из буфера текущие
+    // Р—Р°РјРµС‰Р°РµРј РїР°РєРµС‚Р°РјРё РёР· Р±СѓС„РµСЂР° С‚РµРєСѓС‰РёРµ
 	Times_=std::move(TmpTimes);
 
     return true;
@@ -31,7 +31,7 @@ bool TFormTariffTimes::Execute(MTariffTimes &Times_,
 //---------------------------------------------------------------------------
 void __fastcall TFormTariffTimes::FormShow(TObject *Sender)
 {
-    // Формируем списки выбора времени (часы)
+    // Р¤РѕСЂРјРёСЂСѓРµРј СЃРїРёСЃРєРё РІС‹Р±РѕСЂР° РІСЂРµРјРµРЅРё (С‡Р°СЃС‹)
     for ( int i=0; i<24; i++ )
     {
         UnicodeString Line;
@@ -40,7 +40,7 @@ void __fastcall TFormTariffTimes::FormShow(TObject *Sender)
         ComboBoxEndH->Items->Add(Line);
         ComboBoxSizeH->Items->Add(Line);
     }
-    // Формируем списки выбора времени (минуты)
+    // Р¤РѕСЂРјРёСЂСѓРµРј СЃРїРёСЃРєРё РІС‹Р±РѕСЂР° РІСЂРµРјРµРЅРё (РјРёРЅСѓС‚С‹)
     for ( int i=0; i<60; i+=5 )
     {
         UnicodeString Line;
@@ -49,7 +49,7 @@ void __fastcall TFormTariffTimes::FormShow(TObject *Sender)
         ComboBoxEndM->Items->Add(Line);
         ComboBoxSizeM->Items->Add(Line);
     }
-    // Заносим время и цены в список
+    // Р—Р°РЅРѕСЃРёРј РІСЂРµРјСЏ Рё С†РµРЅС‹ РІ СЃРїРёСЃРѕРє
 	for ( auto &time: TmpTimes )
 	{
 		TListItem *item;
@@ -65,7 +65,7 @@ void __fastcall TFormTariffTimes::FormShow(TObject *Sender)
 void __fastcall TFormTariffTimes::FormClose(TObject *Sender,
       TCloseAction &Action)
 {
-    // Чистим интерфейсные элементы
+    // Р§РёСЃС‚РёРј РёРЅС‚РµСЂС„РµР№СЃРЅС‹Рµ СЌР»РµРјРµРЅС‚С‹
     ListViewTimes->Items->Clear();
     ComboBoxBeginH->Items->Clear();
     ComboBoxBeginM->Items->Clear();
@@ -83,32 +83,32 @@ void __fastcall TFormTariffTimes::ListViewTimesInsert(TObject *Sender,
 	Item->SubItems->Add(L"");
 	Item->SubItems->Add(L"");
 	Item->SubItems->Add(L"");
-    Item->SubItems->Add(L"");
+	Item->SubItems->Add(L"");
 }
 //---------------------------------------------------------------------------
 void __fastcall TFormTariffTimes::ListViewTimesSelectItem(TObject *Sender,
-      TListItem *Item, bool Selected)
+	  TListItem *Item, bool Selected)
 {
-    if ( dynamic_cast<TListView&>(*Sender).SelCount!=1 )
-    {
-        SetEdit(false);
-        return;
-    } else
-        SetEdit(true);
+	if ( dynamic_cast<TListView&>(*Sender).SelCount!=1 )
+	{
+		SetEdit(false);
+		return;
+	} else
+		SetEdit(true);
 
 	auto &time=*reinterpret_cast<const MTariffTimesItem*>(
 		ListViewTimes->Selected->Data);
-	// Время начала действия
+	// Р’СЂРµРјСЏ РЅР°С‡Р°Р»Р° РґРµР№СЃС‚РІРёСЏ
 	ComboBoxBeginH->ItemIndex=time.BeginTime/60;
-	ComboBoxBeginM->ItemIndex=time.BeginTime%60;
-	// Время окончания действия
+	ComboBoxBeginM->ItemIndex=(time.BeginTime%60)/5;
+	// Р’СЂРµРјСЏ РѕРєРѕРЅС‡Р°РЅРёСЏ РґРµР№СЃС‚РІРёСЏ
 	int EndTime=
 		time.EndTime>=(24*60)?
 		time.EndTime-(24*60):
 		time.EndTime;
 	ComboBoxEndH->ItemIndex=EndTime/60;
-	ComboBoxEndM->ItemIndex=EndTime%60;
-	// Время действия
+	ComboBoxEndM->ItemIndex=(EndTime%60)/5;
+	// Р’СЂРµРјСЏ РґРµР№СЃС‚РІРёСЏ
 	switch ( time.Type )
 	{
 		case mttHours:
@@ -143,7 +143,7 @@ void __fastcall TFormTariffTimes::ListViewTimesSelectItem(TObject *Sender,
 			break;
 		default: break;
 	}
-	// Стоимость
+	// РЎС‚РѕРёРјРѕСЃС‚СЊ
 	EditCost->Text=FloatToStrF(time.Cost,ffFixed,8,2);
 }
 //---------------------------------------------------------------------------
@@ -253,12 +253,12 @@ void __fastcall TFormTariffTimes::ButtonAddClick(TObject *Sender)
 		return;
 	}
 
-    // Добавляем пакет в буфер
+    // Р”РѕР±Р°РІР»СЏРµРј РїР°РєРµС‚ РІ Р±СѓС„РµСЂ
 	MTariffTimesItem &time=TmpTimes.Add();
-	// Добавляем строку в список и связываем ее с пакетом
+	// Р”РѕР±Р°РІР»СЏРµРј СЃС‚СЂРѕРєСѓ РІ СЃРїРёСЃРѕРє Рё СЃРІСЏР·С‹РІР°РµРј РµРµ СЃ РїР°РєРµС‚РѕРј
 	TListItem *item=ListViewTimes->Items->Add();
     item->Data=&time;
-    // Обновляем интерфейс
+    // РћР±РЅРѕРІР»СЏРµРј РёРЅС‚РµСЂС„РµР№СЃ
     SetListViewTimesLine(item);
     ListViewTimes->AlphaSort();
     ListViewTimes->ItemFocused=item;
@@ -273,12 +273,12 @@ void __fastcall TFormTariffTimes::ButtonDelClick(TObject *Sender)
     TListItem *item=ListViewTimes->Selected, *next;
     while(item)
     {
-        // Удаляем пакет из буфера
+        // РЈРґР°Р»СЏРµРј РїР°РєРµС‚ РёР· Р±СѓС„РµСЂР°
 		TmpTimes.Del(
 			MTariffTimes::const_iterator(
 			reinterpret_cast<MTariffTimesItem*>(item->Data)
 			));
-        // Удаляем строку из списка
+        // РЈРґР°Р»СЏРµРј СЃС‚СЂРѕРєСѓ РёР· СЃРїРёСЃРєР°
         next=ListViewTimes->GetNextItem(item,sdAll,is);
         item->Delete();
         item=next;
@@ -330,12 +330,12 @@ void TFormTariffTimes::SetListViewTimesLine(TListItem *Item_)
 	UnicodeString line;
     switch ( time.Type )
     {
-		case mttHours: Item_->SubItems->Strings[2]=L"За каждый час"; break;
+		case mttHours: Item_->SubItems->Strings[2]=L"Р—Р° РєР°Р¶РґС‹Р№ С‡Р°СЃ"; break;
 		case mttFlyPacket:
 			h=time.SizeTime/60;
 			m=time.SizeTime%60;
-            if ( h ) line=IntToStr(h)+L" час. ";
-            line+=IntToStr(m/10)+IntToStr(m%10)+L" мин.";
+            if ( h ) line=IntToStr(h)+L" С‡Р°СЃ. ";
+            line+=IntToStr(m/10)+IntToStr(m%10)+L" РјРёРЅ.";
             Item_->SubItems->Strings[2]=line;
             break;
         case mttPacket: Item_->SubItems->Strings[2]=L""; break;

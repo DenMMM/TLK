@@ -1,4 +1,4 @@
-//---------------------------------------------------------------------------
+ï»¿//---------------------------------------------------------------------------
 #include <vcl.h>
 #pragma hdrstop
 //---------------------------------------------------------------------------
@@ -13,13 +13,13 @@ USEFORM("UnitFormMain.cpp", FormMain);
 USEFORM("UnitFormComputers.cpp", FormComputers);
 USEFORM("UnitFormClient.cpp", FormClient);
 USEFORM("UnitFormAuth.cpp", FormAuth);
-USEFORM("UnitFormUsers.cpp", FormUsers);
+USEFORM("UnitFormOptions.cpp", FormOptions);
+USEFORM("UnitFormTariffs.cpp", FormTariffs);
 USEFORM("UnitFormRun.cpp", FormRun);
 USEFORM("UnitFormOptionsPass.cpp", FormOptionsPass);
-USEFORM("UnitFormOptions.cpp", FormOptions);
+USEFORM("UnitFormUsers.cpp", FormUsers);
 USEFORM("UnitFormUserPass.cpp", FormUserPass);
 USEFORM("UnitFormTariffTimes.cpp", FormTariffTimes);
-USEFORM("UnitFormTariffs.cpp", FormTariffs);
 //---------------------------------------------------------------------------
 int WINAPI _tWinMain(HINSTANCE, HINSTANCE, LPTSTR lpCmdLine, int)
 {
@@ -36,7 +36,7 @@ int WINAPI _tWinMain(HINSTANCE, HINSTANCE, LPTSTR lpCmdLine, int)
 	try
 	{
 		Application->Initialize();
-		Application->Title = L"TLK - Ìîäóëü óïðàâëåíèÿ";
+		Application->Title = L"TLK - ÐœÐ¾Ð´ÑƒÐ»ÑŒ ÑƒÐ¿Ñ€Ð°Ð²Ð»ÐµÐ½Ð¸Ñ";
 		Application->CreateForm(__classid(TFormMain), &FormMain);
 		Application->Run();
 	}

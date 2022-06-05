@@ -1,4 +1,4 @@
-//---------------------------------------------------------------------------
+п»ї//---------------------------------------------------------------------------
 #include <limits>
 #include <stdexcept>
 #pragma hdrstop
@@ -252,13 +252,13 @@ std::size_t MLogRecords::DataStatesBase::GetDataSize() const
 {
 	std::size_t Size=
 		sizeof(SystemTime)+
-		sizeof(std::uint32_t);					// Счетчик состояний
+		sizeof(std::uint32_t);					// РЎС‡РµС‚С‡РёРє СЃРѕСЃС‚РѕСЏРЅРёР№
 
 	if ( Items.size() > std::numeric_limits<std::uint32_t>::max() )
 	{
 		throw std::out_of_range(
 			"MLogRecords::DataStatesBase::GetDataSize()\n"
-			"Items.size() превышает max(uint32_t).");
+			"Items.size() РїСЂРµРІС‹С€Р°РµС‚ max(uint32_t).");
 	}
 
 	Size+=(
@@ -330,13 +330,13 @@ std::size_t MLogRecords::DataTariffsBase::GetDataSize() const
 {
 	std::size_t Size=
 		sizeof(SystemTime)+
-		sizeof(std::uint32_t);					// Счетчик тарифов
+		sizeof(std::uint32_t);					// РЎС‡РµС‚С‡РёРє С‚Р°СЂРёС„РѕРІ
 
 	if ( Items.size() > std::numeric_limits<std::uint32_t>::max() )
 	{
 		throw std::out_of_range(
 			"MLogRecords::DataTariffsBase::GetDataSize()\n"
-			"Items.size() превышает max(uint32_t).");
+			"Items.size() РїСЂРµРІС‹С€Р°РµС‚ max(uint32_t).");
 	}
 
 	for ( const auto &Ld: Items )
@@ -393,13 +393,13 @@ std::size_t MLogRecords::DataFinesBase::GetDataSize() const
 {
 	std::size_t Size=
 		sizeof(SystemTime)+
-		sizeof(std::uint32_t);					// Счетчик штрафов
+		sizeof(std::uint32_t);					// РЎС‡РµС‚С‡РёРє С€С‚СЂР°С„РѕРІ
 
 	if ( Items.size() > std::numeric_limits<std::uint32_t>::max() )
 	{
 		throw std::out_of_range(
 			"MLogRecords::DataFinesBase::GetDataSize()\n"
-			"Items.size() превышает max(uint32_t).");
+			"Items.size() РїСЂРµРІС‹С€Р°РµС‚ max(uint32_t).");
 	}
 
 	for ( const auto &Ld: Items )
@@ -456,13 +456,13 @@ std::size_t MLogRecords::DataUsersBase::GetDataSize() const
 {
 	std::size_t Size=
 		sizeof(SystemTime)+
-		sizeof(std::uint32_t);					// Счетчик пользователей
+		sizeof(std::uint32_t);					// РЎС‡РµС‚С‡РёРє РїРѕР»СЊР·РѕРІР°С‚РµР»РµР№
 
 	if ( Items.size() > std::numeric_limits<std::uint32_t>::max() )
 	{
 		throw std::out_of_range(
 			"MLogRecords::DataUsersBase::GetDataSize()\n"
-			"Items.size() превышает max(uint32_t).");
+			"Items.size() РїСЂРµРІС‹С€Р°РµС‚ max(uint32_t).");
 	}
 
 	for ( const auto &Ld: Items )

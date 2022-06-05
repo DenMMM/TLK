@@ -1,41 +1,41 @@
-//---------------------------------------------------------------------------
+п»ї//---------------------------------------------------------------------------
 #ifndef UnitLogH
 #define UnitLogH
 //---------------------------------------------------------------------------
 #include <string>
 #include <cstdint>
 
-#include "UnitLogRecords.h"
+#include "..\..\Core\UnitLogRecords.h"
+#include "..\..\Core\UnitStates.h"
+#include "..\..\Core\UnitTariffs.h"
+#include "..\..\Core\UnitFines.h"
+#include "..\..\Core\UnitUsers.h"
 #include "UnitShellState.h"
-#include "UnitStates.h"
-#include "UnitTariffs.h"
-#include "UnitFines.h"
-#include "UnitUsers.h"
 //---------------------------------------------------------------------------
-// Минимальный период ведения файла лога
-#define mlpDay          1   // Суточный
-#define mlpWeek         2   // Недельный
-#define mlpMonth        3   // На месяц
+// РњРёРЅРёРјР°Р»СЊРЅС‹Р№ РїРµСЂРёРѕРґ РІРµРґРµРЅРёСЏ С„Р°Р№Р»Р° Р»РѕРіР°
+#define mlpDay          1   // РЎСѓС‚РѕС‡РЅС‹Р№
+#define mlpWeek         2   // РќРµРґРµР»СЊРЅС‹Р№
+#define mlpMonth        3   // РќР° РјРµСЃСЏС†
 //---------------------------------------------------------------------------
 class MLog
 {
 private:
-	std::int64_t SystemTime;	// Системное время для синхронизации с описателями состояний компьютеров
-	std::int64_t BeginTime;		// Время, когда лог был начат
-	std::wstring Directory;		// Директория для хранения файлов логов
-	bool Opened;				// Лог был успешно открыт/начат
-//    bool Transaction;			// Флаг-не очищать буфер записей до "сброса" на диск
-	MLogRecords Records;		// Буфер для записей
-	std::uint32_t User;			// Пользователь, открывший смену последним
+	std::int64_t SystemTime;	// РЎРёСЃС‚РµРјРЅРѕРµ РІСЂРµРјСЏ РґР»СЏ СЃРёРЅС…СЂРѕРЅРёР·Р°С†РёРё СЃ РѕРїРёСЃР°С‚РµР»СЏРјРё СЃРѕСЃС‚РѕСЏРЅРёР№ РєРѕРјРїСЊСЋС‚РµСЂРѕРІ
+	std::int64_t BeginTime;		// Р’СЂРµРјСЏ, РєРѕРіРґР° Р»РѕРі Р±С‹Р» РЅР°С‡Р°С‚
+	std::wstring Directory;		// Р”РёСЂРµРєС‚РѕСЂРёСЏ РґР»СЏ С…СЂР°РЅРµРЅРёСЏ С„Р°Р№Р»РѕРІ Р»РѕРіРѕРІ
+	bool Opened;				// Р›РѕРі Р±С‹Р» СѓСЃРїРµС€РЅРѕ РѕС‚РєСЂС‹С‚/РЅР°С‡Р°С‚
+//    bool Transaction;			// Р¤Р»Р°Рі-РЅРµ РѕС‡РёС‰Р°С‚СЊ Р±СѓС„РµСЂ Р·Р°РїРёСЃРµР№ РґРѕ "СЃР±СЂРѕСЃР°" РЅР° РґРёСЃРє
+	MLogRecords Records;		// Р‘СѓС„РµСЂ РґР»СЏ Р·Р°РїРёСЃРµР№
+	std::uint32_t User;			// РџРѕР»СЊР·РѕРІР°С‚РµР»СЊ, РѕС‚РєСЂС‹РІС€РёР№ СЃРјРµРЅСѓ РїРѕСЃР»РµРґРЅРёРј
 	DWORD LastError;
 
-    // Добавить в буфер событие/данные
+    // Р”РѕР±Р°РІРёС‚СЊ РІ Р±СѓС„РµСЂ СЃРѕР±С‹С‚РёРµ/РґР°РЅРЅС‹Рµ
 	void AddSimpleEvent(MLogRecords::ItemType Type_);
 	void AddStatesData(const MStates &States_);
 	void AddTariffsData(const MTariffs &Tariffs_);
 	void AddFinesData(const MFines &Fines_);
 	void AddUsersData(const MUsers &Users_);
-	// Записать в лог простое событие/команду
+	// Р—Р°РїРёСЃР°С‚СЊ РІ Р»РѕРі РїСЂРѕСЃС‚РѕРµ СЃРѕР±С‹С‚РёРµ/РєРѕРјР°РЅРґСѓ
 	bool AddEvent(MLogRecords::ItemType Type_);
 	bool AddMode(MLogRecords::ItemType Type_, char Number_, bool Apply_);
 	bool AddCmd(MLogRecords::ItemType Type_, char Number_);
@@ -43,43 +43,43 @@ private:
     bool Rename() const;
 
 public:
-    // Работа с файлом лога
+    // Р Р°Р±РѕС‚Р° СЃ С„Р°Р№Р»РѕРј Р»РѕРіР°
     bool Begin(
 		const MShellState &ShellState_,
 		const MStates &States_,
 		const MTariffs &Tariffs_,
 		const MFines &Fines_,
-		const MUsers &Users_);				// Создать файл и сохранить первоначальные данные
-	bool Open();							// Открыть существующий файл
-	bool End();								// Закончить заполнение файла
-	bool CheckPeriod(int Period_) const;	// Проверить не пора ли сменить файл лога
-	std::uint32_t LastUser() const;			// Вернуть ID последнего залогиненного пользователя
+		const MUsers &Users_);				// РЎРѕР·РґР°С‚СЊ С„Р°Р№Р» Рё СЃРѕС…СЂР°РЅРёС‚СЊ РїРµСЂРІРѕРЅР°С‡Р°Р»СЊРЅС‹Рµ РґР°РЅРЅС‹Рµ
+	bool Open();							// РћС‚РєСЂС‹С‚СЊ СЃСѓС‰РµСЃС‚РІСѓСЋС‰РёР№ С„Р°Р№Р»
+	bool End();								// Р—Р°РєРѕРЅС‡РёС‚СЊ Р·Р°РїРѕР»РЅРµРЅРёРµ С„Р°Р№Р»Р°
+	bool CheckPeriod(int Period_) const;	// РџСЂРѕРІРµСЂРёС‚СЊ РЅРµ РїРѕСЂР° Р»Рё СЃРјРµРЅРёС‚СЊ С„Р°Р№Р» Р»РѕРіР°
+	std::uint32_t LastUser() const;			// Р’РµСЂРЅСѓС‚СЊ ID РїРѕСЃР»РµРґРЅРµРіРѕ Р·Р°Р»РѕРіРёРЅРµРЅРЅРѕРіРѕ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ
 
-	// Админский модуль
+	// РђРґРјРёРЅСЃРєРёР№ РјРѕРґСѓР»СЊ
 	bool AddStart(
 		const MShellState &ShellState_,
 		const MStates &States_,
 		const MTariffs &Tariffs_,
 		const MFines &Fines_,
-		const MUsers &Users_);				// Запуск модуля управления
-	bool AddStop();							// Остановка модуля управления
+		const MUsers &Users_);				// Р—Р°РїСѓСЃРє РјРѕРґСѓР»СЏ СѓРїСЂР°РІР»РµРЅРёСЏ
+	bool AddStop();							// РћСЃС‚Р°РЅРѕРІРєР° РјРѕРґСѓР»СЏ СѓРїСЂР°РІР»РµРЅРёСЏ
 
-	// Настройки модуля управления
-	bool AddConfig(bool Open_);             	// Настройки открыты/закрыты
-	bool AddComputers(const MStates &States_);	// Изменен список компьютеров
-	bool AddTariffs(const MTariffs &Tariffs_);	// Изменен список тарифов
-	bool AddFines(const MFines &Fines_);		// Изменен список штрафов
-	bool AddUsers(const MUsers &Users_);		// Изменен список пользователей
-	bool AddOptions();							// Изменены общие настройки
+	// РќР°СЃС‚СЂРѕР№РєРё РјРѕРґСѓР»СЏ СѓРїСЂР°РІР»РµРЅРёСЏ
+	bool AddConfig(bool Open_);             	// РќР°СЃС‚СЂРѕР№РєРё РѕС‚РєСЂС‹С‚С‹/Р·Р°РєСЂС‹С‚С‹
+	bool AddComputers(const MStates &States_);	// РР·РјРµРЅРµРЅ СЃРїРёСЃРѕРє РєРѕРјРїСЊСЋС‚РµСЂРѕРІ
+	bool AddTariffs(const MTariffs &Tariffs_);	// РР·РјРµРЅРµРЅ СЃРїРёСЃРѕРє С‚Р°СЂРёС„РѕРІ
+	bool AddFines(const MFines &Fines_);		// РР·РјРµРЅРµРЅ СЃРїРёСЃРѕРє С€С‚СЂР°С„РѕРІ
+	bool AddUsers(const MUsers &Users_);		// РР·РјРµРЅРµРЅ СЃРїРёСЃРѕРє РїРѕР»СЊР·РѕРІР°С‚РµР»РµР№
+	bool AddOptions();							// РР·РјРµРЅРµРЅС‹ РѕР±С‰РёРµ РЅР°СЃС‚СЂРѕР№РєРё
 
-	// Пользователи
-	bool AddLogIn(std::uint32_t UserID_);	// Пользователь начал смену
-	bool AddLogOut();						// Пользователь закончил смену
+	// РџРѕР»СЊР·РѕРІР°С‚РµР»Рё
+	bool AddLogIn(std::uint32_t UserID_);	// РџРѕР»СЊР·РѕРІР°С‚РµР»СЊ РЅР°С‡Р°Р» СЃРјРµРЅСѓ
+	bool AddLogOut();						// РџРѕР»СЊР·РѕРІР°С‚РµР»СЊ Р·Р°РєРѕРЅС‡РёР» СЃРјРµРЅСѓ
 
-	// Управление буферизацией следующих ниже команд
+	// РЈРїСЂР°РІР»РµРЅРёРµ Р±СѓС„РµСЂРёР·Р°С†РёРµР№ СЃР»РµРґСѓСЋС‰РёС… РЅРёР¶Рµ РєРѕРјР°РЅРґ
 //    bool Transact();
 //    bool Apply();
-	// Команды, применяемые к компьютерам
+	// РљРѕРјР°РЅРґС‹, РїСЂРёРјРµРЅСЏРµРјС‹Рµ Рє РєРѕРјРїСЊСЋС‚РµСЂР°Рј
 	bool AddRun(const MTariffRunTimesItem &Time_);
 	bool AddFine(std::int8_t Number_, std::uint32_t FineID_, std::int16_t Time_);
 	bool AddExchange(std::int8_t From_, std::int8_t To_);

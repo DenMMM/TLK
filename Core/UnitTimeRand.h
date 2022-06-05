@@ -1,13 +1,14 @@
-//---------------------------------------------------------------------------
+п»ї//---------------------------------------------------------------------------
 #ifndef UnitTimeRandH
 #define UnitTimeRandH
 //---------------------------------------------------------------------------
+//#include <windows.h>
+#include <winsock2.h>
+
 #include <random>
 #include <chrono>
 #include <array>
 #include <mutex>
-//#include <windows.h>
-#include <winsock2.h>
 
 #include "UnitEncode.h"
 //---------------------------------------------------------------------------
@@ -34,7 +35,7 @@ protected:
 		template <typename ent_cont>
 		void Update(ent_cont Ent_) noexcept
 		{
-			// Зашифруем буфер энтропий каждым новым значением
+			// Р—Р°С€РёС„СЂСѓРµРј Р±СѓС„РµСЂ СЌРЅС‚СЂРѕРїРёР№ РєР°Р¶РґС‹Рј РЅРѕРІС‹Рј Р·РЅР°С‡РµРЅРёРµРј
 			for ( auto E: Ent_ )
 			{
 				BasicEncode(
@@ -56,7 +57,7 @@ protected:
 		}
 
 		MEntropy(std::seed_seq &Seed_):
-			EntSel(0)       			/// хорошо бы rand
+			EntSel(0)       			/// С…РѕСЂРѕС€Рѕ Р±С‹ rand
 		{
 			Seed_.generate(Ent.begin(),Ent.end());
 		}
@@ -68,7 +69,7 @@ protected:
 
 		~MEntropy()
 		{
-			Ent.fill(0);    			/// что лучше нуля ?
+			Ent.fill(0);    			/// С‡С‚Рѕ Р»СѓС‡С€Рµ РЅСѓР»СЏ ?
 		}
 	};
 
@@ -79,19 +80,19 @@ protected:
 	{
 		std::array <result_type, 2> Timers;
 
-		// Определим системное время...
+		// РћРїСЂРµРґРµР»РёРј СЃРёСЃС‚РµРјРЅРѕРµ РІСЂРµРјСЏ...
 		Timers[0]=std::chrono::system_clock::
 			now().time_since_epoch().count();
-		// ... и значение "непрерывного" счетчика
+		// ... Рё Р·РЅР°С‡РµРЅРёРµ "РЅРµРїСЂРµСЂС‹РІРЅРѕРіРѕ" СЃС‡РµС‚С‡РёРєР°
 		Timers[1]=[]() {                /// std::chrono::steady_clock ?
 			LARGE_INTEGER cntr;
 			return
 				::QueryPerformanceCounter(&cntr)?
 				cntr.LowPart:
-				::GetTickCount();       /// снижает надежность генератора
+				::GetTickCount();       /// СЃРЅРёР¶Р°РµС‚ РЅР°РґРµР¶РЅРѕСЃС‚СЊ РіРµРЅРµСЂР°С‚РѕСЂР°
 		}();
 
-		// Используем ID потока, чтобы исключить совпадения
+		// РСЃРїРѕР»СЊР·СѓРµРј ID РїРѕС‚РѕРєР°, С‡С‚РѕР±С‹ РёСЃРєР»СЋС‡РёС‚СЊ СЃРѕРІРїР°РґРµРЅРёСЏ
 		DWORD ThreadId=::GetCurrentThreadId();  /// std::this_thread::get_id();
 		for ( auto &T: Timers ) T^=ThreadId;
 
@@ -103,7 +104,7 @@ protected:
 	{
 		std::lock_guard <std::mutex> lckObj(mtxEntropy);
 
-		// Перестроим буфер энтропий
+		// РџРµСЂРµСЃС‚СЂРѕРёРј Р±СѓС„РµСЂ СЌРЅС‚СЂРѕРїРёР№
 		Entropy.Update(Timers_);
 	}
 
@@ -112,11 +113,11 @@ protected:
 	{
 		std::lock_guard <std::mutex> lckObj(mtxEntropy);
 
-		// Перестроим буфер энтропий
-		Entropy.Update(Timers_);        /// медленно, зато безопасно (?)
-		// Возьмем одну как результат...
+		// РџРµСЂРµСЃС‚СЂРѕРёРј Р±СѓС„РµСЂ СЌРЅС‚СЂРѕРїРёР№
+		Entropy.Update(Timers_);        /// РјРµРґР»РµРЅРЅРѕ, Р·Р°С‚Рѕ Р±РµР·РѕРїР°СЃРЅРѕ (?)
+		// Р’РѕР·СЊРјРµРј РѕРґРЅСѓ РєР°Рє СЂРµР·СѓР»СЊС‚Р°С‚...
 		auto Res=Entropy.Get();
-		// ... и перешифруем отдельно теми же таймерами
+		// ... Рё РїРµСЂРµС€РёС„СЂСѓРµРј РѕС‚РґРµР»СЊРЅРѕ С‚РµРјРё Р¶Рµ С‚Р°Р№РјРµСЂР°РјРё
 		for ( auto T: Timers_ ) BasicDecode(&Res, sizeof(Res), T, 32);
 
 		return Res;

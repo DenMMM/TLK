@@ -1,6 +1,6 @@
-//---------------------------------------------------------------------------
+п»ї//---------------------------------------------------------------------------
 #include <string.h>
-#include <mem.h>
+//#include <mem.h>
 #include <stdlib.h>
 #include <math.h>
 #pragma hdrstop
@@ -72,7 +72,7 @@ std::size_t MTariffsItem::GetDataSize() const
         sizeofLine(Name)+
         sizeof(Programs)+
         sizeof(Reboot)+
-		sizeof(std::uint8_t)+sizeof(std::int8_t)*Comps.size()+  /// проверить size()
+		sizeof(std::uint8_t)+sizeof(std::int8_t)*Comps.size()+  /// РїСЂРѕРІРµСЂРёС‚СЊ size()
 		Times.GetAllDataSize();
 }
 
@@ -120,7 +120,7 @@ void MTariffsItem::CostPacket(MTariffRunTimesItem &RunTime_) const
 	int StartTime, WorkTime;
 	double Cost;
 
-	// Выделяем количество минут с начала суток
+	// Р’С‹РґРµР»СЏРµРј РєРѕР»РёС‡РµСЃС‚РІРѕ РјРёРЅСѓС‚ СЃ РЅР°С‡Р°Р»Р° СЃСѓС‚РѕРє
 	StartTime=ExtractHoursMin(RunTime_.StartTime);
 	//
 	WorkTime=0; Cost=0.;
@@ -131,7 +131,7 @@ void MTariffsItem::CostPacket(MTariffRunTimesItem &RunTime_) const
 			(tt.BeginTime!=RunTime_.BeginTime)||
 			(tt.EndTime!=RunTime_.EndTime) ) continue;
 		WorkTime=tt.MaxWorkTime(StartTime);
-		// Корректируем время работы в соответствии с заданным ограничением
+		// РљРѕСЂСЂРµРєС‚РёСЂСѓРµРј РІСЂРµРјСЏ СЂР°Р±РѕС‚С‹ РІ СЃРѕРѕС‚РІРµС‚СЃС‚РІРёРё СЃ Р·Р°РґР°РЅРЅС‹Рј РѕРіСЂР°РЅРёС‡РµРЅРёРµРј
 		if ( WorkTime>RunTime_.MaxTime ) WorkTime=RunTime_.MaxTime;
 		if ( WorkTime!=0 ) Cost=tt.Cost;
 		break;
@@ -146,7 +146,7 @@ void MTariffsItem::CostFlyPacket(MTariffRunTimesItem &RunTime_) const
 	int StartTime, SizeTime, WorkTime, MaxTime, NeedTime, RealTime;
 	double Cost, LastCost;
 
-	// Выделяем количество минут с начала суток
+	// Р’С‹РґРµР»СЏРµРј РєРѕР»РёС‡РµСЃС‚РІРѕ РјРёРЅСѓС‚ СЃ РЅР°С‡Р°Р»Р° СЃСѓС‚РѕРє
 	StartTime=ExtractHoursMin(RunTime_.StartTime);
 	//
 	SizeTime=RunTime_.SizeTime;
@@ -154,7 +154,7 @@ void MTariffsItem::CostFlyPacket(MTariffRunTimesItem &RunTime_) const
 
 	while(true)
 	{
-		// Ищем подходящую запись для пакета с ненулевым временем работы
+		// РС‰РµРј РїРѕРґС…РѕРґСЏС‰СѓСЋ Р·Р°РїРёСЃСЊ РґР»СЏ РїР°РєРµС‚Р° СЃ РЅРµРЅСѓР»РµРІС‹Рј РІСЂРµРјРµРЅРµРј СЂР°Р±РѕС‚С‹
 		auto iTt=Times.cbegin();
 		auto iEnd=Times.end();
 
@@ -164,27 +164,27 @@ void MTariffsItem::CostFlyPacket(MTariffRunTimesItem &RunTime_) const
 				(iTt->SizeTime!=SizeTime) ) continue;
 			if ( (MaxTime=iTt->MaxWorkTime(StartTime))!=0 ) break;
 		}
-		// Если подходящих записей больше нету, то заканчиваем накопление времени и стоимости
+		// Р•СЃР»Рё РїРѕРґС…РѕРґСЏС‰РёС… Р·Р°РїРёСЃРµР№ Р±РѕР»СЊС€Рµ РЅРµС‚Сѓ, С‚Рѕ Р·Р°РєР°РЅС‡РёРІР°РµРј РЅР°РєРѕРїР»РµРЅРёРµ РІСЂРµРјРµРЅРё Рё СЃС‚РѕРёРјРѕСЃС‚Рё
 		if ( iTt==iEnd )
 		{
-			// Досчитываем стоимость "невлезшего" в тарифную сетку времени
-			// по последней встреченной стоимости пакета
+			// Р”РѕСЃС‡РёС‚С‹РІР°РµРј СЃС‚РѕРёРјРѕСЃС‚СЊ "РЅРµРІР»РµР·С€РµРіРѕ" РІ С‚Р°СЂРёС„РЅСѓСЋ СЃРµС‚РєСѓ РІСЂРµРјРµРЅРё
+			// РїРѕ РїРѕСЃР»РµРґРЅРµР№ РІСЃС‚СЂРµС‡РµРЅРЅРѕР№ СЃС‚РѕРёРјРѕСЃС‚Рё РїР°РєРµС‚Р°
 			Cost+=(SizeTime-WorkTime)*(LastCost/SizeTime);
 			break;
 		}
 		LastCost=iTt->Cost;
-		// Вычисляем сколько еще времени нужно для формирования полного пакета
+		// Р’С‹С‡РёСЃР»СЏРµРј СЃРєРѕР»СЊРєРѕ РµС‰Рµ РІСЂРµРјРµРЅРё РЅСѓР¶РЅРѕ РґР»СЏ С„РѕСЂРјРёСЂРѕРІР°РЅРёСЏ РїРѕР»РЅРѕРіРѕ РїР°РєРµС‚Р°
 		NeedTime=SizeTime-WorkTime;
-		// Проверяем сколько реально времени можно добавить к пакету
+		// РџСЂРѕРІРµСЂСЏРµРј СЃРєРѕР»СЊРєРѕ СЂРµР°Р»СЊРЅРѕ РІСЂРµРјРµРЅРё РјРѕР¶РЅРѕ РґРѕР±Р°РІРёС‚СЊ Рє РїР°РєРµС‚Сѓ
 		RealTime=MaxTime<NeedTime? MaxTime: NeedTime;
-		// Добавляем это время к пакету и увеличиваем стоимость пакета
+		// Р”РѕР±Р°РІР»СЏРµРј СЌС‚Рѕ РІСЂРµРјСЏ Рє РїР°РєРµС‚Сѓ Рё СѓРІРµР»РёС‡РёРІР°РµРј СЃС‚РѕРёРјРѕСЃС‚СЊ РїР°РєРµС‚Р°
 		WorkTime+=RealTime; Cost+=RealTime*(LastCost/SizeTime);
-		// Проверяем не полное ли время пакета уже
+		// РџСЂРѕРІРµСЂСЏРµРј РЅРµ РїРѕР»РЅРѕРµ Р»Рё РІСЂРµРјСЏ РїР°РєРµС‚Р° СѓР¶Рµ
 		if ( WorkTime==SizeTime ) break;
-		// Увеличиваем время начала отсчета и следим, чтобы оно не превысило суточное время
+		// РЈРІРµР»РёС‡РёРІР°РµРј РІСЂРµРјСЏ РЅР°С‡Р°Р»Р° РѕС‚СЃС‡РµС‚Р° Рё СЃР»РµРґРёРј, С‡С‚РѕР±С‹ РѕРЅРѕ РЅРµ РїСЂРµРІС‹СЃРёР»Рѕ СЃСѓС‚РѕС‡РЅРѕРµ РІСЂРµРјСЏ
 		StartTime+=RealTime; if ( StartTime>=(24*60) ) StartTime-=24*60;
 	}
-	// Корректируем время работы в соответствии с заданным ограничением
+	// РљРѕСЂСЂРµРєС‚РёСЂСѓРµРј РІСЂРµРјСЏ СЂР°Р±РѕС‚С‹ РІ СЃРѕРѕС‚РІРµС‚СЃС‚РІРёРё СЃ Р·Р°РґР°РЅРЅС‹Рј РѕРіСЂР°РЅРёС‡РµРЅРёРµРј
 	if ( WorkTime>RunTime_.MaxTime ) WorkTime=RunTime_.MaxTime;
 
 	RunTime_.WorkTime=WorkTime;
@@ -196,9 +196,9 @@ void MTariffsItem::CostHours(MTariffRunTimesItem &RunTime_) const
 	int StartTime, SizeTime, WorkTime, MaxTime, NeedTime, RealTime;
 	double Cost;
 
-	// Выделяем количество минут с начала суток
+	// Р’С‹РґРµР»СЏРµРј РєРѕР»РёС‡РµСЃС‚РІРѕ РјРёРЅСѓС‚ СЃ РЅР°С‡Р°Р»Р° СЃСѓС‚РѕРє
 	StartTime=ExtractHoursMin(RunTime_.StartTime);
-	// Корректируем желаемое время работы в соответствии с заданным ограничением
+	// РљРѕСЂСЂРµРєС‚РёСЂСѓРµРј Р¶РµР»Р°РµРјРѕРµ РІСЂРµРјСЏ СЂР°Р±РѕС‚С‹ РІ СЃРѕРѕС‚РІРµС‚СЃС‚РІРёРё СЃ Р·Р°РґР°РЅРЅС‹Рј РѕРіСЂР°РЅРёС‡РµРЅРёРµРј
 	SizeTime=RunTime_.SizeTime;
 	if ( SizeTime>RunTime_.MaxTime ) SizeTime=RunTime_.MaxTime;
 	//
@@ -206,7 +206,7 @@ void MTariffsItem::CostHours(MTariffRunTimesItem &RunTime_) const
 
 	while(true)
 	{
-		// Ищем подходящую запись с ненулевым временем работы
+		// РС‰РµРј РїРѕРґС…РѕРґСЏС‰СѓСЋ Р·Р°РїРёСЃСЊ СЃ РЅРµРЅСѓР»РµРІС‹Рј РІСЂРµРјРµРЅРµРј СЂР°Р±РѕС‚С‹
 		auto iTt=Times.cbegin();
 		auto iEnd=Times.cend();
 
@@ -215,18 +215,18 @@ void MTariffsItem::CostHours(MTariffRunTimesItem &RunTime_) const
 			if ( (iTt->Type==mttHours)&&
 				((MaxTime=iTt->MaxWorkTime(StartTime))!=0) ) break;
 		}
-		// Если подходящих записей больше нету, то заканчиваем накопление времени и стоимости
+		// Р•СЃР»Рё РїРѕРґС…РѕРґСЏС‰РёС… Р·Р°РїРёСЃРµР№ Р±РѕР»СЊС€Рµ РЅРµС‚Сѓ, С‚Рѕ Р·Р°РєР°РЅС‡РёРІР°РµРј РЅР°РєРѕРїР»РµРЅРёРµ РІСЂРµРјРµРЅРё Рё СЃС‚РѕРёРјРѕСЃС‚Рё
 		if ( iTt==iEnd ) break;
-		// Вычисляем сколько еще времени нужно добавить
+		// Р’С‹С‡РёСЃР»СЏРµРј СЃРєРѕР»СЊРєРѕ РµС‰Рµ РІСЂРµРјРµРЅРё РЅСѓР¶РЅРѕ РґРѕР±Р°РІРёС‚СЊ
 		NeedTime=SizeTime-WorkTime;
-		// Проверяем сколько реально времени можно добавить
+		// РџСЂРѕРІРµСЂСЏРµРј СЃРєРѕР»СЊРєРѕ СЂРµР°Р»СЊРЅРѕ РІСЂРµРјРµРЅРё РјРѕР¶РЅРѕ РґРѕР±Р°РІРёС‚СЊ
 		RealTime=MaxTime<NeedTime? MaxTime: NeedTime;
-		// Добавляем это время и увеличиваем стоимость
+		// Р”РѕР±Р°РІР»СЏРµРј СЌС‚Рѕ РІСЂРµРјСЏ Рё СѓРІРµР»РёС‡РёРІР°РµРј СЃС‚РѕРёРјРѕСЃС‚СЊ
 		WorkTime+=RealTime;
 		Cost+=RealTime*iTt->Cost/60.;
-		// Проверяем не набрано ли уже все время
+		// РџСЂРѕРІРµСЂСЏРµРј РЅРµ РЅР°Р±СЂР°РЅРѕ Р»Рё СѓР¶Рµ РІСЃРµ РІСЂРµРјСЏ
 		if ( WorkTime==SizeTime ) break;
-		// Увеличиваем время начала отсчета и следим, чтобы оно не превысило суточное время
+		// РЈРІРµР»РёС‡РёРІР°РµРј РІСЂРµРјСЏ РЅР°С‡Р°Р»Р° РѕС‚СЃС‡РµС‚Р° Рё СЃР»РµРґРёРј, С‡С‚РѕР±С‹ РѕРЅРѕ РЅРµ РїСЂРµРІС‹СЃРёР»Рѕ СЃСѓС‚РѕС‡РЅРѕРµ РІСЂРµРјСЏ
 		StartTime+=RealTime; if ( StartTime>=(24*60) ) StartTime-=24*60;
 	}
 
@@ -249,7 +249,7 @@ void MTariffsItem::Cost(MTariffRunTimesItem &RunTime_, double Prec_) const
         case mttPacket: CostPacket(RunTime_); break;
         default: RunTime_.WorkTime=0; RunTime_.Cost=0.; break;
     }
-    // Округляем стоимость до желаемой точности
+    // РћРєСЂСѓРіР»СЏРµРј СЃС‚РѕРёРјРѕСЃС‚СЊ РґРѕ Р¶РµР»Р°РµРјРѕР№ С‚РѕС‡РЅРѕСЃС‚Рё
 	RunTime_.Cost=ceil(RunTime_.Cost/Prec_)*Prec_;
 }
 
@@ -257,7 +257,7 @@ bool MTariffsItem::CheckForTime(std::int64_t Time_) const
 {
     int Time;
 
-    // Выделяем количество минут с начала суток
+    // Р’С‹РґРµР»СЏРµРј РєРѕР»РёС‡РµСЃС‚РІРѕ РјРёРЅСѓС‚ СЃ РЅР°С‡Р°Р»Р° СЃСѓС‚РѕРє
     Time=ExtractHoursMin(Time_);
 
 	for ( const auto &tt: Times )
@@ -290,11 +290,11 @@ MTariffsInfoItem MTariffsItem::GetInfo() const
 
 MTariffRunTimes MTariffsItem::GetRunTimes(std::int64_t Time_) const
 {
-	// Выделяем количество минут с начала суток
+	// Р’С‹РґРµР»СЏРµРј РєРѕР»РёС‡РµСЃС‚РІРѕ РјРёРЅСѓС‚ СЃ РЅР°С‡Р°Р»Р° СЃСѓС‚РѕРє
 	int SysTime=ExtractHoursMin(Time_);
 
 	MTariffRunTimes ResTimes;
-	// Проверяем возможность запуска на почасовой основе
+	// РџСЂРѕРІРµСЂСЏРµРј РІРѕР·РјРѕР¶РЅРѕСЃС‚СЊ Р·Р°РїСѓСЃРєР° РЅР° РїРѕС‡Р°СЃРѕРІРѕР№ РѕСЃРЅРѕРІРµ
 	for ( const auto &tt: Times )
 	{
 		if ( (tt.Type!=mttHours)||
@@ -304,7 +304,7 @@ MTariffRunTimes MTariffsItem::GetRunTimes(std::int64_t Time_) const
 		rt.Type=mttHours;
 		break;
 	}
-	// Ищем подходящие "плавающие" пакеты
+	// РС‰РµРј РїРѕРґС…РѕРґСЏС‰РёРµ "РїР»Р°РІР°СЋС‰РёРµ" РїР°РєРµС‚С‹
 	for ( const auto &tt: Times )
 	{
 		if ( (tt.Type!=mttFlyPacket)||
@@ -314,7 +314,7 @@ MTariffRunTimes MTariffsItem::GetRunTimes(std::int64_t Time_) const
 		rt.Type=mttFlyPacket;
 		rt.SizeTime=tt.SizeTime;
 	}
-	// Ищем подходящие пакеты
+	// РС‰РµРј РїРѕРґС…РѕРґСЏС‰РёРµ РїР°РєРµС‚С‹
 	for ( const auto &tt: Times )
 	{
 		if ( (tt.Type!=mttPacket)||

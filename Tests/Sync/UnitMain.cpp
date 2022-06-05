@@ -1,4 +1,4 @@
-#pragma hdrstop
+п»ї#pragma hdrstop
 #pragma argsused
 
 #ifdef _WIN32
@@ -87,17 +87,17 @@ int _tmain(int argc, _TCHAR* argv[])
 	Auth->Load();
 
 	bool result=false;
-	// Подготавливаем синхронизацию по сети с клиентами
+	// РџРѕРґРіРѕС‚Р°РІР»РёРІР°РµРј СЃРёРЅС…СЂРѕРЅРёР·Р°С†РёСЋ РїРѕ СЃРµС‚Рё СЃ РєР»РёРµРЅС‚Р°РјРё
 	result=Sync->NetInit(ENC_Net, Auth.get());
 	Sync->Associate(States.get(), Computers.get());
-	// Запускаем синхронизацию
+	// Р—Р°РїСѓСЃРєР°РµРј СЃРёРЅС…СЂРѕРЅРёР·Р°С†РёСЋ
 	result=Sync->Start();
 	//
 	std::int64_t SystemTime;
 	GetLocalTimeInt64(SystemTime);
 	States->Timer(SystemTime);
 
-	// Имитация задержки между моментами инициализации клиента и сервера
+	// РРјРёС‚Р°С†РёСЏ Р·Р°РґРµСЂР¶РєРё РјРµР¶РґСѓ РјРѕРјРµРЅС‚Р°РјРё РёРЅРёС†РёР°Р»РёР·Р°С†РёРё РєР»РёРµРЅС‚Р° Рё СЃРµСЂРІРµСЂР°
 	::Sleep(12345);
 
 	std::unique_ptr <MStateCl> ClState;

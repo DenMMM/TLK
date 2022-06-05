@@ -1,4 +1,4 @@
-//---------------------------------------------------------------------------
+п»ї//---------------------------------------------------------------------------
 #ifndef UnitFormClientH
 #define UnitFormClientH
 //---------------------------------------------------------------------------
@@ -94,11 +94,11 @@ __published:	// IDE-managed Components
     void __fastcall EditCmdExit(TObject *Sender);
     void __fastcall EditIconExit(TObject *Sender);
 private:	// User declarations
-	MSendSrv Send;                      		// TCP-рассыльщик объектов
-	std::vector <MComputersItem*> SendComps;	// Массив указателей на компьютеры, куда рассылать
-	MGames TmpGames;                    		// Буфер для списка игр
-	MClOptions TmpOptions;              		// Буфер для настроек клиента
-	bool Sending;                       		// Флаг отправки/приема данных
+	MSendSrv Send;                      		// TCP-СЂР°СЃСЃС‹Р»СЊС‰РёРє РѕР±СЉРµРєС‚РѕРІ
+	std::vector <MComputersItem*> SendComps;	// РњР°СЃСЃРёРІ СѓРєР°Р·Р°С‚РµР»РµР№ РЅР° РєРѕРјРїСЊСЋС‚РµСЂС‹, РєСѓРґР° СЂР°СЃСЃС‹Р»Р°С‚СЊ
+	MGames TmpGames;                    		// Р‘СѓС„РµСЂ РґР»СЏ СЃРїРёСЃРєР° РёРіСЂ
+	MClOptions TmpOptions;              		// Р‘СѓС„РµСЂ РґР»СЏ РЅР°СЃС‚СЂРѕРµРє РєР»РёРµРЅС‚Р°
+	bool Sending;                       		// Р¤Р»Р°Рі РѕС‚РїСЂР°РІРєРё/РїСЂРёРµРјР° РґР°РЅРЅС‹С…
     void SetTreeViewGamesLine(TTreeNode *Node_);
 	void AddGamesToTree(TTreeNode *Node_, const MGames &Games_);
 	void CreateGamesTree(const MGames &Games_);

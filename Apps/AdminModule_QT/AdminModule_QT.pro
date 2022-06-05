@@ -22,29 +22,114 @@ DEFINES += QT_DEPRECATED_WARNINGS
 # You can also select to disable deprecated APIs only up to a certain version of Qt.
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
-CONFIG += c++11
+CONFIG += c++17 c++14
+DEFINES += NOMINMAX
+# LIBS += -User32 -Advapi32
 
 SOURCES += \
+        ../../Core/UnitAuth.cpp \
+        ../../Core/UnitClOptions.cpp \
+        ../../Core/UnitCommon.cpp \
+        ../../Core/UnitComputers.cpp \
+        ../../Core/UnitEncode.cpp \
+        ../../Core/UnitFines.cpp \
+        ../../Core/UnitGames.cpp \
+        ../../Core/UnitIDList.cpp \
+        ../../Core/UnitList.cpp \
+        ../../Core/UnitLogRecords.cpp \
+        ../../Core/UnitPassword.cpp \
+        ../../Core/UnitRandCounter.cpp \
+        ../../Core/UnitSLList.cpp \
+        ../../Core/UnitSend.cpp \
+        ../../Core/UnitStates.cpp \
+        ../../Core/UnitSync.cpp \
+        ../../Core/UnitSyncMsgs.cpp \
+        ../../Core/UnitTariffs.cpp \
+        ../../Core/UnitTimeRand.cpp \
+        ../../Core/UnitUsers.cpp \
+        ../../Ext/BrianGladman/SHA/hmac.c \
+        ../../Ext/BrianGladman/SHA/sha1.c \
+        ../../Ext/BrianGladman/SHA/sha2.c \
+        ../../Ext/ZilongTan/fast-hash/fasthash.c \
+        ../AdminModule/UnitLog.cpp \
+        ../AdminModule/UnitOptions.cpp \
+        ../AdminModule/UnitShellState.cpp \
+        dialogAuth.cpp \
+        dialogComputers.cpp \
+        dialogFine.cpp \
+        dialogFines.cpp \
+        dialogLogIn.cpp \
+        dialogNewPass.cpp \
+        dialogOpenConfig.cpp \
+        dialogTariffTimes.cpp \
+        dialogTariffs.cpp \
+        dialogUsers.cpp \
         main.cpp \
-        mainwindow.cpp
+        mainWindow.cpp \
+        unitGlobal.cpp
 
 HEADERS += \
-        mainwindow.h
+        ../../Core/UnitAuth.h \
+        ../../Core/UnitClOptions.h \
+        ../../Core/UnitCommon.h \
+        ../../Core/UnitComputers.h \
+        ../../Core/UnitEncode.h \
+        ../../Core/UnitFines.h \
+        ../../Core/UnitGames.h \
+        ../../Core/UnitIDList.h \
+        ../../Core/UnitList.h \
+        ../../Core/UnitLogRecords.h \
+        ../../Core/UnitPassword.h \
+        ../../Core/UnitRandCounter.h \
+        ../../Core/UnitSLList.h \
+        ../../Core/UnitSend.h \
+        ../../Core/UnitStates.h \
+        ../../Core/UnitSync.h \
+        ../../Core/UnitSyncMsgs.h \
+        ../../Core/UnitTariffs.h \
+        ../../Core/UnitTimeRand.h \
+        ../../Core/UnitUsers.h \
+        ../../Ext/BrianGladman/SHA/hmac.h \
+        ../../Ext/BrianGladman/SHA/sha1.h \
+        ../../Ext/BrianGladman/SHA/sha2.h \
+        ../../Ext/ZilongTan/fast-hash/fasthash.h \
+        ../AdminModule/UnitLog.h \
+        ../AdminModule/UnitOptions.h \
+        ../AdminModule/UnitShellState.h \
+        dialogAuth.h \
+        dialogComputers.h \
+        dialogFine.h \
+        dialogFines.h \
+        dialogLogIn.h \
+        dialogNewPass.h \
+        dialogOpenConfig.h \
+        dialogTariffTimes.h \
+        dialogTariffs.h \
+        dialogUsers.h \
+        mainWindow.h \
+        unitGlobal.h
 
 FORMS += \
-        dialogauth.ui \
-        dialogcomputers.ui \
-        dialogfine.ui \
-        dialogfines.ui \
-        dialoglogin.ui \
-        dialognewpass.ui \
-        dialogopenconfig.ui \
-        dialogtariffs.ui \
-        dialogtarifftimes.ui \
-        dialogusers.ui \
-        mainwindow.ui
+        dialogAuth.ui \
+        dialogComputers.ui \
+        dialogFine.ui \
+        dialogFines.ui \
+        dialogLogIn.ui \
+        dialogNewPass.ui \
+        dialogOpenConfig.ui \
+        dialogTariffTimes.ui \
+        dialogTariffs.ui \
+        dialogUsers.ui \
+        mainWindow.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
+
+DISTFILES +=
+
+LIBS += -lUSER32 -lADVAPI32 -lWS2_32 -lNTDLL -lBCRYPT -lIPHLPAPI -lUSERENV
+
+RESOURCES += \
+    resources.qrc

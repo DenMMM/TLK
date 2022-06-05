@@ -1,4 +1,4 @@
-//---------------------------------------------------------------------------
+п»ї//---------------------------------------------------------------------------
 #ifndef UnitSyncMsgsH
 #define UnitSyncMsgsH
 //---------------------------------------------------------------------------
@@ -19,49 +19,49 @@ struct MSyncPWOL;
 
 struct MSyncData
 {
-	std::int64_t SystemTime;	// Системное время, используемое при всех расчетах
-	std::uint8_t Number;		// Номер компьютера, с которым ассоциировано состояние
-	std::uint32_t State;		// Состояние компьютера (режимы работы)
-	std::int64_t StartWorkTime;	// Время запуска в работу (абсолютное время)
-	std::int32_t SizeWorkTime;	// На какое время запущен (в минутах)       	/// int16_t ?
-	std::int64_t StartFineTime;	// Время, когда был применен штраф (абсолютное время)
-	std::int32_t SizeFineTime;	// Время ожидания в режиме штрафа (в минутах)   /// int16_t ?
-	std::int64_t StopTimerTime;	// Время остановки отсчета времени (абсолютное время)
-	std::uint32_t Programs;		// Групы программ, разрешенных для запуска
-	std::uint32_t Commands;		// Дополнительные команды
+	std::int64_t SystemTime;	// РЎРёСЃС‚РµРјРЅРѕРµ РІСЂРµРјСЏ, РёСЃРїРѕР»СЊР·СѓРµРјРѕРµ РїСЂРё РІСЃРµС… СЂР°СЃС‡РµС‚Р°С…
+	std::uint8_t Number;		// РќРѕРјРµСЂ РєРѕРјРїСЊСЋС‚РµСЂР°, СЃ РєРѕС‚РѕСЂС‹Рј Р°СЃСЃРѕС†РёРёСЂРѕРІР°РЅРѕ СЃРѕСЃС‚РѕСЏРЅРёРµ
+	std::uint32_t State;		// РЎРѕСЃС‚РѕСЏРЅРёРµ РєРѕРјРїСЊСЋС‚РµСЂР° (СЂРµР¶РёРјС‹ СЂР°Р±РѕС‚С‹)
+	std::int64_t StartWorkTime;	// Р’СЂРµРјСЏ Р·Р°РїСѓСЃРєР° РІ СЂР°Р±РѕС‚Сѓ (Р°Р±СЃРѕР»СЋС‚РЅРѕРµ РІСЂРµРјСЏ)
+	std::int32_t SizeWorkTime;	// РќР° РєР°РєРѕРµ РІСЂРµРјСЏ Р·Р°РїСѓС‰РµРЅ (РІ РјРёРЅСѓС‚Р°С…)       	/// int16_t ?
+	std::int64_t StartFineTime;	// Р’СЂРµРјСЏ, РєРѕРіРґР° Р±С‹Р» РїСЂРёРјРµРЅРµРЅ С€С‚СЂР°С„ (Р°Р±СЃРѕР»СЋС‚РЅРѕРµ РІСЂРµРјСЏ)
+	std::int32_t SizeFineTime;	// Р’СЂРµРјСЏ РѕР¶РёРґР°РЅРёСЏ РІ СЂРµР¶РёРјРµ С€С‚СЂР°С„Р° (РІ РјРёРЅСѓС‚Р°С…)   /// int16_t ?
+	std::int64_t StopTimerTime;	// Р’СЂРµРјСЏ РѕСЃС‚Р°РЅРѕРІРєРё РѕС‚СЃС‡РµС‚Р° РІСЂРµРјРµРЅРё (Р°Р±СЃРѕР»СЋС‚РЅРѕРµ РІСЂРµРјСЏ)
+	std::uint32_t Programs;		// Р“СЂСѓРїС‹ РїСЂРѕРіСЂР°РјРј, СЂР°Р·СЂРµС€РµРЅРЅС‹С… РґР»СЏ Р·Р°РїСѓСЃРєР°
+	std::uint32_t Commands;		// Р”РѕРїРѕР»РЅРёС‚РµР»СЊРЅС‹Рµ РєРѕРјР°РЅРґС‹
 };
 
 struct MSyncPHeader
 {
-	std::uint8_t Version;		// Версия сетевого интерфейса
-	std::uint8_t Type;			// Тип пакета
-	std::uint64_t SessId;		// Сеансовый ID (функция от random сервера и клиента)
+	std::uint8_t Version;		// Р’РµСЂСЃРёСЏ СЃРµС‚РµРІРѕРіРѕ РёРЅС‚РµСЂС„РµР№СЃР°
+	std::uint8_t Type;			// РўРёРї РїР°РєРµС‚Р°
+	std::uint64_t SessId;		// РЎРµР°РЅСЃРѕРІС‹Р№ ID (С„СѓРЅРєС†РёСЏ РѕС‚ random СЃРµСЂРІРµСЂР° Рё РєР»РёРµРЅС‚Р°)
 };
 
 struct MSyncPHello
 {
-    MSyncPHeader Header;        // Заголовок
-    unsigned char MAC[MAC_Size];// MAC пакета
+    MSyncPHeader Header;        // Р—Р°РіРѕР»РѕРІРѕРє
+    unsigned char MAC[MAC_Size];// MAC РїР°РєРµС‚Р°
 };
 
 struct MSyncPData
 {
-    MSyncPHeader Header;        // Заголовок
-    MSyncData Data;             // Данные для синхронизации с клиентом
-    unsigned char MAC[MAC_Size];// MAC пакета
+    MSyncPHeader Header;        // Р—Р°РіРѕР»РѕРІРѕРє
+    MSyncData Data;             // Р”Р°РЅРЅС‹Рµ РґР»СЏ СЃРёРЅС…СЂРѕРЅРёР·Р°С†РёРё СЃ РєР»РёРµРЅС‚РѕРј
+    unsigned char MAC[MAC_Size];// MAC РїР°РєРµС‚Р°
 };
 
 struct MSyncPConf
 {
-    MSyncPHeader Header;        // Заголовок
-    unsigned char MAC[MAC_Size];// MAC пакета
+    MSyncPHeader Header;        // Р—Р°РіРѕР»РѕРІРѕРє
+    unsigned char MAC[MAC_Size];// MAC РїР°РєРµС‚Р°
 };
 
 struct MSyncPWOL
 {
-	std::uint32_t ZeroFirst;					// Нули в начале пакета
-	unsigned char Sync[MAC_AddrLength];			// Последовательность для синхронизации
-	unsigned char Magic[16][MAC_AddrLength];	// 16 раз MAC-адрес
+	std::uint32_t ZeroFirst;					// РќСѓР»Рё РІ РЅР°С‡Р°Р»Рµ РїР°РєРµС‚Р°
+	unsigned char Sync[MAC_AddrLength];			// РџРѕСЃР»РµРґРѕРІР°С‚РµР»СЊРЅРѕСЃС‚СЊ РґР»СЏ СЃРёРЅС…СЂРѕРЅРёР·Р°С†РёРё
+	unsigned char Magic[16][MAC_AddrLength];	// 16 СЂР°Р· MAC-Р°РґСЂРµСЃ
 };
 
 #pragma pack(pop)

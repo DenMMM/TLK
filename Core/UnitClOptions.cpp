@@ -1,4 +1,4 @@
-//---------------------------------------------------------------------------
+п»ї//---------------------------------------------------------------------------
 #pragma hdrstop
 
 #include "UnitClOptions.h"
@@ -11,7 +11,7 @@ void MClOptions::SetShellUser(const std::wstring &Name_)
 	{
 		throw std::out_of_range (
 			"MClOptions::SetShellUser()\n"
-			"Длина имени превышет MAX_ClUNameLen.");
+			"Р”Р»РёРЅР° РёРјРµРЅРё РїСЂРµРІС‹С€РµС‚ MAX_ClUNameLen.");
 	}
 
 	ShellUser=Name_;

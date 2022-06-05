@@ -1,4 +1,4 @@
-//---------------------------------------------------------------------------
+п»ї//---------------------------------------------------------------------------
 #include <vcl.h>
 #pragma hdrstop
 
@@ -17,10 +17,10 @@ __fastcall TFormUsers::TFormUsers(TComponent* Owner)
 //---------------------------------------------------------------------------
 void __fastcall TFormUsers::FormShow(TObject *Sender)
 {
-    // Копируем пользователей в буфер
+    // РљРѕРїРёСЂСѓРµРј РїРѕР»СЊР·РѕРІР°С‚РµР»РµР№ РІ Р±СѓС„РµСЂ
 	TmpUsers=*Users;
 
-    // Формируем их список
+    // Р¤РѕСЂРјРёСЂСѓРµРј РёС… СЃРїРёСЃРѕРє
 	for ( auto &user: TmpUsers )
 	{
 		TListItem *item;
@@ -28,24 +28,27 @@ void __fastcall TFormUsers::FormShow(TObject *Sender)
         item->Data=&user;
         SetListViewUsersLine(item);
     }
-    // Сортируем для красоты
+    // РЎРѕСЂС‚РёСЂСѓРµРј РґР»СЏ РєСЂР°СЃРѕС‚С‹
     ListViewUsers->AlphaSort();
 
     EditLogin->MaxLength=MAX_UserLoginLen;
     EditName->MaxLength=MAX_UserNameLen;
 
     SetEdit(false);
-    ActiveControl=ListViewUsers;
+	ActiveControl=ListViewUsers;
+
+	// Р”РѕР±Р°РІРёРј СЌРЅС‚СЂРѕРїРёРё
+	BasicRand.event();
 }
 //---------------------------------------------------------------------------
 void __fastcall TFormUsers::FormClose(TObject *Sender,
       TCloseAction &Action)
 {
-    // Чистим интерфейсные элементы
+    // Р§РёСЃС‚РёРј РёРЅС‚РµСЂС„РµР№СЃРЅС‹Рµ СЌР»РµРјРµРЅС‚С‹
     ListViewUsers->Items->Clear();
 	EditLogin->Text=L"";
     EditName->Text=L"";
-    // Чистим буфер
+    // Р§РёСЃС‚РёРј Р±СѓС„РµСЂ
     TmpUsers.Clear();
 }
 //---------------------------------------------------------------------------
@@ -111,12 +114,12 @@ void __fastcall TFormUsers::ButtonPasswordClick(TObject *Sender)
 {
 	auto &user=*reinterpret_cast<MUsersItem*>(
 		ListViewUsers->Selected->Data);
-    // Подготавливаем координаты
+    // РџРѕРґРіРѕС‚Р°РІР»РёРІР°РµРј РєРѕРѕСЂРґРёРЅР°С‚С‹
     TPoint dialog_coord;
     dialog_coord.x=ButtonPassword->Left+10;
     dialog_coord.y=ButtonPassword->Top+10;
     dialog_coord=ClientToScreen(dialog_coord);
-    // Открываем окно смены пароля
+    // РћС‚РєСЂС‹РІР°РµРј РѕРєРЅРѕ СЃРјРµРЅС‹ РїР°СЂРѕР»СЏ
     try
     {
 		std::unique_ptr <TFormUserPass> form;
@@ -137,15 +140,15 @@ void __fastcall TFormUsers::ButtonAddClick(TObject *Sender)
         return;
     }
 
-    // Добавили в буфер нового пользователя
+    // Р”РѕР±Р°РІРёР»Рё РІ Р±СѓС„РµСЂ РЅРѕРІРѕРіРѕ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ
 	MUsersItem &user=TmpUsers.Add();
 	user.Login=L"NewUser";
-    user.Name=L"Новый пользователь";
-    // Добавили строку в список и связали с ним
+    user.Name=L"РќРѕРІС‹Р№ РїРѕР»СЊР·РѕРІР°С‚РµР»СЊ";
+    // Р”РѕР±Р°РІРёР»Рё СЃС‚СЂРѕРєСѓ РІ СЃРїРёСЃРѕРє Рё СЃРІСЏР·Р°Р»Рё СЃ РЅРёРј
     TListItem *item=ListViewUsers->Items->Add();
     item->Data=&user;
     SetListViewUsersLine(item);
-    // Обновили интерфейс
+    // РћР±РЅРѕРІРёР»Рё РёРЅС‚РµСЂС„РµР№СЃ
     ListViewUsers->ItemFocused=item;
     ListViewUsers->Selected=nullptr;
     ListViewUsers->Selected=item;
@@ -154,17 +157,17 @@ void __fastcall TFormUsers::ButtonAddClick(TObject *Sender)
 //---------------------------------------------------------------------------
 void __fastcall TFormUsers::ButtonDelClick(TObject *Sender)
 {
-    // Удаляем пользователей из списка
+    // РЈРґР°Р»СЏРµРј РїРѕР»СЊР·РѕРІР°С‚РµР»РµР№ РёР· СЃРїРёСЃРєР°
     TItemStates is=TItemStates()<<isSelected;
     TListItem *item=ListViewUsers->Selected, *next;
     while(item)
     {
-        // Удаляем пользователя из буфера
+        // РЈРґР°Р»СЏРµРј РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ РёР· Р±СѓС„РµСЂР°
 		TmpUsers.Del(
 			MUsers::const_iterator(
 			reinterpret_cast<MUsersItem*>(item->Data)
 			));
-        // Удаляем строку из списка
+        // РЈРґР°Р»СЏРµРј СЃС‚СЂРѕРєСѓ РёР· СЃРїРёСЃРєР°
         next=ListViewUsers->GetNextItem(item,sdAll,is);
         item->Delete();
         item=next;
@@ -175,21 +178,21 @@ void __fastcall TFormUsers::ButtonDelClick(TObject *Sender)
 //---------------------------------------------------------------------------
 void __fastcall TFormUsers::ButtonSaveClick(TObject *Sender)
 {
-    // Замещаем актуальных пользователями из буфера
+    // Р—Р°РјРµС‰Р°РµРј Р°РєС‚СѓР°Р»СЊРЅС‹С… РїРѕР»СЊР·РѕРІР°С‚РµР»СЏРјРё РёР· Р±СѓС„РµСЂР°
     *Users=std::move(TmpUsers);
-    // Задаем ID-номера для новых
-    Users->SetUUIDs();                      /// проверить чья смена открыта
-    // Сохраняем в файле
+    // Р—Р°РґР°РµРј ID-РЅРѕРјРµСЂР° РґР»СЏ РЅРѕРІС‹С…
+    Users->SetUUIDs();                      /// РїСЂРѕРІРµСЂРёС‚СЊ С‡СЊСЏ СЃРјРµРЅР° РѕС‚РєСЂС‹С‚Р°
+    // РЎРѕС…СЂР°РЅСЏРµРј РІ С„Р°Р№Р»Рµ
     if ( !Users->Save() )
     {
         ShellState->State|=mssErrorConfig; FormMain->SetShell();
         ResMessageBox(Handle,1,3,MB_APPLMODAL|MB_OK|MB_ICONERROR,Users->gLastErr());
         return;
     }
-    // Запись в логах
+    // Р—Р°РїРёСЃСЊ РІ Р»РѕРіР°С…
     if ( !Log->AddUsers(*Users) )
     {
-        // Настройки сохранили, но без отображения их в логе работать не дадим
+        // РќР°СЃС‚СЂРѕР№РєРё СЃРѕС…СЂР°РЅРёР»Рё, РЅРѕ Р±РµР· РѕС‚РѕР±СЂР°Р¶РµРЅРёСЏ РёС… РІ Р»РѕРіРµ СЂР°Р±РѕС‚Р°С‚СЊ РЅРµ РґР°РґРёРј
         ShellState->State|=mssErrorLog|mssErrorConfig; FormMain->SetShell();
         ResMessageBox(Handle,1,5,MB_APPLMODAL|MB_OK|MB_ICONERROR,Log->gLastErr());
     }

@@ -1,4 +1,4 @@
-//---------------------------------------------------------------------------
+п»ї//---------------------------------------------------------------------------
 #include <vcl.h>
 #include <stdio.h>
 #include <stdexcept>
@@ -49,7 +49,7 @@ void __fastcall TFormMain::FormShow(TObject *Sender)
 	try
 	{
 
-	// Создадим объекты глобального пользования
+	// РЎРѕР·РґР°РґРёРј РѕР±СЉРµРєС‚С‹ РіР»РѕР±Р°Р»СЊРЅРѕРіРѕ РїРѕР»СЊР·РѕРІР°РЅРёСЏ
 	ShellState.reset(new MShellState);
 	Options.reset(new MOptions);
 	Computers.reset(new MComputers);
@@ -61,7 +61,7 @@ void __fastcall TFormMain::FormShow(TObject *Sender)
 	Auth.reset(new MAuth);
 	Log.reset(new MLog);
 
-	// Настроим пути хранения файлов и коды шифрования
+	// РќР°СЃС‚СЂРѕРёРј РїСѓС‚Рё С…СЂР°РЅРµРЅРёСЏ С„Р°Р№Р»РѕРІ Рё РєРѕРґС‹ С€РёС„СЂРѕРІР°РЅРёСЏ
 	Options->SetDefaultKey(
 		HKEY_LOCAL_MACHINE,
 		L"Software\\MMM Groups\\TLK\\3.0\\Admin",
@@ -91,23 +91,23 @@ void __fastcall TFormMain::FormShow(TObject *Sender)
 	Log->SetDefault(file.c_str(),ENC_Code);
 
 #ifdef _DEBUG
-	if ( !Options->Load() )         /// сброс пароля
+	if ( !Options->Load() )         /// СЃР±СЂРѕСЃ РїР°СЂРѕР»СЏ
 	{
 		Options->Pass.Set(L"");
 		Options->Save();
 	}
 #else
-	// Загрузим основные настройки
+	// Р—Р°РіСЂСѓР·РёРј РѕСЃРЅРѕРІРЅС‹Рµ РЅР°СЃС‚СЂРѕР№РєРё
 	if ( !Options->Load() )
 	{
 		ResMessageBox(Handle,1,30,MB_APPLMODAL|MB_OK|MB_ICONERROR);
-		// Без пароля на настройки запускаться не будем
+		// Р‘РµР· РїР°СЂРѕР»СЏ РЅР° РЅР°СЃС‚СЂРѕР№РєРё Р·Р°РїСѓСЃРєР°С‚СЊСЃСЏ РЅРµ Р±СѓРґРµРј
 		Tag=true; Close();
 		return;
 	}
 #endif
 
-	// Загрузим остальные настройки, возможно не все
+	// Р—Р°РіСЂСѓР·РёРј РѕСЃС‚Р°Р»СЊРЅС‹Рµ РЅР°СЃС‚СЂРѕР№РєРё, РІРѕР·РјРѕР¶РЅРѕ РЅРµ РІСЃРµ
 	bool all_load=true;
 	all_load=Auth->Load()&&all_load;
 	all_load=Computers->Load()&&all_load;
@@ -120,39 +120,39 @@ void __fastcall TFormMain::FormShow(TObject *Sender)
 		ResMessageBox(Handle,1,2,MB_APPLMODAL|MB_OK|MB_ICONERROR);
 	}
 
-	// Загрузим состояния компьютеров
+	// Р—Р°РіСЂСѓР·РёРј СЃРѕСЃС‚РѕСЏРЅРёСЏ РєРѕРјРїСЊСЋС‚РµСЂРѕРІ
 	if ( !States->Load() )
 	{
 		States->Clear();
 		ShellState->State|=mssErrorState; SetShell();
 		ResMessageBox(Handle,1,7,MB_APPLMODAL|MB_OK|MB_ICONERROR,States->gLastErr());
 	} else
-		// Хоть состояния и загрузились, сверим их с актуальным списком компьютеров
-		States->Update(*Computers);			/// опасное действие ?
+		// РҐРѕС‚СЊ СЃРѕСЃС‚РѕСЏРЅРёСЏ Рё Р·Р°РіСЂСѓР·РёР»РёСЃСЊ, СЃРІРµСЂРёРј РёС… СЃ Р°РєС‚СѓР°Р»СЊРЅС‹Рј СЃРїРёСЃРєРѕРј РєРѕРјРїСЊСЋС‚РµСЂРѕРІ
+		States->Update(*Computers);			/// РѕРїР°СЃРЅРѕРµ РґРµР№СЃС‚РІРёРµ ?
 
-	// Загрузим ARP-кэш
+	// Р—Р°РіСЂСѓР·РёРј ARP-РєСЌС€
 	if ( !Sync->LoadARP() )
 		ResMessageBox(Handle,0,29,MB_APPLMODAL|MB_OK|MB_ICONWARNING,Sync->gLastErr());
 
-	// Подготавливаем синхронизацию по сети с клиентами
+	// РџРѕРґРіРѕС‚Р°РІР»РёРІР°РµРј СЃРёРЅС…СЂРѕРЅРёР·Р°С†РёСЋ РїРѕ СЃРµС‚Рё СЃ РєР»РёРµРЅС‚Р°РјРё
 	Sync->NetInit(ENC_Net, Auth.get());
 	Sync->Associate(States.get(), Computers.get());
 	ProgressBarNetProcess->Max=Sync->gPCountMax();
 
-	// Таймер нужен до логов, т.к. им нужно системное время
+	// РўР°Р№РјРµСЂ РЅСѓР¶РµРЅ РґРѕ Р»РѕРіРѕРІ, С‚.Рє. РёРј РЅСѓР¶РЅРѕ СЃРёСЃС‚РµРјРЅРѕРµ РІСЂРµРјСЏ
 	Timer->Interval=1000;
 	Timer->Enabled=true;
 	TimerTimer(nullptr);
 
-	// Открываем лог
+	// РћС‚РєСЂС‹РІР°РµРј Р»РѕРі
 	if ( Log->Open() )
 	{
-		// Определяем пользователя, открывшего смену
+		// РћРїСЂРµРґРµР»СЏРµРј РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ, РѕС‚РєСЂС‹РІС€РµРіРѕ СЃРјРµРЅСѓ
 		ShellState->User=Log->LastUser();
-		// Проверяем есть ли он еще в списке пользователей и активен ли его логин
+		// РџСЂРѕРІРµСЂСЏРµРј РµСЃС‚СЊ Р»Рё РѕРЅ РµС‰Рµ РІ СЃРїРёСЃРєРµ РїРѕР»СЊР·РѕРІР°С‚РµР»РµР№ Рё Р°РєС‚РёРІРµРЅ Р»Рё РµРіРѕ Р»РѕРіРёРЅ
 		auto iUser=Users->SrchUUID(ShellState->User);
 		if ( (iUser==Users->end()) || (!iUser->Active) ) ShellState->User=0;
-		// Сохраним в логе стартовые параметры, чтобы потом четко разобрать все режимы
+		// РЎРѕС…СЂР°РЅРёРј РІ Р»РѕРіРµ СЃС‚Р°СЂС‚РѕРІС‹Рµ РїР°СЂР°РјРµС‚СЂС‹, С‡С‚РѕР±С‹ РїРѕС‚РѕРј С‡РµС‚РєРѕ СЂР°Р·РѕР±СЂР°С‚СЊ РІСЃРµ СЂРµР¶РёРјС‹
 		if ( !Log->AddStart(
 			*ShellState,
 			*States,
@@ -165,8 +165,8 @@ void __fastcall TFormMain::FormShow(TObject *Sender)
 		}
 	} else
 	{
-		// Если ошибка лога связана с нарушением его формата,
-		// попытаемся начать новый файл
+		// Р•СЃР»Рё РѕС€РёР±РєР° Р»РѕРіР° СЃРІСЏР·Р°РЅР° СЃ РЅР°СЂСѓС€РµРЅРёРµРј РµРіРѕ С„РѕСЂРјР°С‚Р°,
+		// РїРѕРїС‹С‚Р°РµРјСЃСЏ РЅР°С‡Р°С‚СЊ РЅРѕРІС‹Р№ С„Р°Р№Р»
 		if ( (Log->gLastErr()!=0)||
 			(!Log->Begin(
 				*ShellState,
@@ -187,10 +187,10 @@ void __fastcall TFormMain::FormShow(TObject *Sender)
 
 	TimerNet->Interval=250;
 	TimerNet->Enabled=true;
-	// Запускаем синхронизацию
+	// Р—Р°РїСѓСЃРєР°РµРј СЃРёРЅС…СЂРѕРЅРёР·Р°С†РёСЋ
 	Sync->Start();
 
-	// Включим буферизацию отрисовки, чтобы не мерцало
+	// Р’РєР»СЋС‡РёРј Р±СѓС„РµСЂРёР·Р°С†РёСЋ РѕС‚СЂРёСЃРѕРІРєРё, С‡С‚РѕР±С‹ РЅРµ РјРµСЂС†Р°Р»Рѕ
 	ListViewComputers->DoubleBuffered=true;
 	ProgressBarNetProcess->DoubleBuffered=true;
 
@@ -204,7 +204,7 @@ void __fastcall TFormMain::FormShow(TObject *Sender)
 	catch (std::exception &e)
 	{
 		::MessageBoxA(Handle, e.what(),
-			"TLK - ошибка",MB_APPLMODAL|MB_OK|MB_ICONERROR);
+			"TLK - РѕС€РёР±РєР°",MB_APPLMODAL|MB_OK|MB_ICONERROR);
 		Tag=true; Close();
 		return;
 	}
@@ -225,7 +225,7 @@ void __fastcall TFormMain::FormClose(TObject *Sender, TCloseAction &Action)
     Sync->Stop();
     Sync->NetFree();
 
-    // Добавим запись в лог о нормальном завершении работы
+    // Р”РѕР±Р°РІРёРј Р·Р°РїРёСЃСЊ РІ Р»РѕРі Рѕ РЅРѕСЂРјР°Р»СЊРЅРѕРј Р·Р°РІРµСЂС€РµРЅРёРё СЂР°Р±РѕС‚С‹
     if ( !Tag ) Log->AddStop();
 }
 //---------------------------------------------------------------------------
@@ -233,18 +233,18 @@ void __fastcall TFormMain::TimerTimer(TObject *Sender)
 {
 	std::int64_t SystemTime;
 
-    // Берем системное время
+    // Р‘РµСЂРµРј СЃРёСЃС‚РµРјРЅРѕРµ РІСЂРµРјСЏ
     GetLocalTimeInt64(SystemTime);
-    // Подаем его модулю лога
+    // РџРѕРґР°РµРј РµРіРѕ РјРѕРґСѓР»СЋ Р»РѕРіР°
     Log->Timer(SystemTime);
-    // Обновляем состояния компьютеров и сохраняем в случае изменений
+    // РћР±РЅРѕРІР»СЏРµРј СЃРѕСЃС‚РѕСЏРЅРёСЏ РєРѕРјРїСЊСЋС‚РµСЂРѕРІ Рё СЃРѕС…СЂР°РЅСЏРµРј РІ СЃР»СѓС‡Р°Рµ РёР·РјРµРЅРµРЅРёР№
     if ( States->Timer(SystemTime) )
         if ( !States->Save() ) { ShellState->State|=mssErrorState; SetShell(); }
-    // Обновляем показания часов
+    // РћР±РЅРѕРІР»СЏРµРј РїРѕРєР°Р·Р°РЅРёСЏ С‡Р°СЃРѕРІ
     TDate CurrentTime=Time();
 	LabelTimeSecs->Caption=CurrentTime.FormatString(L"ss");
     LabelTimeHoursMins->Caption=CurrentTime.FormatString(L"hh : mm");
-    // И список компьютеров
+    // Р СЃРїРёСЃРѕРє РєРѕРјРїСЊСЋС‚РµСЂРѕРІ
     UpdateListViewComputers(false);
 }
 //---------------------------------------------------------------------------
@@ -260,7 +260,7 @@ void __fastcall TFormMain::NLogInClick(TObject *Sender)
 
     try
     {
-        // Открываем диалог авторизации
+        // РћС‚РєСЂС‹РІР°РµРј РґРёР°Р»РѕРі Р°РІС‚РѕСЂРёР·Р°С†РёРё
 		form.reset(new TFormLogIn(0));
 		User=form->Execute(*Users);
         if ( User==0 ) return;
@@ -271,7 +271,7 @@ void __fastcall TFormMain::NLogInClick(TObject *Sender)
         return;
     }
     
-    // Записываем в лог событие
+    // Р—Р°РїРёСЃС‹РІР°РµРј РІ Р»РѕРі СЃРѕР±С‹С‚РёРµ
     if ( !Log->AddLogIn(User) )
     {
         ShellState->State|=mssErrorLog; SetShell();
@@ -284,11 +284,11 @@ void __fastcall TFormMain::NLogInClick(TObject *Sender)
 //---------------------------------------------------------------------------
 void __fastcall TFormMain::NLogOutClick(TObject *Sender)
 {
-    // Запрашиваем подтверждение на закрытие смены
+    // Р—Р°РїСЂР°С€РёРІР°РµРј РїРѕРґС‚РІРµСЂР¶РґРµРЅРёРµ РЅР° Р·Р°РєСЂС‹С‚РёРµ СЃРјРµРЅС‹
     if ( ResMessageBox(Handle,25,26,
         MB_APPLMODAL|MB_YESNO|MB_ICONQUESTION)!=IDYES ) return;
 
-    // Записываем в лог событие
+    // Р—Р°РїРёСЃС‹РІР°РµРј РІ Р»РѕРі СЃРѕР±С‹С‚РёРµ
     if ( !Log->AddLogOut() )
     {
         ShellState->State|=mssErrorLog; SetShell();
@@ -298,10 +298,10 @@ void __fastcall TFormMain::NLogOutClick(TObject *Sender)
 
     ShellState->User=0; SetShell();
 
-    // Проверяем не пора ли начать новый файл
+    // РџСЂРѕРІРµСЂСЏРµРј РЅРµ РїРѕСЂР° Р»Рё РЅР°С‡Р°С‚СЊ РЅРѕРІС‹Р№ С„Р°Р№Р»
     if ( !Log->CheckPeriod(Options->LogPeriod) ) return;
 
-    // Закрываем текущий лог и начинаем новый
+    // Р—Р°РєСЂС‹РІР°РµРј С‚РµРєСѓС‰РёР№ Р»РѕРі Рё РЅР°С‡РёРЅР°РµРј РЅРѕРІС‹Р№
 	if ( !(Log->End()&&
 		Log->Begin(
 			*ShellState,
@@ -334,7 +334,7 @@ void __fastcall TFormMain::NConfigOpenClick(TObject *Sender)
         catch (Exception &ex)
         {
             Application->ShowException(&ex);
-            // Не дадим через исключение изменить состояние режима настройки
+            // РќРµ РґР°РґРёРј С‡РµСЂРµР· РёСЃРєР»СЋС‡РµРЅРёРµ РёР·РјРµРЅРёС‚СЊ СЃРѕСЃС‚РѕСЏРЅРёРµ СЂРµР¶РёРјР° РЅР°СЃС‚СЂРѕР№РєРё
             return;
         }
     }
@@ -346,7 +346,7 @@ void __fastcall TFormMain::NComputersClick(TObject *Sender)
 {
     std::unique_ptr <TForm> form;
 
-    // Доп. проверка для большей безопасности
+    // Р”РѕРї. РїСЂРѕРІРµСЂРєР° РґР»СЏ Р±РѕР»СЊС€РµР№ Р±РµР·РѕРїР°СЃРЅРѕСЃС‚Рё
     if ( !EnableConfig ) return;
 
     try
@@ -379,7 +379,7 @@ void __fastcall TFormMain::NOptionsPasswordClick(TObject *Sender)
 		form.reset(new TFormOptionsPass(0));
 		if ( !form->Execute(Options.get(), Left+100, Top+50, true) ) return;
 		if ( Options->Save() ) return;
-//        ShellState->State|=mssErrorConfig; SetShell();  /// не имеет смысла и опасно
+//        ShellState->State|=mssErrorConfig; SetShell();  /// РЅРµ РёРјРµРµС‚ СЃРјС‹СЃР»Р° Рё РѕРїР°СЃРЅРѕ
         ResMessageBox(Handle,1,31,MB_APPLMODAL|MB_OK|MB_ICONERROR,Options->gLastErr());
     }
     catch (Exception &ex)
@@ -397,7 +397,7 @@ void __fastcall TFormMain::NUsersPasswordsClick(TObject *Sender)
 		form.reset(new TFormUserPass(0));
 		if ( !form->Execute(*Users, Left+100, Top+50, true) ) return;
 		if ( Users->Save() ) return;
-//        ShellState->State|=mssErrorConfig; SetShell();  /// не имеет смысла и опасно
+//        ShellState->State|=mssErrorConfig; SetShell();  /// РЅРµ РёРјРµРµС‚ СЃРјС‹СЃР»Р° Рё РѕРїР°СЃРЅРѕ
 		ResMessageBox(Handle,1,3,MB_APPLMODAL|MB_OK|MB_ICONERROR,Users->gLastErr());
 	}
 	catch (Exception &ex)
@@ -413,7 +413,7 @@ void __fastcall TFormMain::BitBtnRunClick(TObject *Sender)
 
 	try
 	{
-		// Создаем объект формы
+		// РЎРѕР·РґР°РµРј РѕР±СЉРµРєС‚ С„РѕСЂРјС‹
 		if ( (Sender==BitBtnRun)||(Sender==NCmpRun) )
 		{
 			form.reset(new TFormRun(0));
@@ -427,13 +427,13 @@ void __fastcall TFormMain::BitBtnRunClick(TObject *Sender)
 			form.reset(new TFormFine(0));
 		} else return;
 
-        // Задаем удобные координаты
+        // Р—Р°РґР°РµРј СѓРґРѕР±РЅС‹Рµ РєРѕРѕСЂРґРёРЅР°С‚С‹
         local_button_coord.x=PanelButtons->Left+BitBtnRun->Left-form->Width-2;
         local_button_coord.y=PanelButtons->Top+BitBtnRun->Top-40;
         local_button_coord=ClientToScreen(local_button_coord);
         form->Left=local_button_coord.x;
         form->Top=local_button_coord.y;
-        // Выводим
+        // Р’С‹РІРѕРґРёРј
         form->ShowModal();
     }
     catch (Exception &ex)
@@ -450,14 +450,14 @@ void __fastcall TFormMain::BitBtnExchangeClick(TObject *Sender)
         return;
     }
 
-	// Ищем описатели состояния компьютеров
+	// РС‰РµРј РѕРїРёСЃР°С‚РµР»Рё СЃРѕСЃС‚РѕСЏРЅРёСЏ РєРѕРјРїСЊСЋС‚РµСЂРѕРІ
 	TListItem *item=ListViewComputers->Selected;
 	auto *state1=reinterpret_cast<MStatesItem*>(item->Data);
 	item=ListViewComputers->GetNextItem(item,sdAll,TItemStates()<<isSelected);
 	auto *state2=reinterpret_cast<MStatesItem*>(item->Data);
 
-	// Проверяем возможно ли применить команду
-	// и не нужно ли поменять местами компьютеры
+	// РџСЂРѕРІРµСЂСЏРµРј РІРѕР·РјРѕР¶РЅРѕ Р»Рё РїСЂРёРјРµРЅРёС‚СЊ РєРѕРјР°РЅРґСѓ
+	// Рё РЅРµ РЅСѓР¶РЅРѕ Р»Рё РїРѕРјРµРЅСЏС‚СЊ РјРµСЃС‚Р°РјРё РєРѕРјРїСЊСЋС‚РµСЂС‹
 	if ( !state1->CmdExchange(*state2,true) )
 	{
 		if ( !state2->CmdExchange(*state1,true) )
@@ -469,7 +469,7 @@ void __fastcall TFormMain::BitBtnExchangeClick(TObject *Sender)
 	}
 
 	MTariffRunTimesItem time=state1->GetRunParam();
-	// Проверяем применим ли тот же тариф ко второму компьютеру
+	// РџСЂРѕРІРµСЂСЏРµРј РїСЂРёРјРµРЅРёРј Р»Рё С‚РѕС‚ Р¶Рµ С‚Р°СЂРёС„ РєРѕ РІС‚РѕСЂРѕРјСѓ РєРѕРјРїСЊСЋС‚РµСЂСѓ
 	auto iTariff=Tariffs->SrchUUID(time.TariffID);
 	if ( !((iTariff!=Tariffs->end()) && iTariff->CheckForComp(state2->Associated())) )
 	{
@@ -477,7 +477,7 @@ void __fastcall TFormMain::BitBtnExchangeClick(TObject *Sender)
         return;
     }
 
-    // Добавляем запись в лог
+    // Р”РѕР±Р°РІР»СЏРµРј Р·Р°РїРёСЃСЊ РІ Р»РѕРі
     if ( !Log->AddExchange(state1->Associated(),
                            state2->Associated()) )
     {
@@ -486,15 +486,15 @@ void __fastcall TFormMain::BitBtnExchangeClick(TObject *Sender)
         return;
     }
 
-    // Применяем команду
+    // РџСЂРёРјРµРЅСЏРµРј РєРѕРјР°РЅРґСѓ
     state1->CmdExchange(*state2,false);
-    // Сохраняем новые состояния в файле
+    // РЎРѕС…СЂР°РЅСЏРµРј РЅРѕРІС‹Рµ СЃРѕСЃС‚РѕСЏРЅРёСЏ РІ С„Р°Р№Р»Рµ
     if ( !States->Save() )
     {
         ShellState->State|=mssErrorState; SetShell();
         ResMessageBox(Handle,1,8,MB_APPLMODAL|MB_OK|MB_ICONERROR,States->gLastErr());
     }
-    // Обновляем список компьютеров
+    // РћР±РЅРѕРІР»СЏРµРј СЃРїРёСЃРѕРє РєРѕРјРїСЊСЋС‚РµСЂРѕРІ
     UpdateListViewComputers(false);
 }
 //---------------------------------------------------------------------------
@@ -510,25 +510,25 @@ void __fastcall TFormMain::BitBtnLockClick(TObject *Sender)
         Item=ListViewComputers->GetNextItem(Item,sdAll,is) )
     {
         auto *State=reinterpret_cast<MStatesItem*>(Item->Data);
-        // Проверяем возможно ли применить команду
+        // РџСЂРѕРІРµСЂСЏРµРј РІРѕР·РјРѕР¶РЅРѕ Р»Рё РїСЂРёРјРµРЅРёС‚СЊ РєРѕРјР°РЅРґСѓ
         if ( !State->CmdLock(lock,true) ) continue;
-        // Добавляем запись в лог
+        // Р”РѕР±Р°РІР»СЏРµРј Р·Р°РїРёСЃСЊ РІ Р»РѕРі
         if ( !Log->AddLock(State->Associated(),lock) )
         {
             ShellState->State|=mssErrorLog; SetShell();
             ResMessageBox(Handle,1,5,MB_APPLMODAL|MB_OK|MB_ICONERROR,Log->gLastErr());
             break;
         }
-        // Применяем команду
+        // РџСЂРёРјРµРЅСЏРµРј РєРѕРјР°РЅРґСѓ
         State->CmdLock(lock,false);
     }
-    // Сохраняем новые состояния в файле
+    // РЎРѕС…СЂР°РЅСЏРµРј РЅРѕРІС‹Рµ СЃРѕСЃС‚РѕСЏРЅРёСЏ РІ С„Р°Р№Р»Рµ
     if ( !States->Save() )
     {
         ShellState->State|=mssErrorState; SetShell();
         ResMessageBox(Handle,1,8,MB_APPLMODAL|MB_OK|MB_ICONERROR,States->gLastErr());
     }
-    // Обновляем список компьютеров
+    // РћР±РЅРѕРІР»СЏРµРј СЃРїРёСЃРѕРє РєРѕРјРїСЊСЋС‚РµСЂРѕРІ
     UpdateListViewComputers(false);
 }
 //---------------------------------------------------------------------------
@@ -557,25 +557,25 @@ void __fastcall TFormMain::NRebootClick(TObject *Sender)
         Item=ListViewComputers->GetNextItem(Item,sdAll,is) )
     {
         auto *State=reinterpret_cast<MStatesItem*>(Item->Data);
-        // Проверяем возможно ли применить команду
+        // РџСЂРѕРІРµСЂСЏРµРј РІРѕР·РјРѕР¶РЅРѕ Р»Рё РїСЂРёРјРµРЅРёС‚СЊ РєРѕРјР°РЅРґСѓ
         if ( !State->CmdReboot(true) ) continue;
-        // Добавляем запись в лог
+        // Р”РѕР±Р°РІР»СЏРµРј Р·Р°РїРёСЃСЊ РІ Р»РѕРі
         if ( !Log->AddReboot(State->Associated()) )
         {
             ShellState->State|=mssErrorLog; SetShell();
             ResMessageBox(Handle,1,5,MB_APPLMODAL|MB_OK|MB_ICONERROR,Log->gLastErr());
             break;
         }
-        // Применяем команду
+        // РџСЂРёРјРµРЅСЏРµРј РєРѕРјР°РЅРґСѓ
         State->CmdReboot(false);
     }
-    // Сохраняем новые состояния в файле
+    // РЎРѕС…СЂР°РЅСЏРµРј РЅРѕРІС‹Рµ СЃРѕСЃС‚РѕСЏРЅРёСЏ РІ С„Р°Р№Р»Рµ
     if ( !States->Save() )
     {
         ShellState->State|=mssErrorState; SetShell();
         ResMessageBox(Handle,1,8,MB_APPLMODAL|MB_OK|MB_ICONERROR,States->gLastErr());
     }
-    // Обновляем список компьютеров
+    // РћР±РЅРѕРІР»СЏРµРј СЃРїРёСЃРѕРє РєРѕРјРїСЊСЋС‚РµСЂРѕРІ
     UpdateListViewComputers(false);
 }
 //---------------------------------------------------------------------------
@@ -586,25 +586,25 @@ void __fastcall TFormMain::NPowerOnClick(TObject *Sender)
         Item=ListViewComputers->GetNextItem(Item,sdAll,is) )
     {
         auto *State=reinterpret_cast<MStatesItem*>(Item->Data);
-        // Проверяем возможно ли применить команду
+        // РџСЂРѕРІРµСЂСЏРµРј РІРѕР·РјРѕР¶РЅРѕ Р»Рё РїСЂРёРјРµРЅРёС‚СЊ РєРѕРјР°РЅРґСѓ
         if ( !State->CmdPowerOn(true) ) continue;
-        // Добавляем запись в лог
+        // Р”РѕР±Р°РІР»СЏРµРј Р·Р°РїРёСЃСЊ РІ Р»РѕРі
         if ( !Log->AddPowerOn(State->Associated()) )
         {
             ShellState->State|=mssErrorLog; SetShell();
             ResMessageBox(Handle,1,5,MB_APPLMODAL|MB_OK|MB_ICONERROR,Log->gLastErr());
             break;
         }
-        // Применяем команду
+        // РџСЂРёРјРµРЅСЏРµРј РєРѕРјР°РЅРґСѓ
         State->CmdPowerOn(false);
     }
-    // Сохраняем новые состояния в файле
+    // РЎРѕС…СЂР°РЅСЏРµРј РЅРѕРІС‹Рµ СЃРѕСЃС‚РѕСЏРЅРёСЏ РІ С„Р°Р№Р»Рµ
     if ( !States->Save() )
     {
         ShellState->State|=mssErrorState; SetShell();
         ResMessageBox(Handle,1,8,MB_APPLMODAL|MB_OK|MB_ICONERROR,States->gLastErr());
     }
-    // Обновляем список компьютеров
+    // РћР±РЅРѕРІР»СЏРµРј СЃРїРёСЃРѕРє РєРѕРјРїСЊСЋС‚РµСЂРѕРІ
     UpdateListViewComputers(false);
 }
 //---------------------------------------------------------------------------
@@ -615,25 +615,25 @@ void __fastcall TFormMain::NShutdownClick(TObject *Sender)
         Item=ListViewComputers->GetNextItem(Item,sdAll,is) )
     {
         auto *State=reinterpret_cast<MStatesItem*>(Item->Data);
-        // Проверяем возможно ли применить команду
+        // РџСЂРѕРІРµСЂСЏРµРј РІРѕР·РјРѕР¶РЅРѕ Р»Рё РїСЂРёРјРµРЅРёС‚СЊ РєРѕРјР°РЅРґСѓ
         if ( !State->CmdShutdown(true) ) continue;
-        // Добавляем запись в лог
+        // Р”РѕР±Р°РІР»СЏРµРј Р·Р°РїРёСЃСЊ РІ Р»РѕРі
         if ( !Log->AddShutdown(State->Associated()) )
         {
             ShellState->State|=mssErrorLog; SetShell();
             ResMessageBox(Handle,1,5,MB_APPLMODAL|MB_OK|MB_ICONERROR,Log->gLastErr());
             break;
         }
-        // Применяем команду
+        // РџСЂРёРјРµРЅСЏРµРј РєРѕРјР°РЅРґСѓ
         State->CmdShutdown(false);
     }
-    // Сохраняем новые состояния в файле
+    // РЎРѕС…СЂР°РЅСЏРµРј РЅРѕРІС‹Рµ СЃРѕСЃС‚РѕСЏРЅРёСЏ РІ С„Р°Р№Р»Рµ
     if ( !States->Save() )
     {
         ShellState->State|=mssErrorState; SetShell();
         ResMessageBox(Handle,1,8,MB_APPLMODAL|MB_OK|MB_ICONERROR,States->gLastErr());
     }
-    // Обновляем список компьютеров
+    // РћР±РЅРѕРІР»СЏРµРј СЃРїРёСЃРѕРє РєРѕРјРїСЊСЋС‚РµСЂРѕРІ
     UpdateListViewComputers(false);
 }
 //---------------------------------------------------------------------------
@@ -649,31 +649,31 @@ void __fastcall TFormMain::NPauseClick(TObject *Sender)
         Item=ListViewComputers->GetNextItem(Item,sdAll,is) )
     {
         auto *State=reinterpret_cast<MStatesItem*>(Item->Data);
-        // Проверяем возможно ли применить команду
+        // РџСЂРѕРІРµСЂСЏРµРј РІРѕР·РјРѕР¶РЅРѕ Р»Рё РїСЂРёРјРµРЅРёС‚СЊ РєРѕРјР°РЅРґСѓ
         if ( !State->CmdPause(pause,true) ) continue;
-        // Добавляем запись в лог
+        // Р”РѕР±Р°РІР»СЏРµРј Р·Р°РїРёСЃСЊ РІ Р»РѕРі
         if ( !Log->AddPause(State->Associated(),pause) )
         {
             ShellState->State|=mssErrorLog; SetShell();
             ResMessageBox(Handle,1,5,MB_APPLMODAL|MB_OK|MB_ICONERROR,Log->gLastErr());
             break;
         }
-        // Применяем команду
+        // РџСЂРёРјРµРЅСЏРµРј РєРѕРјР°РЅРґСѓ
         State->CmdPause(pause,false);
     }
-    // Сохраняем новые состояния в файле
+    // РЎРѕС…СЂР°РЅСЏРµРј РЅРѕРІС‹Рµ СЃРѕСЃС‚РѕСЏРЅРёСЏ РІ С„Р°Р№Р»Рµ
     if ( !States->Save() )
     {
         ShellState->State|=mssErrorState; SetShell();
         ResMessageBox(Handle,1,8,MB_APPLMODAL|MB_OK|MB_ICONERROR,States->gLastErr());
     }
-    // Обновляем список компьютеров
+    // РћР±РЅРѕРІР»СЏРµРј СЃРїРёСЃРѕРє РєРѕРјРїСЊСЋС‚РµСЂРѕРІ
     UpdateListViewComputers(false);
 }
 //---------------------------------------------------------------------------
 void __fastcall TFormMain::NOpenClick(TObject *Sender)
 {
-    // Доп. проверка для большей безопасности
+    // Р”РѕРї. РїСЂРѕРІРµСЂРєР° РґР»СЏ Р±РѕР»СЊС€РµР№ Р±РµР·РѕРїР°СЃРЅРѕСЃС‚Рё
     if ( !EnableConfig ) return;
 
     bool open;
@@ -686,25 +686,25 @@ void __fastcall TFormMain::NOpenClick(TObject *Sender)
         Item=ListViewComputers->GetNextItem(Item,sdAll,is) )
     {
         auto *State=reinterpret_cast<MStatesItem*>(Item->Data);
-        // Проверяем возможно ли применить команду
+        // РџСЂРѕРІРµСЂСЏРµРј РІРѕР·РјРѕР¶РЅРѕ Р»Рё РїСЂРёРјРµРЅРёС‚СЊ РєРѕРјР°РЅРґСѓ
         if ( !State->CmdOpen(open,true) ) continue;
-        // Добавляем запись в лог
+        // Р”РѕР±Р°РІР»СЏРµРј Р·Р°РїРёСЃСЊ РІ Р»РѕРі
         if ( !Log->AddOpen(State->Associated(),open) )
         {
             ShellState->State|=mssErrorLog; SetShell();
             ResMessageBox(Handle,1,5,MB_APPLMODAL|MB_OK|MB_ICONERROR,Log->gLastErr());
             break;
         }
-        // Применяем команду
+        // РџСЂРёРјРµРЅСЏРµРј РєРѕРјР°РЅРґСѓ
         State->CmdOpen(open,false);
     }
-    // Сохраняем новые состояния в файле
+    // РЎРѕС…СЂР°РЅСЏРµРј РЅРѕРІС‹Рµ СЃРѕСЃС‚РѕСЏРЅРёСЏ РІ С„Р°Р№Р»Рµ
     if ( !States->Save() )
     {
         ShellState->State|=mssErrorState; SetShell();
         ResMessageBox(Handle,1,8,MB_APPLMODAL|MB_OK|MB_ICONERROR,States->gLastErr());
     }
-    // Обновляем список компьютеров
+    // РћР±РЅРѕРІР»СЏРµРј СЃРїРёСЃРѕРє РєРѕРјРїСЊСЋС‚РµСЂРѕРІ
     UpdateListViewComputers(false);
 }
 //---------------------------------------------------------------------------
@@ -732,7 +732,7 @@ void __fastcall TFormMain::NFilterAllClick(TObject *Sender)
         NCmpFilterService->Default=true;
         NCmpFilterService->Checked=true;
     } else return;
-    // Обновляем список компьютеров
+    // РћР±РЅРѕРІР»СЏРµРј СЃРїРёСЃРѕРє РєРѕРјРїСЊСЋС‚РµСЂРѕРІ
     UpdateListViewComputers(true);
 }
 //---------------------------------------------------------------------------
@@ -785,7 +785,7 @@ void TFormMain::SetListViewComputersLine(TListItem *Item_, MStatesInfo *Info_)
     wchar_t line[50];
 	int icon;
 
-	// Номер компьютера
+	// РќРѕРјРµСЂ РєРѕРјРїСЊСЋС‚РµСЂР°
 	if ( Info_->Changes&mdcNumber )
 	{
 		auto iComp=Computers->Search(Info_->Number);
@@ -795,7 +795,7 @@ void TFormMain::SetListViewComputersLine(TListItem *Item_, MStatesInfo *Info_)
 			L"%i", Info_->Number);
         SubItems->Strings[0]=line;
     }
-    // Состояние сети
+    // РЎРѕСЃС‚РѕСЏРЅРёРµ СЃРµС‚Рё
     if ( Info_->Changes&mdcNetState )
     {
         unsigned int NetState=Info_->NetState;
@@ -804,35 +804,35 @@ void TFormMain::SetListViewComputersLine(TListItem *Item_, MStatesInfo *Info_)
         else icon=14;
         Item_->SubItemImages[1]=icon;
     }
-    // Режим работы
+    // Р РµР¶РёРј СЂР°Р±РѕС‚С‹
     if ( Info_->Changes&mdcState )
     {
         unsigned int State=Info_->State;
-		if ( State&mcsOpen ) { icon=9; wcscpy(line, L"настройка"); }
-		else if ( State&mcsPause ) { icon=8; wcscpy(line, L"приостановлен"); }
-		else if ( State&mcsLock ) { icon=7; wcscpy(line, L"Прикрыт !"); }
-		else if ( State&mcsFine ) { icon=6; wcscpy(line, L"Штраф !!!"); }
-		else if ( State&mcsWork ) { icon=5; wcscpy(line, L"Работа"); }
-		else if ( State&mcsFree ) { icon=4; wcscpy(line, L"СВОБОДЕН"); }
+		if ( State&mcsOpen ) { icon=9; wcscpy(line, L"РЅР°СЃС‚СЂРѕР№РєР°"); }
+		else if ( State&mcsPause ) { icon=8; wcscpy(line, L"РїСЂРёРѕСЃС‚Р°РЅРѕРІР»РµРЅ"); }
+		else if ( State&mcsLock ) { icon=7; wcscpy(line, L"РџСЂРёРєСЂС‹С‚ !"); }
+		else if ( State&mcsFine ) { icon=6; wcscpy(line, L"РЁС‚СЂР°С„ !!!"); }
+		else if ( State&mcsWork ) { icon=5; wcscpy(line, L"Р Р°Р±РѕС‚Р°"); }
+		else if ( State&mcsFree ) { icon=4; wcscpy(line, L"РЎР’РћР‘РћР”Р•Рќ"); }
 		else { icon=-1; wcscpy(line, L""); }
         Item_->SubItemImages[2]=icon;
         SubItems->Strings[2]=line;
     }
-    // Название тарифа
+    // РќР°Р·РІР°РЅРёРµ С‚Р°СЂРёС„Р°
     if ( Info_->Changes&mdcTariff )
     {
 		auto iTariff=Tariffs->SrchUUID(Info_->TariffID);
 		if ( iTariff!=Tariffs->end() ) SubItems->Strings[3]=iTariff->Name.c_str();
         else SubItems->Strings[3]=L"";
     }
-    // Время работы
+    // Р’СЂРµРјСЏ СЂР°Р±РѕС‚С‹
     if ( Info_->Changes&mdcWorkTime )
     {
         if ( Info_->State&mcsWork )
         {
 			swprintf(
 				line, sizeof(line)/sizeof(line[0]),
-				L"%i час. %.2i мин.",
+				L"%i С‡Р°СЃ. %.2i РјРёРЅ.",
 				Info_->WorkTime/60,
 				Info_->WorkTime%60);
             SubItems->Strings[4]=line;
@@ -843,7 +843,7 @@ void TFormMain::SetListViewComputersLine(TListItem *Item_, MStatesInfo *Info_)
             SubItems->Strings[6]=L"";
         }
     }
-    // Сколько времени осталось работать и до скольки
+    // РЎРєРѕР»СЊРєРѕ РІСЂРµРјРµРЅРё РѕСЃС‚Р°Р»РѕСЃСЊ СЂР°Р±РѕС‚Р°С‚СЊ Рё РґРѕ СЃРєРѕР»СЊРєРё
     if ( Info_->State&mcsWork )
     {
 		swprintf(
@@ -858,14 +858,14 @@ void TFormMain::SetListViewComputersLine(TListItem *Item_, MStatesInfo *Info_)
 			Info_->EndWorkTime%60);
         SubItems->Strings[6]=line;
     }
-    // Время штрафа
+    // Р’СЂРµРјСЏ С€С‚СЂР°С„Р°
     if ( Info_->Changes&mdcFineTime )
     {
         if ( Info_->State&mcsFine )
         {
 			swprintf(
 				line, sizeof(line)/sizeof(line[0]),
-				L"%i мин.",
+				L"%i РјРёРЅ.",
 				Info_->FineTime);
 			SubItems->Strings[7]=line;
         } else
@@ -874,7 +874,7 @@ void TFormMain::SetListViewComputersLine(TListItem *Item_, MStatesInfo *Info_)
 			SubItems->Strings[8]=L"";
 		}
 	}
-	// Сколько времени штрафа осталось
+	// РЎРєРѕР»СЊРєРѕ РІСЂРµРјРµРЅРё С€С‚СЂР°С„Р° РѕСЃС‚Р°Р»РѕСЃСЊ
 	if ( Info_->State&mcsFine )
 	{
 		swprintf(
@@ -893,15 +893,15 @@ void TFormMain::UpdateListViewComputers(bool Full_)
 
     if ( Full_ ) ListViewComputers->Items->Clear();
 
-    // Убираем из списка компьютеры, не подходящие под фильтр. Добавляем новые.
+    // РЈР±РёСЂР°РµРј РёР· СЃРїРёСЃРєР° РєРѕРјРїСЊСЋС‚РµСЂС‹, РЅРµ РїРѕРґС…РѕРґСЏС‰РёРµ РїРѕРґ С„РёР»СЊС‚СЂ. Р”РѕР±Р°РІР»СЏРµРј РЅРѕРІС‹Рµ.
 	for ( auto &State: *States )
 	{
 		Info=State.GetInfo();
 		Item=ListViewComputers->FindData(0,&State,true,false);
-		// Проверяем подходит ли компьютер под выставленный фильтр
+		// РџСЂРѕРІРµСЂСЏРµРј РїРѕРґС…РѕРґРёС‚ Р»Рё РєРѕРјРїСЊСЋС‚РµСЂ РїРѕРґ РІС‹СЃС‚Р°РІР»РµРЅРЅС‹Р№ С„РёР»СЊС‚СЂ
 		if ( CheckFilter(&Info,Options->FilterFreeTime) )
 		{
-			// Если компьютер не занесен в список, то добавляем его
+			// Р•СЃР»Рё РєРѕРјРїСЊСЋС‚РµСЂ РЅРµ Р·Р°РЅРµСЃРµРЅ РІ СЃРїРёСЃРѕРє, С‚Рѕ РґРѕР±Р°РІР»СЏРµРј РµРіРѕ
 			if ( !Item )
 			{
 				Item=ListViewComputers->Items->Add();
@@ -913,7 +913,7 @@ void TFormMain::UpdateListViewComputers(bool Full_)
 			if ( Item ) Item->Delete();
 			continue;
 		}
-		// Обновляем информацию в таблице
+		// РћР±РЅРѕРІР»СЏРµРј РёРЅС„РѕСЂРјР°С†РёСЋ РІ С‚Р°Р±Р»РёС†Рµ
 		if ( Full_ ) Info.Changes=mdcAll;
 		SetListViewComputersLine(Item,&Info);
 	}
@@ -922,7 +922,7 @@ void TFormMain::UpdateListViewComputers(bool Full_)
 void TFormMain::SetShell()
 {
 
-	// Общие операции
+	// РћР±С‰РёРµ РѕРїРµСЂР°С†РёРё
 	bool enable=(ShellState->State&mssConfig)||(ShellState->User!=0);
 	enable=ShellState->State&(mssErrorState|mssErrorConfig)? false: enable;
 	BitBtnRun->Enabled=enable;          NCmpRun->Enabled=enable;
@@ -932,13 +932,13 @@ void TFormMain::SetShell()
 	BitBtnLock->Enabled=enable;         NCmpLock->Enabled=enable;
 	BitBtnUnLock->Enabled=enable;       NCmpUnLock->Enabled=enable;
 	BitBtnAdditionals->Enabled=enable;
-	// Приостановка компьютеров
+	// РџСЂРёРѕСЃС‚Р°РЅРѕРІРєР° РєРѕРјРїСЊСЋС‚РµСЂРѕРІ
 	NPause->Enabled=((ShellState->User!=0)&&(Options->UsersRights&murPause))||
 		(ShellState->State&mssConfig);
 	NRun->Enabled=NPause->Enabled;
 
-	// Настройки, доступные только сисадмину
-	NConfigOpen->Caption=ShellState->State&mssConfig? "Закрыть": "Открыть...";
+	// РќР°СЃС‚СЂРѕР№РєРё, РґРѕСЃС‚СѓРїРЅС‹Рµ С‚РѕР»СЊРєРѕ СЃРёСЃР°РґРјРёРЅСѓ
+	NConfigOpen->Caption=ShellState->State&mssConfig? "Р—Р°РєСЂС‹С‚СЊ": "РћС‚РєСЂС‹С‚СЊ...";
 	enable=(ShellState->State&mssConfig)&&(!(ShellState->State&mssErrorLog));
 	EnableConfig=enable;
 	NAdmin->Enabled=enable;
@@ -950,26 +950,26 @@ void TFormMain::SetShell()
 	NClient->Enabled=enable;
 	NAuth->Enabled=enable;
 	BitBtnSystem->Enabled=enable;
-	// Общесистемные функции
+	// РћР±С‰РµСЃРёСЃС‚РµРјРЅС‹Рµ С„СѓРЅРєС†РёРё
 	NLogIn->Enabled=ShellState->User==0;
 	NLogOut->Enabled=ShellState->User!=0;
 //    NOptionsPassword->Enabled=!error;
 //    NUsersPasswords->Enabled=!error;
-	// Аварийный сброс лога
+	// РђРІР°СЂРёР№РЅС‹Р№ СЃР±СЂРѕСЃ Р»РѕРіР°
 	NLogReset->Enabled=(ShellState->State&mssConfig)&&(ShellState->State&mssErrorLog);
 
-	// Заголовок окна программы
+	// Р—Р°РіРѕР»РѕРІРѕРє РѕРєРЅР° РїСЂРѕРіСЂР°РјРјС‹
 	UnicodeString line=L"TLK - ";
 	auto iUser=Users->SrchUUID(ShellState->User);
 	if ( iUser!=Users->end() ) line+=iUser->Login.c_str();
-	else line+=L"смена не начата";
-    if ( ShellState->State&mssConfig ) line+=L" (открыты настройки)";
+	else line+=L"СЃРјРµРЅР° РЅРµ РЅР°С‡Р°С‚Р°";
+    if ( ShellState->State&mssConfig ) line+=L" (РѕС‚РєСЂС‹С‚С‹ РЅР°СЃС‚СЂРѕР№РєРё)";
     Caption=line;
-    // Строка состояния
+    // РЎС‚СЂРѕРєР° СЃРѕСЃС‚РѕСЏРЅРёСЏ
 	line=L"";
-	if ( ShellState->State&mssErrorConfig ) line+=L"Ошибка работы с конфигурацией, ";
-	if ( ShellState->State&mssErrorState ) line+=L"Не удалось сохранить последнее состояние, ";
-    if ( ShellState->State&mssErrorLog ) line+=L"Ошибка работы с логом, ";
+	if ( ShellState->State&mssErrorConfig ) line+=L"РћС€РёР±РєР° СЂР°Р±РѕС‚С‹ СЃ РєРѕРЅС„РёРіСѓСЂР°С†РёРµР№, ";
+	if ( ShellState->State&mssErrorState ) line+=L"РќРµ СѓРґР°Р»РѕСЃСЊ СЃРѕС…СЂР°РЅРёС‚СЊ РїРѕСЃР»РµРґРЅРµРµ СЃРѕСЃС‚РѕСЏРЅРёРµ, ";
+    if ( ShellState->State&mssErrorLog ) line+=L"РћС€РёР±РєР° СЂР°Р±РѕС‚С‹ СЃ Р»РѕРіРѕРј, ";
     StatusBar->SimpleText=line;
 }
 //---------------------------------------------------------------------------

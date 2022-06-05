@@ -1,4 +1,4 @@
-//---------------------------------------------------------------------------
+п»ї//---------------------------------------------------------------------------
 #ifndef UnitFinesH
 #define UnitFinesH
 //---------------------------------------------------------------------------
@@ -10,8 +10,8 @@
 class MFinesItem;
 class MFines;
 //---------------------------------------------------------------------------
-#define MAX_Fines           20      // Предел количества штрафов
-#define MAX_FineDescrLen    50      // Допустимая длина описания штрафа
+#define MAX_Fines           20      // РџСЂРµРґРµР» РєРѕР»РёС‡РµСЃС‚РІР° С€С‚СЂР°С„РѕРІ
+#define MAX_FineDescrLen    50      // Р”РѕРїСѓСЃС‚РёРјР°СЏ РґР»РёРЅР° РѕРїРёСЃР°РЅРёСЏ С€С‚СЂР°С„Р°
 //---------------------------------------------------------------------------
 class MFinesItem:
 	public MIDListItemSimple <
@@ -19,20 +19,20 @@ class MFinesItem:
 		MFinesItem>
 {
 public:
-	// Функции механизма сохранения/загрузки данных
+	// Р¤СѓРЅРєС†РёРё РјРµС…Р°РЅРёР·РјР° СЃРѕС…СЂР°РЅРµРЅРёСЏ/Р·Р°РіСЂСѓР·РєРё РґР°РЅРЅС‹С…
 	virtual std::size_t GetDataSize() const override;
 	virtual void *SetData(void *Data_) const override;
 	virtual const void *GetData(const void *Data_, const void *Limit_) override;
 
 public:
-	std::int16_t Time;				// Время штрафа
-	std::wstring Descr;             // Описание штрафа
+	std::int16_t Time;				// Р’СЂРµРјСЏ С€С‚СЂР°С„Р°
+	std::wstring Descr;             // РћРїРёСЃР°РЅРёРµ С€С‚СЂР°С„Р°
 
-	// Поддержка логов
+	// РџРѕРґРґРµСЂР¶РєР° Р»РѕРіРѕРІ
 	struct LogData
 	{
-		std::uint32_t UUID;			// ID-номер штрафа
-		std::wstring Descr;         // Описание штрафа
+		std::uint32_t UUID;			// ID-РЅРѕРјРµСЂ С€С‚СЂР°С„Р°
+		std::wstring Descr;         // РћРїРёСЃР°РЅРёРµ С€С‚СЂР°С„Р°
 	};
 
 	LogData gLogData() const

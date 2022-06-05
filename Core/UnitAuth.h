@@ -1,11 +1,11 @@
-//---------------------------------------------------------------------------
+п»ї//---------------------------------------------------------------------------
 #ifndef UnitAuthH
 #define UnitAuthH
 //---------------------------------------------------------------------------
 #define SHA_256                             // SHA_512
-#include "sha1.h"
-#include "sha2.h"
-#include "hmac.h"
+#include "..\Ext\BrianGladman\SHA\sha1.h"
+#include "..\Ext\BrianGladman\SHA\sha2.h"
+#include "..\Ext\BrianGladman\SHA\hmac.h"
 
 #include "UnitSLList.h"
 //---------------------------------------------------------------------------
@@ -22,7 +22,7 @@ class MAuth:
 	public MSLList <MAuth, MAuthStub>       /// private ?
 {
 public:
-    // Функции механизма сохранения/загрузки данных
+    // Р¤СѓРЅРєС†РёРё РјРµС…Р°РЅРёР·РјР° СЃРѕС…СЂР°РЅРµРЅРёСЏ/Р·Р°РіСЂСѓР·РєРё РґР°РЅРЅС‹С…
 	virtual std::size_t GetDataSize() const override;
 	virtual void *SetData(void *Data_) const override;
 	virtual const void *GetData(const void *Data_, const void *Limit_) override;

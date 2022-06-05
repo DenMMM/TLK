@@ -1,4 +1,4 @@
-//---------------------------------------------------------------------------
+п»ї//---------------------------------------------------------------------------
 #include <vcl.h>
 #include <cwchar>
 #pragma hdrstop
@@ -18,10 +18,10 @@ __fastcall TFormGames::TFormGames(TComponent* Owner)
 //---------------------------------------------------------------------------
 void TFormGames::ShowGames(unsigned Pages_)
 {
-    // Отфильтруем список программ от других флагов
+    // РћС‚С„РёР»СЊС‚СЂСѓРµРј СЃРїРёСЃРѕРє РїСЂРѕРіСЂР°РјРј РѕС‚ РґСЂСѓРіРёС… С„Р»Р°РіРѕРІ
     Pages_&=mgpAll;
 
-    // Если не заданы группы программ скроем окно
+    // Р•СЃР»Рё РЅРµ Р·Р°РґР°РЅС‹ РіСЂСѓРїРїС‹ РїСЂРѕРіСЂР°РјРј СЃРєСЂРѕРµРј РѕРєРЅРѕ
     if ( Pages_==mgpNone )
     {
         Tag=true; Close();
@@ -34,12 +34,12 @@ void TFormGames::ShowGames(unsigned Pages_)
 //---------------------------------------------------------------------------
 void TFormGames::UpdateGames(unsigned Pages_)
 {
-    // Очистим список программ и иконок
+    // РћС‡РёСЃС‚РёРј СЃРїРёСЃРѕРє РїСЂРѕРіСЂР°РјРј Рё РёРєРѕРЅРѕРє
     TreeViewGames->Items->Clear();
     ImageListGamesIcons->Clear();
     Games.Clear();
 
-    // Загрузим и добавим новые
+    // Р—Р°РіСЂСѓР·РёРј Рё РґРѕР±Р°РІРёРј РЅРѕРІС‹Рµ
     if ( Games.Load() )
     {
 		if ( Pages_&mgp1 ) AddGamesIndexToTree(Games,0,nullptr,ImageListGamesIcons);
@@ -57,7 +57,7 @@ void TFormGames::AddGamesToTree(const MGames &Games_,
 	TTreeNode *TreeNode_, TImageList *ImageList_)
 {
 	HICON icon;
-	wchar_t icon_file[MAX_PrgIconLength+1];    /// надо: [max(MAX_PrgCmdLength,MAX_PrgIconLength)+1]
+	wchar_t icon_file[MAX_PrgIconLength+1];    /// РЅР°РґРѕ: [max(MAX_PrgCmdLength,MAX_PrgIconLength)+1]
 	wchar_t *pos1, *pos2;
 
 	for ( const auto &Game: Games_ )
@@ -66,7 +66,7 @@ void TFormGames::AddGamesToTree(const MGames &Games_,
 			TreeViewGames->Items->AddChild(
 				TreeNode_,Game.Name.c_str());
 
-		// Извлечем иконку
+		// РР·РІР»РµС‡РµРј РёРєРѕРЅРєСѓ
 		wcscpy(
 			icon_file,
 			wcslen(Game.Icon.c_str())?
@@ -81,7 +81,7 @@ void TFormGames::AddGamesToTree(const MGames &Games_,
 			icon=::ExtractIcon(nullptr, pos1+1, 0);
 		}
 
-		// Добавим ее в дерево со списком игр
+		// Р”РѕР±Р°РІРёРј РµРµ РІ РґРµСЂРµРІРѕ СЃРѕ СЃРїРёСЃРєРѕРј РёРіСЂ
 		if ( (icon==nullptr)||(((int)icon)==1) )
 		{
 			NewTreeNode->ImageIndex=-1;
@@ -94,10 +94,10 @@ void TFormGames::AddGamesToTree(const MGames &Games_,
 				NewTreeNode->ImageIndex;
 		}
 
-		// Командная строка для запуска
+		// РљРѕРјР°РЅРґРЅР°СЏ СЃС‚СЂРѕРєР° РґР»СЏ Р·Р°РїСѓСЃРєР°
 		NewTreeNode->Data=
-			const_cast<wchar_t*>(Game.Command.c_str());     /// безопасно ???
-		// Подуровни дерева
+			const_cast<wchar_t*>(Game.Command.c_str());     /// Р±РµР·РѕРїР°СЃРЅРѕ ???
+		// РџРѕРґСѓСЂРѕРІРЅРё РґРµСЂРµРІР°
 		AddGamesToTree(*Game.upSubGames,NewTreeNode,ImageList_);
 	}
 }
@@ -106,10 +106,10 @@ void TFormGames::AddGamesIndexToTree(const MGames &Games_, size_t Index_,
 	TTreeNode *TreeNode_, TImageList *ImageList_)
 {
 	const MGamesItem *Item=nullptr;
-	// Попытаемся взять адрес MGames по номеру вкладки
+	// РџРѕРїС‹С‚Р°РµРјСЃСЏ РІР·СЏС‚СЊ Р°РґСЂРµСЃ MGames РїРѕ РЅРѕРјРµСЂСѓ РІРєР»Р°РґРєРё
 	try  { Item=&Games_.GetItem(Index_); }
 	catch (std::out_of_range &e) { return; }
-	// Добавим содержимое его SubGames в список программ
+	// Р”РѕР±Р°РІРёРј СЃРѕРґРµСЂР¶РёРјРѕРµ РµРіРѕ SubGames РІ СЃРїРёСЃРѕРє РїСЂРѕРіСЂР°РјРј
 	if ( !Item->upSubGames ) return;
 	AddGamesToTree(*Item->upSubGames,TreeNode_,ImageList_);
 }
@@ -121,7 +121,7 @@ void __fastcall TFormGames::FormCreate(TObject *Sender)
 	TreeViewGames->DoubleBuffered=true;
 	TreeViewGames->Font->Color=(TColor)0x02D2C66F;
 
-	// Настраиваем пути для файлов
+	// РќР°СЃС‚СЂР°РёРІР°РµРј РїСѓС‚Рё РґР»СЏ С„Р°Р№Р»РѕРІ
 	UnicodeString GmsFile=
 		ExtractFilePath(Application->ExeName)+L"\\TLK.GMS";
 	Games.SetDefaultFile(GmsFile.c_str(),ENC_Code);
@@ -135,7 +135,7 @@ void __fastcall TFormGames::FormCloseQuery(TObject *Sender, bool &CanClose)
 void __fastcall TFormGames::FormClose(TObject *Sender,
       TCloseAction &Action)
 {
-    // Очистим список программ и иконок
+    // РћС‡РёСЃС‚РёРј СЃРїРёСЃРѕРє РїСЂРѕРіСЂР°РјРј Рё РёРєРѕРЅРѕРє
     TreeViewGames->Items->Clear();
     ImageListGamesIcons->Clear();
     Games.Clear();
@@ -154,7 +154,7 @@ void __fastcall TFormGames::TreeViewGamesDblClick(TObject *Sender)
 	WideString path, command(reinterpret_cast<wchar_t*>(TreeNode->Data));
 	int pos;
 
-	// Извлечем из командной строки путь
+	// РР·РІР»РµС‡РµРј РёР· РєРѕРјР°РЅРґРЅРѕР№ СЃС‚СЂРѕРєРё РїСѓС‚СЊ
 	if ( (pos=command.Pos(L"\""))==0 ) return;
 	path=command.SubString(pos+1,command.Length()-pos);
 	if ( (pos=path.Pos(L"\""))==0 ) return;
@@ -166,7 +166,7 @@ void __fastcall TFormGames::TreeViewGamesDblClick(TObject *Sender)
 	memset(&si,0,sizeof(STARTUPINFO));
 	si.cb=sizeof(STARTUPINFO);
 
-	// Запустим приложение
+	// Р—Р°РїСѓСЃС‚РёРј РїСЂРёР»РѕР¶РµРЅРёРµ
 	if ( ::CreateProcess(
 		nullptr,
 		command.c_bstr(),

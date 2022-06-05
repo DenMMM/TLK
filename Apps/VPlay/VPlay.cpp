@@ -1,4 +1,4 @@
-//---------------------------------------------------------------------------
+ï»¿//---------------------------------------------------------------------------
 #include <vcl.h>
 #pragma hdrstop
 USERES("VPlay.res");
@@ -10,14 +10,14 @@ int WINAPI _tWinMain(HINSTANCE, HINSTANCE, LPTSTR, int)
     if ( (mutex==nullptr)||(::GetLastError()==ERROR_ALREADY_EXISTS) )
     {
         ::CloseHandle(mutex);
-        ::MessageBox(nullptr,L"Ïëåéåð óæå çàïóùåí !\nÈñïîëüçóéòå ALT+TAB äëÿ ïåðåêëþ÷åíèÿ ìåæäó ïðîãðàììàìè.",
-            L"VPlay - îøèáêà",MB_OK|MB_ICONERROR|MB_APPLMODAL);
+        ::MessageBox(nullptr,L"ÐŸÐ»ÐµÐ¹ÐµÑ€ ÑƒÐ¶Ðµ Ð·Ð°Ð¿ÑƒÑ‰ÐµÐ½ !\nÐ˜ÑÐ¿Ð¾Ð»ÑŒÐ·ÑƒÐ¹Ñ‚Ðµ ALT+TAB Ð´Ð»Ñ Ð¿ÐµÑ€ÐµÐºÐ»ÑŽÑ‡ÐµÐ½Ð¸Ñ Ð¼ÐµÐ¶Ð´Ñƒ Ð¿Ñ€Ð¾Ð³Ñ€Ð°Ð¼Ð¼Ð°Ð¼Ð¸.",
+            L"VPlay - Ð¾ÑˆÐ¸Ð±ÐºÐ°",MB_OK|MB_ICONERROR|MB_APPLMODAL);
         return 0;
     }
     try
     {
          Application->Initialize();
-         Application->Title = "TLK - Âèäåî-ïëåéåð";
+         Application->Title = "TLK - Ð’Ð¸Ð´ÐµÐ¾-Ð¿Ð»ÐµÐ¹ÐµÑ€";
          Application->CreateForm(__classid(TFormMain), &FormMain);
          Application->Run();
     }

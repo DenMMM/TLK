@@ -1,4 +1,4 @@
-//---------------------------------------------------------------------------
+ï»¿//---------------------------------------------------------------------------
 #include <vcl.h>
 #include <stdio.h>
 #pragma hdrstop
@@ -49,7 +49,7 @@ bool TFormUsersUpTime::Open(
 		if ( iUser==Users.end() ) Item->SubItems->Add(L"");
 		else Item->SubItems->Add(iUser->Name.c_str());
 
-		// Âðåìÿ
+		// Ð’Ñ€ÐµÐ¼Ñ
 		if ( Int64ToSystemTime(Time.BeginTime,ss_time_b) )
 		{
 			swprintf(
@@ -84,8 +84,8 @@ day:            pos+=swprintf(line+pos, L"%02d - ",ss_time_e.wDay);
 			time=Time.EndTime-Time.BeginTime;
 			hours=time/(60*60*10000000i64);
 			min=(time%(60*60*10000000i64))/(60*10000000i64);
-			pos=0; if ( hours>0 ) pos=swprintf(line+pos, L"%.2i ÷àñ. ",hours);
-			swprintf(line+pos, L"%.2i ìèí.",min);
+			pos=0; if ( hours>0 ) pos=swprintf(line+pos, L"%.2i Ñ‡Ð°Ñ. ",hours);
+			swprintf(line+pos, L"%.2i Ð¼Ð¸Ð½.",min);
 			Item->SubItems->Add(line);
 		} else
 		{
@@ -96,9 +96,9 @@ day:            pos+=swprintf(line+pos, L"%02d - ",ss_time_e.wDay);
 		Item->SubItems->Add(FloatToStrF(Time.Gains,ffCurrency,8,2));
 	}
 
-	Caption=UnicodeString(L"Ñìåíû  -  ")+File_.Name.c_str();
+	Caption=UnicodeString(L"Ð¡Ð¼ÐµÐ½Ñ‹  -  ")+File_.Name.c_str();
 	FormMain->WindowOpen(File_,this);
-	FormMain->WindowCaption(this, "Ñìåíû");         /// Unicode support ???
+	FormMain->WindowCaption(this, "Ð¡Ð¼ÐµÐ½Ñ‹");         /// Unicode support ???
 	return true;
 }
 //---------------------------------------------------------------------------
@@ -116,7 +116,7 @@ void __fastcall TFormUsersUpTime::ListViewUpTimesSelectItem(
 		Item=ListViewUpTimes->GetNextItem(Item,sdAll,is) )
 	{
 		auto &UpTime=*reinterpret_cast<const MUserUpTime*>(Item->Data);
-		// Èãíîðèðóåì åùå íå çàêðûòûå ñìåíû
+		// Ð˜Ð³Ð½Ð¾Ñ€Ð¸Ñ€ÑƒÐµÐ¼ ÐµÑ‰Ðµ Ð½Ðµ Ð·Ð°ÐºÑ€Ñ‹Ñ‚Ñ‹Ðµ ÑÐ¼ÐµÐ½Ñ‹
 		if ( UpTime.EndTime==0 ) continue;
         //
 		Time+=UpTime.EndTime-UpTime.BeginTime;
@@ -127,11 +127,11 @@ void __fastcall TFormUsersUpTime::ListViewUpTimesSelectItem(
 	min=(Time%(60*60*10000000i64))/(60*10000000i64);
 	pos=0; if ( hours>0 ) pos=swprintf(
 		line+pos, sizeof(line)/sizeof(line[0])-pos,
-		L"%.2i ÷àñ. ",
+		L"%.2i Ñ‡Ð°Ñ. ",
 		hours);
 	swprintf(
 		line+pos, sizeof(line)/sizeof(line[0])-pos,
-		L"%.2i ìèí.",
+		L"%.2i Ð¼Ð¸Ð½.",
 		min);
     LabelSelTime->Caption=line;
     LabelSelMoney->Caption=FloatToStrF(Money,ffCurrency,8,2);

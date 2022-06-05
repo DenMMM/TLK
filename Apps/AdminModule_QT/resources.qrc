@@ -1,0 +1,16 @@
+<RCC>
+    <qresource prefix="/">
+        <file>graphics/MarkerAqua.png</file>
+        <file>graphics/MarkerGreen.png</file>
+        <file>graphics/MarkerRed.png</file>
+        <file>graphics/MarkerYellow.png</file>
+        <file>graphics/IconFree.png</file>
+        <file>graphics/IconNotUsed.png</file>
+        <file>graphics/IconUserActive.png</file>
+        <file>graphics/IconUserInactive.png</file>
+        <file>graphics/BtnAqua.png</file>
+        <file>graphics/BtnGreen.png</file>
+        <file>graphics/BtnRed.png</file>
+        <file>graphics/BtnYellow.png</file>
+    </qresource>
+</RCC>

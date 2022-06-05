@@ -1,4 +1,4 @@
-//---------------------------------------------------------------------------
+п»ї//---------------------------------------------------------------------------
 #include <vcl.h>
 #include <stdio.h>
 #include <stdexcept>
@@ -26,80 +26,80 @@ void __fastcall TFormRun::FormShow(TObject *Sender)
     UseTimes.Clear();
     UseTariffs.Clear();
 
-    // Заполним список компьютеров и подходящих для них тарифов
+    // Р—Р°РїРѕР»РЅРёРј СЃРїРёСЃРѕРє РєРѕРјРїСЊСЋС‚РµСЂРѕРІ Рё РїРѕРґС…РѕРґСЏС‰РёС… РґР»СЏ РЅРёС… С‚Р°СЂРёС„РѕРІ
     TItemStates is=TItemStates()<<isSelected;
     for ( TListItem *item=FormMain->ListViewComputers->Selected; item;
         item=FormMain->ListViewComputers->GetNextItem(item,sdAll,is) )
     {
 		auto &state=*reinterpret_cast<const MStatesItem*>(item->Data);
-		// Запрашиваем параметры для запуска/добавления
+		// Р—Р°РїСЂР°С€РёРІР°РµРј РїР°СЂР°РјРµС‚СЂС‹ РґР»СЏ Р·Р°РїСѓСЃРєР°/РґРѕР±Р°РІР»РµРЅРёСЏ
 		MTariffRunTimesItem tmptime=state.GetRunParam();
-		// Проверяем можно ли поставить/добавить время
+		// РџСЂРѕРІРµСЂСЏРµРј РјРѕР¶РЅРѕ Р»Рё РїРѕСЃС‚Р°РІРёС‚СЊ/РґРѕР±Р°РІРёС‚СЊ РІСЂРµРјСЏ
 		if ( tmptime.MaxTime==0 ) continue;
-		// Дополнительные проверки, специфичные для режима использования диалога
+		// Р”РѕРїРѕР»РЅРёС‚РµР»СЊРЅС‹Рµ РїСЂРѕРІРµСЂРєРё, СЃРїРµС†РёС„РёС‡РЅС‹Рµ РґР»СЏ СЂРµР¶РёРјР° РёСЃРїРѕР»СЊР·РѕРІР°РЅРёСЏ РґРёР°Р»РѕРіР°
 		if ( RunMode )
 		{
-			// Проверяем не выставлен ли для компьютера тариф
+			// РџСЂРѕРІРµСЂСЏРµРј РЅРµ РІС‹СЃС‚Р°РІР»РµРЅ Р»Рё РґР»СЏ РєРѕРјРїСЊСЋС‚РµСЂР° С‚Р°СЂРёС„
 			if ( tmptime.TariffID!=0 ) continue;
 		} else
 		{
-			// Проверяем существует ли еще тариф, по которому был запущен компьютер,
-			// и применим ли до сих пор этот тариф к компьютеру
+			// РџСЂРѕРІРµСЂСЏРµРј СЃСѓС‰РµСЃС‚РІСѓРµС‚ Р»Рё РµС‰Рµ С‚Р°СЂРёС„, РїРѕ РєРѕС‚РѕСЂРѕРјСѓ Р±С‹Р» Р·Р°РїСѓС‰РµРЅ РєРѕРјРїСЊСЋС‚РµСЂ,
+			// Рё РїСЂРёРјРµРЅРёРј Р»Рё РґРѕ СЃРёС… РїРѕСЂ СЌС‚РѕС‚ С‚Р°СЂРёС„ Рє РєРѕРјРїСЊСЋС‚РµСЂСѓ
 			auto iTariff=Tariffs->SrchUUID(tmptime.TariffID);
 			if ( (iTariff==Tariffs->end())||
 				(!iTariff->CheckForComp(tmptime.Number)) ) continue;
-			// Добавляем тариф в список для использования, если он еще не добавлен
+			// Р”РѕР±Р°РІР»СЏРµРј С‚Р°СЂРёС„ РІ СЃРїРёСЃРѕРє РґР»СЏ РёСЃРїРѕР»СЊР·РѕРІР°РЅРёСЏ, РµСЃР»Рё РѕРЅ РµС‰Рµ РЅРµ РґРѕР±Р°РІР»РµРЅ
 			if ( UseTariffs.Search(tmptime.TariffID)==UseTariffs.end() )
 			{
 				UseTariffs.Add()=iTariff->GetInfo();
 			}
 		}
 
-		// Копируем параметры запуска/добавления
+		// РљРѕРїРёСЂСѓРµРј РїР°СЂР°РјРµС‚СЂС‹ Р·Р°РїСѓСЃРєР°/РґРѕР±Р°РІР»РµРЅРёСЏ
 		MTariffRunTimesItem& time=CompTimes.Add();
 		time=tmptime;
-		// Добавляем строку в список компьютеров и связываем с параметрами
+		// Р”РѕР±Р°РІР»СЏРµРј СЃС‚СЂРѕРєСѓ РІ СЃРїРёСЃРѕРє РєРѕРјРїСЊСЋС‚РµСЂРѕРІ Рё СЃРІСЏР·С‹РІР°РµРј СЃ РїР°СЂР°РјРµС‚СЂР°РјРё
 		TListItem *newitem=ListViewComputers->Items->Add();
 		newitem->Data=&time;
-		// Для удобства сразу выделяем компьютеры в таблице
+		// Р”Р»СЏ СѓРґРѕР±СЃС‚РІР° СЃСЂР°Р·Сѓ РІС‹РґРµР»СЏРµРј РєРѕРјРїСЊСЋС‚РµСЂС‹ РІ С‚Р°Р±Р»РёС†Рµ
 		if ( RunMode ) newitem->Selected=true;
 		SetListViewComputersLine(newitem);
 	}
 
     if ( RunMode )
     {
-        // Определяем абсолютное время открытия диалога
+        // РћРїСЂРµРґРµР»СЏРµРј Р°Р±СЃРѕР»СЋС‚РЅРѕРµ РІСЂРµРјСЏ РѕС‚РєСЂС‹С‚РёСЏ РґРёР°Р»РѕРіР°
         if ( RunMode ) GetLocalTimeInt64(OpenDialogTime);
-        // Берем список тарифов, пригодных для использования в это время
+        // Р‘РµСЂРµРј СЃРїРёСЃРѕРє С‚Р°СЂРёС„РѕРІ, РїСЂРёРіРѕРґРЅС‹С… РґР»СЏ РёСЃРїРѕР»СЊР·РѕРІР°РЅРёСЏ РІ СЌС‚Рѕ РІСЂРµРјСЏ
 		UseTariffs=Tariffs->GetForTime(OpenDialogTime);
     }
 
-    // Заносим в список тарифы, которые можно использовать в это время
-	// или с выбранными компьютерами (при добавлении времени)
+    // Р—Р°РЅРѕСЃРёРј РІ СЃРїРёСЃРѕРє С‚Р°СЂРёС„С‹, РєРѕС‚РѕСЂС‹Рµ РјРѕР¶РЅРѕ РёСЃРїРѕР»СЊР·РѕРІР°С‚СЊ РІ СЌС‚Рѕ РІСЂРµРјСЏ
+	// РёР»Рё СЃ РІС‹Р±СЂР°РЅРЅС‹РјРё РєРѕРјРїСЊСЋС‚РµСЂР°РјРё (РїСЂРё РґРѕР±Р°РІР»РµРЅРёРё РІСЂРµРјРµРЅРё)
 	for ( const auto &Info: UseTariffs )
 	{
 		ComboBoxTariff->Items->Add(Info.Name.c_str());
 	}
 
-    // Корректируем интерфейс в соответствии с режимом работы диалога
+    // РљРѕСЂСЂРµРєС‚РёСЂСѓРµРј РёРЅС‚РµСЂС„РµР№СЃ РІ СЃРѕРѕС‚РІРµС‚СЃС‚РІРёРё СЃ СЂРµР¶РёРјРѕРј СЂР°Р±РѕС‚С‹ РґРёР°Р»РѕРіР°
     if ( RunMode )
     {
-		Caption=L"Запуск компьютеров";
+		Caption=L"Р—Р°РїСѓСЃРє РєРѕРјРїСЊСЋС‚РµСЂРѕРІ";
 		ComboBoxTariff->Enabled=true;
-		BitBtnRun->Caption=L"Запустить";
+		BitBtnRun->Caption=L"Р—Р°РїСѓСЃС‚РёС‚СЊ";
 	} else
 	{
-		Caption=L"Добавление времени";
+		Caption=L"Р”РѕР±Р°РІР»РµРЅРёРµ РІСЂРµРјРµРЅРё";
 		ComboBoxTariff->Enabled=false;
-        BitBtnRun->Caption=L"Добавить";
+        BitBtnRun->Caption=L"Р”РѕР±Р°РІРёС‚СЊ";
     }
 
-    // Блокируем поле ввода времени до первого выбора тарифа
+    // Р‘Р»РѕРєРёСЂСѓРµРј РїРѕР»Рµ РІРІРѕРґР° РІСЂРµРјРµРЅРё РґРѕ РїРµСЂРІРѕРіРѕ РІС‹Р±РѕСЂР° С‚Р°СЂРёС„Р°
     ComboBoxTime->Enabled=false;
     ComboBoxTime->Color=clBtnFace;
     ComboBoxTime->Style=csSimple;
 
-    // Инициализируем таймер пользования диалогом
+    // РРЅРёС†РёР°Р»РёР·РёСЂСѓРµРј С‚Р°Р№РјРµСЂ РїРѕР»СЊР·РѕРІР°РЅРёСЏ РґРёР°Р»РѕРіРѕРј
     ProgressBarTime->Min=0;
     ProgressBarTime->Max=Options->CostDialogTime*60;
     ProgressBarTime->Position=0;
@@ -112,19 +112,19 @@ void __fastcall TFormRun::FormShow(TObject *Sender)
 		static_cast<TWinControl*>(ComboBoxTariff):
 		static_cast<TWinControl*>(ListViewComputers);
 
-	// Добавим энтропии
+	// Р”РѕР±Р°РІРёРј СЌРЅС‚СЂРѕРїРёРё
 	BasicRand.event();
 }
 //---------------------------------------------------------------------------
 void __fastcall TFormRun::FormClose(TObject *Sender, TCloseAction &Action)
 {
     TimerDialogLock->Enabled=false;
-    // Чистим интерфейсные элементы
+    // Р§РёСЃС‚РёРј РёРЅС‚РµСЂС„РµР№СЃРЅС‹Рµ СЌР»РµРјРµРЅС‚С‹
     ListViewComputers->Items->Clear();
     ComboBoxTariff->Clear();
     ComboBoxTime->Clear();
     LabelAllCost->Caption=L"";
-    // Очищаем буферы
+    // РћС‡РёС‰Р°РµРј Р±СѓС„РµСЂС‹
     CompTimes.Clear();
     UseTariffs.Clear();
 	UseTimes.Clear();
@@ -176,14 +176,14 @@ void __fastcall TFormRun::ListViewComputersSelectItem(TObject *Sender,
 //---------------------------------------------------------------------------
 void __fastcall TFormRun::ComboBoxTariffClick(TObject *Sender)
 {
-	// Определяем какой тариф был выбран
+	// РћРїСЂРµРґРµР»СЏРµРј РєР°РєРѕР№ С‚Р°СЂРёС„ Р±С‹Р» РІС‹Р±СЂР°РЅ
 	if ( RunMode ) SelTariffID=
 		UseTariffs.GetItem(ComboBoxTariff->ItemIndex).ID;
 
 	auto iTariff=Tariffs->SrchUUID(SelTariffID);
-	/// проверить 'iTariff==Tariffs->end()' ?
+	/// РїСЂРѕРІРµСЂРёС‚СЊ 'iTariff==Tariffs->end()' ?
 
-	// Задаем для выбранных компьютеров тариф, если он применим к ним
+	// Р—Р°РґР°РµРј РґР»СЏ РІС‹Р±СЂР°РЅРЅС‹С… РєРѕРјРїСЊСЋС‚РµСЂРѕРІ С‚Р°СЂРёС„, РµСЃР»Рё РѕРЅ РїСЂРёРјРµРЅРёРј Рє РЅРёРј
 	if ( RunMode )
 	{
 		TItemStates is=TItemStates()<<isSelected;
@@ -201,10 +201,10 @@ void __fastcall TFormRun::ComboBoxTariffClick(TObject *Sender)
 
 	ComboBoxTime->Clear();
 
-	// Запрашиваем для тарифа список пакетов
+	// Р—Р°РїСЂР°С€РёРІР°РµРј РґР»СЏ С‚Р°СЂРёС„Р° СЃРїРёСЃРѕРє РїР°РєРµС‚РѕРІ
 	UseTimes=iTariff->GetRunTimes(OpenDialogTime);
 
-	// Если пакетов для тарифа в это время нету, то запрещаем ввод времени
+	// Р•СЃР»Рё РїР°РєРµС‚РѕРІ РґР»СЏ С‚Р°СЂРёС„Р° РІ СЌС‚Рѕ РІСЂРµРјСЏ РЅРµС‚Сѓ, С‚Рѕ Р·Р°РїСЂРµС‰Р°РµРј РІРІРѕРґ РІСЂРµРјРµРЅРё
 	auto iTime=UseTimes.cbegin();
 	auto iEnd=UseTimes.cend();
 
@@ -218,7 +218,7 @@ void __fastcall TFormRun::ComboBoxTariffClick(TObject *Sender)
 	ComboBoxTime->Enabled=true;
 	ComboBoxTime->Color=clWindow;
 
-	// Позволяем ввод почасового времени
+	// РџРѕР·РІРѕР»СЏРµРј РІРІРѕРґ РїРѕС‡Р°СЃРѕРІРѕРіРѕ РІСЂРµРјРµРЅРё
 	if ( iTime->Type==mttHours )
 	{
 		auto iTemp=iTime; ++iTemp;
@@ -229,7 +229,7 @@ void __fastcall TFormRun::ComboBoxTariffClick(TObject *Sender)
 	{
 		ComboBoxTime->Style=csDropDownList;
 	}
-	// Заносим в список пакеты
+	// Р—Р°РЅРѕСЃРёРј РІ СЃРїРёСЃРѕРє РїР°РєРµС‚С‹
 	while ( iTime!=iEnd )
 	{
 		wchar_t line[30];
@@ -239,7 +239,7 @@ void __fastcall TFormRun::ComboBoxTariffClick(TObject *Sender)
 			case mttFlyPacket:
 				swprintf(
 					line, sizeof(line)/sizeof(line[0]),
-					L"На %i час. %.2i мин.",
+					L"РќР° %i С‡Р°СЃ. %.2i РјРёРЅ.",
 					iTime->SizeTime/60,
 					iTime->SizeTime%60);
 				break;
@@ -248,7 +248,7 @@ void __fastcall TFormRun::ComboBoxTariffClick(TObject *Sender)
 				EndTime=iTime->EndTime; if ( EndTime>=(24*60) ) EndTime-=24*60;
 				swprintf(
 					line, sizeof(line)/sizeof(line[0]),
-					L"С %i:%.2i до %i:%.2i",
+					L"РЎ %i:%.2i РґРѕ %i:%.2i",
 					iTime->BeginTime/60,
 					iTime->BeginTime%60,
 					EndTime/60,
@@ -262,7 +262,7 @@ void __fastcall TFormRun::ComboBoxTariffClick(TObject *Sender)
 		++iTime;
 	}
 
-	// Обновляем сведения об общей стоимости заказа
+	// РћР±РЅРѕРІР»СЏРµРј СЃРІРµРґРµРЅРёСЏ РѕР± РѕР±С‰РµР№ СЃС‚РѕРёРјРѕСЃС‚Рё Р·Р°РєР°Р·Р°
 	if ( RunMode ) UpdateFullCost();
 }
 //---------------------------------------------------------------------------
@@ -273,8 +273,8 @@ void __fastcall TFormRun::ComboBoxTimeClick(TObject *Sender)
 
 	ComboBoxTime->Color=clWindow;
 
-	// Проставляем для выбранных компьютеров время и тариф, если он применим к ним
-	// Рассчитываем стоимость
+	// РџСЂРѕСЃС‚Р°РІР»СЏРµРј РґР»СЏ РІС‹Р±СЂР°РЅРЅС‹С… РєРѕРјРїСЊСЋС‚РµСЂРѕРІ РІСЂРµРјСЏ Рё С‚Р°СЂРёС„, РµСЃР»Рё РѕРЅ РїСЂРёРјРµРЅРёРј Рє РЅРёРј
+	// Р Р°СЃСЃС‡РёС‚С‹РІР°РµРј СЃС‚РѕРёРјРѕСЃС‚СЊ
 	TItemStates is=TItemStates()<<isSelected;
 	for ( TListItem *Item=ListViewComputers->Selected; Item;
 		Item=ListViewComputers->GetNextItem(Item,sdAll,is) )
@@ -283,28 +283,28 @@ void __fastcall TFormRun::ComboBoxTimeClick(TObject *Sender)
 
 		if ( RunMode )
 		{
-			// Проверяем применим ли к компьютеру выбранный ранее тариф
+			// РџСЂРѕРІРµСЂСЏРµРј РїСЂРёРјРµРЅРёРј Р»Рё Рє РєРѕРјРїСЊСЋС‚РµСЂСѓ РІС‹Р±СЂР°РЅРЅС‹Р№ СЂР°РЅРµРµ С‚Р°СЂРёС„
 			if ( !iTariff->CheckForComp(Time.Number) ) continue;
 			//
-			// Задаем для компьютера тариф
+			// Р—Р°РґР°РµРј РґР»СЏ РєРѕРјРїСЊСЋС‚РµСЂР° С‚Р°СЂРёС„
 			Time.TariffID=SelTariffID;
 		} else
 		{
-			// Проверяем применим ли к компьютеру выбранный ранее тариф
+			// РџСЂРѕРІРµСЂСЏРµРј РїСЂРёРјРµРЅРёРј Р»Рё Рє РєРѕРјРїСЊСЋС‚РµСЂСѓ РІС‹Р±СЂР°РЅРЅС‹Р№ СЂР°РЅРµРµ С‚Р°СЂРёС„
 			if ( Time.TariffID!=SelTariffID ) continue;
 		}
-		// Задаем для компьютера параметры пакета
+		// Р—Р°РґР°РµРј РґР»СЏ РєРѕРјРїСЊСЋС‚РµСЂР° РїР°СЂР°РјРµС‚СЂС‹ РїР°РєРµС‚Р°
 		Time.Type=SelTime.Type;
 		Time.BeginTime=SelTime.BeginTime;
 		Time.EndTime=SelTime.EndTime;
 		Time.SizeTime=SelTime.SizeTime;
-		// Рассчитываем время работы и стоимость
+		// Р Р°СЃСЃС‡РёС‚С‹РІР°РµРј РІСЂРµРјСЏ СЂР°Р±РѕС‚С‹ Рё СЃС‚РѕРёРјРѕСЃС‚СЊ
 		iTariff->Cost(Time,Options->CostPrecision);
 		//
 		SetListViewComputersLine(Item);
 	}
 
-	// Обновляем сведения об общей стоимости заказа
+	// РћР±РЅРѕРІР»СЏРµРј СЃРІРµРґРµРЅРёСЏ РѕР± РѕР±С‰РµР№ СЃС‚РѕРёРјРѕСЃС‚Рё Р·Р°РєР°Р·Р°
 	UpdateFullCost();
 }
 //---------------------------------------------------------------------------
@@ -321,28 +321,28 @@ void __fastcall TFormRun::ComboBoxTimeChange(TObject *Sender)
 	if ( iTariff==Tariffs->end() ) return;
 
 	wcscpy(hours,ComboBoxTime->Text.c_str());
-	// Ищем в строке разделитель часов и минут
+	// РС‰РµРј РІ СЃС‚СЂРѕРєРµ СЂР°Р·РґРµР»РёС‚РµР»СЊ С‡Р°СЃРѕРІ Рё РјРёРЅСѓС‚
 	minutes=wcschr(hours,L':');
     //
     if ( minutes==nullptr )
     {
-        // Разбираем время как заданное только в минутах (вплоть до суток)
+        // Р Р°Р·Р±РёСЂР°РµРј РІСЂРµРјСЏ РєР°Рє Р·Р°РґР°РЅРЅРѕРµ С‚РѕР»СЊРєРѕ РІ РјРёРЅСѓС‚Р°С… (РІРїР»РѕС‚СЊ РґРѕ СЃСѓС‚РѕРє)
         if ( swscanf(hours,L"%d",&m)!=1 ) goto error; h=0;
     } else
     {
-        // Делим строку на две и разбираем по-отдельности
+        // Р”РµР»РёРј СЃС‚СЂРѕРєСѓ РЅР° РґРІРµ Рё СЂР°Р·Р±РёСЂР°РµРј РїРѕ-РѕС‚РґРµР»СЊРЅРѕСЃС‚Рё
         *(minutes++)=0;
 		if ( (swscanf(hours,L"%d",&h)!=1)||(h<0)||(h>24) ) goto error;
 		if ( *minutes==0 ) m=0;
         else if( (swscanf(minutes,L"%d",&m)!=1)||(m<0)||(m>59) ) goto error;
     }
-    // Подсчитываем желаемое время работы и проверяем его на ограничения
+    // РџРѕРґСЃС‡РёС‚С‹РІР°РµРј Р¶РµР»Р°РµРјРѕРµ РІСЂРµРјСЏ СЂР°Р±РѕС‚С‹ Рё РїСЂРѕРІРµСЂСЏРµРј РµРіРѕ РЅР° РѕРіСЂР°РЅРёС‡РµРЅРёСЏ
     time=h*60+m; if ( (time<=0)||(time>24*60) ) goto error;
 
     ComboBoxTime->Color=clWindow;
 
-    // Проставляем для выбранных компьютеров время и тариф, если он применим к ним
-    // Рассчитываем стоимость
+    // РџСЂРѕСЃС‚Р°РІР»СЏРµРј РґР»СЏ РІС‹Р±СЂР°РЅРЅС‹С… РєРѕРјРїСЊСЋС‚РµСЂРѕРІ РІСЂРµРјСЏ Рё С‚Р°СЂРёС„, РµСЃР»Рё РѕРЅ РїСЂРёРјРµРЅРёРј Рє РЅРёРј
+    // Р Р°СЃСЃС‡РёС‚С‹РІР°РµРј СЃС‚РѕРёРјРѕСЃС‚СЊ
     is=TItemStates()<<isSelected;
     for ( TListItem *Item=ListViewComputers->Selected; Item;
         Item=ListViewComputers->GetNextItem(Item,sdAll,is) )
@@ -350,26 +350,26 @@ void __fastcall TFormRun::ComboBoxTimeChange(TObject *Sender)
 		Time=reinterpret_cast<MTariffRunTimesItem*>(Item->Data);
 		if ( RunMode )
         {
-            // Проверяем применим ли к компьютеру выбранный ранее тариф
+            // РџСЂРѕРІРµСЂСЏРµРј РїСЂРёРјРµРЅРёРј Р»Рё Рє РєРѕРјРїСЊСЋС‚РµСЂСѓ РІС‹Р±СЂР°РЅРЅС‹Р№ СЂР°РЅРµРµ С‚Р°СЂРёС„
             if ( !iTariff->CheckForComp(Time->Number) ) continue;
             //
-            // Задаем для компьютера тариф
+            // Р—Р°РґР°РµРј РґР»СЏ РєРѕРјРїСЊСЋС‚РµСЂР° С‚Р°СЂРёС„
             Time->TariffID=SelTariffID;
         } else
         {
-            // Проверяем применим ли к компьютеру выбранный ранее тариф
+            // РџСЂРѕРІРµСЂСЏРµРј РїСЂРёРјРµРЅРёРј Р»Рё Рє РєРѕРјРїСЊСЋС‚РµСЂСѓ РІС‹Р±СЂР°РЅРЅС‹Р№ СЂР°РЅРµРµ С‚Р°СЂРёС„
             if ( Time->TariffID!=SelTariffID ) continue;
         }
-        // Задаем для компьютера параметры пакета
+        // Р—Р°РґР°РµРј РґР»СЏ РєРѕРјРїСЊСЋС‚РµСЂР° РїР°СЂР°РјРµС‚СЂС‹ РїР°РєРµС‚Р°
         Time->Type=mttHours;
         Time->SizeTime=time;
-        // Рассчитываем время работы и стоимость
+        // Р Р°СЃСЃС‡РёС‚С‹РІР°РµРј РІСЂРµРјСЏ СЂР°Р±РѕС‚С‹ Рё СЃС‚РѕРёРјРѕСЃС‚СЊ
         iTariff->Cost(*Time,Options->CostPrecision);
         //
         SetListViewComputersLine(Item);
     }
 
-    // Обновляем сведения об общей стоимости заказа
+    // РћР±РЅРѕРІР»СЏРµРј СЃРІРµРґРµРЅРёСЏ РѕР± РѕР±С‰РµР№ СЃС‚РѕРёРјРѕСЃС‚Рё Р·Р°РєР°Р·Р°
     UpdateFullCost();
 
     return;
@@ -395,19 +395,19 @@ void __fastcall TFormRun::BitBtnRunClick(TObject *Sender)
 			auto iState=States->Search(time.Number);     ///
 			auto iTariff=Tariffs->SrchUUID(time.TariffID);
 
-			// Проверяем возможно ли применить команду
+			// РџСЂРѕРІРµСЂСЏРµРј РІРѕР·РјРѕР¶РЅРѕ Р»Рё РїСЂРёРјРµРЅРёС‚СЊ РєРѕРјР°РЅРґСѓ
 			if ( iState->CmdRun(*iTariff,time,true) )
 			{
-				// Добавляем запись в лог
+				// Р”РѕР±Р°РІР»СЏРµРј Р·Р°РїРёСЃСЊ РІ Р»РѕРі
 				if ( !Log->AddRun(time) )
 				{
 					ShellState->State|=mssErrorLog; FormMain->SetShell();
 					ResMessageBox(Handle,1,5,MB_APPLMODAL|MB_OK|MB_ICONERROR,Log->gLastErr());
 					break;
 				}
-				// Применяем команду
+				// РџСЂРёРјРµРЅСЏРµРј РєРѕРјР°РЅРґСѓ
 				iState->CmdRun(*iTariff,time,false);
-				// Удаляем строку из списка
+				// РЈРґР°Р»СЏРµРј СЃС‚СЂРѕРєСѓ РёР· СЃРїРёСЃРєР°
 				item->Delete();
 			}
 		}
@@ -415,17 +415,17 @@ void __fastcall TFormRun::BitBtnRunClick(TObject *Sender)
 		item=next;
 	}
 
-    // Сохраняем новые состояния
+    // РЎРѕС…СЂР°РЅСЏРµРј РЅРѕРІС‹Рµ СЃРѕСЃС‚РѕСЏРЅРёСЏ
     if ( !States->Save() )
     {
         ShellState->State|=mssErrorState; FormMain->SetShell();
         ResMessageBox(Handle,1,8,MB_APPLMODAL|MB_OK|MB_ICONERROR,States->gLastErr());
 	}
 
-	// Обновляем список компьютеров
+	// РћР±РЅРѕРІР»СЏРµРј СЃРїРёСЃРѕРє РєРѕРјРїСЊСЋС‚РµСЂРѕРІ
     FormMain->UpdateListViewComputers(false);
 
-    // Обновляем сведения об общей стоимости заказа
+    // РћР±РЅРѕРІР»СЏРµРј СЃРІРµРґРµРЅРёСЏ РѕР± РѕР±С‰РµР№ СЃС‚РѕРёРјРѕСЃС‚Рё Р·Р°РєР°Р·Р°
     UpdateFullCost();
 }
 //---------------------------------------------------------------------------
@@ -470,7 +470,7 @@ void TFormRun::SetListViewComputersLine(TListItem *Item_)
             Item_->SubItemImages[2]=icon;
 			swprintf(
 				line, sizeof(line)/sizeof(line[0]),
-				L"%i час. %.2i мин.",
+				L"%i С‡Р°СЃ. %.2i РјРёРЅ.",
 				RunTime->WorkTime/60,
 				RunTime->WorkTime%60);
             SubItems->Strings[2]=line;

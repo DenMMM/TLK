@@ -1,4 +1,4 @@
-//---------------------------------------------------------------------------
+п»ї//---------------------------------------------------------------------------
 #ifndef UnitSharedH
 #define UnitSharedH
 //---------------------------------------------------------------------------
@@ -8,53 +8,53 @@
 //---------------------------------------------------------------------------
 class MShared;
 //---------------------------------------------------------------------------
-#define SHRD_LockWait       500     // Время ожидания доступа к общим данным (мсек)
+#define SHRD_LockWait       500     // Р’СЂРµРјСЏ РѕР¶РёРґР°РЅРёСЏ РґРѕСЃС‚СѓРїР° Рє РѕР±С‰РёРј РґР°РЅРЅС‹Рј (РјСЃРµРє)
 //---------------------------------------------------------------------------
-// Сообщения (картинки)
-#define mimNone             0       // Скрыть картинку с сообщением
-#define mimEndTime          1       // Время закончилось
-#define mimLocked           2       // Компьютер закрыт
-#define mimPaused           3       // Компьютер прикрыт адмиинстратором или аварийно
-#define mimFine             4       // Применен штраф
-#define mimTimePaused       5       // Время приостановлено
+// РЎРѕРѕР±С‰РµРЅРёСЏ (РєР°СЂС‚РёРЅРєРё)
+#define mimNone             0       // РЎРєСЂС‹С‚СЊ РєР°СЂС‚РёРЅРєСѓ СЃ СЃРѕРѕР±С‰РµРЅРёРµРј
+#define mimEndTime          1       // Р’СЂРµРјСЏ Р·Р°РєРѕРЅС‡РёР»РѕСЃСЊ
+#define mimLocked           2       // РљРѕРјРїСЊСЋС‚РµСЂ Р·Р°РєСЂС‹С‚
+#define mimPaused           3       // РљРѕРјРїСЊСЋС‚РµСЂ РїСЂРёРєСЂС‹С‚ Р°РґРјРёРёРЅСЃС‚СЂР°С‚РѕСЂРѕРј РёР»Рё Р°РІР°СЂРёР№РЅРѕ
+#define mimFine             4       // РџСЂРёРјРµРЅРµРЅ С€С‚СЂР°С„
+#define mimTimePaused       5       // Р’СЂРµРјСЏ РїСЂРёРѕСЃС‚Р°РЅРѕРІР»РµРЅРѕ
 //---------------------------------------------------------------------------
 class MShared
 {
 private:
     struct MSharedData
     {
-        volatile __int64 SysTime;       // Системное время
+        volatile __int64 SysTime;       // РЎРёСЃС‚РµРјРЅРѕРµ РІСЂРµРјСЏ
         volatile unsigned SysTimeVer;
-        volatile int CompNum;           // Номер компьютера
+        volatile int CompNum;           // РќРѕРјРµСЂ РєРѕРјРїСЊСЋС‚РµСЂР°
         volatile unsigned CompNumVer;
-        volatile int WorkTime;          // Оставшееся время работы
+        volatile int WorkTime;          // РћСЃС‚Р°РІС€РµРµСЃСЏ РІСЂРµРјСЏ СЂР°Р±РѕС‚С‹
         volatile unsigned WorkTimeVer;
-//        volatile int FineTime;          // Оставшееся время штрафа
+//        volatile int FineTime;          // РћСЃС‚Р°РІС€РµРµСЃСЏ РІСЂРµРјСЏ С€С‚СЂР°С„Р°
 //        volatile unsigned FineTimeVer;
-        volatile bool WarnMsg;          // Флаг - отображать предупреждение об окончании времени
+        volatile bool WarnMsg;          // Р¤Р»Р°Рі - РѕС‚РѕР±СЂР°Р¶Р°С‚СЊ РїСЂРµРґСѓРїСЂРµР¶РґРµРЅРёРµ РѕР± РѕРєРѕРЅС‡Р°РЅРёРё РІСЂРµРјРµРЅРё
         volatile unsigned WarnMsgVer;
-        volatile int ImageMsg;          // Сообщение экрана блокировки
+        volatile int ImageMsg;          // РЎРѕРѕР±С‰РµРЅРёРµ СЌРєСЂР°РЅР° Р±Р»РѕРєРёСЂРѕРІРєРё
         volatile unsigned ImageMsgVer;
-        volatile unsigned Games;        // Разрешенные для запуска группы программ
+        volatile unsigned Games;        // Р Р°Р·СЂРµС€РµРЅРЅС‹Рµ РґР»СЏ Р·Р°РїСѓСЃРєР° РіСЂСѓРїРїС‹ РїСЂРѕРіСЂР°РјРј
         volatile unsigned GamesVer;
-        volatile bool ConfigMode;       // Флаг - режим настройки
+        volatile bool ConfigMode;       // Р¤Р»Р°Рі - СЂРµР¶РёРј РЅР°СЃС‚СЂРѕР№РєРё
         volatile unsigned ConfigModeVer;
-        volatile bool Transp;           // Флаг - прозрачность TLK Shell
+        volatile bool Transp;           // Р¤Р»Р°Рі - РїСЂРѕР·СЂР°С‡РЅРѕСЃС‚СЊ TLK Shell
         volatile unsigned TranspVer;
-    } *pData;                   // Указатель на данные в общем блоке памяти
+    } *pData;                   // РЈРєР°Р·Р°С‚РµР»СЊ РЅР° РґР°РЅРЅС‹Рµ РІ РѕР±С‰РµРј Р±Р»РѕРєРµ РїР°РјСЏС‚Рё
 
-    // Увеличить счетчик версии shared-поля с пропуском нуля
+    // РЈРІРµР»РёС‡РёС‚СЊ СЃС‡РµС‚С‡РёРє РІРµСЂСЃРёРё shared-РїРѕР»СЏ СЃ РїСЂРѕРїСѓСЃРєРѕРј РЅСѓР»СЏ
     void NextVer(volatile unsigned *Ver_)
     {
         if ( (++(*Ver_))==0 ) ++(*Ver_);
     }
 
-    HANDLE hMap;                // Handle общего блока памяти
-    HANDLE hMtxMap;             // Handle мьютекса для синхронизации доступа к нему
-    HANDLE hMtxLive;            // Handle мьютекса-маркера существования службы
+    HANDLE hMap;                // Handle РѕР±С‰РµРіРѕ Р±Р»РѕРєР° РїР°РјСЏС‚Рё
+    HANDLE hMtxMap;             // Handle РјСЊСЋС‚РµРєСЃР° РґР»СЏ СЃРёРЅС…СЂРѕРЅРёР·Р°С†РёРё РґРѕСЃС‚СѓРїР° Рє РЅРµРјСѓ
+    HANDLE hMtxLive;            // Handle РјСЊСЋС‚РµРєСЃР°-РјР°СЂРєРµСЂР° СЃСѓС‰РµСЃС‚РІРѕРІР°РЅРёСЏ СЃР»СѓР¶Р±С‹
 
 #pragma pack(push, 1)
-    // Передаваемые дочерним процессам параметры
+    // РџРµСЂРµРґР°РІР°РµРјС‹Рµ РґРѕС‡РµСЂРЅРёРј РїСЂРѕС†РµСЃСЃР°Рј РїР°СЂР°РјРµС‚СЂС‹
     struct MInheritData
     {
         HANDLE hMap;
@@ -64,14 +64,14 @@ private:
 #pragma pack(pop)
     
 public:
-    // Вернуть HEX-строку с параметрами для дочернего процесса (служба)
+    // Р’РµСЂРЅСѓС‚СЊ HEX-СЃС‚СЂРѕРєСѓ СЃ РїР°СЂР°РјРµС‚СЂР°РјРё РґР»СЏ РґРѕС‡РµСЂРЅРµРіРѕ РїСЂРѕС†РµСЃСЃР° (СЃР»СѓР¶Р±Р°)
 	std::wstring InhToHEX() const;
 
-    // Создать shared-секцию (служба)
+    // РЎРѕР·РґР°С‚СЊ shared-СЃРµРєС†РёСЋ (СЃР»СѓР¶Р±Р°)
     bool Create();
-    // Открыть shared-секцию (дочерний процесс)
+    // РћС‚РєСЂС‹С‚СЊ shared-СЃРµРєС†РёСЋ (РґРѕС‡РµСЂРЅРёР№ РїСЂРѕС†РµСЃСЃ)
     bool Open(wchar_t *InhLine_);
-    // Закрыть shared-секцию и освободить системные ресурсы
+    // Р—Р°РєСЂС‹С‚СЊ shared-СЃРµРєС†РёСЋ Рё РѕСЃРІРѕР±РѕРґРёС‚СЊ СЃРёСЃС‚РµРјРЅС‹Рµ СЂРµСЃСѓСЂСЃС‹
     void Close();
 
     bool IsLive() const {
@@ -81,7 +81,7 @@ public:
     bool UnLock() const {
         return ::ReleaseMutex(hMtxMap); }
 
-    // Обновление shared-полей управляющей службой
+    // РћР±РЅРѕРІР»РµРЅРёРµ shared-РїРѕР»РµР№ СѓРїСЂР°РІР»СЏСЋС‰РµР№ СЃР»СѓР¶Р±РѕР№
     void UpdateSysTime(__int64 SysTime_);
     void UpdateCompNum(int Num_);
     void UpdateWorkTime(int Time_);
@@ -91,7 +91,7 @@ public:
     void SetConfigMode(bool Mode_);
     void SetTransp(bool Transp_);
 
-    // Проверка версии поля и получение его значения дочерним процессом
+    // РџСЂРѕРІРµСЂРєР° РІРµСЂСЃРёРё РїРѕР»СЏ Рё РїРѕР»СѓС‡РµРЅРёРµ РµРіРѕ Р·РЅР°С‡РµРЅРёСЏ РґРѕС‡РµСЂРЅРёРј РїСЂРѕС†РµСЃСЃРѕРј
 	bool CheckSysTime(__int64 &SysTime_, unsigned &SysTimeVer_) const;
 	bool CheckCompNum(int &Num_, unsigned &NumVer_) const;
 	bool CheckWorkTime(int &Time_, unsigned &TimeVer_) const;

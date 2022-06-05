@@ -1,4 +1,4 @@
-//---------------------------------------------------------------------------
+п»ї//---------------------------------------------------------------------------
 #pragma hdrstop
 
 #include "UnitMessage.h"
@@ -7,11 +7,11 @@
 //---------------------------------------------------------------------------
 DWORD WINAPI MMessage::ThreadFunc(LPVOID Data)
 {
-    // Создаем очередь сообщений для потока
+    // РЎРѕР·РґР°РµРј РѕС‡РµСЂРµРґСЊ СЃРѕРѕР±С‰РµРЅРёР№ РґР»СЏ РїРѕС‚РѕРєР°
 	::PeekMessage(nullptr, (HWND)-1, 0, 0, PM_NOREMOVE);
-    // Обработка тела потока
+    // РћР±СЂР°Р±РѕС‚РєР° С‚РµР»Р° РїРѕС‚РѕРєР°
     reinterpret_cast<MMessage*>(Data)->ThreadProc();
-    // Завершаем работу потока
+    // Р—Р°РІРµСЂС€Р°РµРј СЂР°Р±РѕС‚Сѓ РїРѕС‚РѕРєР°
     ::ExitThread(0);
     return 0;
 }
@@ -40,7 +40,7 @@ next:
         ::Sleep(20);
     } while(!::PeekMessage(&Msg,nullptr,0,0,PM_REMOVE));
 
-    // Удаляем из памяти загруженную ранее картинку
+    // РЈРґР°Р»СЏРµРј РёР· РїР°РјСЏС‚Рё Р·Р°РіСЂСѓР¶РµРЅРЅСѓСЋ СЂР°РЅРµРµ РєР°СЂС‚РёРЅРєСѓ
     ::DeleteObject(hBitmap); hBitmap=nullptr;
 }
 //---------------------------------------------------------------------------
@@ -50,17 +50,17 @@ bool MMessage::Show()
 
     if ( Thread )
     {
-        // Проверяем не работает ли все еще поток
+        // РџСЂРѕРІРµСЂСЏРµРј РЅРµ СЂР°Р±РѕС‚Р°РµС‚ Р»Рё РІСЃРµ РµС‰Рµ РїРѕС‚РѕРє
         if ( (!::GetExitCodeThread(Thread,&ExitCode))||
             (ExitCode==STILL_ACTIVE) ) return false;
-        // Окончательно уничтожаем прежний поток
+        // РћРєРѕРЅС‡Р°С‚РµР»СЊРЅРѕ СѓРЅРёС‡С‚РѕР¶Р°РµРј РїСЂРµР¶РЅРёР№ РїРѕС‚РѕРє
         ::CloseHandle(Thread); Thread=nullptr; ThreadID=0;
     }
 
-    // Загружаем картинку с сообщением
+    // Р—Р°РіСЂСѓР¶Р°РµРј РєР°СЂС‚РёРЅРєСѓ СЃ СЃРѕРѕР±С‰РµРЅРёРµРј
     if ( (hBitmap=::LoadImage(nullptr, File.c_str(), IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE))==nullptr ) goto error;
 	if ( ::GetObject(hBitmap, sizeof(BITMAP), &Bitmap)==0 ) goto error;
-    // Создаем поток для показа сообщения
+    // РЎРѕР·РґР°РµРј РїРѕС‚РѕРє РґР»СЏ РїРѕРєР°Р·Р° СЃРѕРѕР±С‰РµРЅРёСЏ
     return (Thread=::CreateThread(nullptr,0,&ThreadFunc,
         (LPVOID)this,0,&ThreadID))!=nullptr;
 error:
@@ -71,15 +71,15 @@ error:
 void MMessage::Stop()
 {
 //    DWORD ExitCode;
-//    // Проверяем работает ли поток
+//    // РџСЂРѕРІРµСЂСЏРµРј СЂР°Р±РѕС‚Р°РµС‚ Р»Рё РїРѕС‚РѕРє
 //    if ( (Thread==nullptr)||
 //        (!::GetExitCodeThread(Thread,&ExitCode))||
 //        (ExitCode!=STILL_ACTIVE) ) return false;
     if ( Thread==nullptr ) return;
-    // Посылаем потоку сообщение и ждем завершения его работы
+    // РџРѕСЃС‹Р»Р°РµРј РїРѕС‚РѕРєСѓ СЃРѕРѕР±С‰РµРЅРёРµ Рё Р¶РґРµРј Р·Р°РІРµСЂС€РµРЅРёСЏ РµРіРѕ СЂР°Р±РѕС‚С‹
     ::PostThreadMessage(ThreadID,WM_USER,0,0);
     ::WaitForSingleObject(Thread,INFINITE);
-    // Закрываем описатель потока
+    // Р—Р°РєСЂС‹РІР°РµРј РѕРїРёСЃР°С‚РµР»СЊ РїРѕС‚РѕРєР°
     ::CloseHandle(Thread); Thread=nullptr; ThreadID=0;
 }
 //---------------------------------------------------------------------------

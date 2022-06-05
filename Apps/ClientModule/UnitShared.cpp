@@ -1,4 +1,4 @@
-//---------------------------------------------------------------------------
+п»ї//---------------------------------------------------------------------------
 #pragma hdrstop
 
 #include "UnitShared.h"
@@ -11,13 +11,13 @@ std::wstring MShared::InhToHEX() const
     MInheritData Data;
     wchar_t hex[sizeof(Data)*2+1];
 
-    // Заполним поля
+    // Р—Р°РїРѕР»РЅРёРј РїРѕР»СЏ
     Data.hMap=hMap;
     Data.hMtxMap=hMtxMap;
     Data.hMtxLive=hMtxLive;
-    // Зашифруем
-	BasicEncode(&Data,sizeof(Data),ENC_Code);	/// смысл есть ?
-	// Сконвертируем в HEX-строку
+    // Р—Р°С€РёС„СЂСѓРµРј
+	BasicEncode(&Data,sizeof(Data),ENC_Code);	/// СЃРјС‹СЃР» РµСЃС‚СЊ ?
+	// РЎРєРѕРЅРІРµСЂС‚РёСЂСѓРµРј РІ HEX-СЃС‚СЂРѕРєСѓ
 	ByteToHEX(
 		&Data, sizeof(Data),
 		hex, sizeof(hex)/sizeof(hex[0]),
@@ -34,17 +34,17 @@ bool MShared::Create()
     sa.lpSecurityDescriptor=nullptr;
     sa.bInheritHandle=TRUE;
 
-    // Создадим область общей памяти
+    // РЎРѕР·РґР°РґРёРј РѕР±Р»Р°СЃС‚СЊ РѕР±С‰РµР№ РїР°РјСЏС‚Рё
     hMap=::CreateFileMapping(INVALID_HANDLE_VALUE,&sa,
         PAGE_READWRITE,0,sizeof(MSharedData),nullptr);
     if ( hMap==nullptr ) goto error;
 	pData=reinterpret_cast<MSharedData*>(
 		::MapViewOfFile(hMap,FILE_MAP_WRITE,0,0,0));
     if ( pData==nullptr ) goto error;
-    // Создадим мьютекс для синхронизации доступа к ней
+    // РЎРѕР·РґР°РґРёРј РјСЊСЋС‚РµРєСЃ РґР»СЏ СЃРёРЅС…СЂРѕРЅРёР·Р°С†РёРё РґРѕСЃС‚СѓРїР° Рє РЅРµР№
     hMtxMap=::CreateMutex(&sa,FALSE,nullptr);
     if ( hMtxMap==nullptr ) goto error;
-    // Создадим мьютекс-маркер состояния процесса службы
+    // РЎРѕР·РґР°РґРёРј РјСЊСЋС‚РµРєСЃ-РјР°СЂРєРµСЂ СЃРѕСЃС‚РѕСЏРЅРёСЏ РїСЂРѕС†РµСЃСЃР° СЃР»СѓР¶Р±С‹
     hMtxLive=::CreateMutex(&sa,TRUE,nullptr);
     if ( hMtxLive==nullptr ) goto error;
 
@@ -66,15 +66,15 @@ bool MShared::Open(wchar_t *InhLine_)
 {
 	MInheritData Data;
 
-	// Восстановим из HEX-строки наследованные хэндлы
+	// Р’РѕСЃСЃС‚Р°РЅРѕРІРёРј РёР· HEX-СЃС‚СЂРѕРєРё РЅР°СЃР»РµРґРѕРІР°РЅРЅС‹Рµ С…СЌРЅРґР»С‹
 	if ( HEXToByte(InhLine_, &Data, sizeof(Data))!=sizeof(Data) ) return false;
-	// Расшифруем
+	// Р Р°СЃС€РёС„СЂСѓРµРј
 	BasicDecode(&Data, sizeof(Data), ENC_Code);
 	//
     hMap=Data.hMap;
     hMtxMap=Data.hMtxMap;
     hMtxLive=Data.hMtxLive;
-    // Отобразим общий блок памяти в пространство процесса
+    // РћС‚РѕР±СЂР°Р·РёРј РѕР±С‰РёР№ Р±Р»РѕРє РїР°РјСЏС‚Рё РІ РїСЂРѕСЃС‚СЂР°РЅСЃС‚РІРѕ РїСЂРѕС†РµСЃСЃР°
 	pData=reinterpret_cast<MSharedData*>(
 		::MapViewOfFile(hMap,FILE_MAP_READ,0,0,sizeof(MSharedData)));
     return pData!=nullptr;

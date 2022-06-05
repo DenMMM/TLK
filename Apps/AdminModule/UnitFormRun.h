@@ -1,4 +1,4 @@
-//---------------------------------------------------------------------------
+п»ї//---------------------------------------------------------------------------
 #ifndef UnitFormRunH
 #define UnitFormRunH
 //---------------------------------------------------------------------------
@@ -54,14 +54,14 @@ __published:	// IDE-managed Components
           TListItem *Item, bool Selected);
 private:	// User declarations
     std::int64_t OpenDialogTime;
-	MTariffsInfo UseTariffs;		// Список тарифов, доступных на время открытия диалога
-	MTariffRunTimes UseTimes;	// Список пакетов для выбранного тарифа
-	MTariffRunTimes CompTimes;	// Буфер для хранения времени и стоимости по каждому компьютеру
+	MTariffsInfo UseTariffs;		// РЎРїРёСЃРѕРє С‚Р°СЂРёС„РѕРІ, РґРѕСЃС‚СѓРїРЅС‹С… РЅР° РІСЂРµРјСЏ РѕС‚РєСЂС‹С‚РёСЏ РґРёР°Р»РѕРіР°
+	MTariffRunTimes UseTimes;	// РЎРїРёСЃРѕРє РїР°РєРµС‚РѕРІ РґР»СЏ РІС‹Р±СЂР°РЅРЅРѕРіРѕ С‚Р°СЂРёС„Р°
+	MTariffRunTimes CompTimes;	// Р‘СѓС„РµСЂ РґР»СЏ С…СЂР°РЅРµРЅРёСЏ РІСЂРµРјРµРЅРё Рё СЃС‚РѕРёРјРѕСЃС‚Рё РїРѕ РєР°Р¶РґРѕРјСѓ РєРѕРјРїСЊСЋС‚РµСЂСѓ
 	unsigned SelTariffID;
     void SetListViewComputersLine(TListItem *Item_);
     void UpdateFullCost();
 public:		// User declarations
-    bool RunMode;               // Диалог открыт в режиме "запуска", а не добавления времени
+    bool RunMode;               // Р”РёР°Р»РѕРі РѕС‚РєСЂС‹С‚ РІ СЂРµР¶РёРјРµ "Р·Р°РїСѓСЃРєР°", Р° РЅРµ РґРѕР±Р°РІР»РµРЅРёСЏ РІСЂРµРјРµРЅРё
     __fastcall TFormRun(TComponent* Owner);
 };
 //---------------------------------------------------------------------------

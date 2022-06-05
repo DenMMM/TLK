@@ -1,4 +1,4 @@
-//---------------------------------------------------------------------------
+п»ї//---------------------------------------------------------------------------
 #ifndef UnitListH
 #define UnitListH
 //---------------------------------------------------------------------------
@@ -28,42 +28,42 @@ template <typename parent_list, typename item_type>
 class MListSimple;
 //---------------------------------------------------------------------------
 //---------------------------------------------------------------------------
-// Базовые интерфейсы элемента списка
+// Р‘Р°Р·РѕРІС‹Рµ РёРЅС‚РµСЂС„РµР№СЃС‹ СЌР»РµРјРµРЅС‚Р° СЃРїРёСЃРєР°
 template <
-	typename list_type,			// Имя будущего класса-списка
-	typename base_type>			// Базовый (родительский) тип его элементов
+	typename list_type,			// РРјСЏ Р±СѓРґСѓС‰РµРіРѕ РєР»Р°СЃСЃР°-СЃРїРёСЃРєР°
+	typename base_type>			// Р‘Р°Р·РѕРІС‹Р№ (СЂРѕРґРёС‚РµР»СЊСЃРєРёР№) С‚РёРї РµРіРѕ СЌР»РµРјРµРЅС‚РѕРІ
 class MListItem
 {
 	friend MList <list_type, base_type>;
 
 private:
-	base_type *Prev;			// Указатель на предыдущий элемент списка
-	base_type *Next;			// Указатель на следующий элемент списка
+	base_type *Prev;			// РЈРєР°Р·Р°С‚РµР»СЊ РЅР° РїСЂРµРґС‹РґСѓС‰РёР№ СЌР»РµРјРµРЅС‚ СЃРїРёСЃРєР°
+	base_type *Next;			// РЈРєР°Р·Р°С‚РµР»СЊ РЅР° СЃР»РµРґСѓСЋС‰РёР№ СЌР»РµРјРµРЅС‚ СЃРїРёСЃРєР°
 
 public:
-	// Возвращает [двоичный] ID, ассоциированный с типом элемента
+	// Р’РѕР·РІСЂР°С‰Р°РµС‚ [РґРІРѕРёС‡РЅС‹Р№] ID, Р°СЃСЃРѕС†РёРёСЂРѕРІР°РЅРЅС‹Р№ СЃ С‚РёРїРѕРј СЌР»РµРјРµРЅС‚Р°
 	virtual std::uint8_t gTypeID() const noexcept = 0;
-	// Объявим виртуальное копирование через базовый тип
+	// РћР±СЉСЏРІРёРј РІРёСЂС‚СѓР°Р»СЊРЅРѕРµ РєРѕРїРёСЂРѕРІР°РЅРёРµ С‡РµСЂРµР· Р±Р°Р·РѕРІС‹Р№ С‚РёРї
 	virtual base_type& operator=(const base_type&) = 0;
 	virtual base_type& operator=(base_type&&) = 0;
 
-	// Занулим указатели нового объекта
-	MListItem() noexcept: Prev(nullptr), Next(nullptr) {}
-	MListItem(const MListItem&) noexcept: MListItem() {}
-	MListItem(MListItem&&) noexcept: MListItem() {}
-	// А при копировании сохраним их не тронутыми
-	MListItem& operator=(const MListItem&) noexcept { return *this; }
-	MListItem& operator=(MListItem&&) noexcept { return *this; }
+	// Р—Р°РЅСѓР»РёРј СѓРєР°Р·Р°С‚РµР»Рё РЅРѕРІРѕРіРѕ РѕР±СЉРµРєС‚Р°
+    MListItem() : Prev(nullptr), Next(nullptr) {}
+    MListItem(const MListItem&) : MListItem() {}
+    MListItem(MListItem&&) : MListItem() {}
+	// Рђ РїСЂРё РєРѕРїРёСЂРѕРІР°РЅРёРё СЃРѕС…СЂР°РЅРёРј РёС… РЅРµ С‚СЂРѕРЅСѓС‚С‹РјРё
+    MListItem& operator=(const MListItem&) { return *this; }
+    MListItem& operator=(MListItem&&) { return *this; }
 
 	virtual ~MListItem() = default;
 };
 //---------------------------------------------------------------------------
-// Завершает элемент типизированного списка
+// Р—Р°РІРµСЂС€Р°РµС‚ СЌР»РµРјРµРЅС‚ С‚РёРїРёР·РёСЂРѕРІР°РЅРЅРѕРіРѕ СЃРїРёСЃРєР°
 template <
-	typename parent_item,		// Родительский класс
-	typename base_type,			// Базовый тип его элементов
-	typename item_type,     	// Создаваемый тип элемента
-	std::uint8_t type_id>		// Его двоичный ID
+	typename parent_item,		// Р РѕРґРёС‚РµР»СЊСЃРєРёР№ РєР»Р°СЃСЃ
+	typename base_type,			// Р‘Р°Р·РѕРІС‹Р№ С‚РёРї РµРіРѕ СЌР»РµРјРµРЅС‚РѕРІ
+	typename item_type,     	// РЎРѕР·РґР°РІР°РµРјС‹Р№ С‚РёРї СЌР»РµРјРµРЅС‚Р°
+	std::uint8_t type_id>		// Р•РіРѕ РґРІРѕРёС‡РЅС‹Р№ ID
 class MListItemTyped: public parent_item
 {
 public:
@@ -96,10 +96,10 @@ public:
 	}
 };
 //---------------------------------------------------------------------------
-// Завершает элемент простого (однотипного) списка
+// Р—Р°РІРµСЂС€Р°РµС‚ СЌР»РµРјРµРЅС‚ РїСЂРѕСЃС‚РѕРіРѕ (РѕРґРЅРѕС‚РёРїРЅРѕРіРѕ) СЃРїРёСЃРєР°
 template <
-	typename parent_item,		// Родительский класс
-	typename item_type>			// Тип элемента списка
+	typename parent_item,		// Р РѕРґРёС‚РµР»СЊСЃРєРёР№ РєР»Р°СЃСЃ
+	typename item_type>			// РўРёРї СЌР»РµРјРµРЅС‚Р° СЃРїРёСЃРєР°
 class MListItemSimple: public MListItemTyped <parent_item, item_type, item_type, 0>
 {
 protected:
@@ -109,21 +109,21 @@ protected:
 };
 //---------------------------------------------------------------------------
 //---------------------------------------------------------------------------
-// Реализация типизированного списка
+// Р РµР°Р»РёР·Р°С†РёСЏ С‚РёРїРёР·РёСЂРѕРІР°РЅРЅРѕРіРѕ СЃРїРёСЃРєР°
 template <
-	typename list_type,			// Создаваемый класс списка (имя)
-	typename base_type>			// Базовый тип элемента списка
+	typename list_type,			// РЎРѕР·РґР°РІР°РµРјС‹Р№ РєР»Р°СЃСЃ СЃРїРёСЃРєР° (РёРјСЏ)
+	typename base_type>			// Р‘Р°Р·РѕРІС‹Р№ С‚РёРї СЌР»РµРјРµРЅС‚Р° СЃРїРёСЃРєР°
 class MList
 {
 private:
-	base_type *First;			// Указатель на первый элемент списка
-	base_type *Last;			// Указатель на последний элемент списка
-	size_t Count;				// Количество элементов в списке
+	base_type *First;			// РЈРєР°Р·Р°С‚РµР»СЊ РЅР° РїРµСЂРІС‹Р№ СЌР»РµРјРµРЅС‚ СЃРїРёСЃРєР°
+	base_type *Last;			// РЈРєР°Р·Р°С‚РµР»СЊ РЅР° РїРѕСЃР»РµРґРЅРёР№ СЌР»РµРјРµРЅС‚ СЃРїРёСЃРєР°
+	size_t Count;				// РљРѕР»РёС‡РµСЃС‚РІРѕ СЌР»РµРјРµРЅС‚РѕРІ РІ СЃРїРёСЃРєРµ
 	std::vector <base_type*(*)()> NewForType;
 	base_type* (*NewForTypeDef)();
 
 protected:
-	// Заполнение таблицы, используемой для создания элементов по TypeID
+	// Р—Р°РїРѕР»РЅРµРЅРёРµ С‚Р°Р±Р»РёС†С‹, РёСЃРїРѕР»СЊР·СѓРµРјРѕР№ РґР»СЏ СЃРѕР·РґР°РЅРёСЏ СЌР»РµРјРµРЅС‚РѕРІ РїРѕ TypeID
 	void TypesIDPrepare(size_t Size_)
 	{
 		NewForTypeDef=nullptr;
@@ -137,12 +137,12 @@ protected:
 		const std::size_t ID_=new_item_type::TypeID;
 
 #ifdef _DEBUG
-		// Проверим, что функция для этого ID_ еще не задана
+		// РџСЂРѕРІРµСЂРёРј, С‡С‚Рѕ С„СѓРЅРєС†РёСЏ РґР»СЏ СЌС‚РѕРіРѕ ID_ РµС‰Рµ РЅРµ Р·Р°РґР°РЅР°
 		if ( NewForType.at(ID_)!=nullptr )
 		{
 			throw std::runtime_error (
 				"MList::TypesIDSet()\n"
-				"Повторное использование одного и того же TypeID.");
+				"РџРѕРІС‚РѕСЂРЅРѕРµ РёСЃРїРѕР»СЊР·РѕРІР°РЅРёРµ РѕРґРЅРѕРіРѕ Рё С‚РѕРіРѕ Р¶Рµ TypeID.");
 		}
 #endif
 		NewForType[ID_]=
@@ -170,8 +170,8 @@ public:
 		typedef typename std::iterator <std::bidirectional_iterator_tag, base_type> ::pointer pointer;
 		typedef typename std::iterator <std::bidirectional_iterator_tag, base_type> ::reference reference;
 
-		pointer MyPtr;			// Адрес элемента, на который указывает итератор
-		const MList *ListPtr;	// Адрес списка, которому принадлежит элемент
+		pointer MyPtr;			// РђРґСЂРµСЃ СЌР»РµРјРµРЅС‚Р°, РЅР° РєРѕС‚РѕСЂС‹Р№ СѓРєР°Р·С‹РІР°РµС‚ РёС‚РµСЂР°С‚РѕСЂ
+		const MList *ListPtr;	// РђРґСЂРµСЃ СЃРїРёСЃРєР°, РєРѕС‚РѕСЂРѕРјСѓ РїСЂРёРЅР°РґР»РµР¶РёС‚ СЌР»РµРјРµРЅС‚
 
 	public:
 		const_iterator():
@@ -191,13 +191,13 @@ public:
 			{
 				throw std::runtime_error (
 					"MList::const_iterator::operator++()\n"
-					"Итератор не привязан к списку.");
+					"РС‚РµСЂР°С‚РѕСЂ РЅРµ РїСЂРёРІСЏР·Р°РЅ Рє СЃРїРёСЃРєСѓ.");
 			}
 			if ( MyPtr==nullptr )
 			{
 				throw std::out_of_range (
 					"MList::const_iterator::operator++()\n"
-					"Попытка выйти за границы списка.");
+					"РџРѕРїС‹С‚РєР° РІС‹Р№С‚Рё Р·Р° РіСЂР°РЅРёС†С‹ СЃРїРёСЃРєР°.");
 			}
 #endif
 			MyPtr=MyPtr->Next;
@@ -218,7 +218,7 @@ public:
 			{
 				throw std::runtime_error (
 					"MList::const_iterator::operator--()\n"
-					"Итератор не привязан к списку.");
+					"РС‚РµСЂР°С‚РѕСЂ РЅРµ РїСЂРёРІСЏР·Р°РЅ Рє СЃРїРёСЃРєСѓ.");
 			}
 #endif
 			MyPtr=(MyPtr==nullptr)? ListPtr->Last: MyPtr->Prev;
@@ -227,7 +227,7 @@ public:
 			{
 				throw std::out_of_range (
 					"MList::const_iterator::operator--()\n"
-					"Попытка выйти за границы списка.");
+					"РџРѕРїС‹С‚РєР° РІС‹Р№С‚Рё Р·Р° РіСЂР°РЅРёС†С‹ СЃРїРёСЃРєР°.");
 			}
 #endif
 			return *this;
@@ -305,7 +305,7 @@ public:
 	const_iterator cend() const noexcept { return end(); }
 
 protected:
-	// Как автор "MList" могу себе позволить этот хак...
+	// РљР°Рє Р°РІС‚РѕСЂ "MList" РјРѕРіСѓ СЃРµР±Рµ РїРѕР·РІРѕР»РёС‚СЊ СЌС‚РѕС‚ С…Р°Рє...
 	static iterator const_cast_iter(const_iterator iConst_)
 	{
 		return iterator(
@@ -313,17 +313,17 @@ protected:
 			iConst_.ListPtr);
 	}
 
-	// Присоединяет к списку уэе созданный 'item::New()' элемент
+	// РџСЂРёСЃРѕРµРґРёРЅСЏРµС‚ Рє СЃРїРёСЃРєСѓ СѓСЌРµ СЃРѕР·РґР°РЅРЅС‹Р№ 'item::New()' СЌР»РµРјРµРЅС‚
 	base_type *Add(base_type *NewItem_);
 
 public:
-	// Доступ к атрибутам списка
+	// Р”РѕСЃС‚СѓРї Рє Р°С‚СЂРёР±СѓС‚Р°Рј СЃРїРёСЃРєР°
 	size_t gCount() const noexcept { return Count; }
 
-	// Проверяет можно ли добавлять элементы по ID
+	// РџСЂРѕРІРµСЂСЏРµС‚ РјРѕР¶РЅРѕ Р»Рё РґРѕР±Р°РІР»СЏС‚СЊ СЌР»РµРјРµРЅС‚С‹ РїРѕ ID
 	bool isTyped() const noexcept { return NewForTypeDef==nullptr; }
 
-	// Операции над отдельными элементами _одного_ списка
+	// РћРїРµСЂР°С†РёРё РЅР°Рґ РѕС‚РґРµР»СЊРЅС‹РјРё СЌР»РµРјРµРЅС‚Р°РјРё _РѕРґРЅРѕРіРѕ_ СЃРїРёСЃРєР°
 	template <typename new_item_type>
 	new_item_type& Add()
 	{
@@ -343,9 +343,9 @@ public:
 	void Swap(const_iterator iItem1_, const_iterator iItem2_);
 	iterator Del(const_iterator iPos_);
 
-	// Операции над списком целиком (не трогая атрибуты наследника MList)
-	void Clear() noexcept;						// Удалить все элементы списка
-	void Splice(list_type& AtchList_);			// Присоединить элементы исходного списка
+	// РћРїРµСЂР°С†РёРё РЅР°Рґ СЃРїРёСЃРєРѕРј С†РµР»РёРєРѕРј (РЅРµ С‚СЂРѕРіР°СЏ Р°С‚СЂРёР±СѓС‚С‹ РЅР°СЃР»РµРґРЅРёРєР° MList)
+	void Clear() noexcept;						// РЈРґР°Р»РёС‚СЊ РІСЃРµ СЌР»РµРјРµРЅС‚С‹ СЃРїРёСЃРєР°
+	void Splice(list_type& AtchList_);			// РџСЂРёСЃРѕРµРґРёРЅРёС‚СЊ СЌР»РµРјРµРЅС‚С‹ РёСЃС…РѕРґРЅРѕРіРѕ СЃРїРёСЃРєР°
 
 	MList():
 		First(nullptr),
@@ -374,7 +374,7 @@ public:
 		NewForType(std::move(SrcList_.NewForType)),
 		NewForTypeDef(std::move(SrcList_.NewForTypeDef))
 	{
-		*this=std::move(SrcList_);              /// а "move" надо ?
+		*this=std::move(SrcList_);              /// Р° "move" РЅР°РґРѕ ?
 	}
 
 	~MList()
@@ -383,10 +383,10 @@ public:
 	}
 };
 //---------------------------------------------------------------------------
-// Заглушка для эмуляции простых списков
+// Р—Р°РіР»СѓС€РєР° РґР»СЏ СЌРјСѓР»СЏС†РёРё РїСЂРѕСЃС‚С‹С… СЃРїРёСЃРєРѕРІ
 template <
-	typename parent_list,       // Родительский класс списка
-	typename item_type>			// Тип элемента
+	typename parent_list,       // Р РѕРґРёС‚РµР»СЊСЃРєРёР№ РєР»Р°СЃСЃ СЃРїРёСЃРєР°
+	typename item_type>			// РўРёРї СЌР»РµРјРµРЅС‚Р°
 class MListSimple: public parent_list
 {
 private:
@@ -407,7 +407,7 @@ public:
 
 	MListSimple()
 	{
-		TypesIDDef(&item_type::New);		/// грубовато, в стиле 'C'
+		TypesIDDef(&item_type::New);		/// РіСЂСѓР±РѕРІР°С‚Рѕ, РІ СЃС‚РёР»Рµ 'C'
 	}
 };
 //---------------------------------------------------------------------------
@@ -422,17 +422,17 @@ base_type *MList<list_type,base_type>::Add(base_type *NewItem_)
 	{
 		throw std::runtime_error (
 			"MList::Add()\n"
-			"Объект уже добавлен в список.");
+			"РћР±СЉРµРєС‚ СѓР¶Рµ РґРѕР±Р°РІР»РµРЅ РІ СЃРїРёСЃРѕРє.");
 	}
 #endif
-	// Инициализируем объект
+	// РРЅРёС†РёР°Р»РёР·РёСЂСѓРµРј РѕР±СЉРµРєС‚
 	NewItem_->Prev=Last;
 	NewItem_->Next=nullptr;
-	// Изменяем атрибуты самого списка и предыдущего объекта
+	// РР·РјРµРЅСЏРµРј Р°С‚СЂРёР±СѓС‚С‹ СЃР°РјРѕРіРѕ СЃРїРёСЃРєР° Рё РїСЂРµРґС‹РґСѓС‰РµРіРѕ РѕР±СЉРµРєС‚Р°
 	if ( First==nullptr ) First=NewItem_;
 	else Last->Next=NewItem_;
 	Last=NewItem_;
-	// Корректируем счетчик
+	// РљРѕСЂСЂРµРєС‚РёСЂСѓРµРј СЃС‡РµС‚С‡РёРє
 	Count++;
 
 	return NewItem_;
@@ -450,23 +450,23 @@ base_type& MList<list_type,base_type>::Add(std::uint8_t TypeID_)
 		{
 			throw std::invalid_argument (
 				"MList::Add()\n"
-				"Не известный TypeID.");
+				"РќРµ РёР·РІРµСЃС‚РЅС‹Р№ TypeID.");
 		}
 	}
 
-	// Создадим новый элемент и добавим его к списку
+	// РЎРѕР·РґР°РґРёРј РЅРѕРІС‹Р№ СЌР»РµРјРµРЅС‚ Рё РґРѕР±Р°РІРёРј РµРіРѕ Рє СЃРїРёСЃРєСѓ
 	return *Add(NewF());
 }
 //---------------------------------------------------------------------------
 template <typename list_type, typename base_type>
 const base_type& MList<list_type,base_type>::GetItem(size_t Index_) const
 {
-	// Нельзя '#ifdef _DEBUG'
+	// РќРµР»СЊР·СЏ '#ifdef _DEBUG'
 	if ( Index_>=Count )
 	{
 		throw std::out_of_range (
 			"MList::GetItem()\n"
-			"Попытка выйти за границы списка.");
+			"РџРѕРїС‹С‚РєР° РІС‹Р№С‚Рё Р·Р° РіСЂР°РЅРёС†С‹ СЃРїРёСЃРєР°.");
 	}
 
 	for ( auto &Item: *this )
@@ -477,7 +477,7 @@ const base_type& MList<list_type,base_type>::GetItem(size_t Index_) const
 
 	throw std::runtime_error (
 		"MList::GetItem()\n"
-		"Список короче, чем ожидалось.");
+		"РЎРїРёСЃРѕРє РєРѕСЂРѕС‡Рµ, С‡РµРј РѕР¶РёРґР°Р»РѕСЃСЊ.");
 }
 //---------------------------------------------------------------------------
 template <typename list_type, typename base_type>
@@ -487,7 +487,7 @@ void MList<list_type,base_type>::Swap(const_iterator iItem1_, const_iterator iIt
 	if ( Count==0 )
 		throw std::runtime_error (
 			"MList::Swap()\n"
-			"Список пуст.");
+			"РЎРїРёСЃРѕРє РїСѓСЃС‚.");
 #endif
 
 	base_type* Item1_=iItem1_.MyPtr;
@@ -500,7 +500,7 @@ void MList<list_type,base_type>::Swap(const_iterator iItem1_, const_iterator iIt
 	{
 		throw std::invalid_argument (
 			"MList::Swap()\n"
-			"Объект не существует (nullptr).");
+			"РћР±СЉРµРєС‚ РЅРµ СЃСѓС‰РµСЃС‚РІСѓРµС‚ (nullptr).");
 	}
 #endif
 
@@ -532,13 +532,13 @@ typename MList<list_type,base_type>::iterator
 	{
 		throw std::runtime_error (
 			"MList::Del()\n"
-			"Список пуст.");
+			"РЎРїРёСЃРѕРє РїСѓСЃС‚.");
 	}
 	if ( DelItem_==nullptr )
 	{
 		throw std::invalid_argument (
 			"MList::Del()\n"
-			"Объект не существует (nullptr).");
+			"РћР±СЉРµРєС‚ РЅРµ СЃСѓС‰РµСЃС‚РІСѓРµС‚ (nullptr).");
 	}
 	if (
 		DelItem_->Prev==nullptr &&
@@ -547,22 +547,22 @@ typename MList<list_type,base_type>::iterator
 	{
 		throw std::runtime_error (
 			"MList::Del()\n"
-			"Объект не принадлежит списку.");
+			"РћР±СЉРµРєС‚ РЅРµ РїСЂРёРЅР°РґР»РµР¶РёС‚ СЃРїРёСЃРєСѓ.");
 	}
 #endif
 
-	// Разбираемся с предыдущим элементом списка и его началом
+	// Р Р°Р·Р±РёСЂР°РµРјСЃСЏ СЃ РїСЂРµРґС‹РґСѓС‰РёРј СЌР»РµРјРµРЅС‚РѕРј СЃРїРёСЃРєР° Рё РµРіРѕ РЅР°С‡Р°Р»РѕРј
 	if ( DelItem_->Prev!=nullptr ) DelItem_->Prev->Next=DelItem_->Next;
 	else First=DelItem_->Next;
-	// Разбираемся со следующим элементом списка и его концом
+	// Р Р°Р·Р±РёСЂР°РµРјСЃСЏ СЃРѕ СЃР»РµРґСѓСЋС‰РёРј СЌР»РµРјРµРЅС‚РѕРј СЃРїРёСЃРєР° Рё РµРіРѕ РєРѕРЅС†РѕРј
 	if ( DelItem_->Next!=nullptr ) DelItem_->Next->Prev=DelItem_->Prev;
 	else Last=DelItem_->Prev;
-	// Корректируем счетчик
+	// РљРѕСЂСЂРµРєС‚РёСЂСѓРµРј СЃС‡РµС‚С‡РёРє
 	Count--;
 
 	base_type* NextItem=DelItem_->Next;
 
-	// Удаляем объект из памяти
+	// РЈРґР°Р»СЏРµРј РѕР±СЉРµРєС‚ РёР· РїР°РјСЏС‚Рё
 	delete DelItem_;
 
 	return iterator(NextItem,this);
@@ -603,12 +603,12 @@ MList<list_type,base_type>&
 {
 	if ( (&SrcList_)==this ) return *this;
 
-	// Очищаем список-приемник
+	// РћС‡РёС‰Р°РµРј СЃРїРёСЃРѕРє-РїСЂРёРµРјРЅРёРє
 	Clear();
 
 	try
 	{
-		// Копируем в него элементы исходного
+		// РљРѕРїРёСЂСѓРµРј РІ РЅРµРіРѕ СЌР»РµРјРµРЅС‚С‹ РёСЃС…РѕРґРЅРѕРіРѕ
 		for ( auto &SrcItem: SrcList_ )
 		{
 			auto &NewItem=Add(SrcItem.gTypeID());
@@ -616,7 +616,7 @@ MList<list_type,base_type>&
 		}
 	} catch(...)
 	{
-		// Раз список не заполнился, очистим его и передадим исключение выше
+		// Р Р°Р· СЃРїРёСЃРѕРє РЅРµ Р·Р°РїРѕР»РЅРёР»СЃСЏ, РѕС‡РёСЃС‚РёРј РµРіРѕ Рё РїРµСЂРµРґР°РґРёРј РёСЃРєР»СЋС‡РµРЅРёРµ РІС‹С€Рµ
 		Clear();
 		throw;
 	}
@@ -630,13 +630,13 @@ MList<list_type,base_type>&
 {
 	if ( (&SrcList_)==this ) return *this;
 
-	// Очищаем список-приемник
+	// РћС‡РёС‰Р°РµРј СЃРїРёСЃРѕРє-РїСЂРёРµРјРЅРёРє
 	Clear();
-	// Копируем ссылки на элементы и их количество
+	// РљРѕРїРёСЂСѓРµРј СЃСЃС‹Р»РєРё РЅР° СЌР»РµРјРµРЅС‚С‹ Рё РёС… РєРѕР»РёС‡РµСЃС‚РІРѕ
 	First=SrcList_.First;
 	Last=SrcList_.Last;
 	Count=SrcList_.Count;
-	// Обнуляем эти поля в исходном списке
+	// РћР±РЅСѓР»СЏРµРј СЌС‚Рё РїРѕР»СЏ РІ РёСЃС…РѕРґРЅРѕРј СЃРїРёСЃРєРµ
 	SrcList_.First=nullptr;
 	SrcList_.Last=nullptr;
 	SrcList_.Count=0;
@@ -649,9 +649,9 @@ void MList<list_type,base_type>::Splice(list_type& AtchList_)
 {
 	if ( &AtchList_==this ) return;
 
-	// Проверяем есть ли что присоединять
+	// РџСЂРѕРІРµСЂСЏРµРј РµСЃС‚СЊ Р»Рё С‡С‚Рѕ РїСЂРёСЃРѕРµРґРёРЅСЏС‚СЊ
 	if ( AtchList_.First==nullptr ) return;
-	// Связываем списки
+	// РЎРІСЏР·С‹РІР°РµРј СЃРїРёСЃРєРё
 	if ( First==nullptr ) First=AtchList_.First;
 	else
 	{
@@ -660,7 +660,7 @@ void MList<list_type,base_type>::Splice(list_type& AtchList_)
 	}
 	Last=AtchList_.Last;
 	Count+=AtchList_.Count;
-	// Отсоединяем элементы от исходного списка
+	// РћС‚СЃРѕРµРґРёРЅСЏРµРј СЌР»РµРјРµРЅС‚С‹ РѕС‚ РёСЃС…РѕРґРЅРѕРіРѕ СЃРїРёСЃРєР°
 	AtchList_.First=nullptr;
 	AtchList_.Last=nullptr;
 	AtchList_.Count=0;

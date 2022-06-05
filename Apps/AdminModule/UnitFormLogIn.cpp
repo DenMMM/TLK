@@ -1,4 +1,4 @@
-//---------------------------------------------------------------------------
+ï»¿//---------------------------------------------------------------------------
 #include <vcl.h>
 #pragma hdrstop
 
@@ -16,7 +16,7 @@ std::uint32_t TFormLogIn::Execute(const MUsers &Users_)
 {
     ID=0;
 
-    // Çàíîñèì â ñïèñîê àêòèâíûå ëîãèíû
+    // Ð—Ð°Ð½Ð¾ÑÐ¸Ð¼ Ð² ÑÐ¿Ð¸ÑÐ¾Ðº Ð°ÐºÑ‚Ð¸Ð²Ð½Ñ‹Ðµ Ð»Ð¾Ð³Ð¸Ð½Ñ‹
 	for ( const auto &User: Users_ )
 	{
 		if ( !User.Active ) continue;
@@ -38,7 +38,7 @@ void __fastcall TFormLogIn::FormShow(TObject *Sender)
     EditPassword->Color=clBtnFace;
 	ActiveControl=ComboBoxLogin;
 
-	// Äîáàâèì ýíòðîïèè
+	// Ð”Ð¾Ð±Ð°Ð²Ð¸Ð¼ ÑÐ½Ñ‚Ñ€Ð¾Ð¿Ð¸Ð¸
 	BasicRand.event();
 }
 //---------------------------------------------------------------------------
@@ -54,7 +54,7 @@ void __fastcall TFormLogIn::FormCloseQuery(TObject *Sender, bool &CanClose)
 {
 	if ( ModalResult!=mrOk ) return;
 
-	// Îïðåäåëÿåì êàêîé ïîëüçîâàòåëü áûë âûáðàí
+	// ÐžÐ¿Ñ€ÐµÐ´ÐµÐ»ÑÐµÐ¼ ÐºÐ°ÐºÐ¾Ð¹ Ð¿Ð¾Ð»ÑŒÐ·Ð¾Ð²Ð°Ñ‚ÐµÐ»ÑŒ Ð±Ñ‹Ð» Ð²Ñ‹Ð±Ñ€Ð°Ð½
 	int Index=ComboBoxLogin->ItemIndex;
 	if ( Index<0 )
 	{
@@ -66,7 +66,7 @@ void __fastcall TFormLogIn::FormCloseQuery(TObject *Sender, bool &CanClose)
 	auto &User=*reinterpret_cast<const MUsersItem*>(
 		ComboBoxLogin->Items->Objects[Index]);
 
-	// Ïðîâåðÿåì ïàðîëü
+	// ÐŸÑ€Ð¾Ð²ÐµÑ€ÑÐµÐ¼ Ð¿Ð°Ñ€Ð¾Ð»ÑŒ
 	if ( !User.Pass.Check(EditPassword->Text.c_str()) )
 	{
 		ActiveControl=EditPassword;

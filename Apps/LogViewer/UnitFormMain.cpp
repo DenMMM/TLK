@@ -1,4 +1,4 @@
-//---------------------------------------------------------------------------
+п»ї//---------------------------------------------------------------------------
 #include <vcl.h>
 #include <memory>
 #pragma hdrstop
@@ -29,7 +29,7 @@ void __fastcall TFormMain::NOpenClick(TObject *Sender)
 	//
 	std::unique_ptr <MLogFile> File(new MLogFile);
 	File->Name=OpenDialog->FileName.c_str();
-	// Загружаем файл лога
+	// Р—Р°РіСЂСѓР¶Р°РµРј С„Р°Р№Р» Р»РѕРіР°
 	File->Records.LoadFrom(File->Name,ENC_Code);
 	//
 	if ( ::GetFileTitle(
@@ -43,7 +43,7 @@ void __fastcall TFormMain::NOpenClick(TObject *Sender)
 	NWindows->Add(Menu);
 
 	MLogFile &rFile=*((MLogFile*)Menu->Tag);
-	// Обрабатываем его записи
+	// РћР±СЂР°Р±Р°С‚С‹РІР°РµРј РµРіРѕ Р·Р°РїРёСЃРё
 	FormEvents=new TFormEvents(this);
 	FormEvents->Open(
 		rFile,
@@ -62,7 +62,7 @@ void __fastcall TFormMain::NWindowsClick(TObject *Sender)
 	if ( reinterpret_cast<TMenuItem*>(Sender)->Tag )
 	{
 		reinterpret_cast<TForm*>(
-			dynamic_cast<TMenuItem&>(*Sender).Tag		/// очень грязный трюк
+			dynamic_cast<TMenuItem&>(*Sender).Tag		/// РѕС‡РµРЅСЊ РіСЂСЏР·РЅС‹Р№ С‚СЂСЋРє
 			)->Show();
 	}
 }
@@ -112,7 +112,7 @@ void TFormMain::WindowClose(TForm *Window_)
         {
             if ( SubItem->Items[j]->Tag!=((int)Window_) ) continue;
             SubItem->Remove(SubItem->Items[j]);
-            // Удаляем группу, если с файлом больше ни одно окно не работает
+            // РЈРґР°Р»СЏРµРј РіСЂСѓРїРїСѓ, РµСЃР»Рё СЃ С„Р°Р№Р»РѕРј Р±РѕР»СЊС€Рµ РЅРё РѕРґРЅРѕ РѕРєРЅРѕ РЅРµ СЂР°Р±РѕС‚Р°РµС‚
             if ( SubItem->Count==0 )
             {
                 delete reinterpret_cast<MLogFile*>(SubItem->Tag);

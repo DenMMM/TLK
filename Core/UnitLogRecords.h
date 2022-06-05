@@ -1,4 +1,4 @@
-//---------------------------------------------------------------------------
+п»ї//---------------------------------------------------------------------------
 #ifndef UnitLogRecordsH
 #define UnitLogRecordsH
 //---------------------------------------------------------------------------
@@ -18,7 +18,7 @@ class MLogRecordsItem:
 	public MSLListItem <MLogRecords, MLogRecordsItem>
 {
 public:
-	std::int64_t SystemTime;		// Время создания записи
+	std::int64_t SystemTime;		// Р’СЂРµРјСЏ СЃРѕР·РґР°РЅРёСЏ Р·Р°РїРёСЃРё
 
 	MLogRecordsItem():
 		SystemTime(0)
@@ -31,34 +31,34 @@ class MLogRecords:
 {
 public:
 	enum ItemType {
-		mlrBegin			= 0x11,	// Лог начат
-		mlrEnd				= 0x12,	// Лог закрыт
-		mlrDataShState		= 0x13,	// Данные состояния оболочки
-		mlrDataStates		= 0x14,	// Данные состояний компьютеров
-		mlrDataTariffs		= 0x15,	// Данные тарифов
-		mlrDataFines		= 0x16,	// Данные штрафов
-		mlrDataUsers		= 0x17,	// Данные пользователей
+		mlrBegin			= 0x11,	// Р›РѕРі РЅР°С‡Р°С‚
+		mlrEnd				= 0x12,	// Р›РѕРі Р·Р°РєСЂС‹С‚
+		mlrDataShState		= 0x13,	// Р”Р°РЅРЅС‹Рµ СЃРѕСЃС‚РѕСЏРЅРёСЏ РѕР±РѕР»РѕС‡РєРё
+		mlrDataStates		= 0x14,	// Р”Р°РЅРЅС‹Рµ СЃРѕСЃС‚РѕСЏРЅРёР№ РєРѕРјРїСЊСЋС‚РµСЂРѕРІ
+		mlrDataTariffs		= 0x15,	// Р”Р°РЅРЅС‹Рµ С‚Р°СЂРёС„РѕРІ
+		mlrDataFines		= 0x16,	// Р”Р°РЅРЅС‹Рµ С€С‚СЂР°С„РѕРІ
+		mlrDataUsers		= 0x17,	// Р”Р°РЅРЅС‹Рµ РїРѕР»СЊР·РѕРІР°С‚РµР»РµР№
 
-		mlrStart			= 0x21,	// Запуск админского модуля
-		mlrStop				= 0x22,	// Остановка админского модуля
-		mlrLogIn			= 0x23,	// Пользователь начал работу
-		mlrLogOut			= 0x24,	// Пользователь закончил работу
-		mlrConfig			= 0x25,	// Настройки открыты/закрыты
-		mlrComputers		= 0x26,	// Изменен список компьютеров
-		mlrTariffs			= 0x27,	// Изменен список тарифов
-		mlrFines			= 0x28,	// Изменен список штрафов
-		mlrUsers			= 0x29,	// Изменен список пользователей
-		mlrOptions			= 0x2A,	// Изменены общие настройки
+		mlrStart			= 0x21,	// Р—Р°РїСѓСЃРє Р°РґРјРёРЅСЃРєРѕРіРѕ РјРѕРґСѓР»СЏ
+		mlrStop				= 0x22,	// РћСЃС‚Р°РЅРѕРІРєР° Р°РґРјРёРЅСЃРєРѕРіРѕ РјРѕРґСѓР»СЏ
+		mlrLogIn			= 0x23,	// РџРѕР»СЊР·РѕРІР°С‚РµР»СЊ РЅР°С‡Р°Р» СЂР°Р±РѕС‚Сѓ
+		mlrLogOut			= 0x24,	// РџРѕР»СЊР·РѕРІР°С‚РµР»СЊ Р·Р°РєРѕРЅС‡РёР» СЂР°Р±РѕС‚Сѓ
+		mlrConfig			= 0x25,	// РќР°СЃС‚СЂРѕР№РєРё РѕС‚РєСЂС‹С‚С‹/Р·Р°РєСЂС‹С‚С‹
+		mlrComputers		= 0x26,	// РР·РјРµРЅРµРЅ СЃРїРёСЃРѕРє РєРѕРјРїСЊСЋС‚РµСЂРѕРІ
+		mlrTariffs			= 0x27,	// РР·РјРµРЅРµРЅ СЃРїРёСЃРѕРє С‚Р°СЂРёС„РѕРІ
+		mlrFines			= 0x28,	// РР·РјРµРЅРµРЅ СЃРїРёСЃРѕРє С€С‚СЂР°С„РѕРІ
+		mlrUsers			= 0x29,	// РР·РјРµРЅРµРЅ СЃРїРёСЃРѕРє РїРѕР»СЊР·РѕРІР°С‚РµР»РµР№
+		mlrOptions			= 0x2A,	// РР·РјРµРЅРµРЅС‹ РѕР±С‰РёРµ РЅР°СЃС‚СЂРѕР№РєРё
 
-		mlrRun				= 0x31,	// Запуск компьютера
-		mlrFine				= 0x32,	// Штрафование компьютера
-		mlrExchange			= 0x33,	// Пересадка с одного компьютера на другой
-		mlrLock				= 0x34,	// Прикрытие/открытие компьютера
-		mlrPause			= 0x35,	// Приостановка/запуск времени
-		mlrOpen				= 0x36,	// Открытие/закрытие компьютера для обслуживания
-		mlrPowerOn			= 0x37,	// Включение питания компьютера (WOL)
-		mlrReboot			= 0x38,	// Перезагрузка компьютера
-		mlrShutdown			= 0x39,	// Выключение питания компьютера
+		mlrRun				= 0x31,	// Р—Р°РїСѓСЃРє РєРѕРјРїСЊСЋС‚РµСЂР°
+		mlrFine				= 0x32,	// РЁС‚СЂР°С„РѕРІР°РЅРёРµ РєРѕРјРїСЊСЋС‚РµСЂР°
+		mlrExchange			= 0x33,	// РџРµСЂРµСЃР°РґРєР° СЃ РѕРґРЅРѕРіРѕ РєРѕРјРїСЊСЋС‚РµСЂР° РЅР° РґСЂСѓРіРѕР№
+		mlrLock				= 0x34,	// РџСЂРёРєСЂС‹С‚РёРµ/РѕС‚РєСЂС‹С‚РёРµ РєРѕРјРїСЊСЋС‚РµСЂР°
+		mlrPause			= 0x35,	// РџСЂРёРѕСЃС‚Р°РЅРѕРІРєР°/Р·Р°РїСѓСЃРє РІСЂРµРјРµРЅРё
+		mlrOpen				= 0x36,	// РћС‚РєСЂС‹С‚РёРµ/Р·Р°РєСЂС‹С‚РёРµ РєРѕРјРїСЊСЋС‚РµСЂР° РґР»СЏ РѕР±СЃР»СѓР¶РёРІР°РЅРёСЏ
+		mlrPowerOn			= 0x37,	// Р’РєР»СЋС‡РµРЅРёРµ РїРёС‚Р°РЅРёСЏ РєРѕРјРїСЊСЋС‚РµСЂР° (WOL)
+		mlrReboot			= 0x38,	// РџРµСЂРµР·Р°РіСЂСѓР·РєР° РєРѕРјРїСЊСЋС‚РµСЂР°
+		mlrShutdown			= 0x39,	// Р’С‹РєР»СЋС‡РµРЅРёРµ РїРёС‚Р°РЅРёСЏ РєРѕРјРїСЊСЋС‚РµСЂР°
 		mlrTABLE_SIZE
 	};
 
@@ -67,24 +67,24 @@ protected:
 	class EventBase: public MLogRecordsItem
 	{
 	private:
-		// Функции механизма сохранения/загрузки данных
+		// Р¤СѓРЅРєС†РёРё РјРµС…Р°РЅРёР·РјР° СЃРѕС…СЂР°РЅРµРЅРёСЏ/Р·Р°РіСЂСѓР·РєРё РґР°РЅРЅС‹С…
 		virtual std::size_t GetDataSize() const override;
 		virtual void *SetData(void *Data_) const override;
 		virtual const void *GetData(const void *Data_, const void *Limit_) override;
 	};
 
 
-	class ModeBase: public MLogRecordsItem        /// Объединить с CmdBase ?
+	class ModeBase: public MLogRecordsItem        /// РћР±СЉРµРґРёРЅРёС‚СЊ СЃ CmdBase ?
 	{
 	private:
-		// Функции механизма сохранения/загрузки данных
+		// Р¤СѓРЅРєС†РёРё РјРµС…Р°РЅРёР·РјР° СЃРѕС…СЂР°РЅРµРЅРёСЏ/Р·Р°РіСЂСѓР·РєРё РґР°РЅРЅС‹С…
 		virtual std::size_t GetDataSize() const override;
 		virtual void *SetData(void *Data_) const override;
 		virtual const void *GetData(const void *Data_, const void *Limit_) override;
 
 	public:
-		std::int8_t Number;		// Номер компьютера
-		bool Apply;				// Режим был установлен/снят
+		std::int8_t Number;		// РќРѕРјРµСЂ РєРѕРјРїСЊСЋС‚РµСЂР°
+		bool Apply;				// Р РµР¶РёРј Р±С‹Р» СѓСЃС‚Р°РЅРѕРІР»РµРЅ/СЃРЅСЏС‚
 
 		ModeBase():
 			Number(0),
@@ -97,13 +97,13 @@ protected:
 	class CmdBase: public MLogRecordsItem
 	{
 	private:
-		// Функции механизма сохранения/загрузки данных
+		// Р¤СѓРЅРєС†РёРё РјРµС…Р°РЅРёР·РјР° СЃРѕС…СЂР°РЅРµРЅРёСЏ/Р·Р°РіСЂСѓР·РєРё РґР°РЅРЅС‹С…
 		virtual std::size_t GetDataSize() const override;
 		virtual void *SetData(void *Data_) const override;
 		virtual const void *GetData(const void *Data_, const void *Limit_) override;
 
 	public:
-		std::int8_t Number;		// Номер компьютера
+		std::int8_t Number;		// РќРѕРјРµСЂ РєРѕРјРїСЊСЋС‚РµСЂР°
 
 		CmdBase():
 			Number(0)
@@ -115,14 +115,14 @@ protected:
 	class DataShellBase: public MLogRecordsItem
 	{
 	private:
-		// Функции механизма сохранения/загрузки данных
+		// Р¤СѓРЅРєС†РёРё РјРµС…Р°РЅРёР·РјР° СЃРѕС…СЂР°РЅРµРЅРёСЏ/Р·Р°РіСЂСѓР·РєРё РґР°РЅРЅС‹С…
 		virtual std::size_t GetDataSize() const override;
 		virtual void *SetData(void *Data_) const override;
 		virtual const void *GetData(const void *Data_, const void *Limit_) override;
 
 	public:
-		std::uint32_t State;	// Состояние оболочки
-		std::uint32_t User;		// Текущий пользователь (чья смена открыта)
+		std::uint32_t State;	// РЎРѕСЃС‚РѕСЏРЅРёРµ РѕР±РѕР»РѕС‡РєРё
+		std::uint32_t User;		// РўРµРєСѓС‰РёР№ РїРѕР»СЊР·РѕРІР°С‚РµР»СЊ (С‡СЊСЏ СЃРјРµРЅР° РѕС‚РєСЂС‹С‚Р°)
 
 		DataShellBase():
 			State(0),
@@ -135,65 +135,65 @@ protected:
 	class DataStatesBase: public MLogRecordsItem
 	{
 	private:
-		// Функции механизма сохранения/загрузки данных
+		// Р¤СѓРЅРєС†РёРё РјРµС…Р°РЅРёР·РјР° СЃРѕС…СЂР°РЅРµРЅРёСЏ/Р·Р°РіСЂСѓР·РєРё РґР°РЅРЅС‹С…
 		virtual std::size_t GetDataSize() const override;
 		virtual void *SetData(void *Data_) const override;
 		virtual const void *GetData(const void *Data_, const void *Limit_) override;
 
 	public:
-		std::vector <MStatesItem::LogData> Items;		// Массив состояний компьютеров
+		std::vector <MStatesItem::LogData> Items;		// РњР°СЃСЃРёРІ СЃРѕСЃС‚РѕСЏРЅРёР№ РєРѕРјРїСЊСЋС‚РµСЂРѕРІ
 	};
 
 
 	class DataTariffsBase: public MLogRecordsItem
 	{
 	private:
-		// Функции механизма сохранения/загрузки данных
+		// Р¤СѓРЅРєС†РёРё РјРµС…Р°РЅРёР·РјР° СЃРѕС…СЂР°РЅРµРЅРёСЏ/Р·Р°РіСЂСѓР·РєРё РґР°РЅРЅС‹С…
 		virtual std::size_t GetDataSize() const override;
 		virtual void *SetData(void *Data_) const override;
 		virtual const void *GetData(const void *Data_, const void *Limit_) override;
 
 	public:
-		std::vector <MTariffsItem::LogData> Items;		// Массив описаний тарифов
+		std::vector <MTariffsItem::LogData> Items;		// РњР°СЃСЃРёРІ РѕРїРёСЃР°РЅРёР№ С‚Р°СЂРёС„РѕРІ
 	};
 
 
 	class DataFinesBase: public MLogRecordsItem
 	{
 	private:
-		// Функции механизма сохранения/загрузки данных
+		// Р¤СѓРЅРєС†РёРё РјРµС…Р°РЅРёР·РјР° СЃРѕС…СЂР°РЅРµРЅРёСЏ/Р·Р°РіСЂСѓР·РєРё РґР°РЅРЅС‹С…
 		virtual std::size_t GetDataSize() const override;
 		virtual void *SetData(void *Data_) const override;
 		virtual const void *GetData(const void *Data_, const void *Limit_) override;
 
 	public:
-		std::vector <MFinesItem::LogData> Items;		// Массив описаний штрафов
+		std::vector <MFinesItem::LogData> Items;		// РњР°СЃСЃРёРІ РѕРїРёСЃР°РЅРёР№ С€С‚СЂР°С„РѕРІ
 	};
 
 
 	class DataUsersBase: public MLogRecordsItem
 	{
 	private:
-		// Функции механизма сохранения/загрузки данных
+		// Р¤СѓРЅРєС†РёРё РјРµС…Р°РЅРёР·РјР° СЃРѕС…СЂР°РЅРµРЅРёСЏ/Р·Р°РіСЂСѓР·РєРё РґР°РЅРЅС‹С…
 		virtual std::size_t GetDataSize() const override;
 		virtual void *SetData(void *Data_) const override;
 		virtual const void *GetData(const void *Data_, const void *Limit_) override;
 
 	public:
-		std::vector <MUsersItem::LogData> Items;		// Массив данных о пользователях
+		std::vector <MUsersItem::LogData> Items;		// РњР°СЃСЃРёРІ РґР°РЅРЅС‹С… Рѕ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏС…
 	};
 
 
 	class AppConfigBase: public MLogRecordsItem
 	{
 	private:
-		// Функции механизма сохранения/загрузки данных
+		// Р¤СѓРЅРєС†РёРё РјРµС…Р°РЅРёР·РјР° СЃРѕС…СЂР°РЅРµРЅРёСЏ/Р·Р°РіСЂСѓР·РєРё РґР°РЅРЅС‹С…
 		virtual std::size_t GetDataSize() const override ;
 		virtual void *SetData(void *Data_) const override ;
 		virtual const void *GetData(const void *Data_, const void *Limit_) override ;
 
 	public:
-		bool Opened;			// Настройки открыты/закрыты
+		bool Opened;			// РќР°СЃС‚СЂРѕР№РєРё РѕС‚РєСЂС‹С‚С‹/Р·Р°РєСЂС‹С‚С‹
 
 		AppConfigBase():
 			Opened(false)
@@ -205,13 +205,13 @@ protected:
 	class AppLogInBase: public MLogRecordsItem
 	{
 	private:
-		// Функции механизма сохранения/загрузки данных
+		// Р¤СѓРЅРєС†РёРё РјРµС…Р°РЅРёР·РјР° СЃРѕС…СЂР°РЅРµРЅРёСЏ/Р·Р°РіСЂСѓР·РєРё РґР°РЅРЅС‹С…
 		virtual std::size_t GetDataSize() const override;
 		virtual void *SetData(void *Data_) const override;
 		virtual const void *GetData(const void *Data_, const void *Limit_) override;
 
 	public:
-		std::uint32_t User;		// ID-номер пользователя
+		std::uint32_t User;		// ID-РЅРѕРјРµСЂ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ
 
 		AppLogInBase():
 			User(0)
@@ -223,21 +223,21 @@ protected:
 	class CompRunBase: public MLogRecordsItem
 	{
 	private:
-		// Функции механизма сохранения/загрузки данных
+		// Р¤СѓРЅРєС†РёРё РјРµС…Р°РЅРёР·РјР° СЃРѕС…СЂР°РЅРµРЅРёСЏ/Р·Р°РіСЂСѓР·РєРё РґР°РЅРЅС‹С…
 		virtual std::size_t GetDataSize() const override;
 		virtual void *SetData(void *Data_) const override;
 		virtual const void *GetData(const void *Data_, const void *Limit_) override;
 
 	public:
-		std::int8_t Number;			// Номер компьютера
-		std::uint32_t Tariff;		// ID-номер тарифа
-		std::int64_t StartTime;		// Время, относительно которого посчитана стоимость
+		std::int8_t Number;			// РќРѕРјРµСЂ РєРѕРјРїСЊСЋС‚РµСЂР°
+		std::uint32_t Tariff;		// ID-РЅРѕРјРµСЂ С‚Р°СЂРёС„Р°
+		std::int64_t StartTime;		// Р’СЂРµРјСЏ, РѕС‚РЅРѕСЃРёС‚РµР»СЊРЅРѕ РєРѕС‚РѕСЂРѕРіРѕ РїРѕСЃС‡РёС‚Р°РЅР° СЃС‚РѕРёРјРѕСЃС‚СЊ
 		std::uint8_t Type;          // =
-		std::int16_t BeginTime;		// =    Информация о пакете
+		std::int16_t BeginTime;		// =    РРЅС„РѕСЂРјР°С†РёСЏ Рѕ РїР°РєРµС‚Рµ
 		std::int16_t EndTime;		// =
 		std::int16_t SizeTime;		// =
-		std::int16_t WorkTime;		// Поставленное время работы
-		double Cost;				// Стоимость работы на компьютере в течении 'WorkTime'
+		std::int16_t WorkTime;		// РџРѕСЃС‚Р°РІР»РµРЅРЅРѕРµ РІСЂРµРјСЏ СЂР°Р±РѕС‚С‹
+		double Cost;				// РЎС‚РѕРёРјРѕСЃС‚СЊ СЂР°Р±РѕС‚С‹ РЅР° РєРѕРјРїСЊСЋС‚РµСЂРµ РІ С‚РµС‡РµРЅРёРё 'WorkTime'
 
 		CompRunBase():
 			Number(0),
@@ -257,15 +257,15 @@ protected:
 	class CompFineBase: public MLogRecordsItem
 	{
 	private:
-		// Функции механизма сохранения/загрузки данных
+		// Р¤СѓРЅРєС†РёРё РјРµС…Р°РЅРёР·РјР° СЃРѕС…СЂР°РЅРµРЅРёСЏ/Р·Р°РіСЂСѓР·РєРё РґР°РЅРЅС‹С…
 		virtual std::size_t GetDataSize() const override;
 		virtual void *SetData(void *Data_) const override;
 		virtual const void *GetData(const void *Data_, const void *Limit_) override;
 
 	public:
-		std::int8_t Number;			// Номер компьютера
-		std::uint32_t Fine;			// ID-номер штрафа
-		std::int16_t Time;			// Время штрафа
+		std::int8_t Number;			// РќРѕРјРµСЂ РєРѕРјРїСЊСЋС‚РµСЂР°
+		std::uint32_t Fine;			// ID-РЅРѕРјРµСЂ С€С‚СЂР°С„Р°
+		std::int16_t Time;			// Р’СЂРµРјСЏ С€С‚СЂР°С„Р°
 
 		CompFineBase():
 			Number(0),
@@ -279,14 +279,14 @@ protected:
 	class CompExchangeBase: public MLogRecordsItem
 	{
 	private:
-		// Функции механизма сохранения/загрузки данных
+		// Р¤СѓРЅРєС†РёРё РјРµС…Р°РЅРёР·РјР° СЃРѕС…СЂР°РЅРµРЅРёСЏ/Р·Р°РіСЂСѓР·РєРё РґР°РЅРЅС‹С…
 		virtual std::size_t GetDataSize() const override;
 		virtual void *SetData(void *Data_) const override;
 		virtual const void *GetData(const void *Data_, const void *Limit_) override;
 
 	public:
-		std::int8_t From;			// С какого компьютера было взято время
-		std::int8_t To;				// На какой компьютер время было поставлено
+		std::int8_t From;			// РЎ РєР°РєРѕРіРѕ РєРѕРјРїСЊСЋС‚РµСЂР° Р±С‹Р»Рѕ РІР·СЏС‚Рѕ РІСЂРµРјСЏ
+		std::int8_t To;				// РќР° РєР°РєРѕР№ РєРѕРјРїСЊСЋС‚РµСЂ РІСЂРµРјСЏ Р±С‹Р»Рѕ РїРѕСЃС‚Р°РІР»РµРЅРѕ
 
 		CompExchangeBase():
 			From(0),

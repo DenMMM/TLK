@@ -1,4 +1,4 @@
-//---------------------------------------------------------------------------
+п»ї//---------------------------------------------------------------------------
 #ifndef UnitIDListH
 #define UnitIDListH
 //---------------------------------------------------------------------------
@@ -27,8 +27,8 @@ using MIDListSimple = MSLListSimple <parent_list, item_type>;
 //---------------------------------------------------------------------------
 //---------------------------------------------------------------------------
 template <
-	typename list_type,			// Имя будущего класса-списка
-	typename base_type>			// Базовый (родительский) тип его элементов
+	typename list_type,			// РРјСЏ Р±СѓРґСѓС‰РµРіРѕ РєР»Р°СЃСЃР°-СЃРїРёСЃРєР°
+	typename base_type>			// Р‘Р°Р·РѕРІС‹Р№ (СЂРѕРґРёС‚РµР»СЊСЃРєРёР№) С‚РёРї РµРіРѕ СЌР»РµРјРµРЅС‚РѕРІ
 class MIDListItem:
 	public MSLListItem <list_type, base_type>
 {
@@ -38,7 +38,7 @@ protected:
 	std::uint32_t UUID;
 
 public:
-	// Функции механизма сохранения/загрузки данных
+	// Р¤СѓРЅРєС†РёРё РјРµС…Р°РЅРёР·РјР° СЃРѕС…СЂР°РЅРµРЅРёСЏ/Р·Р°РіСЂСѓР·РєРё РґР°РЅРЅС‹С…
 	virtual std::size_t GetDataSize() const override
 		{ return sizeof(UUID); }
 	virtual void *SetData(void *Data_) const override
@@ -57,8 +57,8 @@ public:
 //---------------------------------------------------------------------------
 //---------------------------------------------------------------------------
 template <
-	typename list_type,			// Создаваемый класс списка (имя)
-	typename base_type>			// Базовый тип элемента списка
+	typename list_type,			// РЎРѕР·РґР°РІР°РµРјС‹Р№ РєР»Р°СЃСЃ СЃРїРёСЃРєР° (РёРјСЏ)
+	typename base_type>			// Р‘Р°Р·РѕРІС‹Р№ С‚РёРї СЌР»РµРјРµРЅС‚Р° СЃРїРёСЃРєР°
 class MIDList:
 	public MSLList <list_type, base_type>
 {
@@ -69,7 +69,7 @@ private:
 	std::uint32_t NextUUID(std::uint32_t LastUUID_) const;
 
 public:
-	// Функции механизма сохранения/загрузки данных
+	// Р¤СѓРЅРєС†РёРё РјРµС…Р°РЅРёР·РјР° СЃРѕС…СЂР°РЅРµРЅРёСЏ/Р·Р°РіСЂСѓР·РєРё РґР°РЅРЅС‹С…
 	virtual std::size_t GetDataSize() const override
 		{ return sizeof(LastUUID); }
 	virtual void *SetData(void *Data_) const override
@@ -112,13 +112,13 @@ std::uint32_t MIDList<list_type,base_type>::FirstUUID()
 	{
 		throw std::runtime_error (
 			"MIDList::FirstUUID()"
-			"Не удалось запросить системное время. Генерация уникальных ID не возможна.");
+			"РќРµ СѓРґР°Р»РѕСЃСЊ Р·Р°РїСЂРѕСЃРёС‚СЊ СЃРёСЃС‚РµРјРЅРѕРµ РІСЂРµРјСЏ. Р“РµРЅРµСЂР°С†РёСЏ СѓРЅРёРєР°Р»СЊРЅС‹С… ID РЅРµ РІРѕР·РјРѕР¶РЅР°.");
 	}
-//    id=::GetTickCount();                // чуток случайности
+//    id=::GetTickCount();                // С‡СѓС‚РѕРє СЃР»СѓС‡Р°Р№РЅРѕСЃС‚Рё
 //    id<<=16;
-	id=time/(60*10000000i64);           // 16 млн минут хватит на >30 лет
-	id<<=8;                             // 256 уникальных ID в минуту достаточно
-	id++;                               // '0' не положено
+	id=time/(60*10000000i64);           // 16 РјР»РЅ РјРёРЅСѓС‚ С…РІР°С‚РёС‚ РЅР° >30 Р»РµС‚
+	id<<=8;                             // 256 СѓРЅРёРєР°Р»СЊРЅС‹С… ID РІ РјРёРЅСѓС‚Сѓ РґРѕСЃС‚Р°С‚РѕС‡РЅРѕ
+	id++;                               // '0' РЅРµ РїРѕР»РѕР¶РµРЅРѕ
 
 	return id;
 }
@@ -127,7 +127,7 @@ template <typename list_type, typename base_type>
 std::uint32_t MIDList<list_type,base_type>::NextUUID(std::uint32_t LastUUID_) const
 {
 	auto iEnd=end();
-	// Перебираем ID (пропуская '0') пока не найдем свободный
+	// РџРµСЂРµР±РёСЂР°РµРј ID (РїСЂРѕРїСѓСЃРєР°СЏ '0') РїРѕРєР° РЅРµ РЅР°Р№РґРµРј СЃРІРѕР±РѕРґРЅС‹Р№
 	do { if ( (++LastUUID_)==0 ) continue; }
 	while ( SrchUUID(LastUUID_)!=iEnd );
 
@@ -166,7 +166,7 @@ auto MIDList<list_type,base_type>::SrchUUID(std::uint32_t UUID_)
 	const MIDList* ConstThis=this;
 	const auto ConstRes=ConstThis->SrchUUID(UUID_);
 	return iterator(
-		reinterpret_cast<base_type*>(&*ConstRes)		/// хак ?
+		reinterpret_cast<base_type*>(&*ConstRes)		/// С…Р°Рє ?
 		);
 }
 */
@@ -176,10 +176,10 @@ void MIDList<list_type,base_type>::SetUUIDs()
 {
 	std::uint32_t uuid;
 
-	// Если еще не задавали ID, генерируем начальное значенение
+	// Р•СЃР»Рё РµС‰Рµ РЅРµ Р·Р°РґР°РІР°Р»Рё ID, РіРµРЅРµСЂРёСЂСѓРµРј РЅР°С‡Р°Р»СЊРЅРѕРµ Р·РЅР°С‡РµРЅРµРЅРёРµ
 	uuid=(LastUUID!=0)? LastUUID: FirstUUID();
 
-	// Проходим список и задаем ID где их нет
+	// РџСЂРѕС…РѕРґРёРј СЃРїРёСЃРѕРє Рё Р·Р°РґР°РµРј ID РіРґРµ РёС… РЅРµС‚
 	auto iItem=begin();
 	auto iEnd=end();
 

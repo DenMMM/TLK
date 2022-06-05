@@ -1,4 +1,4 @@
-//---------------------------------------------------------------------------
+п»ї//---------------------------------------------------------------------------
 #include <string.h>
 #pragma hdrstop
 
@@ -32,7 +32,7 @@ void MAuth::SetKey(const void *Key_, std::size_t Size_)
 	{
 		throw std::runtime_error (
 			"MAuth::SetKey()"
-			"Не допустимый размер ключа.");
+			"РќРµ РґРѕРїСѓСЃС‚РёРјС‹Р№ СЂР°Р·РјРµСЂ РєР»СЋС‡Р°.");
 	}
 	memcpy(Key,Key_,sizeof(Key));
 }
@@ -43,7 +43,7 @@ void MAuth::GetKey(void *Buff_, std::size_t Size_) const
     {
         throw std::runtime_error (
             "MAuth::GetKey()"
-            "Не допустимый размер буфера для ключа.");
+            "РќРµ РґРѕРїСѓСЃС‚РёРјС‹Р№ СЂР°Р·РјРµСЂ Р±СѓС„РµСЂР° РґР»СЏ РєР»СЋС‡Р°.");
     }
     memcpy(Buff_,Key,sizeof(Key));
 }
@@ -61,15 +61,15 @@ bool MAuth::Check(const void *Data_, std::size_t DataSize_, const void *MAC_, st
 {
     unsigned char mac[MAC_Size];
 
-    // Если длины MAC отличаются, то и сравнивать нечего
+    // Р•СЃР»Рё РґР»РёРЅС‹ MAC РѕС‚Р»РёС‡Р°СЋС‚СЃСЏ, С‚Рѕ Рё СЃСЂР°РІРЅРёРІР°С‚СЊ РЅРµС‡РµРіРѕ
     if ( MACSize_!=sizeof(mac) ) return false;
-	// Вычисляем MAC для данных с известным нам ключем
+	// Р’С‹С‡РёСЃР»СЏРµРј MAC РґР»СЏ РґР°РЅРЅС‹С… СЃ РёР·РІРµСЃС‚РЅС‹Рј РЅР°Рј РєР»СЋС‡РµРј
 	hmac_sha(
 		MAC_Alg,
 		Key, sizeof(Key),
 		static_cast<const unsigned char*>(Data_), DataSize_,
 		static_cast<unsigned char*>(mac), sizeof(mac));
-    // Сравниваем MAC
+    // РЎСЂР°РІРЅРёРІР°РµРј MAC
 	return MemSlowCmp(MAC_, mac, sizeof(mac));
 //    return memcmp(MAC_, mac, sizeof(mac)) == 0;
 }

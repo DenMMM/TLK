@@ -1,55 +1,56 @@
-//---------------------------------------------------------------------------
+п»ї//---------------------------------------------------------------------------
 #ifndef UnitSyncH
 #define UnitSyncH
 //---------------------------------------------------------------------------
+#include <winsock2.h>
+
 #include <chrono>
 #include <atomic>
 #include <thread>
 #include <mutex>
-#include <winsock2.h>
 
 #include "UnitSLList.h"
 #include "UnitComputers.h"
 #include "UnitStates.h"
 #include "UnitSyncMsgs.h"
 #include "UnitRandCounter.h"
-#include "fasthash.h"
+#include "..\Ext\ZilongTan\fast-hash\fasthash.h"
 //---------------------------------------------------------------------------
 class MSyncStatesItem;
 class MSyncStates;
 class MSync;
 class MSyncCl;
 //---------------------------------------------------------------------------
-#define SYNC_Version        0x32    // Версия сетевого интерфейса
-#define SYNC_Port           7005    // Номер порта клиента
-#define SYNC_WaitInterval   3000    // Интервал между сеансами посылки данных (в мсек.)
-#define SYNC_SendInterval   256     // Задержка между посылками пакетов в сеансе (в мсек.)
-#define SYNC_SendRetryes    3       // Количество посылок одного и того же пакета в сеансе
+#define SYNC_Version        0x32    // Р’РµСЂСЃРёСЏ СЃРµС‚РµРІРѕРіРѕ РёРЅС‚РµСЂС„РµР№СЃР°
+#define SYNC_Port           7005    // РќРѕРјРµСЂ РїРѕСЂС‚Р° РєР»РёРµРЅС‚Р°
+#define SYNC_WaitInterval   3000    // РРЅС‚РµСЂРІР°Р» РјРµР¶РґСѓ СЃРµР°РЅСЃР°РјРё РїРѕСЃС‹Р»РєРё РґР°РЅРЅС‹С… (РІ РјСЃРµРє.)
+#define SYNC_SendInterval   256     // Р—Р°РґРµСЂР¶РєР° РјРµР¶РґСѓ РїРѕСЃС‹Р»РєР°РјРё РїР°РєРµС‚РѕРІ РІ СЃРµР°РЅСЃРµ (РІ РјСЃРµРє.)
+#define SYNC_SendRetryes    3       // РљРѕР»РёС‡РµСЃС‚РІРѕ РїРѕСЃС‹Р»РѕРє РѕРґРЅРѕРіРѕ Рё С‚РѕРіРѕ Р¶Рµ РїР°РєРµС‚Р° РІ СЃРµР°РЅСЃРµ
 #define SYNC_MinSize        sizeof(MSyncPHello)
 #define SYNC_MaxSize        sizeof(MSyncPData)
 //---------------------------------------------------------------------------
-// Этапы процесса синхронизации
+// Р­С‚Р°РїС‹ РїСЂРѕС†РµСЃСЃР° СЃРёРЅС…СЂРѕРЅРёР·Р°С†РёРё
 #define mspNone				0		//
-#define mspWait				1		// Ожидание новых данных/сеанса
-#define mspHello			2		// Отправка своей части сеансового ID
-#define mspSyncData			3		// Отправка данных (сервер)
-#define mspSyncConf			4		// Отправка данных (клиент)
-#define mspMagic			5		// Отправка WOL magic-пакета (сервер)
+#define mspWait				1		// РћР¶РёРґР°РЅРёРµ РЅРѕРІС‹С… РґР°РЅРЅС‹С…/СЃРµР°РЅСЃР°
+#define mspHello			2		// РћС‚РїСЂР°РІРєР° СЃРІРѕРµР№ С‡Р°СЃС‚Рё СЃРµР°РЅСЃРѕРІРѕРіРѕ ID
+#define mspSyncData			3		// РћС‚РїСЂР°РІРєР° РґР°РЅРЅС‹С… (СЃРµСЂРІРµСЂ)
+#define mspSyncConf			4		// РћС‚РїСЂР°РІРєР° РґР°РЅРЅС‹С… (РєР»РёРµРЅС‚)
+#define mspMagic			5		// РћС‚РїСЂР°РІРєР° WOL magic-РїР°РєРµС‚Р° (СЃРµСЂРІРµСЂ)
 //---------------------------------------------------------------------------
-// Типы пакетов при обмене клиента и сервера (MPacketHeader.Type)
-#define mptHelloS			1		// hello сервера
-#define mptHelloC			2		// hello клиента
-#define mptSyncData			3		// Пакет с данными для клиента (сервер)
-#define mptSyncConf			4		// Подтверждение о получении данных (клиент)
+// РўРёРїС‹ РїР°РєРµС‚РѕРІ РїСЂРё РѕР±РјРµРЅРµ РєР»РёРµРЅС‚Р° Рё СЃРµСЂРІРµСЂР° (MPacketHeader.Type)
+#define mptHelloS			1		// hello СЃРµСЂРІРµСЂР°
+#define mptHelloC			2		// hello РєР»РёРµРЅС‚Р°
+#define mptSyncData			3		// РџР°РєРµС‚ СЃ РґР°РЅРЅС‹РјРё РґР»СЏ РєР»РёРµРЅС‚Р° (СЃРµСЂРІРµСЂ)
+#define mptSyncConf			4		// РџРѕРґС‚РІРµСЂР¶РґРµРЅРёРµ Рѕ РїРѕР»СѓС‡РµРЅРёРё РґР°РЅРЅС‹С… (РєР»РёРµРЅС‚)
 //---------------------------------------------------------------------------
 /*
- сервер:mspWait       <>      клиент:mspWait
+ СЃРµСЂРІРµСЂ:mspWait       <>      РєР»РёРµРЅС‚:mspWait
  ===================================================
     attempt:
             MState::NetSyncNewData();
             MState::NetSyncData(MSyncData);
 
- сервер:mspHello      =>      клиент:mspWait
+ СЃРµСЂРІРµСЂ:mspHello      =>      РєР»РёРµРЅС‚:mspWait
  ===================================================
  MSyncPHello.Header.Version=SYNC_Version;
  MSyncPHello.Header.Type=mptHelloS;
@@ -61,7 +62,7 @@ class MSyncCl;
 									Header.Type,
 									MAC
 
- сервер:mspHello      <=      клиент:mspHello
+ СЃРµСЂРІРµСЂ:mspHello      <=      РєР»РёРµРЅС‚:mspHello
  ===================================================
  MSyncPHello.Header.Version=SYNC_Version;
  MSyncPHello.Header.Type=mptHelloC;
@@ -73,7 +74,7 @@ class MSyncCl;
             Header.Type,
             MAC
 
- сервер:mspSyncData   =>      клиент:mspHello
+ СЃРµСЂРІРµСЂ:mspSyncData   =>      РєР»РёРµРЅС‚:mspHello
  ===================================================
  MSyncPData.Header.Version=SYNC_Version;
  MSyncPData.Header.Type=mptSyncData;
@@ -87,7 +88,7 @@ class MSyncCl;
 									Header.SessId, (anti-replay)
 									MAC
 
- сервер:mspSyncData   <=      клиент:mspSyncConf
+ СЃРµСЂРІРµСЂ:mspSyncData   <=      РєР»РёРµРЅС‚:mspSyncConf
  ===================================================
  MSyncPConf.Header.Version=SYNC_Version;
  MSyncPConf.Header.Type=mptSynConf;
@@ -102,7 +103,7 @@ class MSyncCl;
 	attempt:
 			MState::NetSyncExecuted(true);
 
- сервер:mspWait       ==      клиент:mspWait
+ СЃРµСЂРІРµСЂ:mspWait       ==      РєР»РёРµРЅС‚:mspWait
  ===================================================
 							attempt:
 									MStateCl::NewSyncData(MSyncPData.Data);
@@ -115,56 +116,56 @@ class MSyncStatesItem:
 		MSyncStatesItem>
 {
 private:
-	MStatesItem *State;					// Состояние компьютера, с которым связана запись
-	u_long IP;							// IP-адрес компьютера-клиента
-	sockaddr_in Address;				// Адрес в формате socket
-	bool KnownMAC;						// Индикатор наличия известного MAC-адреса
-	unsigned char MAC[MAC_AddrLength];	// MAC-адрес сетевой платы компьютера
-	unsigned Process;					// Состояние процесса синхронизации
-	std::uint64_t SessId;				// ID сеанса
-	unsigned SendCount;					// Счетчик посланных за сеанс пакетов
-	DWORD LastSendTime;					// Время последней отправки пакета
+	MStatesItem *State;					// РЎРѕСЃС‚РѕСЏРЅРёРµ РєРѕРјРїСЊСЋС‚РµСЂР°, СЃ РєРѕС‚РѕСЂС‹Рј СЃРІСЏР·Р°РЅР° Р·Р°РїРёСЃСЊ
+	u_long IP;							// IP-Р°РґСЂРµСЃ РєРѕРјРїСЊСЋС‚РµСЂР°-РєР»РёРµРЅС‚Р°
+	sockaddr_in Address;				// РђРґСЂРµСЃ РІ С„РѕСЂРјР°С‚Рµ socket
+	bool KnownMAC;						// РРЅРґРёРєР°С‚РѕСЂ РЅР°Р»РёС‡РёСЏ РёР·РІРµСЃС‚РЅРѕРіРѕ MAC-Р°РґСЂРµСЃР°
+	unsigned char MAC[MAC_AddrLength];	// MAC-Р°РґСЂРµСЃ СЃРµС‚РµРІРѕР№ РїР»Р°С‚С‹ РєРѕРјРїСЊСЋС‚РµСЂР°
+	unsigned Process;					// РЎРѕСЃС‚РѕСЏРЅРёРµ РїСЂРѕС†РµСЃСЃР° СЃРёРЅС…СЂРѕРЅРёР·Р°С†РёРё
+	std::uint64_t SessId;				// ID СЃРµР°РЅСЃР°
+	unsigned SendCount;					// РЎС‡РµС‚С‡РёРє РїРѕСЃР»Р°РЅРЅС‹С… Р·Р° СЃРµР°РЅСЃ РїР°РєРµС‚РѕРІ
+	DWORD LastSendTime;					// Р’СЂРµРјСЏ РїРѕСЃР»РµРґРЅРµР№ РѕС‚РїСЂР°РІРєРё РїР°РєРµС‚Р°
 
-	MSyncData SyncData;					// Данные запрошенные у MState, но еще не отправленные
+	MSyncData SyncData;					// Р”Р°РЅРЅС‹Рµ Р·Р°РїСЂРѕС€РµРЅРЅС‹Рµ Сѓ MState, РЅРѕ РµС‰Рµ РЅРµ РѕС‚РїСЂР°РІР»РµРЅРЅС‹Рµ
 	union MPacket
 	{
 		MSyncPHello Hello;
 		MSyncPData Data;
 		MSyncPWOL WOL;
-	} Packet;							// Пакет, отправляемый клиенту
-	int PacketSize;						// Размер отправляемого пакета
+	} Packet;							// РџР°РєРµС‚, РѕС‚РїСЂР°РІР»СЏРµРјС‹Р№ РєР»РёРµРЅС‚Сѓ
+	int PacketSize;						// Р Р°Р·РјРµСЂ РѕС‚РїСЂР°РІР»СЏРµРјРѕРіРѕ РїР°РєРµС‚Р°
 
-	// Генерация session ID со стороны сервера
+	// Р“РµРЅРµСЂР°С†РёСЏ session ID СЃРѕ СЃС‚РѕСЂРѕРЅС‹ СЃРµСЂРІРµСЂР°
 	static MRandCounter SessIdRand;
 	static std::mutex mtxSessId;
 
 	auto NextSessId()
 	{
-		std::lock_guard <std::mutex> lckObj(mtxSessId);	/// Для MSync излишне
+		std::lock_guard <std::mutex> lckObj(mtxSessId);	/// Р”Р»СЏ MSync РёР·Р»РёС€РЅРµ
 		return SessIdRand++;
 	}
 
 public:
-	// Функции механизма сохранения/загрузки данных
+	// Р¤СѓРЅРєС†РёРё РјРµС…Р°РЅРёР·РјР° СЃРѕС…СЂР°РЅРµРЅРёСЏ/Р·Р°РіСЂСѓР·РєРё РґР°РЅРЅС‹С…
 	virtual std::size_t GetDataSize() const override;
 	virtual void *SetData(void *Data_) const override;
 	virtual const void *GetData(const void *Data_, const void *Limit_) override;
 
-	// Связать MSyncState с MState и IP-адресом компьютера
+	// РЎРІСЏР·Р°С‚СЊ MSyncState СЃ MState Рё IP-Р°РґСЂРµСЃРѕРј РєРѕРјРїСЊСЋС‚РµСЂР°
 	void Associate(MStatesItem *State_, u_long IP_);
-	// Подготовиться к отправке/приему
+	// РџРѕРґРіРѕС‚РѕРІРёС‚СЊСЃСЏ Рє РѕС‚РїСЂР°РІРєРµ/РїСЂРёРµРјСѓ
 	bool Start();
-	// Завершить операции, проверить нужно ли сохранить MState
+	// Р—Р°РІРµСЂС€РёС‚СЊ РѕРїРµСЂР°С†РёРё, РїСЂРѕРІРµСЂРёС‚СЊ РЅСѓР¶РЅРѕ Р»Рё СЃРѕС…СЂР°РЅРёС‚СЊ MState
 	bool Stop();
-	// Выполнить операцию отправки пакета, если требуется
+	// Р’С‹РїРѕР»РЅРёС‚СЊ РѕРїРµСЂР°С†РёСЋ РѕС‚РїСЂР°РІРєРё РїР°РєРµС‚Р°, РµСЃР»Рё С‚СЂРµР±СѓРµС‚СЃСЏ
 	bool Send(SOCKET Socket_, SOCKET SocketBC_, std::uint32_t Code_, MAuth *MAC_);
-	// Обработать принятый с ассоциированного IP пакет
+	// РћР±СЂР°Р±РѕС‚Р°С‚СЊ РїСЂРёРЅСЏС‚С‹Р№ СЃ Р°СЃСЃРѕС†РёРёСЂРѕРІР°РЅРЅРѕРіРѕ IP РїР°РєРµС‚
 	bool Recv(char *Packet_, int PacketSize_, std::uint32_t Code_, MAuth *MAC_);
-	// Пытаемся обновить MAC для этого IP
+	// РџС‹С‚Р°РµРјСЃСЏ РѕР±РЅРѕРІРёС‚СЊ MAC РґР»СЏ СЌС‚РѕРіРѕ IP
 	bool UpdateMAC(unsigned char *MAC_);
-	// Узнать IP, с которым обмениваемся пакетами
+	// РЈР·РЅР°С‚СЊ IP, СЃ РєРѕС‚РѕСЂС‹Рј РѕР±РјРµРЅРёРІР°РµРјСЃСЏ РїР°РєРµС‚Р°РјРё
 	u_long gIP() const { return IP; }
-	// Узнать сколько пакетов отправили (для условной индикации процесса)
+	// РЈР·РЅР°С‚СЊ СЃРєРѕР»СЊРєРѕ РїР°РєРµС‚РѕРІ РѕС‚РїСЂР°РІРёР»Рё (РґР»СЏ СѓСЃР»РѕРІРЅРѕР№ РёРЅРґРёРєР°С†РёРё РїСЂРѕС†РµСЃСЃР°)
 	unsigned gPCount() const { return Process==mspWait? 0: SendCount+1; }
 
 	MSyncStatesItem():
@@ -186,12 +187,12 @@ class MSyncStates:
 		MSyncStatesItem>
 {
 public:
-	// Создать объекты синхронизации для компьютеров и связать с их MState
+	// РЎРѕР·РґР°С‚СЊ РѕР±СЉРµРєС‚С‹ СЃРёРЅС…СЂРѕРЅРёР·Р°С†РёРё РґР»СЏ РєРѕРјРїСЊСЋС‚РµСЂРѕРІ Рё СЃРІСЏР·Р°С‚СЊ СЃ РёС… MState
 	void Associate(MStates *States_, MComputers *Computers_);
-	// Пакетная обработка тех же операций для MSyncState
+	// РџР°РєРµС‚РЅР°СЏ РѕР±СЂР°Р±РѕС‚РєР° С‚РµС… Р¶Рµ РѕРїРµСЂР°С†РёР№ РґР»СЏ MSyncState
 	bool Start();
 	bool Stop();
-	// Найти объект по IP-адресу
+	// РќР°Р№С‚Рё РѕР±СЉРµРєС‚ РїРѕ IP-Р°РґСЂРµСЃСѓ
 	const_iterator Search(u_long IP_) const;
 	iterator Search(u_long IP_)
 	{
@@ -203,23 +204,23 @@ public:
 class MSync
 {
 private:
-	bool Init;				// Была ли выполнена инициализация WinSocket
-	bool AutoSaveARP;		// Сохранять ARP-кэш автоматически при обновлении MAC-адресов
-	std::thread Thread;		// Объект потока, осуществляющего отправку/прием
-	SOCKET Socket;			// Сокет для выполнения синхронизации
-	SOCKET SocketBC;		// Сокет для отправки "Magic Packet"
-	std::uint32_t NetCode;	// Код шифрования для сетевого обмена
-	MAuth *NetMAC;			// Аутентификатор сетевых операций
-	MStates *States;		// Cостояния компьютеров для синхронизации
-	MSyncStates SyncStates;	// Объекты процесса синхронизации
+	bool Init;				// Р‘С‹Р»Р° Р»Рё РІС‹РїРѕР»РЅРµРЅР° РёРЅРёС†РёР°Р»РёР·Р°С†РёСЏ WinSocket
+	bool AutoSaveARP;		// РЎРѕС…СЂР°РЅСЏС‚СЊ ARP-РєСЌС€ Р°РІС‚РѕРјР°С‚РёС‡РµСЃРєРё РїСЂРё РѕР±РЅРѕРІР»РµРЅРёРё MAC-Р°РґСЂРµСЃРѕРІ
+	std::thread Thread;		// РћР±СЉРµРєС‚ РїРѕС‚РѕРєР°, РѕСЃСѓС‰РµСЃС‚РІР»СЏСЋС‰РµРіРѕ РѕС‚РїСЂР°РІРєСѓ/РїСЂРёРµРј
+	SOCKET Socket;			// РЎРѕРєРµС‚ РґР»СЏ РІС‹РїРѕР»РЅРµРЅРёСЏ СЃРёРЅС…СЂРѕРЅРёР·Р°С†РёРё
+	SOCKET SocketBC;		// РЎРѕРєРµС‚ РґР»СЏ РѕС‚РїСЂР°РІРєРё "Magic Packet"
+	std::uint32_t NetCode;	// РљРѕРґ С€РёС„СЂРѕРІР°РЅРёСЏ РґР»СЏ СЃРµС‚РµРІРѕРіРѕ РѕР±РјРµРЅР°
+	MAuth *NetMAC;			// РђСѓС‚РµРЅС‚РёС„РёРєР°С‚РѕСЂ СЃРµС‚РµРІС‹С… РѕРїРµСЂР°С†РёР№
+	MStates *States;		// CРѕСЃС‚РѕСЏРЅРёСЏ РєРѕРјРїСЊСЋС‚РµСЂРѕРІ РґР»СЏ СЃРёРЅС…СЂРѕРЅРёР·Р°С†РёРё
+	MSyncStates SyncStates;	// РћР±СЉРµРєС‚С‹ РїСЂРѕС†РµСЃСЃР° СЃРёРЅС…СЂРѕРЅРёР·Р°С†РёРё
 
-	std::atomic_uint PCount;	// Счетчик отправленных пакетов (индикация)
+	std::atomic_uint PCount;	// РЎС‡РµС‚С‡РёРє РѕС‚РїСЂР°РІР»РµРЅРЅС‹С… РїР°РєРµС‚РѕРІ (РёРЅРґРёРєР°С†РёСЏ)
 
 	union MPacket
 	{
 		MSyncPHello Hello;
 		MSyncPConf Conf;
-	} Packet;				// Буфер для принимаемых пакетов
+	} Packet;				// Р‘СѓС„РµСЂ РґР»СЏ РїСЂРёРЅРёРјР°РµРјС‹С… РїР°РєРµС‚РѕРІ
 
 	static bool PollData(SOCKET Socket_);
 	static bool UpdateMAC(MSyncStates *States_);
@@ -229,18 +230,18 @@ private:
 	void sPCount(unsigned Value_) noexcept { PCount.store(Value_); }
 
 public:
-	bool NetInit(std::uint32_t Code_, MAuth *MAC_);	// Инициализация WinSocket
-	bool NetFree();                             	// Освобождение WinSocket
+	bool NetInit(std::uint32_t Code_, MAuth *MAC_);	// РРЅРёС†РёР°Р»РёР·Р°С†РёСЏ WinSocket
+	bool NetFree();                             	// РћСЃРІРѕР±РѕР¶РґРµРЅРёРµ WinSocket
 	bool Associate(MStates *States_, MComputers *Computers_);
-	bool Start();                               	// Создание сокетов и запуск потока синхронизации
-	void Stop();                                	// Остановка потока синхронизации и закрытие сокетов
+	bool Start();                               	// РЎРѕР·РґР°РЅРёРµ СЃРѕРєРµС‚РѕРІ Рё Р·Р°РїСѓСЃРє РїРѕС‚РѕРєР° СЃРёРЅС…СЂРѕРЅРёР·Р°С†РёРё
+	void Stop();                                	// РћСЃС‚Р°РЅРѕРІРєР° РїРѕС‚РѕРєР° СЃРёРЅС…СЂРѕРЅРёР·Р°С†РёРё Рё Р·Р°РєСЂС‹С‚РёРµ СЃРѕРєРµС‚РѕРІ
 
-	void SetARPFile(wchar_t *File_, std::uint32_t Code_, bool AutoSave_);
+	void SetARPFile(const std::wstring &File_, std::uint32_t Code_, bool AutoSave_);
 	bool SaveARP() const { return SyncStates.Save(); }
 	bool LoadARP() { return SyncStates.Load(); }
 	DWORD gLastErr() const noexcept { return SyncStates.gLastErr(); }
 
-	// Индикация процесса снхронизации
+	// РРЅРґРёРєР°С†РёСЏ РїСЂРѕС†РµСЃСЃР° СЃРЅС…СЂРѕРЅРёР·Р°С†РёРё
 	unsigned gPCountMax() const noexcept { return SyncStates.gCount()*SYNC_SendRetryes; }
 	unsigned gPCount() const noexcept { return PCount.load(); }
 
@@ -262,11 +263,11 @@ public:
 
 	~MSync()
 	{
-		// Уничтожим поток
+		// РЈРЅРёС‡С‚РѕР¶РёРј РїРѕС‚РѕРє
 		{
 			std::thread TmpThread(std::move(Thread));
 		}
-		// Закроем сокеты
+		// Р—Р°РєСЂРѕРµРј СЃРѕРєРµС‚С‹
 		if ( Socket!=INVALID_SOCKET ) ::closesocket(Socket);
 		if ( SocketBC!=INVALID_SOCKET ) ::closesocket(SocketBC);
 	}
@@ -275,31 +276,31 @@ public:
 class MSyncCl
 {
 private:
-	bool Init;				// Была ли выполнена инициализация WinSocket
-	std::thread Thread;		// Дескриптор потока, осуществляющего прием/отправку
-	SOCKET Socket;			// Сокет для приема/отправки данных
-	DWORD LastSendTime;		// Время последней отправки пакета
-	unsigned Process;		// Состояние процесса синхронизации
-	unsigned SendCount;		// Счетчик посланных за сеанс пакетов
-	std::uint64_t SessId;	// ID сеанса
-	std::uint32_t NetCode;	// Код шифрования для сетевого обмена
-	MAuth *NetMAC;			// Аутентификатор сетевых операций
-	MStateCl *State;		// Состояние, с которым ассоциирован сетевой интерфейс
-	MSyncData SyncData;		// Новые данные состояния
+	bool Init;				// Р‘С‹Р»Р° Р»Рё РІС‹РїРѕР»РЅРµРЅР° РёРЅРёС†РёР°Р»РёР·Р°С†РёСЏ WinSocket
+	std::thread Thread;		// Р”РµСЃРєСЂРёРїС‚РѕСЂ РїРѕС‚РѕРєР°, РѕСЃСѓС‰РµСЃС‚РІР»СЏСЋС‰РµРіРѕ РїСЂРёРµРј/РѕС‚РїСЂР°РІРєСѓ
+	SOCKET Socket;			// РЎРѕРєРµС‚ РґР»СЏ РїСЂРёРµРјР°/РѕС‚РїСЂР°РІРєРё РґР°РЅРЅС‹С…
+	DWORD LastSendTime;		// Р’СЂРµРјСЏ РїРѕСЃР»РµРґРЅРµР№ РѕС‚РїСЂР°РІРєРё РїР°РєРµС‚Р°
+	unsigned Process;		// РЎРѕСЃС‚РѕСЏРЅРёРµ РїСЂРѕС†РµСЃСЃР° СЃРёРЅС…СЂРѕРЅРёР·Р°С†РёРё
+	unsigned SendCount;		// РЎС‡РµС‚С‡РёРє РїРѕСЃР»Р°РЅРЅС‹С… Р·Р° СЃРµР°РЅСЃ РїР°РєРµС‚РѕРІ
+	std::uint64_t SessId;	// ID СЃРµР°РЅСЃР°
+	std::uint32_t NetCode;	// РљРѕРґ С€РёС„СЂРѕРІР°РЅРёСЏ РґР»СЏ СЃРµС‚РµРІРѕРіРѕ РѕР±РјРµРЅР°
+	MAuth *NetMAC;			// РђСѓС‚РµРЅС‚РёС„РёРєР°С‚РѕСЂ СЃРµС‚РµРІС‹С… РѕРїРµСЂР°С†РёР№
+	MStateCl *State;		// РЎРѕСЃС‚РѕСЏРЅРёРµ, СЃ РєРѕС‚РѕСЂС‹Рј Р°СЃСЃРѕС†РёРёСЂРѕРІР°РЅ СЃРµС‚РµРІРѕР№ РёРЅС‚РµСЂС„РµР№СЃ
+	MSyncData SyncData;		// РќРѕРІС‹Рµ РґР°РЅРЅС‹Рµ СЃРѕСЃС‚РѕСЏРЅРёСЏ
 
 	union MRcvPacket
 	{
 		MSyncPHello Hello;
 		MSyncPData Data;
-	} RcvPacket;			// Буфер для принимаемых от сервера пакетов
+	} RcvPacket;			// Р‘СѓС„РµСЂ РґР»СЏ РїСЂРёРЅРёРјР°РµРјС‹С… РѕС‚ СЃРµСЂРІРµСЂР° РїР°РєРµС‚РѕРІ
 
 	union MSndPacket
 	{
 		MSyncPHello Hello;
 		MSyncPConf Conf;
-	} SndPacket;			// Буфер для отправляемых серверу пакетов
-	int SndPacketSize;		// Размер отправляемого пакета
-	sockaddr_in SndAddr;	// Адрес сервера
+	} SndPacket;			// Р‘СѓС„РµСЂ РґР»СЏ РѕС‚РїСЂР°РІР»СЏРµРјС‹С… СЃРµСЂРІРµСЂСѓ РїР°РєРµС‚РѕРІ
+	int SndPacketSize;		// Р Р°Р·РјРµСЂ РѕС‚РїСЂР°РІР»СЏРµРјРѕРіРѕ РїР°РєРµС‚Р°
+	sockaddr_in SndAddr;	// РђРґСЂРµСЃ СЃРµСЂРІРµСЂР°
 
 	static bool PollData(SOCKET Socket_);
 	void ThreadExecute();
@@ -308,13 +309,13 @@ private:
 	bool Recv(sockaddr_in *From_, char *Packet_, int PacketSize_);
 	bool Send(SOCKET Socket_);
 
-	// Генерация session ID со стороны клиента
+	// Р“РµРЅРµСЂР°С†РёСЏ session ID СЃРѕ СЃС‚РѕСЂРѕРЅС‹ РєР»РёРµРЅС‚Р°
 	MRandCounter SessIdRand;
 	auto NextSessId() { return SessIdRand++; }
 
 public:
-	bool NetInit(std::uint32_t Code_, MAuth *MAC_);	// Инициализация WinSocket
-	bool NetFree();                             	// Освобождение WinSocket
+	bool NetInit(std::uint32_t Code_, MAuth *MAC_);	// РРЅРёС†РёР°Р»РёР·Р°С†РёСЏ WinSocket
+	bool NetFree();                             	// РћСЃРІРѕР±РѕР¶РґРµРЅРёРµ WinSocket
 	void Associate(MStateCl *State_);
 	bool Start();
 	void Stop();
@@ -356,11 +357,11 @@ public:
 
 	~MSyncCl()
 	{
-		// Уничтожим поток
+		// РЈРЅРёС‡С‚РѕР¶РёРј РїРѕС‚РѕРє
 		{
 			std::thread TmpThread(std::move(Thread));
 		}
-		// Закроем сокет
+		// Р—Р°РєСЂРѕРµРј СЃРѕРєРµС‚
 		if ( Socket!=INVALID_SOCKET ) ::closesocket(Socket);
 	}
 };

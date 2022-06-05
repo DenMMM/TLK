@@ -1,8 +1,8 @@
-//---------------------------------------------------------------------------
+п»ї//---------------------------------------------------------------------------
 #ifndef UnitRandCounterH
 #define UnitRandCounterH
 //---------------------------------------------------------------------------
-#include "fasthash.h"
+#include "..\Ext\ZilongTan\fast-hash\fasthash.h"
 
 #include "UnitEncode.h"
 //---------------------------------------------------------------------------
@@ -11,15 +11,15 @@ class MRandCounter;
 class MRandCounter
 {
 private:
-	std::uint64_t Counter;		// Последовательно возрастающий счетчик
-	std::uint64_t Seed;			// Код, которым шифруется его значение
+	std::uint64_t Counter;		// РџРѕСЃР»РµРґРѕРІР°С‚РµР»СЊРЅРѕ РІРѕР·СЂР°СЃС‚Р°СЋС‰РёР№ СЃС‡РµС‚С‡РёРє
+	std::uint64_t Seed;			// РљРѕРґ, РєРѕС‚РѕСЂС‹Рј С€РёС„СЂСѓРµС‚СЃСЏ РµРіРѕ Р·РЅР°С‡РµРЅРёРµ
 
 public:
 	std::uint64_t operator++()
 	{
 		auto Res=(++Counter);
-		// Не криптографический хэш вместо PRNG
-		return fasthash64(&Res, sizeof(Res), Seed); /// А так можно ?
+		// РќРµ РєСЂРёРїС‚РѕРіСЂР°С„РёС‡РµСЃРєРёР№ С…СЌС€ РІРјРµСЃС‚Рѕ PRNG
+		return fasthash64(&Res, sizeof(Res), Seed); /// Рђ С‚Р°Рє РјРѕР¶РЅРѕ ?
 	}
 
 	std::uint64_t operator++(int)

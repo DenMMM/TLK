@@ -1,20 +1,20 @@
-//---------------------------------------------------------------------------
+п»ї//---------------------------------------------------------------------------
 #ifndef UnitPasswordH
 #define UnitPasswordH
 //---------------------------------------------------------------------------
 #include <string>
 
 #define SHA_256                             // SHA_512
-#include "sha1.h"
-#include "sha2.h"
-#include "hmac.h"
+#include "..\Ext\BrianGladman\SHA\sha1.h"
+#include "..\Ext\BrianGladman\SHA\sha2.h"
+#include "..\Ext\BrianGladman\SHA\hmac.h"
 
 #include "UnitSLList.h"
 #include "UnitCommon.h"
 //---------------------------------------------------------------------------
 class MPassword;
 //---------------------------------------------------------------------------
-#define PASS_Char       '#'                 // Отображаемый при вооде пароля символ
+#define PASS_Char       '#'                 // РћС‚РѕР±СЂР°Р¶Р°РµРјС‹Р№ РїСЂРё РІРѕРѕРґРµ РїР°СЂРѕР»СЏ СЃРёРјРІРѕР»
 #define PASS_Alg        HMAC_SHA256         // HMAC_SHA512
 #define PASS_HashSize   SHA256_DIGEST_SIZE  // SHA512_DIGEST_SIZE
 #define PASS_SaltSize   SHA256_DIGEST_SIZE  // SHA256_BLOCK_SIZE, SHA512_BLOCK_SIZE ?
@@ -26,7 +26,7 @@ class MPassword:
 	public MSLList <MPassword, MPasswordStub>
 {
 public:
-	// Функции механизма сохранения/загрузки данных
+	// Р¤СѓРЅРєС†РёРё РјРµС…Р°РЅРёР·РјР° СЃРѕС…СЂР°РЅРµРЅРёСЏ/Р·Р°РіСЂСѓР·РєРё РґР°РЅРЅС‹С…
 	virtual std::size_t GetDataSize() const override;
 	virtual void *SetData(void *Data_) const override;
 	virtual const void *GetData(const void *Data_, const void *Limit_) override;

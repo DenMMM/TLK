@@ -1,4 +1,4 @@
-//---------------------------------------------------------------------------
+п»ї//---------------------------------------------------------------------------
 #include <string.h>
 #pragma hdrstop
 
@@ -14,7 +14,7 @@ std::size_t MUsersItem::GetDataSize() const
 		sizeofLine(Name)+
 		sizeof(Active)+
         Pass.GetDataSize()+
-		MIDListItem::GetDataSize();     		// ID-номер пользователя
+		MIDListItem::GetDataSize();     		// ID-РЅРѕРјРµСЂ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ
 }
 
 void *MUsersItem::SetData(void *Data_) const

@@ -1,14 +1,15 @@
-//---------------------------------------------------------------------------
-#include <stdio.h>
+п»ї//---------------------------------------------------------------------------
 //#include <windows.h>
 #include <winsock2.h>
 #include <ntstatus.h>
 #include <netioapi.h>
+
+#include <stdio.h>
 #pragma hdrstop
 
 #include "UnitCommon.h"
 #include "UnitEncode.h"
-#include "fasthash.h"
+#include "..\Ext\ZilongTan\fast-hash\fasthash.h"
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
 //---------------------------------------------------------------------------
@@ -21,11 +22,11 @@ MTimeRand BasicRand([]() -> std::seed_seq& {
 	return seq;
 }());
 //---------------------------------------------------------------------------
-/// шаблон тут просится
+/// С€Р°Р±Р»РѕРЅ С‚СѓС‚ РїСЂРѕСЃРёС‚СЃСЏ
 void *MemSetLine(void *Mem__, const std::string &Line__)
 {
 	char *Mem_=static_cast<char*>(Mem__);
-	const char *Line_=Line__.c_str();           /// лучше использовать UTF8
+	const char *Line_=Line__.c_str();           /// Р»СѓС‡С€Рµ РёСЃРїРѕР»СЊР·РѕРІР°С‚СЊ UTF8
 
 	while ( (*(Mem_++)=*(Line_++))!='\0' );
 	return Mem_;
@@ -34,7 +35,7 @@ void *MemSetLine(void *Mem__, const std::string &Line__)
 void *MemSetLine(void *Mem__, const std::wstring &Line__)
 {
 	wchar_t *Mem_=static_cast<wchar_t*>(Mem__);
-	const wchar_t *Line_=Line__.c_str();        /// лучше использовать UTF8
+	const wchar_t *Line_=Line__.c_str();        /// Р»СѓС‡С€Рµ РёСЃРїРѕР»СЊР·РѕРІР°С‚СЊ UTF8
 
 	while ( (*(Mem_++)=*(Line_++))!=L'\0' );
 	return Mem_;
@@ -48,7 +49,7 @@ const void *MemGetLine(const void *Mem__, std::string &Line_,
 
 	if ( (std::size_t)(Limit_-Mem_)>(++MaxLength_) ) Limit_=Mem_+MaxLength_;
 	Line_.clear();
-	Line_.reserve(MaxLength_);      			// оптимизация
+	Line_.reserve(MaxLength_);      			// РѕРїС‚РёРјРёР·Р°С†РёСЏ
 
 	do
 	{
@@ -70,7 +71,7 @@ const void *MemGetLine(const void *Mem__, std::wstring &Line_,
 
 	if ( (size_t)(Limit_-Mem_)>(++MaxLength_) ) Limit_=Mem_+MaxLength_;
 	Line_.clear();
-	Line_.reserve(MaxLength_);      			// оптимизация
+	Line_.reserve(MaxLength_);      			// РѕРїС‚РёРјРёР·Р°С†РёСЏ
 
 	do
 	{
@@ -119,14 +120,14 @@ size_t ByteToHEX(const void *Bytes__, std::size_t BytesCount_,
 		L'8', L'9', L'A', L'B', L'C', L'D', L'E', L'F'};
 	const unsigned char *Bytes_=static_cast<const unsigned char*>(Bytes__);
 
-	// Проверим достаточность размера буфера строки
+	// РџСЂРѕРІРµСЂРёРј РґРѕСЃС‚Р°С‚РѕС‡РЅРѕСЃС‚СЊ СЂР°Р·РјРµСЂР° Р±СѓС„РµСЂР° СЃС‚СЂРѕРєРё
 	if (
 		((Delim_==L'\0') && (LineSize_<(BytesCount_*2+1))) ||
 		((Delim_!=L'\0') && (LineSize_<(BytesCount_*3))) )
 	{
 		throw std::runtime_error (
 			"ByteToHEX()\n"
-			"Не достаточный размер буфера для HEX-строки.");
+			"РќРµ РґРѕСЃС‚Р°С‚РѕС‡РЅС‹Р№ СЂР°Р·РјРµСЂ Р±СѓС„РµСЂР° РґР»СЏ HEX-СЃС‚СЂРѕРєРё.");
 	}
 
 	size_t pin=0, pout=0;
@@ -151,7 +152,7 @@ size_t ByteToHEX(const void *Bytes__, std::size_t BytesCount_,
 		}
 	}
 
-	// Последний разделитель заменим концом строки
+	// РџРѕСЃР»РµРґРЅРёР№ СЂР°Р·РґРµР»РёС‚РµР»СЊ Р·Р°РјРµРЅРёРј РєРѕРЅС†РѕРј СЃС‚СЂРѕРєРё
 	Line_[Delim_==L'\0'? pout: --pout]=0;
 
 	return pout;
@@ -172,7 +173,7 @@ std::size_t HEXToByte(const wchar_t *Line_, void *Buff__, std::size_t BuffSize_)
 
     while(pout<BuffSize_)
     {
-        // Ищем символы старшей половинки байта
+        // РС‰РµРј СЃРёРјРІРѕР»С‹ СЃС‚Р°СЂС€РµР№ РїРѕР»РѕРІРёРЅРєРё Р±Р°Р№С‚Р°
         do
         {
             if ( Line_[pin]==0 ) return pout;
@@ -181,7 +182,7 @@ std::size_t HEXToByte(const wchar_t *Line_, void *Buff__, std::size_t BuffSize_)
 		} while(pos==nullptr);
 		byte=((pos-sym)%16)<<4;
 
-		// Ищем символы младшей половинки байта
+		// РС‰РµРј СЃРёРјРІРѕР»С‹ РјР»Р°РґС€РµР№ РїРѕР»РѕРІРёРЅРєРё Р±Р°Р№С‚Р°
 		do
 		{
 			if ( Line_[pin]==0 ) return pout;
@@ -190,7 +191,7 @@ std::size_t HEXToByte(const wchar_t *Line_, void *Buff__, std::size_t BuffSize_)
         } while(pos==nullptr);
         byte+=(pos-sym)%16;
 
-        // Сохраняем сформированный байт в выходном буфере
+        // РЎРѕС…СЂР°РЅСЏРµРј СЃС„РѕСЂРјРёСЂРѕРІР°РЅРЅС‹Р№ Р±Р°Р№С‚ РІ РІС‹С…РѕРґРЅРѕРј Р±СѓС„РµСЂРµ
         Buff_[pout]=byte;
         pout++;
     }
@@ -205,26 +206,26 @@ int ResMessageBox(HWND Owner_, UINT uCaption_, UINT uMessage_, UINT Type_, DWORD
 	DWORD Error;
 
 	HInstance=::GetModuleHandle(nullptr);
-	// Загружаем заголовок сообщения
+	// Р—Р°РіСЂСѓР¶Р°РµРј Р·Р°РіРѕР»РѕРІРѕРє СЃРѕРѕР±С‰РµРЅРёСЏ
 	if ( ::LoadString(HInstance, uCaption_, Caption, 128)==0 )
 		swprintf(Caption, sizeof(Caption)/sizeof(Caption[0]),
-			L"<< Текст заголовка не найден ! >>");
-	// Загружаем сообщение
+			L"<< РўРµРєСЃС‚ Р·Р°РіРѕР»РѕРІРєР° РЅРµ РЅР°Р№РґРµРЅ ! >>");
+	// Р—Р°РіСЂСѓР¶Р°РµРј СЃРѕРѕР±С‰РµРЅРёРµ
 	if ( ::LoadString(HInstance,uMessage_,Message,128)==0 )
 		swprintf(Message, sizeof(Message)/sizeof(Message[0]),
-			L"<< Текст сообщения не найден ! >>");
+			L"<< РўРµРєСЃС‚ СЃРѕРѕР±С‰РµРЅРёСЏ РЅРµ РЅР°Р№РґРµРЅ ! >>");
 
     if ( LastErr_!=0 )
     {
-        // Добавляем пару пустых строк
+        // Р”РѕР±Р°РІР»СЏРµРј РїР°СЂСѓ РїСѓСЃС‚С‹С… СЃС‚СЂРѕРє
 		wcscat(Message, L"\n\n");
-        // Добавляем к строке сообщение об ошибке Windows
+        // Р”РѕР±Р°РІР»СЏРµРј Рє СЃС‚СЂРѕРєРµ СЃРѕРѕР±С‰РµРЅРёРµ РѕР± РѕС€РёР±РєРµ Windows
         ::FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM,nullptr,
             LastErr_,MAKELANGID(LANG_NEUTRAL,SUBLANG_DEFAULT),
             (LPTSTR)(Message+wcslen(Message)),128,nullptr);
     }
     
-    // Выводим сообщение/диалог
+    // Р’С‹РІРѕРґРёРј СЃРѕРѕР±С‰РµРЅРёРµ/РґРёР°Р»РѕРі
     return ::MessageBox(Owner_,Message,Caption,Type_);
 }
 //---------------------------------------------------------------------------
@@ -236,21 +237,21 @@ bool WinExit(UINT uFlags)
     TOKEN_PRIVILEGES Privileges;
 
 /*
-	// Запрашиваем информацию о версии ОС
+	// Р—Р°РїСЂР°С€РёРІР°РµРј РёРЅС„РѕСЂРјР°С†РёСЋ Рѕ РІРµСЂСЃРёРё РћРЎ
 	vi.dwOSVersionInfoSize=sizeof(OSVERSIONINFO);
 	if ( !GetVersionExW(&vi) ) goto error;
-	// Проверяем не WinNT-система ли и требуются ли дополнительные права на выполнение операции
+	// РџСЂРѕРІРµСЂСЏРµРј РЅРµ WinNT-СЃРёСЃС‚РµРјР° Р»Рё Рё С‚СЂРµР±СѓСЋС‚СЃСЏ Р»Рё РґРѕРїРѕР»РЅРёС‚РµР»СЊРЅС‹Рµ РїСЂР°РІР° РЅР° РІС‹РїРѕР»РЅРµРЅРёРµ РѕРїРµСЂР°С†РёРё
 	if ( (vi.dwPlatformId==VER_PLATFORM_WIN32_NT)&&
 		(uFlags&(EWX_POWEROFF|EWX_REBOOT|EWX_SHUTDOWN)) )
 */
     {
-        // Берем описатель процесса
+        // Р‘РµСЂРµРј РѕРїРёСЃР°С‚РµР»СЊ РїСЂРѕС†РµСЃСЃР°
         Process=::GetCurrentProcess();
-        // Берем токен процесса
+        // Р‘РµСЂРµРј С‚РѕРєРµРЅ РїСЂРѕС†РµСЃСЃР°
         if ( !::OpenProcessToken(Process,TOKEN_ADJUST_PRIVILEGES,&Token) ) goto error;
-        // Запрашиваем LUID для SE_SHUTDOWN_NAME
+        // Р—Р°РїСЂР°С€РёРІР°РµРј LUID РґР»СЏ SE_SHUTDOWN_NAME
         if ( !::LookupPrivilegeValue(nullptr,SE_SHUTDOWN_NAME,&Luid) ) goto error;
-        // Устанавливаем привелегию для выполнения выхода из системы
+        // РЈСЃС‚Р°РЅР°РІР»РёРІР°РµРј РїСЂРёРІРµР»РµРіРёСЋ РґР»СЏ РІС‹РїРѕР»РЅРµРЅРёСЏ РІС‹С…РѕРґР° РёР· СЃРёСЃС‚РµРјС‹
         Privileges.PrivilegeCount=1;
         Privileges.Privileges[0].Luid=Luid;
         Privileges.Privileges[0].Attributes=SE_PRIVILEGE_ENABLED;
@@ -274,11 +275,11 @@ void RegExecList(HKEY hKey_, LPCWSTR SubKey_, HANDLE hToken_)
 	wchar_t name[256+1], value[MAX_PATH+1];
 	LPVOID lpEnv=nullptr;
 
-	// Запросим параметры среды пользователя
+	// Р—Р°РїСЂРѕСЃРёРј РїР°СЂР°РјРµС‚СЂС‹ СЃСЂРµРґС‹ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ
 	if ( (hToken_!=INVALID_HANDLE_VALUE)&&
 		(!::CreateEnvironmentBlock(&lpEnv,hToken_,FALSE)) ) return;
 
-	// Откроем раздел реестра
+	// РћС‚РєСЂРѕРµРј СЂР°Р·РґРµР» СЂРµРµСЃС‚СЂР°
 	if ( ::RegOpenKeyExW(
 			hKey_, SubKey_, 0,
 			KEY_ENUMERATE_SUB_KEYS|KEY_QUERY_VALUE,
@@ -294,7 +295,7 @@ void RegExecList(HKEY hKey_, LPCWSTR SubKey_, HANDLE hToken_)
 		name_size=256;
 		data_size=MAX_PATH;
 
-		// Получим значение очередного параметра реестра
+		// РџРѕР»СѓС‡РёРј Р·РЅР°С‡РµРЅРёРµ РѕС‡РµСЂРµРґРЅРѕРіРѕ РїР°СЂР°РјРµС‚СЂР° СЂРµРµСЃС‚СЂР°
 		if ( ::RegEnumValueW(key, index, name, &name_size, nullptr,
 			&type, (BYTE*)value, &data_size)!=ERROR_SUCCESS ) break;
 
@@ -307,7 +308,7 @@ void RegExecList(HKEY hKey_, LPCWSTR SubKey_, HANDLE hToken_)
 			memset(&si,0,sizeof(STARTUPINFO));
 			si.cb=sizeof(STARTUPINFO);
 
-			// Запустим процесс
+			// Р—Р°РїСѓСЃС‚РёРј РїСЂРѕС†РµСЃСЃ
 			if ( hToken_==INVALID_HANDLE_VALUE )
 			{
 				result=::CreateProcessW(
@@ -339,26 +340,26 @@ void RegExecList(HKEY hKey_, LPCWSTR SubKey_, HANDLE hToken_)
 //---------------------------------------------------------------------------
 std::uint64_t CalcHwMacHash()
 {
-	// Запросим таблицу сетевых интерфейсов
+	// Р—Р°РїСЂРѕСЃРёРј С‚Р°Р±Р»РёС†Сѓ СЃРµС‚РµРІС‹С… РёРЅС‚РµСЂС„РµР№СЃРѕРІ
 	PMIB_IF_TABLE2 pTable=nullptr;
 	if ( ::GetIfTable2(&pTable)!=NO_ERROR ) return 0;       /// throw ?
 
-	// Посчитаем хэш MAC-адресов
+	// РџРѕСЃС‡РёС‚Р°РµРј С…СЌС€ MAC-Р°РґСЂРµСЃРѕРІ
 	std::uint64_t uHash=0;
 	for ( ULONG i=0, j=pTable->NumEntries; i<j; ++i )
 	{
 		PMIB_IF_ROW2 pRow=&pTable->Table[i];
 
-		// Учтем только физические интерфейсы
+		// РЈС‡С‚РµРј С‚РѕР»СЊРєРѕ С„РёР·РёС‡РµСЃРєРёРµ РёРЅС‚РµСЂС„РµР№СЃС‹
 		if ( !pRow->InterfaceAndOperStatusFlags.HardwareInterface ) continue;
 
 		uHash=fasthash64(
 			pRow->PhysicalAddress,
 			pRow->PhysicalAddressLength,
-			uHash);         			/// можно так дополнять хэш ?
+			uHash);         			/// РјРѕР¶РЅРѕ С‚Р°Рє РґРѕРїРѕР»РЅСЏС‚СЊ С…СЌС€ ?
 	}
 
-	// Освободим память
+	// РћСЃРІРѕР±РѕРґРёРј РїР°РјСЏС‚СЊ
 	::FreeMibTable(pTable);
 
 	return uHash;

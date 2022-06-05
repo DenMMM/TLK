@@ -1,4 +1,4 @@
-//---------------------------------------------------------------------------
+п»ї//---------------------------------------------------------------------------
 #ifndef UnitTariffsH
 #define UnitTariffsH
 //---------------------------------------------------------------------------
@@ -37,9 +37,9 @@ class MTariffs;
 #define mgpAll (mgp1|mgp2|mgp3|mgp4|mgp5|mgp6|mgp7|mgp8)
 //---------------------------------------------------------------------------
 #define mttUndefined    0
-#define mttHours        1       // Почасовой
-#define mttFlyPacket    2       // Пакет N часов
-#define mttPacket       3       // Пакет с A до B часов (ночь, например)
+#define mttHours        1       // РџРѕС‡Р°СЃРѕРІРѕР№
+#define mttFlyPacket    2       // РџР°РєРµС‚ N С‡Р°СЃРѕРІ
+#define mttPacket       3       // РџР°РєРµС‚ СЃ A РґРѕ B С‡Р°СЃРѕРІ (РЅРѕС‡СЊ, РЅР°РїСЂРёРјРµСЂ)
 //---------------------------------------------------------------------------
 //#define Cost_Precision  0.50
 //---------------------------------------------------------------------------
@@ -49,16 +49,16 @@ class MTariffRunTimesItem:
 		MTariffRunTimesItem>
 {
 public:
-	std::uint32_t TariffID;	// ID-номер тарифа
-	std::int8_t Number;	// Номер компьютера
-	std::int64_t StartTime;	// Время начала работы
+	std::uint32_t TariffID;	// ID-РЅРѕРјРµСЂ С‚Р°СЂРёС„Р°
+	std::int8_t Number;	// РќРѕРјРµСЂ РєРѕРјРїСЊСЋС‚РµСЂР°
+	std::int64_t StartTime;	// Р’СЂРµРјСЏ РЅР°С‡Р°Р»Р° СЂР°Р±РѕС‚С‹
 	std::uint8_t Type;	// =
-	std::int16_t BeginTime;	// =    Информация о пакете
-	std::int16_t EndTime;	// =    и время почасовой работы
+	std::int16_t BeginTime;	// =    РРЅС„РѕСЂРјР°С†РёСЏ Рѕ РїР°РєРµС‚Рµ
+	std::int16_t EndTime;	// =    Рё РІСЂРµРјСЏ РїРѕС‡Р°СЃРѕРІРѕР№ СЂР°Р±РѕС‚С‹
 	std::int16_t SizeTime;	// =
-	std::int16_t WorkTime;	// Сколько времени реально возможно работать по тарифу и его пакету
-	std::int16_t MaxTime;	// Ограничение на максимальное время работы (задается перед расчетом)
-	double Cost;		// Стоимость работы на компьютере в течение 'WorkTime'
+	std::int16_t WorkTime;	// РЎРєРѕР»СЊРєРѕ РІСЂРµРјРµРЅРё СЂРµР°Р»СЊРЅРѕ РІРѕР·РјРѕР¶РЅРѕ СЂР°Р±РѕС‚Р°С‚СЊ РїРѕ С‚Р°СЂРёС„Сѓ Рё РµРіРѕ РїР°РєРµС‚Сѓ
+	std::int16_t MaxTime;	// РћРіСЂР°РЅРёС‡РµРЅРёРµ РЅР° РјР°РєСЃРёРјР°Р»СЊРЅРѕРµ РІСЂРµРјСЏ СЂР°Р±РѕС‚С‹ (Р·Р°РґР°РµС‚СЃСЏ РїРµСЂРµРґ СЂР°СЃС‡РµС‚РѕРј)
+	double Cost;		// РЎС‚РѕРёРјРѕСЃС‚СЊ СЂР°Р±РѕС‚С‹ РЅР° РєРѕРјРїСЊСЋС‚РµСЂРµ РІ С‚РµС‡РµРЅРёРµ 'WorkTime'
 
 	MTariffRunTimesItem():
 		TariffID(0),
@@ -88,17 +88,17 @@ class MTariffTimesItem:
 		MTariffTimesItem>
 {
 public:
-	// Функции механизма сохранения/загрузки данных
+	// Р¤СѓРЅРєС†РёРё РјРµС…Р°РЅРёР·РјР° СЃРѕС…СЂР°РЅРµРЅРёСЏ/Р·Р°РіСЂСѓР·РєРё РґР°РЅРЅС‹С…
 	virtual std::size_t GetDataSize() const override;
 	virtual void *SetData(void *Data_) const override;
 	virtual const void *GetData(const void *Data_, const void *Limit_) override;
 
 public:
-	std::uint8_t Type;	// Тип записи: почасовой, пакет, "плавающий" пакет
-	std::int16_t BeginTime;	// Время начала действия тарифа в минутах с начала суток
-	std::int16_t EndTime;	// Время окончания действия тарифа в минутах с начала суток
-	std::int16_t SizeTime;	// Длительность по времени тарифа в минутах
-	double Cost;		// Стоимость
+	std::uint8_t Type;	// РўРёРї Р·Р°РїРёСЃРё: РїРѕС‡Р°СЃРѕРІРѕР№, РїР°РєРµС‚, "РїР»Р°РІР°СЋС‰РёР№" РїР°РєРµС‚
+	std::int16_t BeginTime;	// Р’СЂРµРјСЏ РЅР°С‡Р°Р»Р° РґРµР№СЃС‚РІРёСЏ С‚Р°СЂРёС„Р° РІ РјРёРЅСѓС‚Р°С… СЃ РЅР°С‡Р°Р»Р° СЃСѓС‚РѕРє
+	std::int16_t EndTime;	// Р’СЂРµРјСЏ РѕРєРѕРЅС‡Р°РЅРёСЏ РґРµР№СЃС‚РІРёСЏ С‚Р°СЂРёС„Р° РІ РјРёРЅСѓС‚Р°С… СЃ РЅР°С‡Р°Р»Р° СЃСѓС‚РѕРє
+	std::int16_t SizeTime;	// Р”Р»РёС‚РµР»СЊРЅРѕСЃС‚СЊ РїРѕ РІСЂРµРјРµРЅРё С‚Р°СЂРёС„Р° РІ РјРёРЅСѓС‚Р°С…
+	double Cost;		// РЎС‚РѕРёРјРѕСЃС‚СЊ
 
 	std::int16_t MaxWorkTime(std::int16_t Time_) const;
 
@@ -154,7 +154,7 @@ class MTariffsItem:
 		MTariffsItem>
 {
 public:
-	// Функции механизма сохранения/загрузки данных
+	// Р¤СѓРЅРєС†РёРё РјРµС…Р°РЅРёР·РјР° СЃРѕС…СЂР°РЅРµРЅРёСЏ/Р·Р°РіСЂСѓР·РєРё РґР°РЅРЅС‹С…
 	virtual std::size_t GetDataSize() const override;
 	virtual void *SetData(void *Data_) const override;
 	virtual const void *GetData(const void *Data_, const void *Limit_) override;
@@ -165,26 +165,26 @@ private:
 	void CostHours(MTariffRunTimesItem &RunTime_) const;
 
 public:
-	std::wstring Name;			// Название тарифа
-	std::uint32_t Programs;			// Группы программ для запуска
-	bool Reboot;				// Пререзагружать компьютер после запуска
-	std::vector <std::int8_t> Comps;	// Номера компьютеров, к которым применим тариф
-	MTariffTimes Times;			// Типы тарифа по времени
+	std::wstring Name;			// РќР°Р·РІР°РЅРёРµ С‚Р°СЂРёС„Р°
+	std::uint32_t Programs;			// Р“СЂСѓРїРїС‹ РїСЂРѕРіСЂР°РјРј РґР»СЏ Р·Р°РїСѓСЃРєР°
+	bool Reboot;				// РџСЂРµСЂРµР·Р°РіСЂСѓР¶Р°С‚СЊ РєРѕРјРїСЊСЋС‚РµСЂ РїРѕСЃР»Рµ Р·Р°РїСѓСЃРєР°
+	std::vector <std::int8_t> Comps;	// РќРѕРјРµСЂР° РєРѕРјРїСЊСЋС‚РµСЂРѕРІ, Рє РєРѕС‚РѕСЂС‹Рј РїСЂРёРјРµРЅРёРј С‚Р°СЂРёС„
+	MTariffTimes Times;			// РўРёРїС‹ С‚Р°СЂРёС„Р° РїРѕ РІСЂРµРјРµРЅРё
 
-	// Проверяет есть ли для заданного времени пакеты по тарифу
+	// РџСЂРѕРІРµСЂСЏРµС‚ РµСЃС‚СЊ Р»Рё РґР»СЏ Р·Р°РґР°РЅРЅРѕРіРѕ РІСЂРµРјРµРЅРё РїР°РєРµС‚С‹ РїРѕ С‚Р°СЂРёС„Сѓ
 	bool CheckForTime(std::int64_t Time_) const;
-	// Проверяет применим ли тариф к компьютеру
+	// РџСЂРѕРІРµСЂСЏРµС‚ РїСЂРёРјРµРЅРёРј Р»Рё С‚Р°СЂРёС„ Рє РєРѕРјРїСЊСЋС‚РµСЂСѓ
 	bool CheckForComp(std::int8_t Num_) const;
 	//
 	void Cost(MTariffRunTimesItem &RunTime_, double Prec_) const;
 	MTariffsInfoItem GetInfo() const;
 	MTariffRunTimes GetRunTimes(std::int64_t Time_) const;
 
-	// Поддержка логов
+	// РџРѕРґРґРµСЂР¶РєР° Р»РѕРіРѕРІ
 	struct LogData
 	{
-		std::uint32_t UUID;				// ID-номер тарифа
-		std::wstring Name;       		// Название тарифа
+		std::uint32_t UUID;				// ID-РЅРѕРјРµСЂ С‚Р°СЂРёС„Р°
+		std::wstring Name;       		// РќР°Р·РІР°РЅРёРµ С‚Р°СЂРёС„Р°
 	};
 
 	LogData gLogData() const
@@ -206,7 +206,7 @@ public:
 		Programs(0),
 		Reboot(false)
 	{
-        Comps.reserve(MAX_Comps);       // оптимизация
+        Comps.reserve(MAX_Comps);       // РѕРїС‚РёРјРёР·Р°С†РёСЏ
 	}
 };
 

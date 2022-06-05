@@ -1,4 +1,4 @@
-//---------------------------------------------------------------------------
+п»ї//---------------------------------------------------------------------------
 #ifndef UnitComputersH
 #define UnitComputersH
 //---------------------------------------------------------------------------
@@ -10,14 +10,14 @@
 class MComputersItem;
 class MComputers;
 //---------------------------------------------------------------------------
-#define MAX_Comps                   50      // Сколько компьютеров разрешено обслуживать TLK
-#define MAX_CompAddrLen             15      // Длина IP-адреса
+#define MAX_Comps                   50      // РЎРєРѕР»СЊРєРѕ РєРѕРјРїСЊСЋС‚РµСЂРѕРІ СЂР°Р·СЂРµС€РµРЅРѕ РѕР±СЃР»СѓР¶РёРІР°С‚СЊ TLK
+#define MAX_CompAddrLen             15      // Р”Р»РёРЅР° IP-Р°РґСЂРµСЃР°
 //---------------------------------------------------------------------------
-#define mgcNone                     0       // Без цветовой метки
-#define mgcAqua                     1       // Голубой
-#define mgcGreen                    2       // Зеленый
-#define mgcRed                      3       // Красный
-#define mgcYellow                   4       // Желтый
+#define mgcNone                     0       // Р‘РµР· С†РІРµС‚РѕРІРѕР№ РјРµС‚РєРё
+#define mgcAqua                     1       // Р“РѕР»СѓР±РѕР№
+#define mgcGreen                    2       // Р—РµР»РµРЅС‹Р№
+#define mgcRed                      3       // РљСЂР°СЃРЅС‹Р№
+#define mgcYellow                   4       // Р–РµР»С‚С‹Р№
 //---------------------------------------------------------------------------
 class MComputersItem:
 	public MSLListItemSimple <
@@ -25,16 +25,16 @@ class MComputersItem:
 		MComputersItem>
 {
 public:
-	// Функции механизма сохранения/загрузки данных
+	// Р¤СѓРЅРєС†РёРё РјРµС…Р°РЅРёР·РјР° СЃРѕС…СЂР°РЅРµРЅРёСЏ/Р·Р°РіСЂСѓР·РєРё РґР°РЅРЅС‹С…
 	virtual std::size_t GetDataSize() const override;
 	virtual void *SetData(void *Data_) const override;
 	virtual const void *GetData(const void *Data_, const void *Limit_) override;
 
 public:
-	std::int8_t Number;					// Номер компьютера
-	std::uint8_t Color;					// Цвет группы
-	std::wstring Address;				// IP-адрес компьютера
-	bool NotUsed;						// Игнорировать компьютер
+	std::int8_t Number;					// РќРѕРјРµСЂ РєРѕРјРїСЊСЋС‚РµСЂР°
+	std::uint8_t Color;					// Р¦РІРµС‚ РіСЂСѓРїРїС‹
+	std::wstring Address;				// IP-Р°РґСЂРµСЃ РєРѕРјРїСЊСЋС‚РµСЂР°
+	bool NotUsed;						// РРіРЅРѕСЂРёСЂРѕРІР°С‚СЊ РєРѕРјРїСЊСЋС‚РµСЂ
 
 	MComputersItem():
 		Number(0),

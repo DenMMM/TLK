@@ -1,4 +1,4 @@
-//---------------------------------------------------------------------------
+п»ї//---------------------------------------------------------------------------
 #include <vcl.h>
 #include <memory>
 #pragma hdrstop
@@ -37,18 +37,18 @@ void __fastcall TFormOptionsPass::FormShow(TObject *Sender)
     EditConfirm->MaxLength=MAX_OptPassLen;
 	EditConfirm->PasswordChar=PASS_Char;
 
-	// Добавим энтропии
+	// Р”РѕР±Р°РІРёРј СЌРЅС‚СЂРѕРїРёРё
 	BasicRand.event();
 }
 //---------------------------------------------------------------------------
 void __fastcall TFormOptionsPass::FormCloseQuery(TObject *Sender,
       bool &CanClose)
 {
-    if ( ModalResult!=mrOk ) return;
-    // Проверяем текущий пароль
+	if ( ModalResult!=mrOk ) return;
+    // РџСЂРѕРІРµСЂСЏРµРј С‚РµРєСѓС‰РёР№ РїР°СЂРѕР»СЊ
     if ( !TmpOptions->Pass.Check(EditPassword->Text.c_str()) )
         { ActiveControl=EditPassword; goto error; }
-    // Проверяем новый пароль
+    // РџСЂРѕРІРµСЂСЏРµРј РЅРѕРІС‹Р№ РїР°СЂРѕР»СЊ
     if ( EditNew->Text!=EditConfirm->Text )
         { ActiveControl=EditNew; goto error; }
     //
@@ -90,7 +90,7 @@ void __fastcall TFormOptionsPass::ButtonGenerateClick(TObject *Sender)
 //---------------------------------------------------------------------------
 void __fastcall TFormOptionsPass::EditPasswordKeyPress(TObject *Sender, System::WideChar &Key)
 {
-	// Добавим энтропии
+	// Р”РѕР±Р°РІРёРј СЌРЅС‚СЂРѕРїРёРё
 	BasicRand.event();
 }
 //---------------------------------------------------------------------------

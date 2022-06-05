@@ -1,4 +1,4 @@
-#pragma hdrstop
+п»ї#pragma hdrstop
 #pragma argsused
 
 #ifdef _WIN32
@@ -18,15 +18,15 @@
 
 int _tmain(int argc, _TCHAR* argv[]) 
 {
-	MSendSrv SendSrv;                      		// TCP-рассыльщик объектов
+	MSendSrv SendSrv;                      		// TCP-СЂР°СЃСЃС‹Р»СЊС‰РёРє РѕР±СЉРµРєС‚РѕРІ
 	MSendCl SendCl;
 	MAuth AuthSrv;
 	MAuth AuthCl;
 	MStateCl StateCl;
 
-	MGames TmpGames;                    		// Буфер для списка игр
+	MGames TmpGames;                    		// Р‘СѓС„РµСЂ РґР»СЏ СЃРїРёСЃРєР° РёРіСЂ
 	MGames TmpGamesCl;
-	MClOptions TmpOptions;              		// Буфер для настроек клиента
+	MClOptions TmpOptions;              		// Р‘СѓС„РµСЂ РґР»СЏ РЅР°СЃС‚СЂРѕРµРє РєР»РёРµРЅС‚Р°
 	MClOptions TmpOptionsCl;
 
 

@@ -1,4 +1,4 @@
-//---------------------------------------------------------------------------
+п»ї//---------------------------------------------------------------------------
 #include <vcl.h>
 #pragma hdrstop
 USEFORM("UnitFormMain.cpp", FormMain);
@@ -10,7 +10,7 @@ int WINAPI _tWinMain(HINSTANCE, HINSTANCE, LPTSTR lpCmdLine, int)
 	try
 	{
 		 Application->Initialize();
-         Application->Title = L"TLK - Просмотр логов";
+         Application->Title = L"TLK - РџСЂРѕСЃРјРѕС‚СЂ Р»РѕРіРѕРІ";
          Application->CreateForm(__classid(TFormMain), &FormMain);
 		Application->Run();
     }

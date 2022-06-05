@@ -1,13 +1,14 @@
-//---------------------------------------------------------------------------
+п»ї//---------------------------------------------------------------------------
 #ifndef UnitSendH
 #define UnitSendH
 //---------------------------------------------------------------------------
+#include <winsock2.h>
+
 #include <vector>
 #include <chrono>
 #include <atomic>
 #include <thread>
 #include <mutex>
-#include <winsock2.h>
 
 #include "UnitSLList.h"
 #include "UnitStates.h"
@@ -24,18 +25,18 @@ class MSend;
 class MSendSrv;
 class MSendCl;
 //---------------------------------------------------------------------------
-#define SEND_Version        0x32    // Версия сетевого интерфейса
-#define SEND_Port           7005    // Номер порта клиента
-// Ограничения на размер данных в процессе обмена (MSendRequest.Size)
+#define SEND_Version        0x32    // Р’РµСЂСЃРёСЏ СЃРµС‚РµРІРѕРіРѕ РёРЅС‚РµСЂС„РµР№СЃР°
+#define SEND_Port           7005    // РќРѕРјРµСЂ РїРѕСЂС‚Р° РєР»РёРµРЅС‚Р°
+// РћРіСЂР°РЅРёС‡РµРЅРёСЏ РЅР° СЂР°Р·РјРµСЂ РґР°РЅРЅС‹С… РІ РїСЂРѕС†РµСЃСЃРµ РѕР±РјРµРЅР° (MSendRequest.Size)
 #define SEND_MinData        (sizeof(std::uint32_t)+MAC_Size)
-#define SEND_MaxData        (MAX_SLFileSize+MAC_Size)   // Размер упакованного объекта+MAC
+#define SEND_MaxData        (MAX_SLFileSize+MAC_Size)   // Р Р°Р·РјРµСЂ СѓРїР°РєРѕРІР°РЅРЅРѕРіРѕ РѕР±СЉРµРєС‚Р°+MAC
 //---------------------------------------------------------------------------
-// Что сервер хочет отправить клиенту/скачать с него (MSendRequest.Type)
-#define mstSendGames        1       // Список игр для клиента
-#define mstSendConfig       2       // Настройки для клиента
-#define mstGetGames         3       // Запрос списка игр
-#define mstGetConfig        4       // Запрос настроек клиента
-#define mstAccept           5       // Подтверждение клиентом успешной доставки
+// Р§С‚Рѕ СЃРµСЂРІРµСЂ С…РѕС‡РµС‚ РѕС‚РїСЂР°РІРёС‚СЊ РєР»РёРµРЅС‚Сѓ/СЃРєР°С‡Р°С‚СЊ СЃ РЅРµРіРѕ (MSendRequest.Type)
+#define mstSendGames        1       // РЎРїРёСЃРѕРє РёРіСЂ РґР»СЏ РєР»РёРµРЅС‚Р°
+#define mstSendConfig       2       // РќР°СЃС‚СЂРѕР№РєРё РґР»СЏ РєР»РёРµРЅС‚Р°
+#define mstGetGames         3       // Р—Р°РїСЂРѕСЃ СЃРїРёСЃРєР° РёРіСЂ
+#define mstGetConfig        4       // Р—Р°РїСЂРѕСЃ РЅР°СЃС‚СЂРѕРµРє РєР»РёРµРЅС‚Р°
+#define mstAccept           5       // РџРѕРґС‚РІРµСЂР¶РґРµРЅРёРµ РєР»РёРµРЅС‚РѕРј СѓСЃРїРµС€РЅРѕР№ РґРѕСЃС‚Р°РІРєРё
 //---------------------------------------------------------------------------
 // Main Send State
 #define mssNone             0
@@ -44,18 +45,18 @@ class MSendCl;
 #define mssGetGames         3
 #define mssGetConfig        4
 //---------------------------------------------------------------------------
-// События, посылаемые MSendSrv оболочке для индикации процесса
-#define mseConnecting       1   // Устанавливается соединение
-#define mseSending          2   // Отправка данных
-#define mseReceiving        3   // Прием данных
-#define mseDisconnecting    4   // Разъединение
-#define mseExecute          5   // Сеанс завершился успешно
-#define mseNotConnect       6   // Не удалось соединиться с клиентом
-#define mseProtError        7   // Ошибка протокола
-#define mseFreeParam        8   // Можно удалить поданные для групповой обработки данные
+// РЎРѕР±С‹С‚РёСЏ, РїРѕСЃС‹Р»Р°РµРјС‹Рµ MSendSrv РѕР±РѕР»РѕС‡РєРµ РґР»СЏ РёРЅРґРёРєР°С†РёРё РїСЂРѕС†РµСЃСЃР°
+#define mseConnecting       1   // РЈСЃС‚Р°РЅР°РІР»РёРІР°РµС‚СЃСЏ СЃРѕРµРґРёРЅРµРЅРёРµ
+#define mseSending          2   // РћС‚РїСЂР°РІРєР° РґР°РЅРЅС‹С…
+#define mseReceiving        3   // РџСЂРёРµРј РґР°РЅРЅС‹С…
+#define mseDisconnecting    4   // Р Р°Р·СЉРµРґРёРЅРµРЅРёРµ
+#define mseExecute          5   // РЎРµР°РЅСЃ Р·Р°РІРµСЂС€РёР»СЃСЏ СѓСЃРїРµС€РЅРѕ
+#define mseNotConnect       6   // РќРµ СѓРґР°Р»РѕСЃСЊ СЃРѕРµРґРёРЅРёС‚СЊСЃСЏ СЃ РєР»РёРµРЅС‚РѕРј
+#define mseProtError        7   // РћС€РёР±РєР° РїСЂРѕС‚РѕРєРѕР»Р°
+#define mseFreeParam        8   // РњРѕР¶РЅРѕ СѓРґР°Р»РёС‚СЊ РїРѕРґР°РЅРЅС‹Рµ РґР»СЏ РіСЂСѓРїРїРѕРІРѕР№ РѕР±СЂР°Р±РѕС‚РєРё РґР°РЅРЅС‹Рµ
 //---------------------------------------------------------------------------
 /*
- сервер               =>      клиент
+ СЃРµСЂРІРµСЂ               =>      РєР»РёРµРЅС‚
  ===================================================
  MSendHello.Version=SEND_Version
  MSendHello.Seed=random1;
@@ -65,7 +66,7 @@ class MSendCl;
                                     Version,
                                     MAC
 
- сервер               <=      клиент
+ СЃРµСЂРІРµСЂ               <=      РєР»РёРµРЅС‚
  ===================================================
  MSendHello.Version=SEND_Version
  MSendHello.Seed=random2;
@@ -78,7 +79,7 @@ class MSendCl;
             
  [mssSendGames/mssSendConfig]
 
- сервер               =>      клиент
+ СЃРµСЂРІРµСЂ               =>      РєР»РёРµРЅС‚
  ===================================================
  MSendRequest.Type=mstSendGames/mstSendConfig;
  MSendRequest.Seed=mix(random1,random2);
@@ -93,7 +94,7 @@ class MSendCl;
                              attempt:
                                     new char[Size]
 
- сервер               =>      клиент
+ СЃРµСЂРІРµСЂ               =>      РєР»РёРµРЅС‚
  ===================================================
  Seed=mix(random1,random2);
  Data[]=MSLList::SetAllData();
@@ -106,7 +107,7 @@ class MSendCl;
                                     MSLList::GetAllData();
                                     MStateCl::New...();
 
- сервер               <=      клиент
+ СЃРµСЂРІРµСЂ               <=      РєР»РёРµРЅС‚
  ===================================================
  MSendRequest.Type=mstAccept;
  MSendRequest.Seed=mix(random1,random2);
@@ -124,7 +125,7 @@ class MSendCl;
 
  [mssGetGames/mssGetConfig]
 
- сервер               =>      клиент
+ СЃРµСЂРІРµСЂ               =>      РєР»РёРµРЅС‚
  ===================================================
  MSendRequest.Type=mstGetGames/mstGetConfig;
  MSendRequest.Seed=mix(random1,random2);
@@ -136,7 +137,7 @@ class MSendCl;
                                     Size,
                                     MAC
 
- сервер               <=      клиент
+ СЃРµСЂРІРµСЂ               <=      РєР»РёРµРЅС‚
  ===================================================
  MSendRequest.Type=mstAccept;
  MSendRequest.Seed=mix(random1,random2);
@@ -151,7 +152,7 @@ class MSendCl;
     attempt:
             new char[Size]
 
- сервер               <=      клиент
+ СЃРµСЂРІРµСЂ               <=      РєР»РёРµРЅС‚
  ===================================================
  Seed=mix(random1,random2);
  Data[]=MSLList::SetAllData();
@@ -169,17 +170,17 @@ class MSendCl;
 
 struct MSendHello
 {
-	std::uint8_t Version;		// Версия сетевого интерфейса
-	std::uint64_t SessId;		// random сервера/клиента
-	unsigned char MAC[MAC_Size];// MAC пакета
+	std::uint8_t Version;		// Р’РµСЂСЃРёСЏ СЃРµС‚РµРІРѕРіРѕ РёРЅС‚РµСЂС„РµР№СЃР°
+	std::uint64_t SessId;		// random СЃРµСЂРІРµСЂР°/РєР»РёРµРЅС‚Р°
+	unsigned char MAC[MAC_Size];// MAC РїР°РєРµС‚Р°
 };
 
 struct MSendRequest
 {
-	std::uint8_t Type;			// Тип запроса
-	std::uint64_t SessId;		// Сеансовый ID (функция от random сервера и клиента)
-	std::uint32_t Size;			// Размер последующих данных для приема
-	unsigned char MAC[MAC_Size];// MAC пакета
+	std::uint8_t Type;			// РўРёРї Р·Р°РїСЂРѕСЃР°
+	std::uint64_t SessId;		// РЎРµР°РЅСЃРѕРІС‹Р№ ID (С„СѓРЅРєС†РёСЏ РѕС‚ random СЃРµСЂРІРµСЂР° Рё РєР»РёРµРЅС‚Р°)
+	std::uint32_t Size;			// Р Р°Р·РјРµСЂ РїРѕСЃР»РµРґСѓСЋС‰РёС… РґР°РЅРЅС‹С… РґР»СЏ РїСЂРёРµРјР°
+	unsigned char MAC[MAC_Size];// MAC РїР°РєРµС‚Р°
 };
 
 #pragma pack(pop)
@@ -187,36 +188,36 @@ struct MSendRequest
 class MSend
 {
 private:
-    SOCKET lSocket;             // Сокет для ожидания соединений
-    SOCKET rSocket;             // Сокет для соединения с клиентом
-	std::thread Thread;			// Дескриптор потока, осуществляющего отправку/прием
-	std::uint32_t NetCode;		// Ключ шифрования данных
-	MAuth *NetMAC;              // Объект для вычисления и проверки MAC
-    bool Init;                  // Флаг выполненной инициализации WinSock,NetCode,NetMAC
+    SOCKET lSocket;             // РЎРѕРєРµС‚ РґР»СЏ РѕР¶РёРґР°РЅРёСЏ СЃРѕРµРґРёРЅРµРЅРёР№
+    SOCKET rSocket;             // РЎРѕРєРµС‚ РґР»СЏ СЃРѕРµРґРёРЅРµРЅРёСЏ СЃ РєР»РёРµРЅС‚РѕРј
+	std::thread Thread;			// Р”РµСЃРєСЂРёРїС‚РѕСЂ РїРѕС‚РѕРєР°, РѕСЃСѓС‰РµСЃС‚РІР»СЏСЋС‰РµРіРѕ РѕС‚РїСЂР°РІРєСѓ/РїСЂРёРµРј
+	std::uint32_t NetCode;		// РљР»СЋС‡ С€РёС„СЂРѕРІР°РЅРёСЏ РґР°РЅРЅС‹С…
+	MAuth *NetMAC;              // РћР±СЉРµРєС‚ РґР»СЏ РІС‹С‡РёСЃР»РµРЅРёСЏ Рё РїСЂРѕРІРµСЂРєРё MAC
+    bool Init;                  // Р¤Р»Р°Рі РІС‹РїРѕР»РЅРµРЅРЅРѕР№ РёРЅРёС†РёР°Р»РёР·Р°С†РёРё WinSock,NetCode,NetMAC
 
     union MPacket
     {
         MSendHello Hello;
         MSendRequest Request;
-    } Packet;                   // Буфер для отправки/приема запросов
+    } Packet;                   // Р‘СѓС„РµСЂ РґР»СЏ РѕС‚РїСЂР°РІРєРё/РїСЂРёРµРјР° Р·Р°РїСЂРѕСЃРѕРІ
 
 protected:
-	std::atomic_bool Break;		// Флаг прерывания сетевых операций
+	std::atomic_bool Break;		// Р¤Р»Р°Рі РїСЂРµСЂС‹РІР°РЅРёСЏ СЃРµС‚РµРІС‹С… РѕРїРµСЂР°С†РёР№
 
-    // Операции с сокетами
-	bool NetInit(std::uint32_t Code_, MAuth *MAC_);	// Инициализация WinSocket
-	bool NetFree();                             	// Освобождение WinSocket
+    // РћРїРµСЂР°С†РёРё СЃ СЃРѕРєРµС‚Р°РјРё
+	bool NetInit(std::uint32_t Code_, MAuth *MAC_);	// РРЅРёС†РёР°Р»РёР·Р°С†РёСЏ WinSocket
+	bool NetFree();                             	// РћСЃРІРѕР±РѕР¶РґРµРЅРёРµ WinSocket
     bool Create(bool Srv_);
-    bool Listen();      // Ожидать входящее соединения
-    bool Accept();      // Принять входящее соединение
-    bool Connect(const wchar_t *IP_, unsigned Time_);    // Создать исходящее соединение
+    bool Listen();      // РћР¶РёРґР°С‚СЊ РІС…РѕРґСЏС‰РµРµ СЃРѕРµРґРёРЅРµРЅРёСЏ
+    bool Accept();      // РџСЂРёРЅСЏС‚СЊ РІС…РѕРґСЏС‰РµРµ СЃРѕРµРґРёРЅРµРЅРёРµ
+    bool Connect(const wchar_t *IP_, unsigned Time_);    // РЎРѕР·РґР°С‚СЊ РёСЃС…РѕРґСЏС‰РµРµ СЃРѕРµРґРёРЅРµРЅРёРµ
 	bool Snd(char *Data_, std::size_t Size_, unsigned Time_);
 	bool Rcv(char *Data_, std::size_t Size_, unsigned Time_);
-    bool Disconnect(unsigned Time_);            // Закрыть исходящее соединение
-    void lClose();          // Закрыть слушающий сокет
-    void rClose();          // Закрыть сокет удаленного соединения
+    bool Disconnect(unsigned Time_);            // Р—Р°РєСЂС‹С‚СЊ РёСЃС…РѕРґСЏС‰РµРµ СЃРѕРµРґРёРЅРµРЅРёРµ
+    void lClose();          // Р—Р°РєСЂС‹С‚СЊ СЃР»СѓС€Р°СЋС‰РёР№ СЃРѕРєРµС‚
+    void rClose();          // Р—Р°РєСЂС‹С‚СЊ СЃРѕРєРµС‚ СѓРґР°Р»РµРЅРЅРѕРіРѕ СЃРѕРµРґРёРЅРµРЅРёСЏ
 
-    // Примитивы протокола
+    // РџСЂРёРјРёС‚РёРІС‹ РїСЂРѕС‚РѕРєРѕР»Р°
 	bool SndHello(std::uint64_t SessId_);
 	bool RcvHello(std::uint64_t *SessId_);
 	bool SndRequest(std::uint8_t Type_, std::uint64_t SessId_, std::size_t Size_);
@@ -228,7 +229,7 @@ protected:
 	template <typename obj_type>
 	bool RcvObject(obj_type *Obj_, std::size_t Size_, std::uint64_t SessId_);
 
-    // Операции с потоком отправки/приема
+    // РћРїРµСЂР°С†РёРё СЃ РїРѕС‚РѕРєРѕРј РѕС‚РїСЂР°РІРєРё/РїСЂРёРµРјР°
     virtual void ThreadP()=0;
 
     bool Start();
@@ -255,27 +256,27 @@ public:
 class MSendSrv: public MSend
 {
 private:
-	HWND Window;                // Окно для обработки сообщений о процессе отправки
+	HWND Window;                // РћРєРЅРѕ РґР»СЏ РѕР±СЂР°Р±РѕС‚РєРё СЃРѕРѕР±С‰РµРЅРёР№ Рѕ РїСЂРѕС†РµСЃСЃРµ РѕС‚РїСЂР°РІРєРё
 	UINT MinMsg;                //
 
-	int Mode;                   			// Режим (что отправляем/запрашиваем)
-	std::vector <MComputersItem*> *Comps;	// Массив со списком компьютеров для рассылки
-	MComputersItem *Comp;					// Указатель на компьютер, для загрузки
-	MGames *ObjGames;                   	// Объекты для
-	MClOptions *ObjOptions;             	// отправки/приема
+	int Mode;                   			// Р РµР¶РёРј (С‡С‚Рѕ РѕС‚РїСЂР°РІР»СЏРµРј/Р·Р°РїСЂР°С€РёРІР°РµРј)
+	std::vector <MComputersItem*> *Comps;	// РњР°СЃСЃРёРІ СЃРѕ СЃРїРёСЃРєРѕРј РєРѕРјРїСЊСЋС‚РµСЂРѕРІ РґР»СЏ СЂР°СЃСЃС‹Р»РєРё
+	MComputersItem *Comp;					// РЈРєР°Р·Р°С‚РµР»СЊ РЅР° РєРѕРјРїСЊСЋС‚РµСЂ, РґР»СЏ Р·Р°РіСЂСѓР·РєРё
+	MGames *ObjGames;                   	// РћР±СЉРµРєС‚С‹ РґР»СЏ
+	MClOptions *ObjOptions;             	// РѕС‚РїСЂР°РІРєРё/РїСЂРёРµРјР°
 
 	void ThreadP();
 	void ThreadSend();
 	void ThreadGet();
 	void Event(MComputersItem *Computer_, int Event_);
 
-	// Генерация Seed со стороны сервера
+	// Р“РµРЅРµСЂР°С†РёСЏ Seed СЃРѕ СЃС‚РѕСЂРѕРЅС‹ СЃРµСЂРІРµСЂР°
 	static MRandCounter SessIdRand;
 	static std::mutex mtxSessId;
 
 	auto NextSessId()
 	{
-		std::lock_guard <std::mutex> lckObj(mtxSessId);	/// Для MSendSrv излишне
+		std::lock_guard <std::mutex> lckObj(mtxSessId);	/// Р”Р»СЏ MSendSrv РёР·Р»РёС€РЅРµ
 		return SessIdRand++;
 	}
 
@@ -306,13 +307,13 @@ public:
 class MSendCl: public MSend
 {
 private:
-    MStateCl *State;            // Кому сообщать об обновлении списка игр, настроек
-    MClOptions Options;         // Буферные объекты
-    MGames Games;               // для приема/отправки
+    MStateCl *State;            // РљРѕРјСѓ СЃРѕРѕР±С‰Р°С‚СЊ РѕР± РѕР±РЅРѕРІР»РµРЅРёРё СЃРїРёСЃРєР° РёРіСЂ, РЅР°СЃС‚СЂРѕРµРє
+    MClOptions Options;         // Р‘СѓС„РµСЂРЅС‹Рµ РѕР±СЉРµРєС‚С‹
+    MGames Games;               // РґР»СЏ РїСЂРёРµРјР°/РѕС‚РїСЂР°РІРєРё
 
     void ThreadP();
 
-	// Генерация Seed со стороны клиента
+	// Р“РµРЅРµСЂР°С†РёСЏ Seed СЃРѕ СЃС‚РѕСЂРѕРЅС‹ РєР»РёРµРЅС‚Р°
 	MRandCounter SessIdRand;
 	auto NextSessId() { return SessIdRand++; }
 
@@ -336,7 +337,7 @@ public:
 
 				rnd_v[1]=std::chrono::system_clock::
 					now().time_since_epoch().count();
-				rnd_v[2]=CalcHwMacHash();		/// заменить на IP-адрес ?
+				rnd_v[2]=CalcHwMacHash();		/// Р·Р°РјРµРЅРёС‚СЊ РЅР° IP-Р°РґСЂРµСЃ ?
 				rnd_v[3]=0x4E4C432D444E4553;	// ASCII 'SEND-CLN'
 
 				return fasthash64(&rnd_v, sizeof(rnd_v), 0);
