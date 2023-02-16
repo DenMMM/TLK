@@ -1,9 +1,9 @@
-﻿#include "dialogUsers.h"
+﻿//---------------------------------------------------------------------------
+#include "dialogUsers.h"
 #include "ui_dialogUsers.h"
 
-#include "dialogNewPass.h"
-
-
+#include "dialogUserPass.h"
+//---------------------------------------------------------------------------
 dialogUsers::dialogUsers(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::dialogUsers)
@@ -19,56 +19,70 @@ dialogUsers::dialogUsers(QWidget *parent) :
     ui->lineEditLogin->setMaxLength(MAX_UserLoginLen);
     ui->lineEditName->setMaxLength(MAX_UserNameLen);
 }
-
+//---------------------------------------------------------------------------
 dialogUsers::~dialogUsers()
 {
     delete ui;
 }
-
-std::optional<MUsers> dialogUsers::exec(
-    const MUsers& src_, int left_, int top_)
+//---------------------------------------------------------------------------
+std::optional <MUsers> dialogUsers::exec(
+    const MUsers& src, int left, int top)
 {
-    tmp_users = src_;
+    tmpUsers = src;
 
-    for (auto& user: tmp_users)
+    for (auto& user: tmpUsers)
     {
-        const auto row_index = ui->tableWidgetUsers->rowCount();
-        ui->tableWidgetUsers->setRowCount(row_index + 1);
-        ui->tableWidgetUsers->setItem(row_index, 0, new QTableWidgetItem);
-        ui->tableWidgetUsers->setItem(row_index, 1, new QTableWidgetItem);
-        set_tableWidgetUsers_line(row_index, &user);
+        const auto rowIndex = ui->tableWidgetUsers->rowCount();
+        ui->tableWidgetUsers->setRowCount(rowIndex + 1);
+        ui->tableWidgetUsers->setItem(rowIndex, 0, new QTableWidgetItem);
+        ui->tableWidgetUsers->setItem(rowIndex, 1, new QTableWidgetItem);
+        setTableWidgetUsersLine(rowIndex, &user);
     }
 
-    this->move(left_, top_);
-    set_edit(false);
+    setEditable(false);
+    ui->tableWidgetUsers->setFocus();
+    this->move(left, top);
 
     BasicRand.event();
 
     std::optional <MUsers> result;
 
-    if (static_cast<QDialog*>(this)->exec() == QDialog::Accepted)
-        result = std::move(tmp_users);
+    if (QDialog::exec() == QDialog::Accepted)
+        result = std::move(tmpUsers);
 
     return result;
 }
-
+//---------------------------------------------------------------------------
 void dialogUsers::on_buttonPassword_clicked()
 {
-    dialogNewPass dialog;
-    dialog.exec();
-}
+    auto items = ui->tableWidgetUsers->selectedItems();
 
+    if (items.count() != ui->tableWidgetUsers->columnCount())
+        return;
+
+    auto* item = items.first();
+    auto data = item->data(Qt::UserRole);
+    auto* user = reinterpret_cast<MUsersItem*>(data.value<void*>());
+
+    // Подготавливаем координаты
+    const auto coord = ui->buttonPassword->mapToGlobal(QPoint(10, 10));
+
+    // Открываем окно смены пароля
+    dialogUserPass dialog;
+    dialog.exec(*user, coord.x(), coord.y(), false);
+}
+//---------------------------------------------------------------------------
 void dialogUsers::on_tableWidgetUsers_itemSelectionChanged()
 {
     auto items = ui->tableWidgetUsers->selectedItems();
 
     if (items.count() != ui->tableWidgetUsers->columnCount())
     {
-        set_edit(false);
+        setEditable(false);
     }
     else
     {
-        set_edit(true);
+        setEditable(true);
 
         auto data = items.first()->data(Qt::UserRole);
         auto* user = reinterpret_cast<MUsersItem*>(data.value<void*>());
@@ -77,7 +91,7 @@ void dialogUsers::on_tableWidgetUsers_itemSelectionChanged()
         ui->lineEditName->setText(QString::fromStdWString(user->Name));
     }
 }
-
+//---------------------------------------------------------------------------
 void dialogUsers::on_lineEditLogin_editingFinished()
 {
     auto items = ui->tableWidgetUsers->selectedItems();
@@ -91,9 +105,9 @@ void dialogUsers::on_lineEditLogin_editingFinished()
 
     ui->lineEditLogin->setText(ui->lineEditLogin->text().trimmed());
     user->Login = ui->lineEditLogin->text().toStdWString();
-    set_tableWidgetUsers_line(item->row(), user);
+    setTableWidgetUsersLine(item->row(), user);
 }
-
+//---------------------------------------------------------------------------
 void dialogUsers::on_lineEditName_editingFinished()
 {
     auto items = ui->tableWidgetUsers->selectedItems();
@@ -107,55 +121,58 @@ void dialogUsers::on_lineEditName_editingFinished()
 
     ui->lineEditName->setText(ui->lineEditName->text().trimmed());
     user->Name = ui->lineEditName->text().toStdWString();
-    set_tableWidgetUsers_line(item->row(), user);
+    setTableWidgetUsersLine(item->row(), user);
 }
-
+//---------------------------------------------------------------------------
 void dialogUsers::on_buttonActive_clicked()
 {
-    update_active(true);
+    updateActive(true);
 }
-
+//---------------------------------------------------------------------------
 void dialogUsers::on_buttonInactive_clicked()
 {
-    update_active(false);
+    updateActive(false);
 }
-
+//---------------------------------------------------------------------------
 void dialogUsers::on_buttonAdd_clicked()
 {
-    if (tmp_users.gCount() >= MAX_Users)
+    if (tmpUsers.gCount() >= MAX_Users)
     {
         ResMessageBox((HWND)this->windowHandle(), 0, 23, MB_APPLMODAL|MB_OK|MB_ICONINFORMATION);
         return;
     }
 
-    MUsersItem& new_user = tmp_users.Add();
-    new_user.Login = L"NewUser";
-    new_user.Name = L"Новый пользователь";
+    MUsersItem& newUser = tmpUsers.Add();
+    newUser.Login = L"NewUser";
+    newUser.Name = L"Новый пользователь";
 
-    const auto row_index = ui->tableWidgetUsers->rowCount();
-    ui->tableWidgetUsers->setRowCount(row_index + 1);
-    ui->tableWidgetUsers->setItem(row_index, 0, new QTableWidgetItem);
-    ui->tableWidgetUsers->setItem(row_index, 1, new QTableWidgetItem);
-    set_tableWidgetUsers_line(row_index, &new_user);
+    const auto rowIndex = ui->tableWidgetUsers->rowCount();
+    ui->tableWidgetUsers->setRowCount(rowIndex + 1);
+    ui->tableWidgetUsers->setItem(rowIndex, 0, new QTableWidgetItem);
+    ui->tableWidgetUsers->setItem(rowIndex, 1, new QTableWidgetItem);
+    setTableWidgetUsersLine(rowIndex, &newUser);
+
+    ui->tableWidgetUsers->selectRow(rowIndex);
+    ui->lineEditLogin->setFocus();
 }
-
+//---------------------------------------------------------------------------
 void dialogUsers::on_buttonDel_clicked()
 {
     auto items = ui->tableWidgetUsers->selectedItems();
 
-    for (auto i_item = items.rbegin(); i_item != items.rend(); ++i_item)
+    for (auto iItem = items.rbegin(); iItem != items.rend(); ++iItem)
     {
-        if ((*i_item)->column() != 0)
+        if ((*iItem)->column() != 0)
             continue;
 
-        auto data = (*i_item)->data(Qt::UserRole);
+        auto data = (*iItem)->data(Qt::UserRole);
         auto* user = reinterpret_cast<MUsersItem*>(data.value<void*>());
-        ui->tableWidgetUsers->removeRow((*i_item)->row());
-        tmp_users.Del(MUsers::const_iterator(user));
+        ui->tableWidgetUsers->removeRow((*iItem)->row());
+        tmpUsers.Del(MUsers::const_iterator(user));
     }
 }
-
-void dialogUsers::update_active(bool active_)
+//---------------------------------------------------------------------------
+void dialogUsers::updateActive(bool active)
 {
     auto items = ui->tableWidgetUsers->selectedItems();
 
@@ -169,37 +186,38 @@ void dialogUsers::update_active(bool active_)
 
         auto data = item->data(Qt::UserRole);
         auto* user = reinterpret_cast<MUsersItem*>(data.value<void*>());
-        user->Active = active_;
-        set_tableWidgetUsers_line(item->row(), user);
+        user->Active = active;
+        setTableWidgetUsersLine(item->row(), user);
     }
 }
-
-void dialogUsers::set_tableWidgetUsers_line(
-    int row_index_, MUsersItem* user_)
+//---------------------------------------------------------------------------
+void dialogUsers::setTableWidgetUsersLine(
+    int rowIndex, MUsersItem* user)
 {
-    auto ptr_to_user = QVariant::fromValue(reinterpret_cast<void*>(user_));
+    auto ptrToUser = QVariant::fromValue(reinterpret_cast<void*>(user));
 
-    auto* item1 = ui->tableWidgetUsers->item(row_index_, 0);
-    item1->setData(Qt::UserRole, ptr_to_user);
+    auto* item1 = ui->tableWidgetUsers->item(rowIndex, 0);
+    item1->setData(Qt::UserRole, ptrToUser);
     item1->setTextAlignment(Qt::AlignLeft|Qt::AlignVCenter);
-    item1->setText(QString::fromStdWString(user_->Login));
+    item1->setText(QString::fromStdWString(user->Login));
 
-    QIcon icon_active = user_->Active ?
+    QIcon iconActive = user->Active ?
         QIcon(":/graphics/IconUserActive.png"):
         QIcon(":/graphics/IconUserInactive.png");
-    item1->setIcon(icon_active);
+    item1->setIcon(iconActive);
 
-    auto* item2 = ui->tableWidgetUsers->item(row_index_, 1);
-    item2->setData(Qt::UserRole, ptr_to_user);
+    auto* item2 = ui->tableWidgetUsers->item(rowIndex, 1);
+    item2->setData(Qt::UserRole, ptrToUser);
     item2->setTextAlignment(Qt::AlignLeft|Qt::AlignVCenter);
-    item2->setText(QString::fromStdWString(user_->Name));
+    item2->setText(QString::fromStdWString(user->Name));
 }
-
-void dialogUsers::set_edit(bool edit_)
+//---------------------------------------------------------------------------
+void dialogUsers::setEditable(bool mode)
 {
-    ui->labelLogin->setEnabled(edit_);
-    ui->lineEditLogin->setEnabled(edit_);
-    ui->labelFullName->setEnabled(edit_);
-    ui->lineEditName->setEnabled(edit_);
-    ui->buttonPassword->setEnabled(edit_);
+    ui->labelLogin->setEnabled(mode);
+    ui->lineEditLogin->setEnabled(mode);
+    ui->labelFullName->setEnabled(mode);
+    ui->lineEditName->setEnabled(mode);
+    ui->buttonPassword->setEnabled(mode);
 }
+//---------------------------------------------------------------------------

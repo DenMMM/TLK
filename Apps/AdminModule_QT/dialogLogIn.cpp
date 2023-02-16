@@ -1,10 +1,11 @@
-﻿#include "dialogLogIn.h"
+﻿//---------------------------------------------------------------------------
+#include "dialogLogIn.h"
 #include "ui_dialogLogIn.h"
-
-
+//---------------------------------------------------------------------------
 dialogLogIn::dialogLogIn(QWidget *parent) :
     QDialog(parent),
-    ui(new Ui::dialogLogIn)
+    ui(new Ui::dialogLogIn),
+    userId(0)
 {
     ui->setupUi(this);
 
@@ -14,15 +15,15 @@ dialogLogIn::dialogLogIn(QWidget *parent) :
 
     setWindowFlags(Qt::Dialog | Qt::MSWindowsFixedSizeDialogHint);
 }
-
+//---------------------------------------------------------------------------
 dialogLogIn::~dialogLogIn()
 {
     delete ui;
 }
-
-std::optional<std::uint32_t> dialogLogIn::exec(const MUsers &users_)
+//---------------------------------------------------------------------------
+std::optional <std::uint32_t> dialogLogIn::exec(const MUsers& users)
 {
-    for(const auto& user: users_)
+    for (const auto& user: users)
     {
         if (user.Active)
         {
@@ -33,30 +34,41 @@ std::optional<std::uint32_t> dialogLogIn::exec(const MUsers &users_)
         }
     }
 
-    while(true)
-    {
-        if (static_cast<QDialog*>(this)->exec() == QDialog::Accepted)
-        {
-            const int index = ui->comboBoxLogin->currentIndex();
+    ui->comboBoxLogin->setFocus();
 
-            if (index >= 0)
-            {
-                auto data = ui->comboBoxLogin->currentData(Qt::UserRole);
-                auto* user = reinterpret_cast<const MUsersItem*>(data.value<void*>());
+    BasicRand.event();
 
-                if (user->Pass.Check(ui->lineEditPassword->text().toStdWString()))
-                    return user->gUUID();
-                else
-                    ui->lineEditPassword->setFocus();
-            }
-        }
-        else
-        {
-            return {};
-        }
-    }
+    std::optional <std::uint32_t> result;
+
+    if (QDialog::exec() == QDialog::Accepted)
+        result = userId;
+
+    return result;
 }
+//---------------------------------------------------------------------------
+void dialogLogIn::accept()
+{
+    const int index = ui->comboBoxLogin->currentIndex();
 
+    if (index < 0)
+    {
+        ui->comboBoxLogin->setFocus();
+        return;
+    }
+
+    auto data = ui->comboBoxLogin->currentData(Qt::UserRole);
+    auto* user = reinterpret_cast<const MUsersItem*>(data.value<void*>());
+
+    if (!user->Pass.Check(ui->lineEditPassword->text().toStdWString()))
+    {
+        ui->lineEditPassword->setFocus();
+        return;
+    }
+
+    userId = user->gUUID();
+    QDialog::accept();
+}
+//---------------------------------------------------------------------------
 void dialogLogIn::on_comboBoxLogin_currentIndexChanged(int index)
 {
     if (index < 0)
@@ -65,3 +77,4 @@ void dialogLogIn::on_comboBoxLogin_currentIndexChanged(int index)
     ui->labelPassword->setEnabled(true);
     ui->lineEditPassword->setEnabled(true);
 }
+//---------------------------------------------------------------------------

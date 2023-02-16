@@ -1,7 +1,7 @@
-﻿#include "dialogFines.h"
+﻿//---------------------------------------------------------------------------
+#include "dialogFines.h"
 #include "ui_dialogFines.h"
-
-
+//---------------------------------------------------------------------------
 dialogFines::dialogFines(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::dialogFines)
@@ -16,56 +16,57 @@ dialogFines::dialogFines(QWidget *parent) :
 
     ui->lineEditDescription->setMaxLength(MAX_FineDescrLen);
 }
-
+//---------------------------------------------------------------------------
 dialogFines::~dialogFines()
 {
     delete ui;
 }
-
+//---------------------------------------------------------------------------
 std::optional<MFines> dialogFines::exec(
-    const MFines& src_, int left_, int top_)
+    const MFines& src, int left, int top)
 {
-    tmp_fines = src_;
+    tmpFines = src;
 
-    for (auto& fine: tmp_fines)
+    for (auto& fine: tmpFines)
     {
-        const auto row_index = ui->tableWidgetFines->rowCount();
-        ui->tableWidgetFines->setRowCount(row_index + 1);
-        ui->tableWidgetFines->setItem(row_index, 0, new QTableWidgetItem);
-        ui->tableWidgetFines->setItem(row_index, 1, new QTableWidgetItem);
-        set_tableWidgetFines_line(row_index, &fine);
+        const auto rowIndex = ui->tableWidgetFines->rowCount();
+        ui->tableWidgetFines->setRowCount(rowIndex + 1);
+        ui->tableWidgetFines->setItem(rowIndex, 0, new QTableWidgetItem);
+        ui->tableWidgetFines->setItem(rowIndex, 1, new QTableWidgetItem);
+        setTableWidgetFinesLine(rowIndex, &fine);
     }
 
     ui->comboBoxTime->addItem(u8"Все время");
-    for ( int i=1; i <= 60; ++i )
+    for (int i = 1; i <= 60; ++i)
     {
         ui->comboBoxTime->addItem(QString::number(i));
     }
 
-    this->move(left_, top_);
-    set_edit(false);
+    setEditable(false);
+    ui->tableWidgetFines->setFocus();
+    this->move(left, top);
 
     BasicRand.event();
 
     std::optional <MFines> result;
 
-    if (static_cast<QDialog*>(this)->exec() == QDialog::Accepted)
-        result = std::move(tmp_fines);
+    if (QDialog::exec() == QDialog::Accepted)
+        result = std::move(tmpFines);
 
     return result;
 }
-
+//---------------------------------------------------------------------------
 void dialogFines::on_tableWidgetFines_itemSelectionChanged()
 {
     auto items = ui->tableWidgetFines->selectedItems();
 
     if (items.count() != ui->tableWidgetFines->columnCount())
     {
-        set_edit(false);
+        setEditable(false);
     }
     else
     {
-        set_edit(true);
+        setEditable(true);
 
         auto data = items.first()->data(Qt::UserRole);
         auto* fine = reinterpret_cast<MFinesItem*>(data.value<void*>());
@@ -74,7 +75,7 @@ void dialogFines::on_tableWidgetFines_itemSelectionChanged()
         ui->comboBoxTime->setCurrentIndex(fine->Time == (24 * 60)? 0: fine->Time);
     }
 }
-
+//---------------------------------------------------------------------------
 void dialogFines::on_lineEditDescription_editingFinished()
 {
     auto items = ui->tableWidgetFines->selectedItems();
@@ -88,9 +89,9 @@ void dialogFines::on_lineEditDescription_editingFinished()
 
     ui->lineEditDescription->setText(ui->lineEditDescription->text().trimmed());
     fine->Descr = ui->lineEditDescription->text().toStdWString();
-    set_tableWidgetFines_line(item->row(), fine);
+    setTableWidgetFinesLine(item->row(), fine);
 }
-
+//---------------------------------------------------------------------------
 void dialogFines::on_comboBoxTime_activated(int index)
 {
     auto items = ui->tableWidgetFines->selectedItems();
@@ -103,68 +104,72 @@ void dialogFines::on_comboBoxTime_activated(int index)
     auto* fine = reinterpret_cast<MFinesItem*>(data.value<void*>());
 
     fine->Time = index == 0? (24 * 60): index;
-    set_tableWidgetFines_line(item->row(), fine);
+    setTableWidgetFinesLine(item->row(), fine);
 }
-
+//---------------------------------------------------------------------------
 void dialogFines::on_buttonAdd_clicked()
 {
-    if (tmp_fines.gCount() >= MAX_Fines)
+    if (tmpFines.gCount() >= MAX_Fines)
     {
         ResMessageBox((HWND)this->windowHandle(), 0, 22, MB_APPLMODAL|MB_OK|MB_ICONINFORMATION);
         return;
     }
 
-    MFinesItem& new_fine = tmp_fines.Add();
-    new_fine.Descr = L"Новый штраф";
-    new_fine.Time = 1;
+    MFinesItem& newFine = tmpFines.Add();
+    newFine.Descr = L"Новый штраф";
+    newFine.Time = 1;
 
-    const auto row_index = ui->tableWidgetFines->rowCount();
-    ui->tableWidgetFines->setRowCount(row_index + 1);
-    ui->tableWidgetFines->setItem(row_index, 0, new QTableWidgetItem);
-    ui->tableWidgetFines->setItem(row_index, 1, new QTableWidgetItem);
-    set_tableWidgetFines_line(row_index, &new_fine);
+    const auto rowIndex = ui->tableWidgetFines->rowCount();
+    ui->tableWidgetFines->setRowCount(rowIndex + 1);
+    ui->tableWidgetFines->setItem(rowIndex, 0, new QTableWidgetItem);
+    ui->tableWidgetFines->setItem(rowIndex, 1, new QTableWidgetItem);
+    setTableWidgetFinesLine(rowIndex, &newFine);
+
+    ui->tableWidgetFines->selectRow(rowIndex);
+    ui->lineEditDescription->setFocus();
 }
-
+//---------------------------------------------------------------------------
 void dialogFines::on_buttonDel_clicked()
 {
     auto items = ui->tableWidgetFines->selectedItems();
 
-    for (auto i_item = items.rbegin(); i_item != items.rend(); ++i_item)
+    for (auto iItem = items.rbegin(); iItem != items.rend(); ++iItem)
     {
-        if ((*i_item)->column() != 0)
+        if ((*iItem)->column() != 0)
             continue;
 
-        auto data = (*i_item)->data(Qt::UserRole);
+        auto data = (*iItem)->data(Qt::UserRole);
         auto* fine = reinterpret_cast<MFinesItem*>(data.value<void*>());
-        ui->tableWidgetFines->removeRow((*i_item)->row());
-        tmp_fines.Del(MFines::const_iterator(fine));
+        ui->tableWidgetFines->removeRow((*iItem)->row());
+        tmpFines.Del(MFines::const_iterator(fine));
     }
 }
-
-void dialogFines::set_tableWidgetFines_line(
-    int row_index_, MFinesItem* fine_)
+//---------------------------------------------------------------------------
+void dialogFines::setTableWidgetFinesLine(
+    int rowIndex, MFinesItem* fine)
 {
-    auto ptr_to_fine = QVariant::fromValue(reinterpret_cast<void*>(fine_));
+    auto ptrToFine = QVariant::fromValue(reinterpret_cast<void*>(fine));
 
-    auto* item1 = ui->tableWidgetFines->item(row_index_, 0);
-    item1->setData(Qt::UserRole, ptr_to_fine);
+    auto* item1 = ui->tableWidgetFines->item(rowIndex, 0);
+    item1->setData(Qt::UserRole, ptrToFine);
     item1->setTextAlignment(Qt::AlignLeft|Qt::AlignVCenter);
-    item1->setText(QString::fromStdWString(fine_->Descr));
+    item1->setText(QString::fromStdWString(fine->Descr));
 
-    auto* item2 = ui->tableWidgetFines->item(row_index_, 1);
-    item2->setData(Qt::UserRole, ptr_to_fine);
+    auto* item2 = ui->tableWidgetFines->item(rowIndex, 1);
+    item2->setData(Qt::UserRole, ptrToFine);
     item2->setTextAlignment(Qt::AlignRight|Qt::AlignVCenter);
 
-    if (fine_->Time == (24 * 60))
+    if (fine->Time == (24 * 60))
         item2->setText(u8"Все время");
     else
-        item2->setText(QString::number(fine_->Time) + u8" мин.");
+        item2->setText(QString::number(fine->Time) + u8" мин.");
 }
-
-void dialogFines::set_edit(bool edit_)
+//---------------------------------------------------------------------------
+void dialogFines::setEditable(bool mode)
 {
-    ui->labelDescription->setEnabled(edit_);
-    ui->lineEditDescription->setEnabled(edit_);
-    ui->labelTime->setEnabled(edit_);
-    ui->comboBoxTime->setEnabled(edit_);
+    ui->labelDescription->setEnabled(mode);
+    ui->lineEditDescription->setEnabled(mode);
+    ui->labelTime->setEnabled(mode);
+    ui->comboBoxTime->setEnabled(mode);
 }
+//---------------------------------------------------------------------------

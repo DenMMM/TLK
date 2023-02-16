@@ -1,0 +1,243 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>dialogOptions</class>
+ <widget class="QDialog" name="dialogOptions">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>460</width>
+    <height>278</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Общие настройки</string>
+  </property>
+  <property name="modal">
+   <bool>true</bool>
+  </property>
+  <widget class="QDialogButtonBox" name="buttonBox">
+   <property name="geometry">
+    <rect>
+     <x>4</x>
+     <y>242</y>
+     <width>452</width>
+     <height>32</height>
+    </rect>
+   </property>
+   <property name="orientation">
+    <enum>Qt::Horizontal</enum>
+   </property>
+   <property name="standardButtons">
+    <set>QDialogButtonBox::Cancel|QDialogButtonBox::Help|QDialogButtonBox::Ok</set>
+   </property>
+  </widget>
+  <widget class="QFrame" name="frame">
+   <property name="geometry">
+    <rect>
+     <x>4</x>
+     <y>4</y>
+     <width>453</width>
+     <height>237</height>
+    </rect>
+   </property>
+   <property name="frameShape">
+    <enum>QFrame::Box</enum>
+   </property>
+   <property name="frameShadow">
+    <enum>QFrame::Sunken</enum>
+   </property>
+   <widget class="Line" name="line1">
+    <property name="geometry">
+     <rect>
+      <x>8</x>
+      <y>36</y>
+      <width>437</width>
+      <height>3</height>
+     </rect>
+    </property>
+    <property name="orientation">
+     <enum>Qt::Horizontal</enum>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label1">
+    <property name="geometry">
+     <rect>
+      <x>24</x>
+      <y>8</y>
+      <width>251</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Период ведения файла лога:</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="lineEditCostDialogTime">
+    <property name="geometry">
+     <rect>
+      <x>336</x>
+      <y>44</y>
+      <width>85</width>
+      <height>21</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label2">
+    <property name="geometry">
+     <rect>
+      <x>24</x>
+      <y>44</y>
+      <width>304</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Новый пароль:</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+    </property>
+   </widget>
+   <widget class="QComboBox" name="comboBoxLogPeriod">
+    <property name="geometry">
+     <rect>
+      <x>280</x>
+      <y>8</y>
+      <width>141</width>
+      <height>21</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label3">
+    <property name="geometry">
+     <rect>
+      <x>24</x>
+      <y>72</y>
+      <width>304</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Точность расчета цен:</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="lineEditCostPrecision">
+    <property name="geometry">
+     <rect>
+      <x>336</x>
+      <y>72</y>
+      <width>85</width>
+      <height>21</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="Line" name="line2">
+    <property name="geometry">
+     <rect>
+      <x>8</x>
+      <y>100</y>
+      <width>437</width>
+      <height>3</height>
+     </rect>
+    </property>
+    <property name="orientation">
+     <enum>Qt::Horizontal</enum>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label4">
+    <property name="geometry">
+     <rect>
+      <x>24</x>
+      <y>108</y>
+      <width>304</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Время для попадания под фильтр &quot;Свободные&quot; (минут):</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="lineEditFilterFreeTime">
+    <property name="geometry">
+     <rect>
+      <x>336</x>
+      <y>108</y>
+      <width>85</width>
+      <height>21</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="Line" name="line3">
+    <property name="geometry">
+     <rect>
+      <x>8</x>
+      <y>136</y>
+      <width>437</width>
+      <height>3</height>
+     </rect>
+    </property>
+    <property name="orientation">
+     <enum>Qt::Horizontal</enum>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="checkBoxRightPause">
+    <property name="geometry">
+     <rect>
+      <x>16</x>
+      <y>148</y>
+      <width>401</width>
+      <height>17</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Разрешить администраторам приостанавливать компьютеры</string>
+    </property>
+   </widget>
+  </widget>
+ </widget>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>accepted()</signal>
+   <receiver>dialogOptions</receiver>
+   <slot>accept()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>248</x>
+     <y>254</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>157</x>
+     <y>274</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>rejected()</signal>
+   <receiver>dialogOptions</receiver>
+   <slot>reject()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>316</x>
+     <y>260</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>286</x>
+     <y>274</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>

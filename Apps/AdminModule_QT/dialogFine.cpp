@@ -1,7 +1,7 @@
-﻿#include "dialogFine.h"
+﻿//---------------------------------------------------------------------------
+#include "dialogFine.h"
 #include "ui_dialogFine.h"
-
-
+//---------------------------------------------------------------------------
 dialogFine::dialogFine(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::dialogFine)
@@ -10,15 +10,14 @@ dialogFine::dialogFine(QWidget *parent) :
 
     setWindowFlags(Qt::Dialog | Qt::MSWindowsFixedSizeDialogHint);
 }
-
-
+//---------------------------------------------------------------------------
 dialogFine::~dialogFine()
 {
     delete ui;
 }
-
-
+//---------------------------------------------------------------------------
 void dialogFine::on_buttonFine_clicked()
 {
 //
 }
+//---------------------------------------------------------------------------

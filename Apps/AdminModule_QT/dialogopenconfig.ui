@@ -13,6 +13,9 @@
   <property name="windowTitle">
    <string>Открыть настройки</string>
   </property>
+  <property name="modal">
+   <bool>true</bool>
+  </property>
   <widget class="QDialogButtonBox" name="buttonBox">
    <property name="geometry">
     <rect>
@@ -71,6 +74,9 @@
       <width>185</width>
       <height>21</height>
      </rect>
+    </property>
+    <property name="echoMode">
+     <enum>QLineEdit::Password</enum>
     </property>
    </widget>
   </widget>

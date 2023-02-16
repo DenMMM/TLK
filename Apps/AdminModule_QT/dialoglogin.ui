@@ -13,6 +13,9 @@
   <property name="windowTitle">
    <string>Новая смена</string>
   </property>
+  <property name="modal">
+   <bool>true</bool>
+  </property>
   <widget class="QDialogButtonBox" name="buttonBox">
    <property name="geometry">
     <rect>
@@ -99,9 +102,9 @@
     <property name="geometry">
      <rect>
       <x>39</x>
-      <y>115</y>
+      <y>116</y>
       <width>51</width>
-      <height>20</height>
+      <height>13</height>
      </rect>
     </property>
     <property name="text">

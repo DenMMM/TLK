@@ -1,7 +1,7 @@
-﻿#include "dialogAuth.h"
+﻿//---------------------------------------------------------------------------
+#include "dialogAuth.h"
 #include "ui_dialogAuth.h"
-
-
+//---------------------------------------------------------------------------
 dialogAuth::dialogAuth(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::dialogAuth)
@@ -10,9 +10,9 @@ dialogAuth::dialogAuth(QWidget *parent) :
 
     setWindowFlags(Qt::Dialog | Qt::MSWindowsFixedSizeDialogHint);
 }
-
-
+//---------------------------------------------------------------------------
 dialogAuth::~dialogAuth()
 {
     delete ui;
 }
+//---------------------------------------------------------------------------

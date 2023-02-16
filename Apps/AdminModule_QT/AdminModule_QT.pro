@@ -36,11 +36,14 @@ SOURCES += \
         ../../Core/UnitGames.cpp \
         ../../Core/UnitIDList.cpp \
         ../../Core/UnitList.cpp \
+        ../../Core/UnitLog.cpp \
         ../../Core/UnitLogRecords.cpp \
+        ../../Core/UnitOptions.cpp \
         ../../Core/UnitPassword.cpp \
         ../../Core/UnitRandCounter.cpp \
         ../../Core/UnitSLList.cpp \
         ../../Core/UnitSend.cpp \
+        ../../Core/UnitShellState.cpp \
         ../../Core/UnitStates.cpp \
         ../../Core/UnitSync.cpp \
         ../../Core/UnitSyncMsgs.cpp \
@@ -51,9 +54,6 @@ SOURCES += \
         ../../Ext/BrianGladman/SHA/sha1.c \
         ../../Ext/BrianGladman/SHA/sha2.c \
         ../../Ext/ZilongTan/fast-hash/fasthash.c \
-        ../AdminModule/UnitLog.cpp \
-        ../AdminModule/UnitOptions.cpp \
-        ../AdminModule/UnitShellState.cpp \
         dialogAuth.cpp \
         dialogComputers.cpp \
         dialogFine.cpp \
@@ -61,8 +61,11 @@ SOURCES += \
         dialogLogIn.cpp \
         dialogNewPass.cpp \
         dialogOpenConfig.cpp \
+        dialogOptions.cpp \
+        dialogOptionsPass.cpp \
         dialogTariffTimes.cpp \
         dialogTariffs.cpp \
+        dialogUserPass.cpp \
         dialogUsers.cpp \
         main.cpp \
         mainWindow.cpp \
@@ -78,11 +81,14 @@ HEADERS += \
         ../../Core/UnitGames.h \
         ../../Core/UnitIDList.h \
         ../../Core/UnitList.h \
+        ../../Core/UnitLog.h \
         ../../Core/UnitLogRecords.h \
+        ../../Core/UnitOptions.h \
         ../../Core/UnitPassword.h \
         ../../Core/UnitRandCounter.h \
         ../../Core/UnitSLList.h \
         ../../Core/UnitSend.h \
+        ../../Core/UnitShellState.h \
         ../../Core/UnitStates.h \
         ../../Core/UnitSync.h \
         ../../Core/UnitSyncMsgs.h \
@@ -93,9 +99,6 @@ HEADERS += \
         ../../Ext/BrianGladman/SHA/sha1.h \
         ../../Ext/BrianGladman/SHA/sha2.h \
         ../../Ext/ZilongTan/fast-hash/fasthash.h \
-        ../AdminModule/UnitLog.h \
-        ../AdminModule/UnitOptions.h \
-        ../AdminModule/UnitShellState.h \
         dialogAuth.h \
         dialogComputers.h \
         dialogFine.h \
@@ -103,8 +106,11 @@ HEADERS += \
         dialogLogIn.h \
         dialogNewPass.h \
         dialogOpenConfig.h \
+        dialogOptions.h \
+        dialogOptionsPass.h \
         dialogTariffTimes.h \
         dialogTariffs.h \
+        dialogUserPass.h \
         dialogUsers.h \
         mainWindow.h \
         unitGlobal.h
@@ -117,8 +123,11 @@ FORMS += \
         dialogLogIn.ui \
         dialogNewPass.ui \
         dialogOpenConfig.ui \
+        dialogOptions.ui \
+        dialogOptionsPass.ui \
         dialogTariffTimes.ui \
         dialogTariffs.ui \
+        dialogUserPass.ui \
         dialogUsers.ui \
         mainWindow.ui
 

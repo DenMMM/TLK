@@ -1,17 +1,17 @@
-<?xml version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>dialogNewPass</class>
- <widget class="QDialog" name="dialogNewPass">
+ <class>dialogOptionsPass</class>
+ <widget class="QDialog" name="dialogOptionsPass">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>324</width>
-    <height>164</height>
+    <width>348</width>
+    <height>174</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Новый пароль</string>
+   <string>Пароль на настройки</string>
   </property>
   <property name="modal">
    <bool>true</bool>
@@ -19,9 +19,9 @@
   <widget class="QDialogButtonBox" name="buttonBox">
    <property name="geometry">
     <rect>
-     <x>4</x>
-     <y>130</y>
-     <width>317</width>
+     <x>0</x>
+     <y>139</y>
+     <width>348</width>
      <height>32</height>
     </rect>
    </property>
@@ -40,8 +40,8 @@
     <rect>
      <x>4</x>
      <y>4</y>
-     <width>317</width>
-     <height>125</height>
+     <width>341</width>
+     <height>133</height>
     </rect>
    </property>
    <property name="frameShape">
@@ -54,8 +54,8 @@
     <property name="geometry">
      <rect>
       <x>8</x>
-      <y>44</y>
-      <width>301</width>
+      <y>36</y>
+      <width>325</width>
       <height>3</height>
      </rect>
     </property>
@@ -63,120 +63,123 @@
      <enum>Qt::Horizontal</enum>
     </property>
    </widget>
-   <widget class="QFrame" name="frame_2">
+   <widget class="QLineEdit" name="lineEditPassword">
     <property name="geometry">
      <rect>
-      <x>24</x>
-      <y>12</y>
-      <width>213</width>
+      <x>104</x>
+      <y>8</y>
+      <width>185</width>
       <height>21</height>
      </rect>
     </property>
-    <property name="frameShape">
-     <enum>QFrame::Panel</enum>
-    </property>
-    <property name="frameShadow">
-     <enum>QFrame::Raised</enum>
-    </property>
-    <widget class="QLabel" name="labelPassword">
-     <property name="geometry">
-      <rect>
-       <x>4</x>
-       <y>4</y>
-       <width>205</width>
-       <height>13</height>
-      </rect>
-     </property>
-     <property name="font">
-      <font>
-       <weight>75</weight>
-       <bold>true</bold>
-      </font>
-     </property>
-     <property name="text">
-      <string/>
-     </property>
-     <property name="alignment">
-      <set>Qt::AlignCenter</set>
-     </property>
-    </widget>
-   </widget>
-   <widget class="QPushButton" name="buttonNew">
-    <property name="geometry">
-     <rect>
-      <x>240</x>
-      <y>12</y>
-      <width>53</width>
-      <height>21</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Новый</string>
+    <property name="echoMode">
+     <enum>QLineEdit::Password</enum>
     </property>
    </widget>
-   <widget class="QLabel" name="label">
+   <widget class="QLabel" name="labelPassword">
     <property name="geometry">
      <rect>
-      <x>14</x>
-      <y>57</y>
-      <width>41</width>
+      <x>15</x>
+      <y>8</y>
+      <width>81</width>
       <height>20</height>
      </rect>
     </property>
     <property name="text">
-     <string>Длина:</string>
+     <string>Пароль:</string>
     </property>
     <property name="alignment">
      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
     </property>
    </widget>
-   <widget class="QComboBox" name="comboBoxLength">
+   <widget class="QLineEdit" name="lineEditNew">
     <property name="geometry">
      <rect>
-      <x>60</x>
-      <y>56</y>
-      <width>73</width>
+      <x>104</x>
+      <y>80</y>
+      <width>185</width>
       <height>21</height>
      </rect>
     </property>
+    <property name="echoMode">
+     <enum>QLineEdit::Password</enum>
+    </property>
    </widget>
-   <widget class="QCheckBox" name="checkBoxCapital">
+   <widget class="QLabel" name="labelNew">
     <property name="geometry">
      <rect>
-      <x>148</x>
-      <y>56</y>
-      <width>145</width>
-      <height>17</height>
+      <x>15</x>
+      <y>80</y>
+      <width>81</width>
+      <height>20</height>
      </rect>
     </property>
     <property name="text">
-     <string>ЗАГЛАВНЫЕ буквы</string>
+     <string>Новый пароль:</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
     </property>
    </widget>
-   <widget class="QCheckBox" name="checkBoxSmall">
+   <widget class="QLineEdit" name="lineEditConfirm">
     <property name="geometry">
      <rect>
-      <x>148</x>
-      <y>76</y>
-      <width>145</width>
-      <height>17</height>
+      <x>104</x>
+      <y>104</y>
+      <width>185</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="echoMode">
+     <enum>QLineEdit::Password</enum>
+    </property>
+   </widget>
+   <widget class="QLabel" name="labelConfirm">
+    <property name="geometry">
+     <rect>
+      <x>15</x>
+      <y>104</y>
+      <width>81</width>
+      <height>20</height>
      </rect>
     </property>
     <property name="text">
-     <string>строчные буквы</string>
+     <string>Повтор:</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
     </property>
    </widget>
-   <widget class="QCheckBox" name="checkBoxNum">
+   <widget class="QPushButton" name="pushButtonGenerate">
     <property name="geometry">
      <rect>
-      <x>148</x>
-      <y>96</y>
-      <width>145</width>
-      <height>17</height>
+      <x>292</x>
+      <y>80</y>
+      <width>21</width>
+      <height>21</height>
      </rect>
     </property>
     <property name="text">
-     <string>Цифры</string>
+     <string>...</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="labelText">
+    <property name="geometry">
+     <rect>
+      <x>16</x>
+      <y>44</y>
+      <width>309</width>
+      <height>29</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Наберите новый пароль и повторите его ввод  во второе поле. Новый пароль можно сгенерировать.</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+    </property>
+    <property name="wordWrap">
+     <bool>true</bool>
     </property>
    </widget>
   </widget>
@@ -186,7 +189,7 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>accepted()</signal>
-   <receiver>dialogNewPass</receiver>
+   <receiver>dialogOptionsPass</receiver>
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -202,7 +205,7 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>rejected()</signal>
-   <receiver>dialogNewPass</receiver>
+   <receiver>dialogOptionsPass</receiver>
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">

@@ -1,14 +1,14 @@
-﻿#include "dialogTariffs.h"
+﻿//---------------------------------------------------------------------------
+#include "dialogTariffs.h"
 #include "ui_dialogTariffs.h"
 
 #include "dialogTariffTimes.h"
-
-
+//---------------------------------------------------------------------------
 dialogTariffs::dialogTariffs(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::dialogTariffs),
-    updating_listWidgetApps(false),
-    updating_listWidgetComputers(false)
+    updatingListWidgetApps(false),
+    updatingListWidgetComputers(false)
 {
     ui->setupUi(this);
 
@@ -22,72 +22,73 @@ dialogTariffs::dialogTariffs(QWidget *parent) :
 
     ui->lineEditName->setMaxLength(MAX_TariffNameLen);
 }
-
+//---------------------------------------------------------------------------
 dialogTariffs::~dialogTariffs()
 {
     delete ui;
 }
-
+//---------------------------------------------------------------------------
 std::optional<MTariffs> dialogTariffs::exec(
-        const MTariffs& src_,
-        const MComputers& computers_,
-        int left_, int top_)
+        const MTariffs& tariffs,
+        const MComputers& computers,
+        int left, int top)
 {
-    tmp_tariffs = src_;
+    tmpTariffs = tariffs;
 
-    for (auto& tariff: tmp_tariffs)
+    for (auto& tariff: tmpTariffs)
     {
-        const auto row_index = ui->listWidgetNames->count();
+        const auto rowIndex = ui->listWidgetNames->count();
         ui->listWidgetNames->addItem("");
-        set_listWidgetNames_line(row_index, &tariff);
+        setListWidgetNamesLine(rowIndex, &tariff);
     }
 
-    for (const auto& comp: computers_)
+    for (const auto& comp: computers)
     {
-        auto* new_item = new QListWidgetItem;
-        new_item->setData(Qt::UserRole, comp.Number);
-        new_item->setText(QString::number(comp.Number));
-        new_item->setCheckState(Qt::Unchecked);
+        auto* newItem = new QListWidgetItem;
+        newItem->setData(Qt::UserRole, comp.Number);
+        newItem->setText(QString::number(comp.Number));
+        newItem->setCheckState(Qt::Unchecked);
 
-        QIcon icon_color;
+        QIcon iconColor;
         switch(comp.Color)
         {
-            case mgcRed:    icon_color = QIcon(":/graphics/MarkerRed.png"); break;
-            case mgcGreen:  icon_color = QIcon(":/graphics/MarkerGreen.png"); break;
-            case mgcAqua:   icon_color = QIcon(":/graphics/MarkerAqua.png"); break;
-            case mgcYellow: icon_color = QIcon(":/graphics/MarkerYellow.png"); break;
+            case mgcRed:    iconColor = QIcon(":/graphics/MarkerRed.png"); break;
+            case mgcGreen:  iconColor = QIcon(":/graphics/MarkerGreen.png"); break;
+            case mgcAqua:   iconColor = QIcon(":/graphics/MarkerAqua.png"); break;
+            case mgcYellow: iconColor = QIcon(":/graphics/MarkerYellow.png"); break;
             case mgcNone:   break;
             default:        break;
         }
-        new_item->setIcon(icon_color);
+        newItem->setIcon(iconColor);
 
-        ui->listWidgetComputers->addItem(new_item);
+        ui->listWidgetComputers->addItem(newItem);
     }
 
-    this->move(left_, top_);
-    set_edit(false);
+    setEditable(false);
+    ui->listWidgetNames->setFocus();
+    this->move(left, top);
 
     BasicRand.event();
 
     std::optional <MTariffs> result;
 
-    if (static_cast<QDialog*>(this)->exec() == QDialog::Accepted)
-        result = std::move(tmp_tariffs);
+    if (QDialog::exec() == QDialog::Accepted)
+        result = std::move(tmpTariffs);
 
     return result;
 }
-
+//---------------------------------------------------------------------------
 void dialogTariffs::on_listWidgetNames_itemSelectionChanged()
 {
     auto items = ui->listWidgetNames->selectedItems();
 
     if (items.count() != 1)
     {
-        set_edit(false);
+        setEditable(false);
     }
     else
     {
-        set_edit(true);
+        setEditable(true);
 
         auto data = items.first()->data(Qt::UserRole);
         auto* tariff = reinterpret_cast<MTariffsItem*>(data.value<void*>());
@@ -97,7 +98,7 @@ void dialogTariffs::on_listWidgetNames_itemSelectionChanged()
         ui->checkBoxRoute->setChecked(tariff->Programs & mgpRoute);
         ui->checkBoxDesktop->setChecked(tariff->Programs & mgpDesktop);
 
-        updating_listWidgetApps = true;
+        updatingListWidgetApps = true;
         ui->listWidgetApps->item(0)->setCheckState(tariff->Programs & mgp1? Qt::Checked: Qt::Unchecked);
         ui->listWidgetApps->item(1)->setCheckState(tariff->Programs & mgp2? Qt::Checked: Qt::Unchecked);
         ui->listWidgetApps->item(2)->setCheckState(tariff->Programs & mgp3? Qt::Checked: Qt::Unchecked);
@@ -106,9 +107,9 @@ void dialogTariffs::on_listWidgetNames_itemSelectionChanged()
         ui->listWidgetApps->item(5)->setCheckState(tariff->Programs & mgp6? Qt::Checked: Qt::Unchecked);
         ui->listWidgetApps->item(6)->setCheckState(tariff->Programs & mgp7? Qt::Checked: Qt::Unchecked);
         ui->listWidgetApps->item(7)->setCheckState(tariff->Programs & mgp8? Qt::Checked: Qt::Unchecked);
-        updating_listWidgetApps = false;
+        updatingListWidgetApps = false;
 
-        updating_listWidgetComputers = true;
+        updatingListWidgetComputers = true;
         for (int index = ui->listWidgetComputers->count(); (index--) > 0;)
         {
             auto* item = ui->listWidgetComputers->item(index);
@@ -118,41 +119,45 @@ void dialogTariffs::on_listWidgetNames_itemSelectionChanged()
                 tariff->CheckForComp(number)?
                 Qt::Checked: Qt::Unchecked);
         }
-        updating_listWidgetComputers = false;
+        updatingListWidgetComputers = false;
     }
 }
-
+//---------------------------------------------------------------------------
 void dialogTariffs::on_buttonAdd_clicked()
 {
-    if (tmp_tariffs.gCount() >= MAX_Tariffs)
+    if (tmpTariffs.gCount() >= MAX_Tariffs)
     {
         ResMessageBox((HWND)this->windowHandle(), 0, 20, MB_APPLMODAL|MB_OK|MB_ICONINFORMATION);
         return;
     }
 
-    MTariffsItem& new_tariff = tmp_tariffs.Add();
-    new_tariff.Name = L"Новый тариф";
+    MTariffsItem& newTariff = tmpTariffs.Add();
+    newTariff.Name = L"Новый тариф";
 
     const auto row_index = ui->listWidgetNames->count();
     ui->listWidgetNames->addItem("");
-    set_listWidgetNames_line(row_index, &new_tariff);
-}
+    setListWidgetNamesLine(row_index, &newTariff);
 
+    ui->listWidgetNames->clearSelection();
+    ui->listWidgetNames->item(row_index)->setSelected(true);
+    ui->lineEditName->setFocus();
+}
+//---------------------------------------------------------------------------
 void dialogTariffs::on_buttonDel_clicked()
 {
     auto items = ui->listWidgetNames->selectedItems();
 
-    for (auto i_item = items.rbegin(); i_item != items.rend(); ++i_item)
+    for (auto iItem = items.rbegin(); iItem != items.rend(); ++iItem)
     {
-        auto data = (*i_item)->data(Qt::UserRole);
+        auto data = (*iItem)->data(Qt::UserRole);
         auto* tariff = reinterpret_cast<MTariffsItem*>(data.value<void*>());
 
-        ui->listWidgetNames->removeItemWidget(*i_item);
-        delete *i_item;
-        tmp_tariffs.Del(MTariffs::const_iterator(tariff));
+        ui->listWidgetNames->removeItemWidget(*iItem);
+        delete *iItem;
+        tmpTariffs.Del(MTariffs::const_iterator(tariff));
     }
 }
-
+//---------------------------------------------------------------------------
 void dialogTariffs::on_lineEditName_editingFinished()
 {
     auto items = ui->listWidgetNames->selectedItems();
@@ -166,9 +171,9 @@ void dialogTariffs::on_lineEditName_editingFinished()
 
     ui->lineEditName->setText(ui->lineEditName->text().trimmed());
     tariff->Name = ui->lineEditName->text().toStdWString();
-    set_listWidgetNames_line(ui->listWidgetNames->row(item), tariff);
+    setListWidgetNamesLine(ui->listWidgetNames->row(item), tariff);
 }
-
+//---------------------------------------------------------------------------
 void dialogTariffs::on_checkBoxReboot_clicked(bool checked)
 {
     auto items = ui->listWidgetNames->selectedItems();
@@ -181,7 +186,7 @@ void dialogTariffs::on_checkBoxReboot_clicked(bool checked)
     auto* tariff = reinterpret_cast<MTariffsItem*>(data.value<void*>());
     tariff->Reboot = checked;
 }
-
+//---------------------------------------------------------------------------
 void dialogTariffs::on_checkBoxRoute_clicked(bool checked)
 {
     auto items = ui->listWidgetNames->selectedItems();
@@ -198,7 +203,7 @@ void dialogTariffs::on_checkBoxRoute_clicked(bool checked)
     else
         tariff->Programs &= ~mgpRoute;
 }
-
+//---------------------------------------------------------------------------
 void dialogTariffs::on_checkBoxDesktop_clicked(bool checked)
 {
     auto items = ui->listWidgetNames->selectedItems();
@@ -215,7 +220,7 @@ void dialogTariffs::on_checkBoxDesktop_clicked(bool checked)
     else
         tariff->Programs &= ~mgpDesktop;
 }
-
+//---------------------------------------------------------------------------
 void dialogTariffs::on_buttonTimes_clicked()
 {
     auto items = ui->listWidgetNames->selectedItems();
@@ -233,16 +238,16 @@ void dialogTariffs::on_buttonTimes_clicked()
     if (result.has_value())
         tariff->Times = std::move(*result);
 }
-
+//---------------------------------------------------------------------------
 void dialogTariffs::on_listWidgetApps_itemChanged(QListWidgetItem *item)
 {
     auto items = ui->listWidgetNames->selectedItems();
 
-    if (items.count() != 1 || updating_listWidgetApps)
+    if (items.count() != 1 || updatingListWidgetApps)
         return;
 
-    auto* tariff_item = items.first();
-    auto data = tariff_item->data(Qt::UserRole);
+    auto* tariffItem = items.first();
+    auto data = tariffItem->data(Qt::UserRole);
     auto* tariff = reinterpret_cast<MTariffsItem*>(data.value<void*>());
 
     std::uint32_t progs = tariff->Programs & (~mgpAll);
@@ -257,19 +262,19 @@ void dialogTariffs::on_listWidgetApps_itemChanged(QListWidgetItem *item)
 
     tariff->Programs = progs;
 }
-
+//---------------------------------------------------------------------------
 void dialogTariffs::on_listWidgetComputers_itemChanged(QListWidgetItem *item)
 {
     auto items = ui->listWidgetNames->selectedItems();
 
-    if (items.count() != 1 || updating_listWidgetComputers)
+    if (items.count() != 1 || updatingListWidgetComputers)
         return;
 
     auto* tariff_item = items.first();
     auto data = tariff_item->data(Qt::UserRole);
     auto* tariff = reinterpret_cast<MTariffsItem*>(data.value<void*>());
 
-    tmp_comps.clear();
+    tmpComps.clear();
 
     for (int index = ui->listWidgetComputers->count(); (index--) > 0;)
     {
@@ -277,37 +282,38 @@ void dialogTariffs::on_listWidgetComputers_itemChanged(QListWidgetItem *item)
         auto number = item->data(Qt::UserRole).value<decltype(MComputersItem::Number)>();
 
         if (item->checkState() == Qt::Checked)
-            tmp_comps.push_back(number);
+            tmpComps.push_back(number);
     }
 
-    tariff->Comps = tmp_comps;
+    tariff->Comps = tmpComps;
 }
-
-void dialogTariffs::set_listWidgetNames_line(
-    int row_index_, MTariffsItem* tariff_)
+//---------------------------------------------------------------------------
+void dialogTariffs::setListWidgetNamesLine(
+    int rowIndex, MTariffsItem* tariff)
 {
-    auto ptr_to_tariff = QVariant::fromValue(reinterpret_cast<void*>(tariff_));
+    auto ptrToTariff = QVariant::fromValue(reinterpret_cast<void*>(tariff));
 
-    auto* item = ui->listWidgetNames->item(row_index_);
-    item->setData(Qt::UserRole, ptr_to_tariff);
+    auto* item = ui->listWidgetNames->item(rowIndex);
+    item->setData(Qt::UserRole, ptrToTariff);
     item->setTextAlignment(Qt::AlignLeft|Qt::AlignVCenter);
-    item->setText(QString::fromStdWString(tariff_->Name));
+    item->setText(QString::fromStdWString(tariff->Name));
 }
-
-void dialogTariffs::set_edit(bool edit_)
+//---------------------------------------------------------------------------
+void dialogTariffs::setEditable(bool mode)
 {
-    ui->labelTariffName->setEnabled(edit_);
-    ui->lineEditName->setEnabled(edit_);
-    ui->checkBoxReboot->setEnabled(edit_);
-    ui->checkBoxRoute->setEnabled(edit_);
-    ui->checkBoxDesktop->setEnabled(edit_);
-    ui->buttonTimes->setEnabled(edit_);
-    ui->labelTariffApps->setEnabled(edit_);
-    ui->listWidgetApps->setEnabled(edit_);
-    ui->labelTariffComputers->setEnabled(edit_);
-    ui->listWidgetComputers->setEnabled(edit_);
+    ui->labelTariffName->setEnabled(mode);
+    ui->lineEditName->setEnabled(mode);
+    ui->checkBoxReboot->setEnabled(mode);
+    ui->checkBoxRoute->setEnabled(mode);
+    ui->checkBoxDesktop->setEnabled(mode);
+    ui->buttonTimes->setEnabled(mode);
+    ui->labelTariffApps->setEnabled(mode);
+    ui->listWidgetApps->setEnabled(mode);
+    ui->labelTariffComputers->setEnabled(mode);
+    ui->listWidgetComputers->setEnabled(mode);
 //    ButtonSetSelComp->Enabled=Edit_;
 //    ButtonSetAllComp->Enabled=Edit_;
 //    ButtonResSelComp->Enabled=Edit_;
 //    ButtonResAllComp->Enabled=Edit_;
 }
+//---------------------------------------------------------------------------
